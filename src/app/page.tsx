@@ -284,7 +284,7 @@ export default function Home() {
                   <div className="flex flex-col">
                     <span className="font-medium">Quinty</span>
                     <code className="text-xs">
-                      0x5110CE4c643923CA05f3c48aDb5a0f7718Ddfd15
+                      0x530E104Dc25D641b9b619e5C1CC556961b470f4f
                     </code>
                   </div>
                 </li>
@@ -292,7 +292,7 @@ export default function Home() {
                   <div className="flex flex-col">
                     <span className="font-medium">Reputation</span>
                     <code className="text-xs">
-                      0x347B1EEE3Fb806EE1aF1D02Bd1781CF1523d8A3F
+                      0x0889De145E2c78f1534f357190e0Fe8406bAc135
                     </code>
                   </div>
                 </li>
@@ -300,7 +300,7 @@ export default function Home() {
                   <div className="flex flex-col">
                     <span className="font-medium">Disputes</span>
                     <code className="text-xs">
-                      0x25e505A0E77BAc255bEA230e2Ad1b93c1490d7F2
+                      0x3CA26DD1dA114A7A706A9155C2417cA53812750E
                     </code>
                   </div>
                 </li>
@@ -308,7 +308,7 @@ export default function Home() {
                   <div className="flex flex-col">
                     <span className="font-medium">Airdrops</span>
                     <code className="text-xs">
-                      0xaa00D6519d7bbECb27a5e0cF07dC5Bc0f75F46Df
+                      0xfA270eDBe41ba112bd21653B61ce67c07f06F0a8
                     </code>
                   </div>
                 </li>
