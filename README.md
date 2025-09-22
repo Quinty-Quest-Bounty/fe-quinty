@@ -12,10 +12,10 @@ A complete frontend implementation for the Quinty decentralized bounty system on
 - **Communication**: Threaded replies between creators and solvers
 - **Solution Reveals**: Winners can reveal actual solutions post-resolution
 
-### ⚖️ Dispute Resolution (Pengadilan )
+### ⚖️ Dispute Resolution
 
 - **Expiry Voting**: Community votes on expired bounties to rank top submissions
-- **Pengadilan Disputes**: Creators can dispute winner selections
+- **Disputes**: Creators can dispute winner selections
 - **Staking System**: 0.0001 STT minimum stakes for voting participation
 - **Weighted Voting**: Higher stakes provide more voting power
 - **Reward Distribution**: Proportional rewards for correct voters

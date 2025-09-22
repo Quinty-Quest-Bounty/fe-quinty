@@ -127,7 +127,7 @@ export default function DisputeManager() {
     functionName: "bountyCounter",
   });
 
-  // Load eligible bounties for pengadilan dispute
+  // Load eligible bounties for dispute
   const loadEligibleBounties = async () => {
     if (bountyCounter === undefined) return;
 
@@ -336,7 +336,7 @@ export default function DisputeManager() {
     }
   };
 
-  // Initiate pengadilan dispute
+  // Initiate dispute
   const initiatePengadilan = async (bounty: Bounty) => {
     if (!isConnected) return;
 
@@ -353,12 +353,12 @@ export default function DisputeManager() {
         value: requiredStake,
       });
 
-      alert("Pengadilan dispute initiated successfully!");
+      alert("Dispute initiated successfully!");
       refetchDisputes();
       loadEligibleBounties(); // Refresh the list
     } catch (error) {
-      console.error("Error initiating pengadilan:", error);
-      alert("Error initiating pengadilan dispute");
+      console.error("Error initiating:", error);
+      alert("Error initiating dispute");
     }
   };
 
@@ -414,12 +414,12 @@ export default function DisputeManager() {
         </div>
       </div>
 
-      {/* Initiate Pengadilan Dispute Section */}
+      {/* Initiate Dispute Section */}
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-2xl flex items-center justify-center gap-2">
             <Gavel className="h-6 w-6" />
-            Initiate Pengadilan Dispute
+            Initiate Dispute
           </CardTitle>
           <CardDescription className="text-lg">
             As a bounty creator, you can dispute a winner selection if you
@@ -590,9 +590,7 @@ export default function DisputeManager() {
                                 : "bg-red-200 text-red-800"
                             }`}
                           >
-                            {dispute.isExpiry
-                              ? "⏰ Expiry Vote"
-                              : "⚖️ Pengadilan Dispute"}
+                            {dispute.isExpiry ? "⏰ Expiry Vote" : "⚖️ Dispute"}
                           </span>
                           <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
                             🗳️ {dispute.voteCount} votes
@@ -619,7 +617,7 @@ export default function DisputeManager() {
                       <div className="font-semibold mb-2">
                         {dispute.isExpiry
                           ? "ℹ️ How Expiry Voting Works:"
-                          : "ℹ️ How Pengadilan Dispute Works:"}
+                          : "ℹ️ How ispute Works:"}
                       </div>
                       {dispute.isExpiry
                         ? "The bounty deadline has passed. Community members can vote to rank the top 3 submissions. The highest-ranked non-winner receives 10% of the slash amount, and correct voters share 5%."
