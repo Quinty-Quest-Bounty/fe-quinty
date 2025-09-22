@@ -154,9 +154,9 @@ export default function ReputationDisplay() {
       const achievementsArray = userAchievements as any[];
 
       const stats = {
-        bountiesCreated: Number(userStats.totalBountiesCreated || 0),
-        submissions: Number(userStats.totalSubmissions || 0),
-        wins: Number(userStats.totalWins || 0),
+        bountiesCreated: Number((userStats as any)?.totalBountiesCreated || 0),
+        submissions: Number((userStats as any)?.totalSubmissions || 0),
+        wins: Number((userStats as any)?.totalWins || 0),
       };
 
       const achievements = {
@@ -203,9 +203,9 @@ export default function ReputationDisplay() {
       ]);
 
       const stats = {
-        bountiesCreated: Number(statsData.totalBountiesCreated || 0),
-        submissions: Number(statsData.totalSubmissions || 0),
-        wins: Number(statsData.totalWins || 0),
+        bountiesCreated: Number((statsData as any)?.totalBountiesCreated || 0),
+        submissions: Number((statsData as any)?.totalSubmissions || 0),
+        wins: Number((statsData as any)?.totalWins || 0),
       };
 
       const achievementsArray = achievementsData as any[];
