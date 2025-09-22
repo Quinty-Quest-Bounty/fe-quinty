@@ -551,7 +551,7 @@ export default function BountyManager() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="container mx-auto p-6 space-y-8">
       {/* Header */}
       <div className="text-center space-y-2">
         <div className="flex justify-center">
@@ -565,29 +565,25 @@ export default function BountyManager() {
           transparent project completion.
         </p>
       </div>
-      <div className="mb-6">
-        {/* <h2 className="text-3xl font-bold text-gray-800 mb-4">
-          Quinty Bounty System
-        </h2> */}
 
-        {/* Tab Navigation */}
-        <div className="border-b">
-          <nav className="-mb-px flex space-x-8">
-            {["browse", "create"].map((tab) => (
-              <Button
-                key={tab}
-                variant="ghost"
-                onClick={() => setActiveTab(tab as any)}
-                className={`border-b-2 rounded-none ${
-                  activeTab === tab
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground"
-                }`}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)} Bounties
-              </Button>
-            ))}
-          </nav>
+      {/* Tab Navigation */}
+      <div className="flex justify-center">
+        <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
+          {[
+            { id: "browse", label: "Browse", icon: Target },
+            { id: "create", label: "Create", icon: Plus },
+          ].map((tab) => (
+            <Button
+              key={tab.id}
+              variant={activeTab === tab.id ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setActiveTab(tab.id as any)}
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all"
+            >
+              <tab.icon className="h-4 w-4 mr-2" />
+              {tab.label} Bounties
+            </Button>
+          ))}
         </div>
       </div>
 

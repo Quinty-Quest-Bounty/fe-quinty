@@ -177,7 +177,6 @@ export default function BountyCard({
 
   const statusLabel = BountyStatusEnum[bounty.status] || "Unknown";
 
-
   // Get status color for badge variant
   const getStatusVariant = (status: number) => {
     switch (status) {
@@ -272,7 +271,24 @@ export default function BountyCard({
         <div className="flex items-center gap-2 pt-4 pb-2">
           <User className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">Created by</span>
-          <Badge variant="outline" className="text-xs">
+          <Badge
+            variant="outline"
+            className="text-xs cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => {
+              navigator.clipboard.writeText(bounty.creator);
+              // You could add a toast notification here if available
+              const originalText = document.querySelector(`[data-address="${bounty.creator}"]`)?.textContent;
+              const element = document.querySelector(`[data-address="${bounty.creator}"]`);
+              if (element) {
+                element.textContent = 'Copied!';
+                setTimeout(() => {
+                  element.textContent = originalText || formatAddress(bounty.creator);
+                }, 1000);
+              }
+            }}
+            data-address={bounty.creator}
+            title="Click to copy address"
+          >
             {formatAddress(bounty.creator)}
           </Badge>
         </div>
@@ -331,7 +347,6 @@ export default function BountyCard({
             {bounty.status === 0 && !isCreator ? "Apply Now" : "Manage"}
           </Button>
         </div>
-
 
         {/* Toggle Details */}
         <Button

@@ -806,14 +806,18 @@ export default function AirdropManager() {
 
       {/* Tab Navigation */}
       <div className="flex justify-center">
-        <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1">
+        <div className="inline-flex h-10 items-center justify-center rounded-lg bg-gray-100 p-1">
           {navigationItems.map((item) => (
             <Button
               key={item.id}
-              variant={activeTab === item.id ? "default" : "ghost"}
+              variant="ghost"
               size="sm"
               onClick={() => setActiveTab(item.id as any)}
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium"
+              className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                activeTab === item.id
+                  ? "bg-white text-gray-900 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+              }`}
             >
               <item.icon className="h-4 w-4 mr-2" />
               {item.label}
@@ -824,295 +828,326 @@ export default function AirdropManager() {
 
       {/* Create Airdrop Tab */}
       {activeTab === "create" && (
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">
-              Create Promotion Campaign
-            </CardTitle>
-            <CardDescription className="text-lg">
-              Launch transparent promotional campaigns with fixed STT rewards
-              for verified social media engagement
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="title">Campaign Title *</Label>
-              <Input
-                id="title"
-                value={newAirdrop.title}
-                onChange={(e) =>
-                  setNewAirdrop({ ...newAirdrop, title: e.target.value })
-                }
-                placeholder="Enter campaign title..."
-                required
-              />
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-white border border-gray-200 rounded-lg">
+            <div className="text-center p-8 border-b border-gray-200">
+              <div className="flex justify-center mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
+                  <Gift className="h-5 w-5 text-gray-600" />
+                </div>
+              </div>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                Create Promotion Campaign
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Launch transparent promotional campaigns with fixed STT rewards for verified social media engagement
+              </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Campaign Description</Label>
-              <Textarea
-                id="description"
-                value={newAirdrop.description}
-                onChange={(e) =>
-                  setNewAirdrop({ ...newAirdrop, description: e.target.value })
-                }
-                rows={3}
-                placeholder="Describe your promotional campaign..."
-              />
-            </div>
+            <div className="p-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                {/* LEFT COLUMN - Basic Info */}
+                <div className="space-y-8">
+                  {/* Basic Information */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                        1
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900">Campaign Details</h3>
+                    </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="requirements">
-                Requirements (What users need to do) *
-              </Label>
-              <Textarea
-                id="requirements"
-                value={newAirdrop.requirements}
-                onChange={(e) =>
-                  setNewAirdrop({ ...newAirdrop, requirements: e.target.value })
-                }
-                rows={3}
-                placeholder="e.g., Post on X/Twitter with #Quinty hashtag, get 100+ likes, include wallet address..."
-                required
-              />
-            </div>
-
-            {/* Image Upload Section */}
-            <div className="space-y-2">
-              <Label>Campaign Image (Optional)</Label>
-              <div className="space-y-3">
-                {imagePreview ? (
-                  <div className="relative">
-                    <img
-                      src={imagePreview}
-                      alt="Campaign preview"
-                      className="w-full h-48 object-cover rounded-lg border"
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      onClick={removeImage}
-                      className="absolute top-2 right-2"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div
-                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer hover:bg-muted/50 ${
-                      isDragOver
-                        ? "border-primary bg-primary/5"
-                        : "border-muted-foreground/25"
-                    }`}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                  >
                     <div className="space-y-4">
-                      <div className="flex justify-center">
-                        <Upload
-                          className={`h-10 w-10 ${
-                            isDragOver
-                              ? "text-primary"
-                              : "text-muted-foreground"
-                          }`}
-                        />
-                      </div>
                       <div className="space-y-2">
-                        <Label
-                          htmlFor="image-upload"
-                          className="cursor-pointer font-medium"
-                        >
-                          <span className="text-primary hover:text-primary/80">
-                            Upload an image
-                          </span>
-                          <span className="text-muted-foreground">
-                            {" "}
-                            or drag and drop
-                          </span>
-                        </Label>
+                        <Label htmlFor="title" className="text-sm font-medium text-gray-700">Campaign Title *</Label>
                         <Input
-                          id="image-upload"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageSelect}
-                          className="hidden"
+                          id="title"
+                          value={newAirdrop.title}
+                          onChange={(e) =>
+                            setNewAirdrop({ ...newAirdrop, title: e.target.value })
+                          }
+                          placeholder="Enter campaign title..."
+                          className="border-gray-300 focus:border-gray-500 focus:ring-gray-500/20"
+                          required
                         />
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {isDragOver
-                          ? "Drop your image here"
-                          : "PNG, JPG, GIF up to 5MB"}
-                      </p>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="description" className="text-sm font-medium text-gray-700">Campaign Description</Label>
+                        <Textarea
+                          id="description"
+                          value={newAirdrop.description}
+                          onChange={(e) =>
+                            setNewAirdrop({ ...newAirdrop, description: e.target.value })
+                          }
+                          rows={3}
+                          placeholder="Describe your promotional campaign..."
+                          className="border-gray-300 focus:border-gray-500 focus:ring-gray-500/20 resize-none"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="requirements" className="text-sm font-medium text-gray-700">
+                          Requirements (What users need to do) *
+                        </Label>
+                        <Textarea
+                          id="requirements"
+                          value={newAirdrop.requirements}
+                          onChange={(e) =>
+                            setNewAirdrop({ ...newAirdrop, requirements: e.target.value })
+                          }
+                          rows={3}
+                          placeholder="e.g., Post on X/Twitter with #Quinty hashtag, get 100+ likes, include wallet address..."
+                          className="border-gray-300 focus:border-gray-500 focus:ring-gray-500/20 resize-none"
+                          required
+                        />
+                      </div>
                     </div>
                   </div>
-                )}
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="reward">Reward Per Qualifier (STT) *</Label>
-                <div className="relative">
-                  <Coins className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="reward"
-                    type="number"
-                    value={newAirdrop.perQualifier}
-                    onChange={(e) =>
-                      setNewAirdrop({
-                        ...newAirdrop,
-                        perQualifier: e.target.value,
-                      })
-                    }
-                    className="pl-10"
-                    placeholder="10"
-                    step="0.01"
-                    required
-                  />
-                </div>
-              </div>
+                  {/* Campaign Image */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                        2
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900">Campaign Image</h3>
+                    </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="maxQualifiers">Max Qualifiers *</Label>
-                <div className="relative">
-                  <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="maxQualifiers"
-                    type="number"
-                    value={newAirdrop.maxQualifiers}
-                    onChange={(e) =>
-                      setNewAirdrop({
-                        ...newAirdrop,
-                        maxQualifiers: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    className="pl-10"
-                    placeholder="100"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="deadline">Deadline *</Label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="deadline"
-                  type="datetime-local"
-                  value={newAirdrop.deadline}
-                  onChange={(e) =>
-                    setNewAirdrop({ ...newAirdrop, deadline: e.target.value })
-                  }
-                  className="pl-10"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Campaign Summary */}
-            {newAirdrop.perQualifier && newAirdrop.maxQualifiers && (
-              <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-                <CardHeader>
-                  <CardTitle className="text-lg text-blue-900">
-                    Campaign Summary
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Card>
-                      <CardContent className="p-4 text-center">
-                        <div className="text-sm font-medium text-muted-foreground">
-                          Total Budget
+                    <div className="space-y-3">
+                      {imagePreview ? (
+                        <div className="relative">
+                          <img
+                            src={imagePreview}
+                            alt="Campaign preview"
+                            className="w-full h-40 object-cover rounded-lg border border-gray-200"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={removeImage}
+                            className="absolute top-2 right-2 h-8 w-8 p-0 bg-white"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <div className="text-2xl font-bold text-blue-600">
-                          {(
-                            parseFloat(newAirdrop.perQualifier) *
-                            newAirdrop.maxQualifiers
-                          ).toFixed(2)}{" "}
-                          STT
+                      ) : (
+                        <div
+                          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
+                            isDragOver
+                              ? "border-gray-400 bg-gray-50"
+                              : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                          }`}
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          onDrop={handleDrop}
+                        >
+                          <div className="space-y-3">
+                            <div className="flex justify-center">
+                              <Upload className="h-8 w-8 text-gray-400" />
+                            </div>
+                            <div className="space-y-1">
+                              <Label
+                                htmlFor="image-upload"
+                                className="cursor-pointer font-medium text-sm text-gray-900"
+                              >
+                                Upload an image
+                                <span className="text-gray-500 ml-1">or drag and drop</span>
+                              </Label>
+                              <Input
+                                id="image-upload"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageSelect}
+                                className="hidden"
+                              />
+                            </div>
+                            <p className="text-xs text-gray-500">
+                              {isDragOver
+                                ? "Drop your image here"
+                                : "PNG, JPG, GIF up to 5MB"}
+                            </p>
+                          </div>
                         </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardContent className="p-4 text-center">
-                        <div className="text-sm font-medium text-muted-foreground">
-                          Per User
-                        </div>
-                        <div className="text-2xl font-bold text-green-600">
-                          {newAirdrop.perQualifier} STT
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardContent className="p-4 text-center">
-                        <div className="text-sm font-medium text-muted-foreground">
-                          Max Participants
-                        </div>
-                        <div className="text-2xl font-bold text-purple-600">
-                          {newAirdrop.maxQualifiers}
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardContent className="p-4 text-center">
-                        <div className="text-sm font-medium text-muted-foreground">
-                          Distribution
-                        </div>
-                        <div className="text-sm font-semibold">
-                          First-come, first-served
-                        </div>
-                      </CardContent>
-                    </Card>
+                      )}
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                </div>
 
-            <Button
-              onClick={createAirdrop}
-              disabled={
-                isUploading ||
-                !newAirdrop.title ||
-                !newAirdrop.perQualifier ||
-                !newAirdrop.maxQualifiers ||
-                !newAirdrop.deadline ||
-                !newAirdrop.requirements
-              }
-              className="w-full"
-              size="lg"
-            >
-              {isUploading ? (
-                <>
-                  <Upload className="w-4 h-4 mr-2 animate-spin" />
-                  Uploading Image...
-                </>
-              ) : (
-                <>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Campaign
+                {/* RIGHT COLUMN - Rewards & Settings */}
+                <div className="space-y-8">
+                  {/* Reward Settings */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                        3
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900">Reward Settings</h3>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="reward" className="text-sm font-medium text-gray-700">Reward Per Qualifier (STT) *</Label>
+                          <div className="relative">
+                            <Coins className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Input
+                              id="reward"
+                              type="number"
+                              value={newAirdrop.perQualifier}
+                              onChange={(e) =>
+                                setNewAirdrop({
+                                  ...newAirdrop,
+                                  perQualifier: e.target.value,
+                                })
+                              }
+                              className="pl-10 border-gray-300 focus:border-gray-500 focus:ring-gray-500/20"
+                              placeholder="10"
+                              step="0.01"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="maxQualifiers" className="text-sm font-medium text-gray-700">Max Qualifiers *</Label>
+                          <div className="relative">
+                            <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Input
+                              id="maxQualifiers"
+                              type="number"
+                              value={newAirdrop.maxQualifiers}
+                              onChange={(e) =>
+                                setNewAirdrop({
+                                  ...newAirdrop,
+                                  maxQualifiers: parseInt(e.target.value) || 0,
+                                })
+                              }
+                              className="pl-10 border-gray-300 focus:border-gray-500 focus:ring-gray-500/20"
+                              placeholder="100"
+                              required
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="deadline" className="text-sm font-medium text-gray-700">Deadline *</Label>
+                        <div className="relative">
+                          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <Input
+                            id="deadline"
+                            type="datetime-local"
+                            value={newAirdrop.deadline}
+                            onChange={(e) =>
+                              setNewAirdrop({ ...newAirdrop, deadline: e.target.value })
+                            }
+                            className="pl-10 border-gray-300 focus:border-gray-500 focus:ring-gray-500/20"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Campaign Summary */}
                   {newAirdrop.perQualifier && newAirdrop.maxQualifiers && (
-                    <span className="ml-2 opacity-90">
-                      (
-                      {(
-                        parseFloat(newAirdrop.perQualifier) *
-                        newAirdrop.maxQualifiers
-                      ).toFixed(2)}{" "}
-                      STT)
-                    </span>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                          4
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-900">Campaign Summary</h3>
+                      </div>
+
+                      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center p-3 bg-white rounded-lg border border-gray-200">
+                            <div className="text-xs font-medium text-gray-500 mb-1">
+                              Total Budget
+                            </div>
+                            <div className="text-lg font-semibold text-gray-900">
+                              {(
+                                parseFloat(newAirdrop.perQualifier) *
+                                newAirdrop.maxQualifiers
+                              ).toFixed(2)} STT
+                            </div>
+                          </div>
+
+                          <div className="text-center p-3 bg-white rounded-lg border border-gray-200">
+                            <div className="text-xs font-medium text-gray-500 mb-1">
+                              Per User
+                            </div>
+                            <div className="text-lg font-semibold text-gray-900">
+                              {newAirdrop.perQualifier} STT
+                            </div>
+                          </div>
+
+                          <div className="text-center p-3 bg-white rounded-lg border border-gray-200">
+                            <div className="text-xs font-medium text-gray-500 mb-1">
+                              Max Participants
+                            </div>
+                            <div className="text-lg font-semibold text-gray-900">
+                              {newAirdrop.maxQualifiers}
+                            </div>
+                          </div>
+
+                          <div className="text-center p-3 bg-white rounded-lg border border-gray-200">
+                            <div className="text-xs font-medium text-gray-500 mb-1">
+                              Distribution
+                            </div>
+                            <div className="text-xs font-medium text-gray-700">
+                              First-come, first-served
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   )}
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
+
+                  {/* Submit Button */}
+                  <div className="pt-4">
+                    <Button
+                      onClick={createAirdrop}
+                      disabled={
+                        isUploading ||
+                        !newAirdrop.title ||
+                        !newAirdrop.perQualifier ||
+                        !newAirdrop.maxQualifiers ||
+                        !newAirdrop.deadline ||
+                        !newAirdrop.requirements
+                      }
+                      className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-3 rounded-lg transition-colors"
+                      size="lg"
+                    >
+                      {isUploading ? (
+                        <>
+                          <Upload className="w-4 h-4 mr-2 animate-spin" />
+                          Uploading Image...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create Campaign
+                          {newAirdrop.perQualifier && newAirdrop.maxQualifiers && (
+                            <span className="ml-2 opacity-80">
+                              (
+                              {(
+                                parseFloat(newAirdrop.perQualifier) *
+                                newAirdrop.maxQualifiers
+                              ).toFixed(2)} STT)
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Browse Airdrops Tab */}
@@ -1352,17 +1387,22 @@ export default function AirdropManager() {
         </div>
       )}
 
-      {/* Manage Tab - Redesigned for Better UX */}
+      {/* Manage Tab - Monochrome Notion-style */}
       {activeTab === "manage" && (
-        <div className="space-y-6">
+        <div className="max-w-5xl mx-auto space-y-6">
+          {/* Header */}
           <div className="text-center mb-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">
+            <div className="flex justify-center mb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
+                <Settings className="h-5 w-5 text-gray-600" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
               Manage Your Campaigns
-            </h3>
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 rounded-xl border border-blue-200 max-w-2xl mx-auto">
-              <p className="text-blue-800 font-medium">
-                📝 Review submissions and select eligible participants for
-                rewards
+            </h2>
+            <div className="bg-gray-50 border border-gray-200 px-6 py-3 rounded-lg max-w-2xl mx-auto">
+              <p className="text-gray-700 text-sm">
+                📝 Review submissions and select eligible participants for rewards
               </p>
             </div>
           </div>
@@ -1372,249 +1412,274 @@ export default function AirdropManager() {
             {airdrops.filter(
               (a) => a.creator === address && !a.resolved && !a.cancelled
             ).length === 0 ? (
-              <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-                <div className="text-8xl mb-6">📋</div>
-                <h4 className="text-2xl font-bold text-gray-900 mb-3">
-                  No Active Campaigns
-                </h4>
-                <p className="text-gray-600 mb-6 text-lg">
-                  You don't have any active campaigns to manage. Create your
-                  first campaign to get started!
-                </p>
-                <button
-                  onClick={() => setActiveTab("create")}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg"
-                >
-                  🚀 Create New Campaign
-                </button>
+              <div className="bg-white border border-gray-200 rounded-lg">
+                <div className="p-12 text-center">
+                  <div className="flex justify-center mb-6">
+                    <div className="h-16 w-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <span className="text-3xl">📋</span>
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-medium text-gray-900 mb-3">
+                    No Active Campaigns
+                  </h3>
+                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                    You don't have any active campaigns to manage. Create your first campaign to get started!
+                  </p>
+                  <Button
+                    onClick={() => setActiveTab("create")}
+                    className="bg-gray-900 hover:bg-gray-800 text-white font-medium px-6 py-2 rounded-lg transition-colors"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create New Campaign
+                  </Button>
+                </div>
               </div>
             ) : (
-              airdrops
-                .filter(
-                  (a) => a.creator === address && !a.resolved && !a.cancelled
-                )
-                .map((airdrop) => (
-                  <div key={airdrop.id} className="bg-white rounded-lg shadow">
-                    {/* Campaign Header */}
-                    <div className="p-6 border-b border-gray-200">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                            {airdrop.title || `Campaign #${airdrop.id}`}
-                          </h4>
-                          <div className="grid grid-cols-3 gap-4 text-sm">
-                            <div>
-                              <span className="text-gray-500">Reward:</span>
-                              <div className="font-medium text-green-600">
-                                {formatSTT(airdrop.perQualifier)} STT each
+              <div className="space-y-4">
+                {airdrops
+                  .filter(
+                    (a) => a.creator === address && !a.resolved && !a.cancelled
+                  )
+                  .map((airdrop) => (
+                    <div key={airdrop.id} className="bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+                      {/* Campaign Header */}
+                      <div className="p-6 border-b border-gray-200">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="h-8 w-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <Gift className="h-4 w-4 text-gray-600" />
                               </div>
+                              <h3 className="text-lg font-medium text-gray-900">
+                                {airdrop.title || `Campaign #${airdrop.id}`}
+                              </h3>
                             </div>
-                            <div>
-                              <span className="text-gray-500">Progress:</span>
-                              <div className="font-medium">
-                                {airdrop.qualifiersCount}/
-                                {airdrop.maxQualifiers} qualified
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                <div className="text-xs font-medium text-gray-500 mb-1">Reward</div>
+                                <div className="text-sm font-medium text-gray-900">
+                                  {formatSTT(airdrop.perQualifier)} STT each
+                                </div>
                               </div>
-                            </div>
-                            <div>
-                              <span className="text-gray-500">Deadline:</span>
-                              <div className="font-medium">
-                                {formatTimeLeft(BigInt(airdrop.deadline))}
+                              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                <div className="text-xs font-medium text-gray-500 mb-1">Progress</div>
+                                <div className="text-sm font-medium text-gray-900">
+                                  {airdrop.qualifiersCount}/{airdrop.maxQualifiers} qualified
+                                </div>
+                              </div>
+                              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                <div className="text-xs font-medium text-gray-500 mb-1">Deadline</div>
+                                <div className="text-sm font-medium text-gray-900">
+                                  {formatTimeLeft(BigInt(airdrop.deadline))}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="flex gap-2">
-                          {Date.now() / 1000 > airdrop.deadline && (
-                            <button
-                              onClick={() => finalizeAirdrop(airdrop.id)}
-                              disabled={isFinalizing}
-                              className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                          <div className="flex gap-2 ml-4">
+                            {Date.now() / 1000 > airdrop.deadline && (
+                              <Button
+                                onClick={() => finalizeAirdrop(airdrop.id)}
+                                disabled={isFinalizing}
+                                variant="default"
+                                size="sm"
+                                className="bg-gray-900 hover:bg-gray-800 text-white"
+                              >
+                                <Check className="w-3 h-3 mr-1" />
+                                {isFinalizing ? "Finalizing..." : "Finalize"}
+                              </Button>
+                            )}
+                            <Button
+                              onClick={() => cancelAirdrop(airdrop.id)}
+                              disabled={isCancelling}
+                              variant="outline"
+                              size="sm"
+                              className="border-gray-300 text-gray-700 hover:bg-gray-50"
                             >
-                              {isFinalizing ? "Finalizing..." : "Finalize"}
-                            </button>
-                          )}
-                          <button
-                            onClick={() => cancelAirdrop(airdrop.id)}
-                            disabled={isCancelling}
-                            className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                              <X className="w-3 h-3 mr-1" />
+                              {isCancelling ? "Cancelling..." : "Cancel"}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Submissions Section */}
+                      <div className="p-6">
+                        <div className="flex justify-between items-center mb-4">
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4 text-gray-400" />
+                            <h4 className="font-medium text-gray-900">
+                              Submissions ({entries[airdrop.id]?.length || 0})
+                            </h4>
+                          </div>
+                          <Button
+                            onClick={() => {
+                              if (selectedAirdrop === airdrop.id) {
+                                setSelectedAirdrop(null);
+                              } else {
+                                setSelectedAirdrop(airdrop.id);
+                                loadEntries(airdrop.id);
+                              }
+                            }}
+                            variant="outline"
+                            size="sm"
+                            className="border-gray-300 text-gray-700 hover:bg-gray-50"
                           >
-                            {isCancelling ? "Cancelling..." : "Cancel"}
-                          </button>
+                            <Eye className="w-3 h-3 mr-1" />
+                            {selectedAirdrop === airdrop.id ? "Hide Submissions" : "Review Submissions"}
+                          </Button>
                         </div>
-                      </div>
-                    </div>
 
-                    {/* Submissions Section */}
-                    <div className="p-6">
-                      <div className="flex justify-between items-center mb-4">
-                        <h5 className="font-medium text-gray-900">
-                          Submissions ({entries[airdrop.id]?.length || 0})
-                        </h5>
-                        <button
-                          onClick={() => {
-                            if (selectedAirdrop === airdrop.id) {
-                              setSelectedAirdrop(null);
-                            } else {
-                              setSelectedAirdrop(airdrop.id);
-                              // Always load entries when reviewing
-                              loadEntries(airdrop.id);
-                            }
-                          }}
-                          className="text-primary-600 hover:text-primary-700 text-sm font-medium"
-                        >
-                          {selectedAirdrop === airdrop.id
-                            ? "Hide Submissions"
-                            : "Review Submissions"}
-                        </button>
-                      </div>
-
-                      {!entries[airdrop.id] ||
-                      entries[airdrop.id].length === 0 ? (
-                        <div className="text-center py-8 text-gray-500">
-                          <div className="text-4xl mb-2">💭</div>
-                          <p>
-                            No submissions yet. Share your campaign to get
-                            participants!
-                          </p>
-                        </div>
-                      ) : (
-                        <>
-                          {selectedAirdrop === airdrop.id && (
-                            <div className="space-y-3 mb-6">
-                              {entries[airdrop.id].map((entry, index) => (
-                                <div
-                                  key={index}
-                                  className={`border rounded-lg p-4 ${
-                                    verificationForm.qualifiedIndices.includes(
-                                      index
-                                    )
-                                      ? "border-green-500 bg-green-50"
-                                      : "border-gray-200 hover:border-gray-300"
-                                  }`}
-                                >
-                                  <div className="flex justify-between items-start">
-                                    <div className="flex-1">
-                                      <div className="flex items-center gap-3 mb-2">
-                                        <span className="font-medium text-gray-900">
-                                          {formatAddress(entry.solver)}
-                                        </span>
-                                        <span
-                                          className={`px-2 py-1 rounded-full text-xs ${
-                                            entry.status === 1
-                                              ? "bg-green-100 text-green-800"
-                                              : entry.status === 2
-                                              ? "bg-red-100 text-red-800"
-                                              : "bg-yellow-100 text-yellow-800"
-                                          }`}
-                                        >
-                                          {entry.status === 1
-                                            ? "Approved"
-                                            : entry.status === 2
-                                            ? "Rejected"
-                                            : "Pending"}
-                                        </span>
-                                      </div>
-                                      <div className="text-sm text-gray-600">
-                                        <div>IPFS: {entry.ipfsProofCid}</div>
-                                        <div>
-                                          Submitted:{" "}
-                                          {new Date(
-                                            entry.timestamp * 1000
-                                          ).toLocaleDateString()}
-                                        </div>
-                                        {entry.feedback && (
-                                          <div className="mt-1 text-blue-600">
-                                            Feedback: {entry.feedback}
+                        {!entries[airdrop.id] || entries[airdrop.id].length === 0 ? (
+                          <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                            <div className="flex justify-center mb-3">
+                              <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <span className="text-2xl">💭</span>
+                              </div>
+                            </div>
+                            <p className="text-gray-600 text-sm">
+                              No submissions yet. Share your campaign to get participants!
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            {selectedAirdrop === airdrop.id && (
+                              <div className="space-y-3 mb-6">
+                                {entries[airdrop.id].map((entry, index) => (
+                                  <div
+                                    key={index}
+                                    className={`border rounded-lg p-4 transition-colors ${
+                                      verificationForm.qualifiedIndices.includes(index)
+                                        ? "border-gray-400 bg-gray-50"
+                                        : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                                    }`}
+                                  >
+                                    <div className="flex justify-between items-start">
+                                      <div className="flex-1">
+                                        <div className="flex items-center gap-3 mb-3">
+                                          <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                            <span className="text-xs font-medium text-gray-600">
+                                              {entry.solver.slice(0, 2).toUpperCase()}
+                                            </span>
                                           </div>
-                                        )}
+                                          <span className="font-medium text-gray-900">
+                                            {formatAddress(entry.solver)}
+                                          </span>
+                                          <Badge
+                                            variant="outline"
+                                            className={
+                                              entry.status === 1
+                                                ? "border-gray-400 text-gray-700 bg-gray-100"
+                                                : entry.status === 2
+                                                ? "border-gray-400 text-gray-700 bg-gray-100"
+                                                : "border-gray-300 text-gray-600 bg-gray-50"
+                                            }
+                                          >
+                                            {entry.status === 1 ? "Approved" : entry.status === 2 ? "Rejected" : "Pending"}
+                                          </Badge>
+                                        </div>
+                                        <div className="text-sm text-gray-600 space-y-1">
+                                          <div className="flex items-center gap-2">
+                                            <FileText className="w-3 h-3 text-gray-400" />
+                                            <span>IPFS: {entry.ipfsProofCid}</span>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <Clock className="w-3 h-3 text-gray-400" />
+                                            <span>
+                                              Submitted: {new Date(entry.timestamp * 1000).toLocaleDateString()}
+                                            </span>
+                                          </div>
+                                          {entry.feedback && (
+                                            <div className="mt-2 p-2 bg-gray-100 border border-gray-200 rounded text-gray-700 text-xs">
+                                              <strong>Feedback:</strong> {entry.feedback}
+                                            </div>
+                                          )}
+                                        </div>
                                       </div>
-                                    </div>
-                                    <div className="flex gap-2">
-                                      <button
-                                        onClick={() => {
-                                          const newQualified =
-                                            verificationForm.qualifiedIndices.includes(
-                                              index
-                                            )
-                                              ? verificationForm.qualifiedIndices.filter(
-                                                  (i) => i !== index
-                                                )
-                                              : [
-                                                  ...verificationForm.qualifiedIndices,
-                                                  index,
-                                                ];
-                                          setVerificationForm({
-                                            ...verificationForm,
-                                            airdropId: airdrop.id,
-                                            qualifiedIndices: newQualified,
-                                          });
-                                        }}
-                                        className={`px-3 py-1 rounded text-sm font-medium ${
-                                          verificationForm.qualifiedIndices.includes(
-                                            index
-                                          )
-                                            ? "bg-green-600 text-white hover:bg-green-700"
-                                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                                        }`}
-                                      >
-                                        {verificationForm.qualifiedIndices.includes(
-                                          index
-                                        )
-                                          ? "✓ Selected"
-                                          : "Select"}
-                                      </button>
+                                      <div className="flex gap-2 ml-4">
+                                        <Button
+                                          onClick={() => {
+                                            const newQualified = verificationForm.qualifiedIndices.includes(index)
+                                              ? verificationForm.qualifiedIndices.filter((i) => i !== index)
+                                              : [...verificationForm.qualifiedIndices, index];
+                                            setVerificationForm({
+                                              ...verificationForm,
+                                              airdropId: airdrop.id,
+                                              qualifiedIndices: newQualified,
+                                            });
+                                          }}
+                                          variant={
+                                            verificationForm.qualifiedIndices.includes(index) ? "default" : "outline"
+                                          }
+                                          size="sm"
+                                          className={
+                                            verificationForm.qualifiedIndices.includes(index)
+                                              ? "bg-gray-900 hover:bg-gray-800 text-white"
+                                              : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                                          }
+                                        >
+                                          {verificationForm.qualifiedIndices.includes(index) ? (
+                                            <>
+                                              <Check className="w-3 h-3 mr-1" />
+                                              Selected
+                                            </>
+                                          ) : (
+                                            <>
+                                              <Plus className="w-3 h-3 mr-1" />
+                                              Select
+                                            </>
+                                          )}
+                                        </Button>
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                                ))}
+                              </div>
+                            )}
 
-                          {/* Action Buttons */}
-                          {selectedAirdrop === airdrop.id &&
-                            verificationForm.qualifiedIndices.length > 0 && (
-                              <div className="bg-blue-50 rounded-lg p-4">
+                            {/* Action Buttons */}
+                            {selectedAirdrop === airdrop.id && verificationForm.qualifiedIndices.length > 0 && (
+                              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                                 <div className="flex justify-between items-center">
                                   <div>
-                                    <h6 className="font-medium text-blue-900">
+                                    <h5 className="font-medium text-gray-900 mb-1">
                                       Ready to Distribute Rewards
-                                    </h6>
-                                    <p className="text-sm text-blue-700">
-                                      {verificationForm.qualifiedIndices.length}{" "}
-                                      participants selected •
+                                    </h5>
+                                    <p className="text-sm text-gray-600">
+                                      {verificationForm.qualifiedIndices.length} participants selected •{" "}
                                       {formatSTT(
-                                        airdrop.perQualifier *
-                                          BigInt(
-                                            verificationForm.qualifiedIndices
-                                              .length
-                                          )
+                                        airdrop.perQualifier * BigInt(verificationForm.qualifiedIndices.length)
                                       )}{" "}
                                       STT total
                                     </p>
                                   </div>
-                                  <button
+                                  <Button
                                     onClick={() => {
-                                      verifyAndDistribute(
-                                        airdrop.id,
-                                        verificationForm.qualifiedIndices
-                                      );
+                                      verifyAndDistribute(airdrop.id, verificationForm.qualifiedIndices);
                                     }}
                                     disabled={isDistributing}
-                                    className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="bg-gray-900 hover:bg-gray-800 text-white font-medium transition-colors"
                                   >
-                                    {isDistributing
-                                      ? "Distributing..."
-                                      : "Distribute Rewards"}
-                                  </button>
+                                    {isDistributing ? (
+                                      <>
+                                        <Clock className="w-4 h-4 mr-2 animate-spin" />
+                                        Distributing...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Send className="w-4 h-4 mr-2" />
+                                        Distribute Rewards
+                                      </>
+                                    )}
+                                  </Button>
                                 </div>
                               </div>
                             )}
-                        </>
-                      )}
+                          </>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))
+                  ))}
+              </div>
             )}
           </div>
         </div>

@@ -644,9 +644,7 @@ export default function ReputationDisplay() {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <h4 className="font-medium">
-                            {formatAddress(user.address)}
-                          </h4>
+                          <h4 className="font-medium">{user.address}</h4>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Badge variant="outline" className="text-xs">
                               {user.achievements.achievements.length}{" "}
@@ -673,203 +671,247 @@ export default function ReputationDisplay() {
         </div>
       )}
 
-      {/* Achievement Guide Tab */}
+      {/* Achievement Guide Tab - Compact Monochrome Design */}
       {selectedTab === "achievements" && (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5" />
-                Achievement Categories
-              </CardTitle>
-              <CardDescription>
-                Learn about the different types of achievements and how to earn
-                them
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Solver Achievements */}
-                <Card className="border-blue-200">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center gap-2 text-blue-600">
-                      <Target className="h-5 w-5" />
-                      Solver Badges
-                    </CardTitle>
-                    <CardDescription>
-                      Earned by submitting solutions to bounties
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {ACHIEVEMENT_MILESTONES.map((milestone, index) => (
-                      <div
-                        key={milestone}
-                        className="flex items-center justify-between p-2 rounded-md bg-blue-50"
-                      >
-                        <span className="text-sm font-medium">
-                          Level {index + 1}
+        <div className="max-w-5xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+              <Award className="h-4 w-4 text-gray-600" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">
+                Achievement System
+              </h1>
+              <p className="text-sm text-gray-600">
+                Milestone-based NFT achievements for reputation building
+              </p>
+            </div>
+          </div>
+
+          {/* How it works - Horizontal */}
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-white rounded border border-gray-200 flex items-center justify-center">
+                    <span className="text-xs font-bold text-gray-700">1</span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900 text-sm">
+                      Participate
+                    </h3>
+                    <p className="text-xs text-gray-600">Submit & create</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-white rounded border border-gray-200 flex items-center justify-center">
+                    <span className="text-xs font-bold text-gray-700">2</span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900 text-sm">
+                      Hit Milestones
+                    </h3>
+                    <p className="text-xs text-gray-600">Reach targets</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-white rounded border border-gray-200 flex items-center justify-center">
+                    <span className="text-xs font-bold text-gray-700">3</span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900 text-sm">
+                      Earn NFTs
+                    </h3>
+                    <p className="text-xs text-gray-600">Get badges</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Achievement Categories - Row Layout */}
+          <div className="space-y-4">
+            {/* Solver Achievements */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Target className="h-4 w-4 text-gray-600" />
+                  <h3 className="font-semibold text-gray-900">
+                    Solver Achievements
+                  </h3>
+                  <span className="text-xs text-gray-500">
+                    Submit solutions to bounties
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-2">
+                {ACHIEVEMENT_MILESTONES.map((milestone, index) => (
+                  <div
+                    key={milestone}
+                    className="flex items-center justify-between p-2 bg-white rounded border border-gray-200 hover:border-gray-300 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-gray-50 rounded flex items-center justify-center border border-gray-200">
+                        <span className="text-xs font-semibold text-gray-700">
+                          {index + 1}
                         </span>
-                        <Badge variant="outline" className="text-blue-600">
+                      </div>
+                      <div className="text-xs">
+                        <div className="font-medium text-gray-900">
+                          {
+                            ACHIEVEMENT_NAMES[
+                              index as keyof typeof ACHIEVEMENT_NAMES
+                            ]
+                          }
+                        </div>
+                        <div className="text-gray-600">
                           {milestone} submissions
-                        </Badge>
+                        </div>
                       </div>
-                    ))}
-                  </CardContent>
-                </Card>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-                {/* Winner Achievements */}
-                <Card className="border-green-200">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center gap-2 text-green-600">
-                      <Trophy className="h-5 w-5" />
-                      Winner Badges
-                    </CardTitle>
-                    <CardDescription>
-                      Earned by winning bounty competitions
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {ACHIEVEMENT_MILESTONES.map((milestone, index) => (
-                      <div
-                        key={milestone}
-                        className="flex items-center justify-between p-2 rounded-md bg-green-50"
-                      >
-                        <span className="text-sm font-medium">
-                          Level {index + 1}
+            {/* Winner Achievements */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Trophy className="h-4 w-4 text-gray-600" />
+                  <h3 className="font-semibold text-gray-900">
+                    Winner Achievements
+                  </h3>
+                  <span className="text-xs text-gray-500">
+                    Win bounty competitions
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-2">
+                {ACHIEVEMENT_MILESTONES.map((milestone, index) => (
+                  <div
+                    key={milestone}
+                    className="flex items-center justify-between p-2 bg-white rounded border border-gray-200 hover:border-gray-300 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-gray-50 rounded flex items-center justify-center border border-gray-200">
+                        <span className="text-xs font-semibold text-gray-700">
+                          {index + 1}
                         </span>
-                        <Badge variant="outline" className="text-green-600">
-                          {milestone} wins
-                        </Badge>
                       </div>
-                    ))}
-                  </CardContent>
-                </Card>
+                      <div className="text-xs">
+                        <div className="font-medium text-gray-900">
+                          {
+                            ACHIEVEMENT_NAMES[
+                              (index + 5) as keyof typeof ACHIEVEMENT_NAMES
+                            ]
+                          }
+                        </div>
+                        <div className="text-gray-600">{milestone} wins</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-                {/* Creator Achievements */}
-                <Card className="border-purple-200">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center gap-2 text-purple-600">
-                      <Medal className="h-5 w-5" />
-                      Creator Badges
-                    </CardTitle>
-                    <CardDescription>
-                      Earned by creating bounties for the community
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {ACHIEVEMENT_MILESTONES.map((milestone, index) => (
-                      <div
-                        key={milestone}
-                        className="flex items-center justify-between p-2 rounded-md bg-purple-50"
-                      >
-                        <span className="text-sm font-medium">
-                          Level {index + 1}
+            {/* Creator Achievements */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Medal className="h-4 w-4 text-gray-600" />
+                  <h3 className="font-semibold text-gray-900">
+                    Creator Achievements
+                  </h3>
+                  <span className="text-xs text-gray-500">
+                    Create bounties for community
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-5 gap-2">
+                {ACHIEVEMENT_MILESTONES.map((milestone, index) => (
+                  <div
+                    key={milestone}
+                    className="flex items-center justify-between p-2 bg-white rounded border border-gray-200 hover:border-gray-300 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-gray-50 rounded flex items-center justify-center border border-gray-200">
+                        <span className="text-xs font-semibold text-gray-700">
+                          {index + 1}
                         </span>
-                        <Badge variant="outline" className="text-purple-600">
+                      </div>
+                      <div className="text-xs">
+                        <div className="font-medium text-gray-900">
+                          {
+                            ACHIEVEMENT_NAMES[
+                              (index + 10) as keyof typeof ACHIEVEMENT_NAMES
+                            ]
+                          }
+                        </div>
+                        <div className="text-gray-600">
                           {milestone} bounties
-                        </Badge>
+                        </div>
                       </div>
-                    ))}
-                  </CardContent>
-                </Card>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          {/* NFT Benefits */}
-          <Card className="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-none">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Star className="h-5 w-5" />
-                NFT Achievement Benefits
-              </CardTitle>
-              <CardDescription>
-                Why achievements matter in the Quinty ecosystem
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <Trophy className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold">Soulbound NFTs</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Permanent, non-transferable reputation tokens that stay
-                        with you forever
-                      </p>
-                    </div>
+          {/* Benefits - Row Layout */}
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <h2 className="font-semibold text-gray-900 mb-3">
+              NFT Achievement Benefits
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {[
+                {
+                  icon: Trophy,
+                  title: "Permanent Reputation",
+                  desc: "Soulbound NFTs for long-term credibility",
+                },
+                {
+                  icon: Star,
+                  title: "Custom Artwork",
+                  desc: "Unique IPFS-hosted designs",
+                },
+                {
+                  icon: Target,
+                  title: "Clear Progression",
+                  desc: "Transparent milestone system",
+                },
+                {
+                  icon: User,
+                  title: "Wallet Compatible",
+                  desc: "Visible in MetaMask & others",
+                },
+                {
+                  icon: TrendingUp,
+                  title: "Community Status",
+                  desc: "Showcase contributions",
+                },
+                {
+                  icon: Medal,
+                  title: "Recognition",
+                  desc: "Build trust & credibility",
+                },
+              ].map((benefit, index) => (
+                <div key={index} className="flex items-start gap-2">
+                  <div className="w-6 h-6 bg-white rounded flex items-center justify-center border border-gray-200 flex-shrink-0">
+                    <benefit.icon className="h-3 w-3 text-gray-600" />
                   </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <Star className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold">Custom Artwork</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Each achievement features unique IPFS-hosted images and
-                        metadata
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <Target className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold">Milestone-Based</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Clear progression system with set targets to work
-                        towards
-                      </p>
-                    </div>
+                  <div>
+                    <h4 className="font-medium text-gray-900 text-xs">
+                      {benefit.title}
+                    </h4>
+                    <p className="text-xs text-gray-600">{benefit.desc}</p>
                   </div>
                 </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <User className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold">Wallet Integration</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Visible in MetaMask and other NFT-compatible wallets
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <TrendingUp className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold">Season Tracking</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Monthly leaderboards and special seasonal achievements
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <Medal className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold">Community Recognition</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Showcase your contributions and build your reputation
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>
