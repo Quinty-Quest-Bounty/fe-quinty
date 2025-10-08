@@ -1,16 +1,23 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React from "react";
+import { useRouter } from "next/navigation";
 import { formatSTT, formatTimeLeft, formatAddress } from "../utils/web3";
 import { IpfsImage } from "../utils/ipfs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+} from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Separator } from "./ui/separator";
-import { Calendar, Users, Send, Clock, Gift, Coins, User, Target } from "lucide-react";
-import { cn } from "../lib/utils";
+import {
+  Users,
+  Clock,
+  Coins,
+} from "lucide-react";
 
 interface Airdrop {
   id: number;
@@ -30,11 +37,20 @@ interface Airdrop {
 
 interface AirdropCardProps {
   airdrop: Airdrop;
-  onShowSubmitModal: () => void;
+  onShowSubmitModal?: () => void;
+  viewMode?: "grid" | "list";
 }
 
-export default function AirdropCard({ airdrop, onShowSubmitModal }: AirdropCardProps) {
-  const progress = Math.min((airdrop.qualifiersCount / airdrop.maxQualifiers) * 100, 100);
+export default function AirdropCard({
+  airdrop,
+  onShowSubmitModal,
+  viewMode = "grid",
+}: AirdropCardProps) {
+  const router = useRouter();
+  const progress = Math.min(
+    (airdrop.qualifiersCount / airdrop.maxQualifiers) * 100,
+    100
+  );
   const isExpired = Date.now() / 1000 > airdrop.deadline;
 
   const getStatusColor = () => {
@@ -51,110 +67,147 @@ export default function AirdropCard({ airdrop, onShowSubmitModal }: AirdropCardP
     return "Active";
   };
 
+  if (viewMode === "list") {
+    return (
+      <Card
+        className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 cursor-pointer"
+        onClick={() => router.push(`/airdrops/${airdrop.id}`)}
+      >
+        <div className="flex flex-row">
+          {/* Image Section */}
+          {airdrop.imageUrl && (
+            <div className="relative w-48 h-32 overflow-hidden bg-muted flex-shrink-0">
+              <IpfsImage
+                cid={airdrop.imageUrl.replace("ipfs://", "")}
+                alt={airdrop.title}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            </div>
+          )}
+
+          <div className="flex-1 flex flex-col">
+            <CardHeader className="pb-2">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-semibold leading-tight line-clamp-1">
+                    {airdrop.title}
+                  </h3>
+                  <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
+                    {airdrop.description?.replace(/\n\nImage:.*$/, "") || "Social media promotion task"}
+                  </p>
+                </div>
+                <Badge variant={getStatusColor()} className="text-xs flex-shrink-0">
+                  {getStatusText()}
+                </Badge>
+              </div>
+            </CardHeader>
+
+            <CardContent className="pt-0 pb-3 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                  <Coins className="h-3.5 w-3.5 text-green-600" />
+                  <span className="text-lg font-bold text-green-600">
+                    {formatSTT(airdrop.perQualifier)}
+                  </span>
+                  <span className="text-xs font-medium text-green-600">STT</span>
+                </div>
+
+                <Separator orientation="vertical" className="h-6" />
+
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Users className="h-3 w-3" />
+                  <span className="font-medium">{airdrop.qualifiersCount}/{airdrop.maxQualifiers}</span>
+                </div>
+
+                <Separator orientation="vertical" className="h-6" />
+
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  <span className="font-medium">{formatTimeLeft(BigInt(airdrop.deadline))}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Avatar className="h-5 w-5">
+                  <AvatarFallback className="text-[10px]">
+                    {airdrop.creator.slice(2, 4).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-xs text-muted-foreground">
+                  {formatAddress(airdrop.creator)}
+                </span>
+              </div>
+            </CardContent>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
   return (
-    <Card className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5">
+    <Card
+      className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 cursor-pointer"
+      onClick={() => router.push(`/airdrops/${airdrop.id}`)}
+    >
       {/* Status Badge */}
-      <div className="absolute top-4 right-4 z-10">
-        <Badge variant={getStatusColor()}>
-          <Clock className="w-3 h-3 mr-1" />
+      <div className="absolute top-2 right-2 z-10">
+        <Badge variant={getStatusColor()} className="text-xs">
           {getStatusText()}
         </Badge>
       </div>
 
       {/* Image Section */}
       {airdrop.imageUrl && (
-        <div className="relative w-full h-48 overflow-hidden bg-muted">
+        <div className="relative w-full h-32 overflow-hidden bg-muted">
           <IpfsImage
-            cid={airdrop.imageUrl.replace('ipfs://', '')}
+            cid={airdrop.imageUrl.replace("ipfs://", "")}
             alt={airdrop.title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
         </div>
       )}
 
-      <CardHeader className="space-y-4">
-        {/* Title and Description */}
-        <div className="space-y-2">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 flex-shrink-0">
-              <Gift className="h-5 w-5 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg leading-tight line-clamp-2">
-                {airdrop.title}
-              </CardTitle>
-              <CardDescription className="mt-1 line-clamp-2">
-                {airdrop.description?.replace(/\n\nImage:.*$/, '') || "Social media promotion task"}
-              </CardDescription>
-            </div>
-          </div>
-        </div>
-
-        {/* Creator Info */}
-        <div className="flex items-center gap-2">
-          <Avatar className="h-6 w-6">
-            <AvatarFallback className="text-xs">
-              {airdrop.creator.slice(2, 4).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <span className="text-sm text-muted-foreground">
-            by {formatAddress(airdrop.creator)}
-          </span>
+      <CardHeader className="p-3 space-y-2">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm leading-tight line-clamp-2 font-semibold">
+            {airdrop.title}
+          </h3>
+          <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
+            {airdrop.description?.replace(/\n\nImage:.*$/, "") || "Social media promotion task"}
+          </p>
         </div>
 
         <Separator />
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-1 text-muted-foreground text-sm">
-              <Users className="h-3 w-3" />
-              Participants
-            </div>
-            <div className="font-semibold">
-              {airdrop.qualifiersCount} / {airdrop.maxQualifiers}
-            </div>
-            <Progress value={progress} className="h-1.5" />
+        {/* Stats */}
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Users className="h-3 w-3" />
+            <span>{airdrop.qualifiersCount}/{airdrop.maxQualifiers}</span>
           </div>
-
-          <div className="space-y-1">
-            <div className="flex items-center gap-1 text-muted-foreground text-sm">
-              <Calendar className="h-3 w-3" />
-              Deadline
-            </div>
-            <div className="font-semibold text-sm">
-              {formatTimeLeft(BigInt(airdrop.deadline))}
-            </div>
+          <Progress value={progress} className="h-1 w-16" />
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            <span>{formatTimeLeft(BigInt(airdrop.deadline))}</span>
           </div>
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="p-3 pt-0">
         {/* Reward Section */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
-          <div>
-            <div className="flex items-center gap-2">
-              <Coins className="h-4 w-4 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">
-                {formatSTT(airdrop.perQualifier)}
-              </span>
-              <span className="text-sm font-medium text-green-600">STT</span>
-            </div>
-            <div className="text-xs text-muted-foreground">per qualifier</div>
+        <div className="flex items-center justify-between p-2 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
+          <div className="flex items-center gap-1.5">
+            <Coins className="h-3.5 w-3.5 text-green-600" />
+            <span className="text-base font-bold text-green-600">
+              {formatSTT(airdrop.perQualifier)}
+            </span>
+            <span className="text-xs font-medium text-green-600">STT</span>
           </div>
-
-          {/* Action Button */}
-          {!isExpired && !airdrop.resolved && airdrop.qualifiersCount < airdrop.maxQualifiers ? (
-            <Button onClick={onShowSubmitModal} size="sm">
-              <Send className="w-4 h-4 mr-2" />
-              Submit Entry
-            </Button>
-          ) : (
-            <Badge variant="outline" className="px-3 py-1">
-              {getStatusText()}
-            </Badge>
-          )}
+          <Avatar className="h-5 w-5">
+            <AvatarFallback className="text-[10px]">
+              {airdrop.creator.slice(2, 4).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
         </div>
       </CardContent>
     </Card>

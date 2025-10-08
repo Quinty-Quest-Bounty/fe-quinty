@@ -391,7 +391,11 @@ export default function BountyManager() {
   // Effect to handle transaction status
   useEffect(() => {
     if (isConfirmed) {
-      // Reset form only after transaction is confirmed
+      // Reload bounties after confirmation
+      loadBountiesAndSubmissions();
+      // Switch to browse tab to see the new bounty
+      setActiveTab("browse");
+      // Reset form
       setNewBounty({
         title: "",
         description: "",
@@ -409,9 +413,6 @@ export default function BountyManager() {
       setDeadlineDate(undefined);
       setDeadlineTime("23:59");
       setUploadedFiles([]);
-
-      alert("Bounty created successfully and confirmed on Somnia Testnet!");
-      loadBountiesAndSubmissions(); // Reload bounties
     }
   }, [isConfirmed]);
 
@@ -439,7 +440,6 @@ export default function BountyManager() {
       });
 
       setNewSubmission({ bountyId: 0, ipfsCid: "" });
-      alert("Solution submitted successfully! Transaction pending...");
     } catch (error) {
       console.error("Error submitting solution:", error);
       alert("Error submitting solution: " + (error as any).message);
@@ -461,9 +461,6 @@ export default function BountyManager() {
         functionName: "selectWinners",
         args: [BigInt(bountyId), winners, subIds.map((id) => BigInt(id))],
       });
-
-      alert("Winners selected successfully!");
-      loadBountiesAndSubmissions();
     } catch (error) {
       console.error("Error selecting winners:", error);
       alert("Error selecting winners");
@@ -481,9 +478,6 @@ export default function BountyManager() {
         functionName: "triggerSlash",
         args: [BigInt(bountyId)],
       });
-
-      alert("Slash triggered successfully!");
-      loadBountiesAndSubmissions();
     } catch (error) {
       console.error("Error triggering slash:", error);
       alert("Error triggering slash");
@@ -501,9 +495,6 @@ export default function BountyManager() {
         functionName: "addReply",
         args: [BigInt(bountyId), BigInt(subId), content],
       });
-      alert(
-        "Reply submitted successfully! It will appear after the transaction is confirmed."
-      );
     } catch (error) {
       console.error("Error adding reply:", error);
       alert("Error adding reply");
@@ -525,9 +516,6 @@ export default function BountyManager() {
         functionName: "revealSolution",
         args: [BigInt(bountyId), BigInt(subId), revealCid],
       });
-      alert(
-        "Solution revealed successfully! It will appear after the transaction is confirmed."
-      );
     } catch (error) {
       console.error("Error revealing solution:", error);
       alert("Error revealing solution");
@@ -589,37 +577,38 @@ export default function BountyManager() {
 
       {/* Create Bounty Tab */}
       {activeTab === "create" && (
-        <div className="max-w-7xl mx-auto">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="w-6 h-6" />
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-white border border-gray-200 rounded-lg">
+            <div className="text-center p-8 border-b border-gray-200">
+              <div className="flex justify-center mb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
+                  <Target className="h-5 w-5 text-gray-600" />
+                </div>
+              </div>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
                 Create New Bounty
-              </CardTitle>
-              <p className="text-muted-foreground">
-                Create a detailed bounty with IPFS metadata and smart contract
-                escrow
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Create a detailed bounty with IPFS metadata and smart contract escrow
               </p>
-            </CardHeader>
+            </div>
 
-            <CardContent>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="p-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 {/* LEFT COLUMN - Basic Info & Details */}
-                <div className="space-y-6">
+                <div className="space-y-8">
                   {/* Basic Information */}
-                  <Card className="p-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
-                        <span className="text-xs font-semibold text-primary">
-                          1
-                        </span>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                        1
                       </div>
-                      <h4 className="font-semibold">Basic Information</h4>
+                      <h3 className="text-lg font-medium text-gray-900">Basic Information</h3>
                     </div>
 
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Title *</label>
+                        <label className="text-sm font-medium text-gray-700">Title *</label>
                         <Input
                           type="text"
                           value={newBounty.title}
@@ -630,11 +619,12 @@ export default function BountyManager() {
                             })
                           }
                           placeholder="e.g., Build a React Dashboard Component"
+                          className="border-gray-300 focus:border-gray-500 focus:ring-gray-500/20"
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">
+                        <label className="text-sm font-medium text-gray-700">
                           Bounty Type
                         </label>
                         <Select
@@ -646,7 +636,7 @@ export default function BountyManager() {
                             })
                           }
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="border-gray-300">
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                           <SelectContent>
@@ -662,7 +652,7 @@ export default function BountyManager() {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">
+                        <label className="text-sm font-medium text-gray-700">
                           Description *
                         </label>
                         <textarea
@@ -673,22 +663,21 @@ export default function BountyManager() {
                               description: e.target.value,
                             })
                           }
-                          className="w-full min-h-[80px] p-3 border border-input rounded-md bg-background resize-none text-sm"
+                          rows={3}
+                          className="w-full p-3 border border-gray-300 rounded-md bg-background resize-none text-sm focus:border-gray-500 focus:ring-gray-500/20"
                           placeholder="Detailed description of your bounty..."
                         />
                       </div>
                     </div>
-                  </Card>
+                  </div>
 
                   {/* Bounty Details */}
-                  <Card className="p-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
-                        <span className="text-xs font-semibold text-primary">
-                          2
-                        </span>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                        2
                       </div>
-                      <h4 className="font-semibold">Bounty Details</h4>
+                      <h3 className="text-lg font-medium text-gray-900">Bounty Details</h3>
                     </div>
 
                     <div className="space-y-4">
@@ -895,20 +884,18 @@ export default function BountyManager() {
                         )}
                       </div>
                     </div>
-                  </Card>
+                  </div>
                 </div>
 
                 {/* RIGHT COLUMN - Requirements, Media & Submit */}
-                <div className="space-y-6">
+                <div className="space-y-8">
                   {/* Requirements & Skills */}
-                  <Card className="p-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
-                        <span className="text-xs font-semibold text-primary">
-                          3
-                        </span>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                        3
                       </div>
-                      <h4 className="font-semibold">Requirements & Skills</h4>
+                      <h3 className="text-lg font-medium text-gray-900">Requirements & Skills</h3>
                     </div>
 
                     <div className="space-y-4">
@@ -1086,17 +1073,15 @@ export default function BountyManager() {
                         </div>
                       </div>
                     </div>
-                  </Card>
+                  </div>
 
                   {/* Media Upload */}
-                  <Card className="p-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
-                        <span className="text-xs font-semibold text-primary">
-                          4
-                        </span>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                        4
                       </div>
-                      <h4 className="font-semibold">Media & Assets</h4>
+                      <h3 className="text-lg font-medium text-gray-900">Media & Assets</h3>
                     </div>
 
                     <div className="space-y-3">
@@ -1164,58 +1149,19 @@ export default function BountyManager() {
                         </div>
                       )}
                     </div>
-                  </Card>
+                  </div>
 
                   {/* Submit Section */}
-                  <Card className="p-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
-                        <span className="text-xs font-semibold text-primary">
-                          5
-                        </span>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                        5
                       </div>
-                      <h4 className="font-semibold">Create Bounty</h4>
+                      <h3 className="text-lg font-medium text-gray-900">Create Bounty</h3>
                     </div>
 
-                    <div className="space-y-4">
-                      <Button
-                        onClick={createBounty}
-                        disabled={
-                          !newBounty.title ||
-                          !newBounty.description ||
-                          !newBounty.amount ||
-                          !deadlineDate ||
-                          isPending ||
-                          isConfirming ||
-                          isUploadingImages
-                        }
-                        className="w-full h-10 font-semibold"
-                      >
-                        {isUploadingImages ? (
-                          <>
-                            <Upload className="w-4 h-4 mr-2 animate-spin" />
-                            Uploading to IPFS...
-                          </>
-                        ) : isPending ? (
-                          <>
-                            <Clock className="w-4 h-4 mr-2 animate-spin" />
-                            Preparing Transaction...
-                          </>
-                        ) : isConfirming ? (
-                          <>
-                            <Clock className="w-4 h-4 mr-2 animate-spin" />
-                            Confirming...
-                          </>
-                        ) : (
-                          <>
-                            <Target className="w-4 h-4 mr-2" />
-                            Create Bounty
-                          </>
-                        )}
-                      </Button>
-
-                      {/* Transaction Status */}
-                      {hash && (
+                    {/* Transaction Status */}
+                    {hash && (
                         <div className="p-3 bg-blue-50/50 border border-blue-200 rounded-lg">
                           <div className="space-y-2">
                             <p className="text-xs font-medium">
@@ -1252,12 +1198,42 @@ export default function BountyManager() {
                           </p>
                         </div>
                       )}
-                    </div>
-                  </Card>
+
+                      <Button
+                        onClick={createBounty}
+                        disabled={
+                          isPending ||
+                          isConfirming ||
+                          !newBounty.title ||
+                          !newBounty.description ||
+                          !newBounty.amount ||
+                          !newBounty.deadline ||
+                          isUploadingImages
+                        }
+                        className="w-full"
+                      >
+                        {isUploadingImages ? (
+                          <>
+                            <Upload className="w-4 h-4 mr-2 animate-spin" />
+                            Uploading Images...
+                          </>
+                        ) : isPending || isConfirming ? (
+                          <>
+                            <Clock className="w-4 h-4 mr-2 animate-spin" />
+                            {isPending ? "Confirming..." : "Creating..."}
+                          </>
+                        ) : (
+                          <>
+                            <Target className="w-4 h-4 mr-2" />
+                            Create Bounty
+                          </>
+                        )}
+                      </Button>
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1311,7 +1287,7 @@ export default function BountyManager() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {bounties.map((bounty) => (
                 <BountyCard
                   key={bounty.id}

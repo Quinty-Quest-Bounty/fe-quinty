@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { wagmiConfig } from '../utils/web3';
+import { AlertProvider } from '../hooks/useAlert';
 
 const queryClient = new QueryClient();
 
@@ -13,7 +14,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider>
-          {children}
+          <AlertProvider>
+            {children}
+          </AlertProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

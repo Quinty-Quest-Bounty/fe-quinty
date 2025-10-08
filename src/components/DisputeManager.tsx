@@ -376,38 +376,36 @@ export default function DisputeManager() {
 
   if (!isConnected) {
     return (
-      <div className="container mx-auto p-6">
-        <Card className="max-w-md mx-auto">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-4">
-              <Scale className="h-8 w-8 text-primary" />
-            </div>
-            <CardTitle className="text-center mb-2">
-              Connect Your Wallet
-            </CardTitle>
-            <CardDescription className="text-center">
-              Please connect your wallet to participate in dispute resolution
-            </CardDescription>
-          </CardContent>
-        </Card>
-      </div>
+      <Card className="max-w-md mx-auto">
+        <CardContent className="flex flex-col items-center justify-center py-8">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-3">
+            <Scale className="h-6 w-6 text-primary" />
+          </div>
+          <CardTitle className="text-center mb-2">
+            Connect Your Wallet
+          </CardTitle>
+          <CardDescription className="text-center">
+            Please connect your wallet to participate in dispute resolution
+          </CardDescription>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="text-center space-y-4">
+      <div className="text-center space-y-2">
         <div className="flex justify-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-            <Scale className="h-8 w-8 text-primary" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+            <Scale className="h-6 w-6 text-primary" />
           </div>
         </div>
-        <div className="space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight">
             Dispute Resolution
           </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-muted-foreground">
             Participate in community voting to resolve bounty disputes and
             expiries. Help maintain fairness and justice in the ecosystem.
           </p>
@@ -416,22 +414,22 @@ export default function DisputeManager() {
 
       {/* Initiate Dispute Section */}
       <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl flex items-center justify-center gap-2">
-            <Gavel className="h-6 w-6" />
+        <CardHeader className="text-center p-4">
+          <CardTitle className="text-xl flex items-center justify-center gap-2">
+            <Gavel className="h-5 w-5" />
             Initiate Dispute
           </CardTitle>
-          <CardDescription className="text-lg">
+          <CardDescription>
             As a bounty creator, you can dispute a winner selection if you
             believe there was an issue
           </CardDescription>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="p-4">
           {eligibleBounties.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-muted mx-auto mb-4">
-                <FileText className="h-10 w-10 text-muted-foreground" />
+            <div className="text-center py-8">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted mx-auto mb-3">
+                <FileText className="h-6 w-6 text-muted-foreground" />
               </div>
               <CardTitle className="mb-2">
                 No Bounties Available for Dispute
@@ -465,7 +463,7 @@ export default function DisputeManager() {
                         isCreator ? "border-orange-200 bg-orange-50" : ""
                       }
                     >
-                      <CardContent className="p-6">
+                      <CardContent className="p-4">
                         <div className="flex justify-between items-start">
                           <div className="flex-1 space-y-3">
                             <div className="flex items-center gap-2">
@@ -543,10 +541,10 @@ export default function DisputeManager() {
       </Card>
 
       {/* Active Disputes Section */}
-      <div className="space-y-6">
-        <div className="text-center space-y-4">
-          <h2 className="text-2xl font-bold flex items-center justify-center gap-2">
-            <Vote className="h-6 w-6" />
+      <div className="space-y-4">
+        <div className="text-center space-y-2">
+          <h2 className="text-xl font-bold flex items-center justify-center gap-2">
+            <Vote className="h-5 w-5" />
             Active Disputes
           </h2>
           <Badge variant="secondary" className="px-4 py-2">
@@ -556,9 +554,9 @@ export default function DisputeManager() {
 
         {disputes.filter((d) => !d.resolved).length === 0 ? (
           <Card>
-            <CardContent className="flex flex-col items-center justify-center py-16">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10 mb-4">
-                <CheckCircle className="h-10 w-10 text-primary" />
+            <CardContent className="flex flex-col items-center justify-center py-8">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-3">
+                <CheckCircle className="h-6 w-6 text-primary" />
               </div>
               <CardTitle className="mb-2">No Active Disputes</CardTitle>
               <CardDescription className="text-center">
@@ -568,7 +566,7 @@ export default function DisputeManager() {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {disputes
               .filter((d) => !d.resolved)
               .map((dispute) => (
@@ -576,7 +574,7 @@ export default function DisputeManager() {
                   key={dispute.id}
                   className="bg-white rounded-xl shadow-lg border-2 border-gray-200 overflow-hidden"
                 >
-                  <div className="p-6">
+                  <div className="p-4">
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <h4 className="text-xl font-bold text-gray-900 mb-2">

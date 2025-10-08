@@ -430,8 +430,6 @@ export default function AirdropManager() {
       });
       setSelectedImage(null);
       setImagePreview(null);
-
-      alert("Airdrop created successfully!");
     } catch (error) {
       console.error("Error creating airdrop:", error);
       alert("Error creating airdrop");
@@ -459,9 +457,6 @@ export default function AirdropManager() {
         twitterUrl: "",
         description: "",
       });
-
-      alert("Entry submitted successfully!");
-      loadAirdrops();
     } catch (error) {
       console.error("Error submitting entry:", error);
       alert("Error submitting entry");
@@ -500,12 +495,6 @@ export default function AirdropManager() {
         feedback: "",
         qualifiedIndices: [],
       });
-
-      alert("Entry verified successfully!");
-      loadAirdrops();
-      if (selectedAirdrop) {
-        loadEntries(selectedAirdrop);
-      }
     } catch (error) {
       console.error("Error verifying entry:", error);
       alert("Error verifying entry");
@@ -638,8 +627,6 @@ export default function AirdropManager() {
 
       console.log("Verification transaction hash:", txHash);
 
-      alert("Entries verified successfully! Now finalizing airdrop...");
-
       // After verification, finalize the airdrop to distribute rewards
       const finalizeTxHash = await writeContractAsync({
         address: contractAddress as `0x${string}`,
@@ -659,7 +646,6 @@ export default function AirdropManager() {
         qualifiedIndices: [],
       });
 
-      alert("Rewards distributed successfully!");
       loadAirdrops();
       // Refresh entries for the airdrop
       loadEntries(targetAirdropId);
@@ -698,7 +684,6 @@ export default function AirdropManager() {
 
       console.log("Cancel airdrop transaction hash:", txHash);
 
-      alert("Airdrop cancelled successfully!");
       loadAirdrops();
     } catch (error) {
       console.error("Error cancelling airdrop:", error);
@@ -724,7 +709,6 @@ export default function AirdropManager() {
 
       console.log("Finalize airdrop transaction hash:", txHash);
 
-      alert("Airdrop finalized successfully!");
       loadAirdrops();
     } catch (error) {
       console.error("Error finalizing airdrop:", error);

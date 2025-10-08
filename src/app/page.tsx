@@ -1,12 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { useRouter } from "next/navigation";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
-import BountyManager from "../components/BountyManager";
-import DisputeManager from "../components/DisputeManager";
-import ReputationDisplay from "../components/ReputationDisplay";
-import AirdropManager from "../components/AirdropManager";
 import NetworkBanner from "../components/NetworkBanner";
 import {
   Card,
@@ -27,194 +24,134 @@ import {
   Code,
   Coins,
   Shield,
+  ArrowRight,
 } from "lucide-react";
 
 export default function Home() {
+  const router = useRouter();
   const { isConnected } = useAccount();
-  const [activeSection, setActiveSection] = useState<
-    "bounties" | "disputes" | "reputation" | "airdrops"
-  >("bounties");
 
   const navigationItems = [
-    { id: "bounties", label: "Bounties", icon: Target },
-    { id: "disputes", label: "Disputes", icon: Scale },
-    { id: "reputation", label: "Reputation", icon: Trophy },
-    { id: "airdrops", label: "Airdrops", icon: Gift },
+    { id: "bounties", label: "Bounties", icon: Target, path: "/bounties" },
+    { id: "disputes", label: "Disputes", icon: Scale, path: "/disputes" },
+    { id: "reputation", label: "Reputation", icon: Trophy, path: "/reputation" },
+    { id: "airdrops", label: "Airdrops", icon: Gift, path: "/airdrops" },
   ];
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center space-x-8">
-              <div className="flex items-center space-x-2">
-                {/* <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                  <Target className="h-5 w-5 text-primary-foreground" />
-                </div> */}
-                <h1 className="text-xl font-bold tracking-tight">Quinty </h1>
-              </div>
-
-              {/* Desktop Navigation */}
-              <nav className="hidden md:flex">
-                <div className="flex items-center space-x-1">
-                  {navigationItems.map((item) => (
-                    <Button
-                      key={item.id}
-                      variant={activeSection === item.id ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setActiveSection(item.id as any)}
-                      className="flex items-center space-x-2"
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.label}</span>
-                    </Button>
-                  ))}
-                </div>
-              </nav>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <ConnectButton />
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Mobile Navigation */}
-      <div className="md:hidden border-b bg-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-2 py-3 overflow-x-auto">
-            {navigationItems.map((item) => (
-              <Button
-                key={item.id}
-                variant={activeSection === item.id ? "default" : "outline"}
-                size="sm"
-                onClick={() => setActiveSection(item.id as any)}
-                className="flex-shrink-0 flex items-center space-x-2"
-              >
-                <item.icon className="h-4 w-4" />
-                <span>{item.label}</span>
-              </Button>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <main className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Network Banner */}
         {isConnected && <NetworkBanner />}
 
-        {!isConnected ? (
-          <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
-            <div className="max-w-4xl mx-auto text-center space-y-8">
-              {/* Hero Section */}
-              <div className="space-y-6">
-                <div className="flex justify-center">
-                  <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10">
-                    <Target className="h-10 w-10 text-primary" />
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-                    Welcome to Quinty
-                  </h1>
-                  <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                    Decentralized bounty platform with governance, reputation
-                    NFTs, and transparent dispute resolution.
-                  </p>
+        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            {/* Hero Section */}
+            <div className="space-y-6">
+              <div className="flex justify-center">
+                <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10">
+                  <Target className="h-10 w-10 text-primary" />
                 </div>
               </div>
+              <div className="space-y-4">
+                <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+                  Welcome to Quinty
+                </h1>
+                <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                  Decentralized bounty platform with governance, reputation
+                  NFTs, and transparent dispute resolution.
+                </p>
+              </div>
+            </div>
 
-              {/* Features Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
-                <Card className="text-left">
-                  <CardHeader>
+            {/* Features Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-16">
+              <Card className="text-left cursor-pointer hover:shadow-lg transition-shadow" onClick={() => router.push("/bounties")}>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
                         <Target className="h-5 w-5 text-blue-600" />
                       </div>
                       <CardTitle>Create Bounties</CardTitle>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>
-                      Post tasks with 100% STT escrow and transparent project
-                      completion.
-                    </CardDescription>
-                  </CardContent>
-                </Card>
+                    <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>
+                    Post tasks with 100% STT escrow and transparent project
+                    completion.
+                  </CardDescription>
+                </CardContent>
+              </Card>
 
-                <Card className="text-left">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      {/* Kiri */}
-                      <div className="flex items-center space-x-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
-                          <Scale className="h-5 w-5 text-green-600" />
-                        </div>
-                        <CardTitle>Disputes</CardTitle>
+              <Card className="text-left cursor-pointer hover:shadow-lg transition-shadow" onClick={() => router.push("/disputes")}>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
+                        <Scale className="h-5 w-5 text-green-600" />
                       </div>
-
-                      {/* Kanan */}
-                      <Badge variant="secondary">Soon</Badge>
+                      <CardTitle>Disputes</CardTitle>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>
-                      Community voting with staking mechanisms ensures fair
-                      resolution of conflicts and disputes.
-                    </CardDescription>
-                  </CardContent>
-                </Card>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">Soon</Badge>
+                      <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>
+                    Community voting with staking mechanisms ensures fair
+                    resolution of conflicts and disputes.
+                  </CardDescription>
+                </CardContent>
+              </Card>
 
-                <Card className="text-left">
-                  <CardHeader>
+              <Card className="text-left cursor-pointer hover:shadow-lg transition-shadow" onClick={() => router.push("/reputation")}>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-100">
                         <Trophy className="h-5 w-5 text-yellow-600" />
                       </div>
                       <CardTitle>NFT Reputation</CardTitle>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>
-                      Earn soulbound achievement badges that showcase your
-                      successful participation and contributions.
-                    </CardDescription>
-                  </CardContent>
-                </Card>
+                    <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>
+                    Earn soulbound achievement badges that showcase your
+                    successful participation and contributions.
+                  </CardDescription>
+                </CardContent>
+              </Card>
 
-                <Card className="text-left">
-                  <CardHeader>
+              <Card className="text-left cursor-pointer hover:shadow-lg transition-shadow" onClick={() => router.push("/airdrops")}>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
                         <Gift className="h-5 w-5 text-purple-600" />
                       </div>
                       <CardTitle>Airdrop Tasks</CardTitle>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>
-                      Participate in transparent promotion campaigns with
-                      verified rewards and community benefits.
-                    </CardDescription>
-                  </CardContent>
-                </Card>
-              </div>
+                    <ArrowRight className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>
+                    Participate in transparent promotion campaigns with
+                    verified rewards and community benefits.
+                  </CardDescription>
+                </CardContent>
+              </Card>
             </div>
           </div>
-        ) : (
-          <div className="space-y-6">
-            {/* Active Section Content */}
-            {activeSection === "bounties" && <BountyManager />}
-            {activeSection === "disputes" && <DisputeManager />}
-            {activeSection === "reputation" && <ReputationDisplay />}
-            {activeSection === "airdrops" && <AirdropManager />}
-          </div>
-        )}
+        </div>
       </main>
 
       {/* Footer */}
