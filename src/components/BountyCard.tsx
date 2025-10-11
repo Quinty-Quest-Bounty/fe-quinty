@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
-import { formatSTT, formatTimeLeft, formatAddress } from "../utils/web3";
+import { formatETH, formatTimeLeft, formatAddress } from "../utils/web3";
 import {
   fetchMetadataFromIpfs,
   BountyMetadata,
@@ -170,7 +170,7 @@ export default function BountyCard({
                 <div className="flex items-center gap-1.5">
                   <Trophy className="h-3.5 w-3.5 text-primary" />
                   <span className="text-lg font-bold text-primary">
-                    {formatSTT(bounty.amount)}
+                    {formatETH(bounty.amount)}
                   </span>
                   <span className="text-xs font-medium text-primary">STT</span>
                 </div>
@@ -261,7 +261,7 @@ export default function BountyCard({
           <div className="flex items-center gap-1.5">
             <Trophy className="h-3.5 w-3.5 text-primary" />
             <span className="text-base font-bold text-primary">
-              {formatSTT(bounty.amount)}
+              {formatETH(bounty.amount)}
             </span>
             <span className="text-xs font-medium text-primary">STT</span>
           </div>

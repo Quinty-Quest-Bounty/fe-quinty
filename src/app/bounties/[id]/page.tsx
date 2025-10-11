@@ -11,10 +11,10 @@ import { readContract } from "@wagmi/core";
 import {
   CONTRACT_ADDRESSES,
   QUINTY_ABI,
-  SOMNIA_TESTNET_ID,
+  BASE_SEPOLIA_CHAIN_ID,
 } from "../../../utils/contracts";
 import {
-  formatSTT,
+  formatETH,
   formatTimeLeft,
   formatAddress,
   wagmiConfig,
@@ -142,7 +142,7 @@ export default function BountyDetailPage() {
     try {
       setIsLoading(true);
       const bountyData = await readContract(wagmiConfig, {
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "getBountyData",
         args: [BigInt(bountyId)],
@@ -165,7 +165,7 @@ export default function BountyDetailPage() {
 
         // Get submissions
         const submissionCount = await readContract(wagmiConfig, {
-          address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
             .Quinty as `0x${string}`,
           abi: QUINTY_ABI,
           functionName: "getSubmissionCount",
@@ -175,7 +175,7 @@ export default function BountyDetailPage() {
         const submissions: Submission[] = [];
         for (let i = 0; i < Number(submissionCount); i++) {
           const submissionData = await readContract(wagmiConfig, {
-            address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
               .Quinty as `0x${string}`,
             abi: QUINTY_ABI,
             functionName: "getSubmissionStruct",
@@ -249,7 +249,7 @@ export default function BountyDetailPage() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "submitSolution",
         args: [BigInt(bountyId), submissionCid],
@@ -273,7 +273,7 @@ export default function BountyDetailPage() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "selectWinners",
         args: [
@@ -292,7 +292,7 @@ export default function BountyDetailPage() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "addReply",
         args: [BigInt(bountyId), BigInt(subId), replyContent[subId]],
@@ -308,7 +308,7 @@ export default function BountyDetailPage() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "revealSolution",
         args: [BigInt(bountyId), BigInt(subId), revealCid[subId]],
@@ -503,7 +503,7 @@ export default function BountyDetailPage() {
                     </span>
                   </div>
                   <p className="text-base font-bold text-primary">
-                    {formatSTT(bounty.amount)} STT
+                    {formatETH(bounty.amount)} ETH
                   </p>
                 </div>
 
@@ -651,11 +651,11 @@ export default function BountyDetailPage() {
                                   {winnerShare}%
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                  {formatSTT(
+                                  {formatETH(
                                     (bounty.amount * BigInt(winnerShare)) /
                                       BigInt(100)
                                   )}{" "}
-                                  STT
+                                  ETH
                                 </p>
                               </div>
                             </div>

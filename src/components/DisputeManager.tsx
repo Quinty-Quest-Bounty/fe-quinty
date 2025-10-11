@@ -6,16 +6,16 @@ import {
   CONTRACT_ADDRESSES,
   DISPUTE_ABI,
   QUINTY_ABI, // Import Quinty ABI to get submission details
-  SOMNIA_TESTNET_ID,
+  BASE_SEPOLIA_CHAIN_ID,
   MIN_VOTING_STAKE,
 } from "../utils/contracts";
 import { readContract } from "@wagmi/core";
 import {
-  formatSTT,
+  formatETH,
   formatTimeLeft,
   formatAddress,
   wagmiConfig,
-  parseSTT,
+  parseETH,
 } from "../utils/web3";
 import {
   Card,
@@ -114,7 +114,7 @@ export default function DisputeManager() {
 
   // Read dispute counter
   const { data: disputeCounter, refetch: refetchDisputes } = useReadContract({
-    address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
       .DisputeResolver as `0x${string}`,
     abi: DISPUTE_ABI,
     functionName: "disputeCounter",
@@ -122,7 +122,7 @@ export default function DisputeManager() {
 
   // Read bounty counter
   const { data: bountyCounter } = useReadContract({
-    address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].Quinty as `0x${string}`,
+    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
     abi: QUINTY_ABI,
     functionName: "bountyCounter",
   });
@@ -139,7 +139,7 @@ export default function DisputeManager() {
       try {
         console.log(`🔍 DEBUG: Loading bounty ${i}...`);
         const bountyData = await readContract(wagmiConfig, {
-          address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
             .Quinty as `0x${string}`,
           abi: QUINTY_ABI,
           functionName: "getBountyData",
@@ -213,7 +213,7 @@ export default function DisputeManager() {
 
     try {
       const submissionCount = await readContract(wagmiConfig, {
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "getSubmissionCount",
         args: [BigInt(bountyId)],
@@ -222,7 +222,7 @@ export default function DisputeManager() {
       const loadedSubmissions: Submission[] = [];
       for (let i = 0; i < Number(submissionCount); i++) {
         const subData = await readContract(wagmiConfig, {
-          address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
             .Quinty as `0x${string}`,
           abi: QUINTY_ABI,
           functionName: "getSubmission",
@@ -251,7 +251,7 @@ export default function DisputeManager() {
     for (let i = 1; i <= Number(disputeCounter); i++) {
       try {
         const disputeData = await readContract(wagmiConfig, {
-          address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
             .DisputeResolver as `0x${string}`,
           abi: DISPUTE_ABI,
           functionName: "getDispute",
@@ -299,12 +299,12 @@ export default function DisputeManager() {
 
     try {
       await writeContract({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
           .DisputeResolver as `0x${string}`,
         abi: DISPUTE_ABI,
         functionName: "vote",
         args: [BigInt(selectedDispute.id), rankings.map((r) => BigInt(r))],
-        value: parseSTT(voteForm.stakeAmount),
+        value: parseETH(voteForm.stakeAmount),
       });
 
       alert("Vote cast successfully!");
@@ -321,7 +321,7 @@ export default function DisputeManager() {
 
     try {
       await writeContract({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
           .DisputeResolver as `0x${string}`,
         abi: DISPUTE_ABI,
         functionName: "resolveDispute",
@@ -345,7 +345,7 @@ export default function DisputeManager() {
 
     try {
       await writeContract({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
           .DisputeResolver as `0x${string}`,
         abi: DISPUTE_ABI,
         functionName: "initiatePengadilanDispute",
@@ -490,7 +490,7 @@ export default function DisputeManager() {
                               <div className="flex items-center gap-1">
                                 <Coins className="h-4 w-4 text-green-600" />
                                 <span className="font-semibold text-green-600">
-                                  {formatSTT(bounty.amount)} STT
+                                  {formatETH(bounty.amount)} ETH
                                 </span>
                               </div>
 
@@ -514,7 +514,7 @@ export default function DisputeManager() {
                             <div className="text-sm text-muted-foreground">
                               Required Stake:{" "}
                               <span className="font-semibold">
-                                {formatSTT(requiredStake)} STT
+                                {formatETH(requiredStake)} ETH
                               </span>
                             </div>
                             <Button
@@ -597,7 +597,7 @@ export default function DisputeManager() {
                       </div>
                       <div className="text-right">
                         <div className="text-3xl font-bold text-green-600 mb-1">
-                          {formatSTT(dispute.amount)} STT
+                          {formatETH(dispute.amount)} ETH
                         </div>
                         <div className="text-sm text-gray-600">
                           ⏱️ Ends: {formatTimeLeft(BigInt(dispute.votingEnd))}
@@ -671,7 +671,7 @@ export default function DisputeManager() {
                             🗳️ Cast Your Vote
                           </h5>
                           <p className="text-sm text-blue-800 mb-4">
-                            💰 Minimum stake: {MIN_VOTING_STAKE} STT • Higher
+                            💰 Minimum stake: {MIN_VOTING_STAKE} ETH • Higher
                             stakes = more voting power
                           </p>
 
@@ -789,7 +789,7 @@ export default function DisputeManager() {
                                   influence
                                 </p>
                                 <p className="text-xs text-blue-600 mt-1">
-                                  Minimum: {MIN_VOTING_STAKE} STT
+                                  Minimum: {MIN_VOTING_STAKE} ETH
                                 </p>
                               </div>
                             </div>
@@ -805,7 +805,7 @@ export default function DisputeManager() {
                             }
                             className="flex-1 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 shadow-lg disabled:cursor-not-allowed"
                           >
-                            🗳️ Cast Vote ({voteForm.stakeAmount} STT)
+                            🗳️ Cast Vote ({voteForm.stakeAmount} ETH)
                           </button>
                           <button
                             onClick={() => setSelectedDispute(null)}

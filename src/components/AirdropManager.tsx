@@ -12,17 +12,17 @@ import { readContract } from "@wagmi/core";
 import {
   CONTRACT_ADDRESSES,
   AIRDROP_ABI,
-  SOMNIA_TESTNET_ID,
+  BASE_SEPOLIA_CHAIN_ID,
 } from "../utils/contracts";
 import {
-  formatSTT,
+  formatETH,
   formatTimeLeft,
   formatAddress,
   wagmiConfig,
-  parseSTT,
+  parseETH,
 } from "../utils/web3";
 import { uploadToIpfs, formatIpfsUrl, IpfsImage } from "../utils/ipfs";
-import { ensureSomniaNetwork } from "../utils/network";
+import { ensureBaseSepoliaNetwork } from "../utils/network";
 import AirdropCard from "./AirdropCard";
 import {
   Card,
@@ -102,6 +102,7 @@ export default function AirdropManager() {
   // State
   const [airdrops, setAirdrops] = useState<Airdrop[]>([]);
   const [entries, setEntries] = useState<{ [airdropId: number]: Entry[] }>({});
+  const [entryCounts, setEntryCounts] = useState<{ [airdropId: number]: number }>({});
   const [selectedAirdrop, setSelectedAirdrop] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"create" | "browse" | "manage">(
     "browse"
@@ -147,7 +148,7 @@ export default function AirdropManager() {
   // Read airdrop counter
   const { data: airdropCounter, refetch: refetchAirdropCounter } =
     useReadContract({
-      address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+      address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
         .AirdropBounty as `0x${string}`,
       abi: AIRDROP_ABI,
       functionName: "airdropCounter",
@@ -155,7 +156,7 @@ export default function AirdropManager() {
 
   // Watch for airdrop events
   useWatchContractEvent({
-    address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
       .AirdropBounty as `0x${string}`,
     abi: AIRDROP_ABI,
     eventName: "AirdropCreated",
@@ -165,7 +166,7 @@ export default function AirdropManager() {
   });
 
   useWatchContractEvent({
-    address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
       .AirdropBounty as `0x${string}`,
     abi: AIRDROP_ABI,
     eventName: "EntrySubmitted",
@@ -181,24 +182,37 @@ export default function AirdropManager() {
     if (airdropCounter === undefined) return;
 
     const loadedAirdrops: Airdrop[] = [];
+    const counts: { [airdropId: number]: number } = {};
+
     for (let i = 1; i <= Number(airdropCounter); i++) {
       try {
         const airdrop = await readAirdrop(i);
         if (airdrop) {
           loadedAirdrops.push(airdrop);
+
+          // Load entry count for this airdrop
+          const entryCount = await readContract(wagmiConfig, {
+            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+              .AirdropBounty as `0x${string}`,
+            abi: AIRDROP_ABI,
+            functionName: "getEntryCount",
+            args: [BigInt(i)],
+          });
+          counts[i] = Number(entryCount);
         }
       } catch (error) {
         console.error(`Error loading airdrop ${i}:`, error);
       }
     }
     setAirdrops(loadedAirdrops.reverse());
+    setEntryCounts(counts);
   };
 
   // Read specific airdrop
   const readAirdrop = async (airdropId: number): Promise<Airdrop | null> => {
     try {
       const airdropData = await readContract(wagmiConfig, {
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
           .AirdropBounty as `0x${string}`,
         abi: AIRDROP_ABI,
         functionName: "getAirdrop",
@@ -250,7 +264,7 @@ export default function AirdropManager() {
   const loadEntries = async (airdropId: number) => {
     try {
       const entryCount = await readContract(wagmiConfig, {
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
           .AirdropBounty as `0x${string}`,
         abi: AIRDROP_ABI,
         functionName: "getEntryCount",
@@ -260,7 +274,7 @@ export default function AirdropManager() {
       const loadedEntries: Entry[] = [];
       for (let i = 0; i < Number(entryCount); i++) {
         const entryData = await readContract(wagmiConfig, {
-          address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
             .AirdropBounty as `0x${string}`,
           abi: AIRDROP_ABI,
           functionName: "getEntry",
@@ -359,11 +373,11 @@ export default function AirdropManager() {
     )
       return;
 
-    // Check if user is on Somnia Testnet using wagmi's reliable chainId
-    if (chainId !== SOMNIA_TESTNET_ID) {
-      const networkOk = await ensureSomniaNetwork();
+    // Check if user is on Base Sepolia using wagmi's reliable chainId
+    if (chainId !== BASE_SEPOLIA_CHAIN_ID) {
+      const networkOk = await ensureBaseSepoliaNetwork();
       if (!networkOk) {
-        alert("Please connect to Somnia Testnet to create airdrops");
+        alert("Please connect to Base Sepolia to create airdrops");
         return;
       }
     }
@@ -392,7 +406,7 @@ export default function AirdropManager() {
       const deadlineTimestamp = Math.floor(
         new Date(newAirdrop.deadline).getTime() / 1000
       );
-      const perQualifierWei = parseSTT(newAirdrop.perQualifier);
+      const perQualifierWei = parseETH(newAirdrop.perQualifier);
       const totalAmount = perQualifierWei * BigInt(newAirdrop.maxQualifiers);
 
       // Include image URL in description if available
@@ -401,7 +415,7 @@ export default function AirdropManager() {
         : newAirdrop.description || "";
 
       const txHash = await writeContractAsync({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
           .AirdropBounty as `0x${string}`,
         abi: AIRDROP_ABI,
         functionName: "createAirdrop",
@@ -442,7 +456,7 @@ export default function AirdropManager() {
 
     try {
       const txHash = await writeContractAsync({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
           .AirdropBounty as `0x${string}`,
         abi: AIRDROP_ABI,
         functionName: "submitEntry",
@@ -474,7 +488,7 @@ export default function AirdropManager() {
 
     try {
       const txHash = await writeContractAsync({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
           .AirdropBounty as `0x${string}`,
         abi: AIRDROP_ABI,
         functionName: "verifyEntry",
@@ -533,7 +547,7 @@ export default function AirdropManager() {
 
     // Check contract address
     const contractAddress =
-      CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]?.AirdropBounty;
+      CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]?.AirdropBounty;
     if (!contractAddress) {
       alert(
         "Contract address not found. Please check your network configuration."
@@ -615,7 +629,7 @@ export default function AirdropManager() {
         feedbacks,
         entriesCount: airdropEntries.length,
         contractAddress: contractAddress,
-        network: SOMNIA_TESTNET_ID,
+        network: BASE_SEPOLIA_CHAIN_ID,
       });
 
       const txHash = await writeContractAsync({
@@ -675,7 +689,7 @@ export default function AirdropManager() {
     setIsCancelling(true);
     try {
       const txHash = await writeContractAsync({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
           .AirdropBounty as `0x${string}`,
         abi: AIRDROP_ABI,
         functionName: "cancelAirdrop",
@@ -700,7 +714,7 @@ export default function AirdropManager() {
     setIsFinalizing(true);
     try {
       const txHash = await writeContractAsync({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
           .AirdropBounty as `0x${string}`,
         abi: AIRDROP_ABI,
         functionName: "finalizeAirdrop",
@@ -824,7 +838,7 @@ export default function AirdropManager() {
                 Create Promotion Campaign
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Launch transparent promotional campaigns with fixed STT rewards for verified social media engagement
+                Launch transparent promotional campaigns with fixed ETH rewards for verified social media engagement
               </p>
             </div>
 
@@ -1055,7 +1069,7 @@ export default function AirdropManager() {
                               {(
                                 parseFloat(newAirdrop.perQualifier) *
                                 newAirdrop.maxQualifiers
-                              ).toFixed(2)} STT
+                              ).toFixed(2)} ETH
                             </div>
                           </div>
 
@@ -1064,7 +1078,7 @@ export default function AirdropManager() {
                               Per User
                             </div>
                             <div className="text-lg font-semibold text-gray-900">
-                              {newAirdrop.perQualifier} STT
+                              {newAirdrop.perQualifier} ETH
                             </div>
                           </div>
 
@@ -1120,7 +1134,7 @@ export default function AirdropManager() {
                               {(
                                 parseFloat(newAirdrop.perQualifier) *
                                 newAirdrop.maxQualifiers
-                              ).toFixed(2)} STT)
+                              ).toFixed(2)} ETH)
                             </span>
                           )}
                         </>
@@ -1174,6 +1188,7 @@ export default function AirdropManager() {
                   <AirdropCard
                     key={airdrop.id}
                     airdrop={airdrop}
+                    entryCount={entryCounts[airdrop.id] || 0}
                     onShowSubmitModal={() => {
                       setModalAirdropId(airdrop.id);
                       setShowSubmitModal(true);
@@ -1337,7 +1352,25 @@ export default function AirdropManager() {
                         </div>
                         <div className="text-sm text-gray-700">
                           <div className="mb-1">
-                            <strong>IPFS:</strong> {entry.ipfsProofCid}
+                            <strong>
+                              {entry.ipfsProofCid.includes("twitter.com") ||
+                              entry.ipfsProofCid.includes("x.com")
+                                ? "Twitter/X Post:"
+                                : "IPFS:"}
+                            </strong>{" "}
+                            {entry.ipfsProofCid.includes("twitter.com") ||
+                            entry.ipfsProofCid.includes("x.com") ? (
+                              <a
+                                href={entry.ipfsProofCid}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800 underline inline-flex items-center gap-1"
+                              >
+                                View Post <ExternalLink className="w-3 h-3" />
+                              </a>
+                            ) : (
+                              entry.ipfsProofCid
+                            )}
                           </div>
                           <div className="mb-1">
                             <strong>Submitted:</strong>{" "}
@@ -1442,7 +1475,7 @@ export default function AirdropManager() {
                               <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
                                 <div className="text-xs font-medium text-gray-500 mb-1">Reward</div>
                                 <div className="text-sm font-medium text-gray-900">
-                                  {formatSTT(airdrop.perQualifier)} STT each
+                                  {formatETH(airdrop.perQualifier)} ETH each
                                 </div>
                               </div>
                               <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
@@ -1472,16 +1505,18 @@ export default function AirdropManager() {
                                 {isFinalizing ? "Finalizing..." : "Finalize"}
                               </Button>
                             )}
-                            <Button
-                              onClick={() => cancelAirdrop(airdrop.id)}
-                              disabled={isCancelling}
-                              variant="outline"
-                              size="sm"
-                              className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                            >
-                              <X className="w-3 h-3 mr-1" />
-                              {isCancelling ? "Cancelling..." : "Cancel"}
-                            </Button>
+                            {!airdrop.resolved && !airdrop.cancelled && airdrop.qualifiersCount === 0 && (
+                              <Button
+                                onClick={() => cancelAirdrop(airdrop.id)}
+                                disabled={isCancelling}
+                                variant="outline"
+                                size="sm"
+                                className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                              >
+                                <X className="w-3 h-3 mr-1" />
+                                {isCancelling ? "Cancelling..." : "Cancel"}
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1563,8 +1598,26 @@ export default function AirdropManager() {
                                         </div>
                                         <div className="text-sm text-gray-600 space-y-1">
                                           <div className="flex items-center gap-2">
-                                            <FileText className="w-3 h-3 text-gray-400" />
-                                            <span>IPFS: {entry.ipfsProofCid}</span>
+                                            {entry.ipfsProofCid.includes("twitter.com") ||
+                                            entry.ipfsProofCid.includes("x.com") ? (
+                                              <>
+                                                <ExternalLink className="w-3 h-3 text-gray-400" />
+                                                <span>Twitter/X Post: </span>
+                                                <a
+                                                  href={entry.ipfsProofCid}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="text-blue-600 hover:text-blue-800 underline"
+                                                >
+                                                  View Post
+                                                </a>
+                                              </>
+                                            ) : (
+                                              <>
+                                                <FileText className="w-3 h-3 text-gray-400" />
+                                                <span>IPFS: {entry.ipfsProofCid}</span>
+                                              </>
+                                            )}
                                           </div>
                                           <div className="flex items-center gap-2">
                                             <Clock className="w-3 h-3 text-gray-400" />
@@ -1630,10 +1683,10 @@ export default function AirdropManager() {
                                     </h5>
                                     <p className="text-sm text-gray-600">
                                       {verificationForm.qualifiedIndices.length} participants selected •{" "}
-                                      {formatSTT(
+                                      {formatETH(
                                         airdrop.perQualifier * BigInt(verificationForm.qualifiedIndices.length)
                                       )}{" "}
-                                      STT total
+                                      ETH total
                                     </p>
                                   </div>
                                   <Button

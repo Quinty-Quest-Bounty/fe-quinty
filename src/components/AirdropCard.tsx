@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { formatSTT, formatTimeLeft, formatAddress } from "../utils/web3";
+import { formatETH, formatTimeLeft, formatAddress } from "../utils/web3";
 import { IpfsImage } from "../utils/ipfs";
 import {
   Card,
@@ -37,12 +37,14 @@ interface Airdrop {
 
 interface AirdropCardProps {
   airdrop: Airdrop;
+  entryCount?: number;
   onShowSubmitModal?: () => void;
   viewMode?: "grid" | "list";
 }
 
 export default function AirdropCard({
   airdrop,
+  entryCount = 0,
   onShowSubmitModal,
   viewMode = "grid",
 }: AirdropCardProps) {
@@ -107,7 +109,7 @@ export default function AirdropCard({
                 <div className="flex items-center gap-1.5">
                   <Coins className="h-3.5 w-3.5 text-green-600" />
                   <span className="text-lg font-bold text-green-600">
-                    {formatSTT(airdrop.perQualifier)}
+                    {formatETH(airdrop.perQualifier)}
                   </span>
                   <span className="text-xs font-medium text-green-600">STT</span>
                 </div>
@@ -116,7 +118,9 @@ export default function AirdropCard({
 
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Users className="h-3 w-3" />
-                  <span className="font-medium">{airdrop.qualifiersCount}/{airdrop.maxQualifiers}</span>
+                  <span className="font-medium">
+                    {entryCount > 0 ? `${entryCount} entries` : `${airdrop.qualifiersCount}/${airdrop.maxQualifiers}`}
+                  </span>
                 </div>
 
                 <Separator orientation="vertical" className="h-6" />
@@ -183,7 +187,9 @@ export default function AirdropCard({
         <div className="flex items-center justify-between text-xs">
           <div className="flex items-center gap-1 text-muted-foreground">
             <Users className="h-3 w-3" />
-            <span>{airdrop.qualifiersCount}/{airdrop.maxQualifiers}</span>
+            <span>
+              {entryCount > 0 ? `${entryCount} entries` : `${airdrop.qualifiersCount}/${airdrop.maxQualifiers}`}
+            </span>
           </div>
           <Progress value={progress} className="h-1 w-16" />
           <div className="flex items-center gap-1 text-muted-foreground">
@@ -199,7 +205,7 @@ export default function AirdropCard({
           <div className="flex items-center gap-1.5">
             <Coins className="h-3.5 w-3.5 text-green-600" />
             <span className="text-base font-bold text-green-600">
-              {formatSTT(airdrop.perQualifier)}
+              {formatETH(airdrop.perQualifier)}
             </span>
             <span className="text-xs font-medium text-green-600">STT</span>
           </div>

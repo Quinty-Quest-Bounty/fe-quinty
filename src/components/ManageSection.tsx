@@ -12,7 +12,7 @@ interface ManageSectionProps {
   verifyEntry: () => void;
   finalizeAirdrop: (id: number) => void;
   cancelAirdrop: (id: number) => void;
-  formatSTT: (value: bigint) => string;
+  formatETH: (value: bigint) => string;
   formatTimeLeft: (timestamp: number) => string;
   setActiveTab: (tab: string) => void;
 }
@@ -29,7 +29,7 @@ export const ManageSection: React.FC<ManageSectionProps> = ({
   verifyEntry,
   finalizeAirdrop,
   cancelAirdrop,
-  formatSTT,
+  formatETH,
   formatTimeLeft,
   setActiveTab,
 }) => {
@@ -123,11 +123,11 @@ export const ManageSection: React.FC<ManageSectionProps> = ({
                         </div>
                         <div>
                           <span className="text-gray-500">Reward:</span>
-                          <div className="font-medium">{formatSTT(airdrop.perQualifier)} STT</div>
+                          <div className="font-medium">{formatETH(airdrop.perQualifier)} ETH</div>
                         </div>
                         <div>
                           <span className="text-gray-500">Total Budget:</span>
-                          <div className="font-medium">{formatSTT(airdrop.totalAmount)} STT</div>
+                          <div className="font-medium">{formatETH(airdrop.totalAmount)} ETH</div>
                         </div>
                         <div>
                           <span className="text-gray-500">Deadline:</span>
@@ -269,9 +269,9 @@ export const ManageSection: React.FC<ManageSectionProps> = ({
                 <div>
                   <h6 className="font-medium mb-2">Financial Summary</h6>
                   <div className="space-y-2 text-sm">
-                    <div>Total Escrowed: <span className="font-medium">{formatSTT(selectedAirdropForManage.totalAmount)} STT</span></div>
-                    <div>Will Distribute: <span className="font-medium">{formatSTT(selectedAirdropForManage.perQualifier * BigInt(selectedAirdropForManage.qualifiersCount))} STT</span></div>
-                    <div>Your Refund: <span className="font-medium text-green-600">{formatSTT(selectedAirdropForManage.totalAmount - (selectedAirdropForManage.perQualifier * BigInt(selectedAirdropForManage.qualifiersCount)))} STT</span></div>
+                    <div>Total Escrowed: <span className="font-medium">{formatETH(selectedAirdropForManage.totalAmount)} ETH</span></div>
+                    <div>Will Distribute: <span className="font-medium">{formatETH(selectedAirdropForManage.perQualifier * BigInt(selectedAirdropForManage.qualifiersCount))} ETH</span></div>
+                    <div>Your Refund: <span className="font-medium text-green-600">{formatETH(selectedAirdropForManage.totalAmount - (selectedAirdropForManage.perQualifier * BigInt(selectedAirdropForManage.qualifiersCount)))} ETH</span></div>
                   </div>
                 </div>
               </div>
@@ -307,7 +307,7 @@ export const ManageSection: React.FC<ManageSectionProps> = ({
                 <h6 className="font-medium mb-2">Campaign Details</h6>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>Approved Entries: <span className="font-medium">{selectedAirdropForManage.qualifiersCount}</span></div>
-                  <div>Total Escrowed: <span className="font-medium">{formatSTT(selectedAirdropForManage.totalAmount)} STT</span></div>
+                  <div>Total Escrowed: <span className="font-medium">{formatETH(selectedAirdropForManage.totalAmount)} ETH</span></div>
                 </div>
               </div>
 

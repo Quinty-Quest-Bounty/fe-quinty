@@ -6,7 +6,7 @@ import { Space_Grotesk } from "next/font/google";
 export const metadata = {
   title: "Quinty  - Decentralized Bounty System",
   description:
-    "A transparent bounty platform with  governance, reputation NFTs, and dispute resolution on Somnia Testnet",
+    "A transparent bounty platform with  governance, reputation NFTs, and dispute resolution on Base Sepolia",
 };
 
 const spaceGrotesk = Space_Grotesk({

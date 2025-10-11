@@ -5,7 +5,7 @@ import { useAccount, useReadContract, useWatchContractEvent } from "wagmi";
 import {
   CONTRACT_ADDRESSES,
   REPUTATION_ABI,
-  SOMNIA_TESTNET_ID,
+  BASE_SEPOLIA_CHAIN_ID,
 } from "../utils/contracts";
 import { readContract } from "@wagmi/core";
 import { formatAddress, wagmiConfig } from "../utils/web3";
@@ -107,7 +107,7 @@ export default function ReputationDisplay() {
 
   // Read user stats
   const { data: userStats, refetch: refetchStats } = useReadContract({
-    address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
       .QuintyReputation as `0x${string}`,
     abi: REPUTATION_ABI,
     functionName: "getUserStats",
@@ -118,7 +118,7 @@ export default function ReputationDisplay() {
   // Read user achievements
   const { data: userAchievements, refetch: refetchAchievements } =
     useReadContract({
-      address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+      address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
         .QuintyReputation as `0x${string}`,
       abi: REPUTATION_ABI,
       functionName: "getUserAchievements",
@@ -128,7 +128,7 @@ export default function ReputationDisplay() {
 
   // Read user's NFT balance
   const { data: nftBalance } = useReadContract({
-    address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
       .QuintyReputation as `0x${string}`,
     abi: REPUTATION_ABI,
     functionName: "balanceOf",
@@ -138,7 +138,7 @@ export default function ReputationDisplay() {
 
   // Watch for achievement updates
   useWatchContractEvent({
-    address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
       .QuintyReputation as `0x${string}`,
     abi: REPUTATION_ABI,
     eventName: "AchievementUnlocked",
@@ -187,14 +187,14 @@ export default function ReputationDisplay() {
     try {
       const [statsData, achievementsData] = await Promise.all([
         readContract(wagmiConfig, {
-          address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
             .QuintyReputation as `0x${string}`,
           abi: REPUTATION_ABI,
           functionName: "getUserStats",
           args: [searchAddress as `0x${string}`],
         }),
         readContract(wagmiConfig, {
-          address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
             .QuintyReputation as `0x${string}`,
           abi: REPUTATION_ABI,
           functionName: "getUserAchievements",
@@ -551,7 +551,7 @@ export default function ReputationDisplay() {
                         Contract:{" "}
                         <code className="bg-muted px-1 py-0.5 rounded text-xs font-mono">
                           {
-                            CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+                            CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
                               .QuintyReputation
                           }
                         </code>

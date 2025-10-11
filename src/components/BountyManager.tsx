@@ -12,9 +12,9 @@ import { readContract } from "@wagmi/core";
 import {
   CONTRACT_ADDRESSES,
   QUINTY_ABI,
-  SOMNIA_TESTNET_ID,
+  BASE_SEPOLIA_CHAIN_ID,
 } from "../utils/contracts";
-import { parseSTT, wagmiConfig } from "../utils/web3";
+import { parseETH, wagmiConfig } from "../utils/web3";
 import BountyCard from "./BountyCard";
 import {
   uploadMetadataToIpfs,
@@ -114,6 +114,8 @@ export default function BountyManager() {
     deliverables: [""],
     skills: [""],
     images: [] as string[], // IPFS CIDs for uploaded images
+    hasOprec: false,
+    oprecDeadline: "",
   });
 
   // Date and time state for the calendar
@@ -144,14 +146,14 @@ export default function BountyManager() {
 
   // Read bounty counter
   const { data: bountyCounter } = useReadContract({
-    address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].Quinty as `0x${string}`,
+    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
     abi: QUINTY_ABI,
     functionName: "bountyCounter",
   });
 
   // Watch for bounty events
   useWatchContractEvent({
-    address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].Quinty as `0x${string}`,
+    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
     abi: QUINTY_ABI,
     eventName: "BountyCreated",
     onLogs() {
@@ -160,7 +162,7 @@ export default function BountyManager() {
   });
 
   useWatchContractEvent({
-    address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].Quinty as `0x${string}`,
+    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
     abi: QUINTY_ABI,
     eventName: "SubmissionCreated",
     onLogs(logs) {
@@ -225,7 +227,7 @@ export default function BountyManager() {
       try {
         // 1. Get all bounty metadata using the new robust function
         const bountyData = await readContract(wagmiConfig, {
-          address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
             .Quinty as `0x${string}`,
           abi: QUINTY_ABI,
           functionName: "getBountyData",
@@ -249,7 +251,7 @@ export default function BountyManager() {
 
           // 2. Get submissions separately
           const submissionCount = await readContract(wagmiConfig, {
-            address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
               .Quinty as `0x${string}`,
             abi: QUINTY_ABI,
             functionName: "getSubmissionCount",
@@ -259,7 +261,7 @@ export default function BountyManager() {
           const submissions: Submission[] = [];
           for (let i = 0; i < Number(submissionCount); i++) {
             const submissionData = await readContract(wagmiConfig, {
-              address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID]
+              address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
                 .Quinty as `0x${string}`,
               abi: QUINTY_ABI,
               functionName: "getSubmissionStruct",
@@ -350,8 +352,13 @@ export default function BountyManager() {
         : [];
 
       console.log("Creating bounty on blockchain...");
+      // Calculate oprec deadline timestamp if enabled
+      const oprecDeadlineTimestamp = newBounty.hasOprec && newBounty.oprecDeadline
+        ? Math.floor(new Date(newBounty.oprecDeadline).getTime() / 1000)
+        : 0;
+
       writeContract({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "createBounty",
         args: [
@@ -360,8 +367,10 @@ export default function BountyManager() {
           newBounty.allowMultipleWinners,
           winnerSharesArg,
           BigInt(slashPercent),
+          newBounty.hasOprec,
+          BigInt(oprecDeadlineTimestamp),
         ],
-        value: parseSTT(newBounty.amount),
+        value: parseETH(newBounty.amount),
       });
 
       // Reset form
@@ -378,6 +387,8 @@ export default function BountyManager() {
         deliverables: [""],
         skills: [""],
         images: [],
+        hasOprec: false,
+        oprecDeadline: "",
       });
       setDeadlineDate(undefined);
       setDeadlineTime("23:59");
@@ -409,6 +420,8 @@ export default function BountyManager() {
         deliverables: [""],
         skills: [""],
         images: [],
+        hasOprec: false,
+        oprecDeadline: "",
       });
       setDeadlineDate(undefined);
       setDeadlineTime("23:59");
@@ -432,7 +445,7 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "submitSolution",
         args: [BigInt(targetBountyId), targetIpfsCid],
@@ -456,7 +469,7 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "selectWinners",
         args: [BigInt(bountyId), winners, subIds.map((id) => BigInt(id))],
@@ -473,7 +486,7 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "triggerSlash",
         args: [BigInt(bountyId)],
@@ -490,7 +503,7 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "addReply",
         args: [BigInt(bountyId), BigInt(subId), content],
@@ -511,7 +524,7 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "revealSolution",
         args: [BigInt(bountyId), BigInt(subId), revealCid],
@@ -549,7 +562,7 @@ export default function BountyManager() {
         </div>
         <h1 className="text-4xl font-bold tracking-tight">Quinty Bounty</h1>
         <p className="text-muted-foreground text-lg">
-          Post tasks with 100% STT escrow and blinded submissions for secure,
+          Post tasks with 100% ETH escrow and blinded submissions for secure,
           transparent project completion.
         </p>
       </div>

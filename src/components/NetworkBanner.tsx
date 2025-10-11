@@ -1,38 +1,38 @@
 "use client";
 
 import { useChainId } from "wagmi";
-import { SOMNIA_TESTNET_ID } from "../utils/contracts";
-import { ensureSomniaNetwork } from "../utils/network";
+import { BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
+import { ensureBaseSepoliaNetwork } from "../utils/network";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 
 export default function NetworkBanner() {
   const chainId = useChainId();
-  const isOnSomnia = chainId === SOMNIA_TESTNET_ID;
+  const isOnBaseSepolia = chainId === BASE_SEPOLIA_CHAIN_ID;
 
   const handleSwitchNetwork = async () => {
-    const success = await ensureSomniaNetwork();
+    const success = await ensureBaseSepoliaNetwork();
     if (success) {
       // Force page refresh to update chain state
       window.location.reload();
     }
   };
 
-  if (isOnSomnia) {
+  if (isOnBaseSepolia) {
     return (
       <Alert variant="success" className="py-2">
         {/* <CheckCircle className="h-3 w-3 mt-0.5" /> */}
         <AlertDescription className="flex items-center justify-between min-h-[20px]">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium leading-5">
-              Somnia Testnet
+              Base Sepolia
             </span>
             <Badge
               variant="outline"
               className="text-xs h-5 px-2 flex items-center bg-green-100 text-green-700 border-green-300"
             >
-              STT
+              ETH
             </Badge>
           </div>
           <span className="text-xs text-green-600 leading-5">
@@ -61,7 +61,7 @@ export default function NetworkBanner() {
           size="sm"
           className="h-6 px-2 text-xs flex items-center"
         >
-          Switch
+          Switch to Base Sepolia
         </Button>
       </AlertDescription>
     </Alert>

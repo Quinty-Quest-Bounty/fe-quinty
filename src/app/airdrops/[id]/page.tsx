@@ -11,9 +11,9 @@ import { readContract } from "@wagmi/core";
 import {
   CONTRACT_ADDRESSES,
   AIRDROP_ABI,
-  SOMNIA_TESTNET_ID,
+  BASE_SEPOLIA_CHAIN_ID,
 } from "../../../utils/contracts";
-import { formatSTT, formatTimeLeft, formatAddress, wagmiConfig } from "../../../utils/web3";
+import { formatETH, formatTimeLeft, formatAddress, wagmiConfig } from "../../../utils/web3";
 import { IpfsImage } from "../../../utils/ipfs";
 import { useAlert } from "../../../hooks/useAlert";
 import TetrisLoading from "../../../components/ui/tetris-loader";
@@ -99,7 +99,7 @@ export default function AirdropDetailPage() {
     try {
       setIsLoading(true);
       const airdropData = await readContract(wagmiConfig, {
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].AirdropBounty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
         abi: AIRDROP_ABI,
         functionName: "getAirdrop",
         args: [BigInt(airdropId)],
@@ -142,7 +142,7 @@ export default function AirdropDetailPage() {
 
         // Load entries
         const entryCount = await readContract(wagmiConfig, {
-          address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].AirdropBounty as `0x${string}`,
+          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
           abi: AIRDROP_ABI,
           functionName: "getEntryCount",
           args: [BigInt(airdropId)],
@@ -151,7 +151,7 @@ export default function AirdropDetailPage() {
         const loadedEntries: Entry[] = [];
         for (let i = 0; i < Number(entryCount); i++) {
           const entryData = await readContract(wagmiConfig, {
-            address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].AirdropBounty as `0x${string}`,
+            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
             abi: AIRDROP_ABI,
             functionName: "getEntry",
             args: [BigInt(airdropId), BigInt(i)],
@@ -199,7 +199,7 @@ export default function AirdropDetailPage() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[SOMNIA_TESTNET_ID].AirdropBounty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
         abi: AIRDROP_ABI,
         functionName: "submitEntry",
         args: [BigInt(airdropId), newEntry.ipfsProofCid],
@@ -372,7 +372,7 @@ export default function AirdropDetailPage() {
                     <span className="text-xs font-medium text-muted-foreground">Reward Per User</span>
                   </div>
                   <p className="text-base font-bold text-green-600">
-                    {formatSTT(airdrop.perQualifier)} STT
+                    {formatETH(airdrop.perQualifier)} ETH
                   </p>
                 </div>
 
@@ -403,7 +403,7 @@ export default function AirdropDetailPage() {
                     <span className="text-xs font-medium text-muted-foreground">Total Budget</span>
                   </div>
                   <p className="text-sm font-semibold">
-                    {formatSTT(airdrop.totalAmount)} STT
+                    {formatETH(airdrop.totalAmount)} ETH
                   </p>
                 </div>
               </div>
@@ -464,8 +464,26 @@ export default function AirdropDetailPage() {
                       <CardContent className="pt-0">
                         <div className="space-y-2">
                           <div className="flex items-center gap-1.5">
-                            <FileText className="w-3 h-3 text-muted-foreground" />
-                            <span className="text-xs">IPFS: {userEntry.ipfsProofCid}</span>
+                            {userEntry.ipfsProofCid.includes("twitter.com") ||
+                            userEntry.ipfsProofCid.includes("x.com") ? (
+                              <>
+                                <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                                <span className="text-xs">Twitter/X Post: </span>
+                                <a
+                                  href={userEntry.ipfsProofCid}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs text-blue-600 hover:text-blue-800 underline"
+                                >
+                                  View Post
+                                </a>
+                              </>
+                            ) : (
+                              <>
+                                <FileText className="w-3 h-3 text-muted-foreground" />
+                                <span className="text-xs">IPFS: {userEntry.ipfsProofCid}</span>
+                              </>
+                            )}
                           </div>
                           {userEntry.feedback && (
                             <div className="mt-2 p-2 bg-white rounded-lg">
@@ -604,8 +622,26 @@ export default function AirdropDetailPage() {
                               </div>
                               <div className="text-xs text-muted-foreground space-y-0.5">
                                 <div className="flex items-center gap-1.5">
-                                  <FileText className="w-3 h-3" />
-                                  <span>IPFS: {entry.ipfsProofCid}</span>
+                                  {entry.ipfsProofCid.includes("twitter.com") ||
+                                  entry.ipfsProofCid.includes("x.com") ? (
+                                    <>
+                                      <ExternalLink className="w-3 h-3" />
+                                      <span>Twitter/X Post: </span>
+                                      <a
+                                        href={entry.ipfsProofCid}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 hover:text-blue-800 underline"
+                                      >
+                                        View Post
+                                      </a>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <FileText className="w-3 h-3" />
+                                      <span>IPFS: {entry.ipfsProofCid}</span>
+                                    </>
+                                  )}
                                 </div>
                                 <div className="flex items-center gap-1.5">
                                   <Calendar className="w-3 h-3" />
@@ -620,16 +656,18 @@ export default function AirdropDetailPage() {
                                 )}
                               </div>
                             </div>
-                            <Button variant="outline" size="sm" className="h-7" asChild>
-                              <a
-                                href={`https://ipfs.io/ipfs/${entry.ipfsProofCid}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <ExternalLink className="w-3 h-3 mr-1" />
-                                <span className="text-xs">View</span>
-                              </a>
-                            </Button>
+                            {!(entry.ipfsProofCid.includes("twitter.com") || entry.ipfsProofCid.includes("x.com")) && (
+                              <Button variant="outline" size="sm" className="h-7" asChild>
+                                <a
+                                  href={`https://ipfs.io/ipfs/${entry.ipfsProofCid}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <ExternalLink className="w-3 h-3 mr-1" />
+                                  <span className="text-xs">View</span>
+                                </a>
+                              </Button>
+                            )}
                           </div>
                         </CardContent>
                       </Card>
