@@ -1,85 +1,116 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Button } from "./ui/button";
+import Link from "next/link";
 import {
-  Target,
-  Scale,
-  Trophy,
-  Gift,
-} from "lucide-react";
+  Navbar,
+  NavBody,
+  NavItems,
+  MobileNav,
+  MobileNavHeader,
+  MobileNavToggle,
+  MobileNavMenu,
+} from "@/components/ui/resizable-navbar";
+import { Target } from "lucide-react";
+
+const navItems = [
+  {
+    name: "Bounties",
+    link: "/bounties",
+  },
+  {
+    name: "Disputes",
+    link: "/disputes",
+  },
+  {
+    name: "Reputation",
+    link: "/reputation",
+  },
+  {
+    name: "Airdrops",
+    link: "/airdrops",
+  },
+];
 
 export default function Header() {
   const router = useRouter();
-
-  const navigationItems = [
-    { id: "bounties", label: "Bounties", icon: Target, path: "/bounties" },
-    { id: "disputes", label: "Disputes", icon: Scale, path: "/disputes" },
-    { id: "reputation", label: "Reputation", icon: Trophy, path: "/reputation" },
-    { id: "airdrops", label: "Airdrops", icon: Gift, path: "/airdrops" },
-  ];
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <>
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center space-x-8">
-              <div
-                className="flex items-center space-x-2 cursor-pointer"
-                onClick={() => router.push("/")}
-              >
-                <h1 className="text-xl font-bold tracking-tight">Quinty</h1>
-              </div>
-
-              {/* Desktop Navigation */}
-              <nav className="hidden md:flex">
-                <div className="flex items-center space-x-1">
-                  {navigationItems.map((item) => (
-                    <Button
-                      key={item.id}
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => router.push(item.path)}
-                      className="flex items-center space-x-2"
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.label}</span>
-                    </Button>
-                  ))}
-                </div>
-              </nav>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <ConnectButton />
+    <div className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center pt-4">
+      <Navbar className="pointer-events-auto !fixed top-4 left-0 right-0 w-full px-4 sm:px-6">
+        <NavBody className="mx-auto w-full border border-primary/20 bg-background/90 px-4 backdrop-blur-xl lg:flex">
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className="flex items-center gap-2 rounded-full border border-transparent px-3 py-2 text-sm font-semibold text-foreground transition hover:border-primary/30 hover:bg-background"
+          >
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15">
+              <Target className="h-4 w-4 text-primary" />
+            </span>
+            Quinty
+          </button>
+          <NavItems
+            items={navItems}
+            onItemClick={() => setIsMobileMenuOpen(false)}
+            className="text-foreground"
+          />
+          <div className="hidden items-center gap-3 lg:flex">
+            <div className="hidden sm:block">
+              <ConnectButton
+                accountStatus="avatar"
+                chainStatus="icon"
+                showBalance={false}
+              />
             </div>
           </div>
-        </div>
-      </header>
+        </NavBody>
 
-      {/* Mobile Navigation */}
-      <div className="md:hidden border-b bg-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-2 py-3 overflow-x-auto">
-            {navigationItems.map((item) => (
-              <Button
-                key={item.id}
-                variant="outline"
-                size="sm"
-                onClick={() => router.push(item.path)}
-                className="flex-shrink-0 flex items-center space-x-2"
+        <MobileNav className="border border-primary/20 bg-background/95 backdrop-blur">
+          <MobileNavHeader>
+            <Link
+              href="/"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center gap-2 rounded-full px-2 py-1 text-sm font-semibold text-foreground transition hover:bg-background"
+            >
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15">
+                <Target className="h-4 w-4 text-primary" />
+              </span>
+              Quinty
+            </Link>
+            <MobileNavToggle
+              isOpen={isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+            />
+          </MobileNavHeader>
+          <MobileNavMenu
+            isOpen={isMobileMenuOpen}
+            onClose={() => setIsMobileMenuOpen(false)}
+          >
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                href={item.link}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="relative w-full rounded-xl px-3 py-2 text-base font-medium text-foreground transition-colors hover:bg-foreground/5"
               >
-                <item.icon className="h-4 w-4" />
-                <span>{item.label}</span>
-              </Button>
+                {item.name}
+              </Link>
             ))}
-          </div>
-        </div>
-      </div>
-    </>
+            <div className="flex w-full flex-col gap-4">
+              <div className="w-full rounded-lg border border-primary/25 bg-card/80 p-3">
+                <ConnectButton
+                  accountStatus="avatar"
+                  chainStatus="icon"
+                  showBalance={false}
+                />
+              </div>
+            </div>
+          </MobileNavMenu>
+        </MobileNav>
+      </Navbar>
+    </div>
   );
 }

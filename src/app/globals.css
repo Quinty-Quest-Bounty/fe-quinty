@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -56,7 +54,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: var(--font-space-grotesk), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -64,7 +62,7 @@
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold tracking-tight;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-space-grotesk), sans-serif;
   }
 
   h1 {
@@ -149,12 +147,12 @@
   }
 
   .font-heading {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-space-grotesk), sans-serif;
     font-weight: 600;
   }
 
   .font-body {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-space-grotesk), sans-serif;
     font-weight: 400;
   }
 
