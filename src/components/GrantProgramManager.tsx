@@ -16,6 +16,8 @@ import {
   GrantStatus,
 } from "../utils/contracts";
 import { parseETH, formatETH, wagmiConfig, formatAddress } from "../utils/web3";
+import { useAlertDialog } from "@/hooks/useAlertDialog";
+import { useShare } from "@/hooks/useShare";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -43,6 +45,7 @@ import {
   CheckCircle,
   XCircle,
   Clock,
+  Share2,
 } from "lucide-react";
 
 enum ApplicationStatus {
@@ -84,6 +87,8 @@ export default function GrantProgramManager() {
   const { writeContract, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({ hash });
+  const { showAlert, showConfirm } = useAlertDialog();
+  const { shareLink } = useShare();
 
   const [grants, setGrants] = useState<Grant[]>([]);
   const [activeTab, setActiveTab] = useState<"create" | "browse" | "my-grants">("browse");
@@ -288,12 +293,20 @@ export default function GrantProgramManager() {
   // Handle create grant
   const handleCreateGrant = async () => {
     if (!isVerified) {
-      alert("You must be ZK verified to create a grant");
+      showAlert({
+        title: "Verification Required",
+        description: "You must be ZK verified to create a grant",
+        variant: "warning"
+      });
       return;
     }
 
     if (!newGrant.title || !newGrant.amount || !newGrant.maxApplicants) {
-      alert("Please fill in all required fields");
+      showAlert({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "warning"
+      });
       return;
     }
 
@@ -307,7 +320,11 @@ export default function GrantProgramManager() {
 
     // Validate: application deadline < distribution deadline
     if (appDeadline >= distDeadline) {
-      alert("Distribution deadline must be after application deadline");
+      showAlert({
+        title: "Invalid Deadline",
+        description: "Distribution deadline must be after application deadline",
+        variant: "warning"
+      });
       return;
     }
 
@@ -344,7 +361,11 @@ export default function GrantProgramManager() {
     if (!selectedGrant) return;
 
     if (!applyForm.projectDetails || !applyForm.requestedAmount) {
-      alert("Please fill in all required fields");
+      showAlert({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "warning"
+      });
       return;
     }
 
@@ -392,13 +413,26 @@ export default function GrantProgramManager() {
       setTimeout(() => loadApplications(selectedGrant.id), 2000);
     } catch (error) {
       console.error("Error approving application:", error);
-      alert("Failed to approve application");
+      showAlert({
+        title: "Approval Failed",
+        description: "Failed to approve application",
+        variant: "destructive"
+      });
     }
   };
 
   // Handle reject application
   const handleRejectApplication = async (applicationId: number) => {
     if (!selectedGrant) return;
+
+    const confirmed = await showConfirm({
+      title: "Confirm Rejection",
+      description: "Are you sure you want to reject this application?",
+      confirmText: "Yes, Reject",
+      cancelText: "Cancel"
+    });
+
+    if (!confirmed) return;
 
     const reason = rejectionReason || "Application does not meet requirements";
 
@@ -419,7 +453,11 @@ export default function GrantProgramManager() {
       setTimeout(() => loadApplications(selectedGrant.id), 2000);
     } catch (error) {
       console.error("Error rejecting application:", error);
-      alert("Failed to reject application");
+      showAlert({
+        title: "Rejection Failed",
+        description: "Failed to reject application",
+        variant: "destructive"
+      });
     }
   };
 
@@ -594,6 +632,13 @@ export default function GrantProgramManager() {
             >
               Apply
             </Button>
+            <Button
+              onClick={() => shareLink(`/funding/grant-program/${grant.id}`, "Share this grant")}
+              variant="ghost"
+              size="sm"
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
             {isOwner && (
               <Button
                 onClick={() => {
@@ -760,11 +805,7 @@ export default function GrantProgramManager() {
                             <Button
                               size="sm"
                               variant="destructive"
-                              onClick={() => {
-                                if (confirm("Are you sure you want to reject this application?")) {
-                                  handleRejectApplication(idx);
-                                }
-                              }}
+                              onClick={() => handleRejectApplication(idx)}
                               disabled={isPending}
                             >
                               <XCircle className="h-3 w-3 mr-1" />

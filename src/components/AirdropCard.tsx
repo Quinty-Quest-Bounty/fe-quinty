@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatETH, formatTimeLeft, formatAddress } from "../utils/web3";
 import { IpfsImage } from "../utils/ipfs";
@@ -13,11 +13,22 @@ import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Separator } from "./ui/separator";
+import { Button } from "./ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
 import {
   Users,
   Clock,
   Coins,
+  Eye,
+  Share2,
 } from "lucide-react";
+import { useShare } from "@/hooks/useShare";
 
 interface Airdrop {
   id: number;
@@ -49,6 +60,8 @@ export default function AirdropCard({
   viewMode = "grid",
 }: AirdropCardProps) {
   const router = useRouter();
+  const [quickView, setQuickView] = useState(false);
+  const { shareLink } = useShare();
   const progress = Math.min(
     (airdrop.qualifiersCount / airdrop.maxQualifiers) * 100,
     100
@@ -71,9 +84,9 @@ export default function AirdropCard({
 
   if (viewMode === "list") {
     return (
+      <>
       <Card
-        className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 cursor-pointer"
-        onClick={() => router.push(`/airdrops/${airdrop.id}`)}
+        className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5"
       >
         <div className="flex flex-row">
           {/* Image Section */}
@@ -104,54 +117,186 @@ export default function AirdropCard({
               </div>
             </CardHeader>
 
-            <CardContent className="pt-0 pb-3 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
-                  <Coins className="h-3.5 w-3.5 text-green-600" />
-                  <span className="text-lg font-bold text-green-600">
-                    {formatETH(airdrop.perQualifier)}
-                  </span>
-                  <span className="text-xs font-medium text-green-600">STT</span>
+            <CardContent className="pt-0 pb-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <Coins className="h-3.5 w-3.5 text-green-600" />
+                    <span className="text-lg font-bold text-green-600">
+                      {formatETH(airdrop.perQualifier)}
+                    </span>
+                    <span className="text-xs font-medium text-green-600">STT</span>
+                  </div>
+
+                  <Separator orientation="vertical" className="h-6" />
+
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Users className="h-3 w-3" />
+                    <span className="font-medium">
+                      {entryCount > 0 ? `${entryCount} entries` : `${airdrop.qualifiersCount}/${airdrop.maxQualifiers}`}
+                    </span>
+                  </div>
+
+                  <Separator orientation="vertical" className="h-6" />
+
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    <span className="font-medium">{formatTimeLeft(BigInt(airdrop.deadline))}</span>
+                  </div>
                 </div>
 
-                <Separator orientation="vertical" className="h-6" />
-
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Users className="h-3 w-3" />
-                  <span className="font-medium">
-                    {entryCount > 0 ? `${entryCount} entries` : `${airdrop.qualifiersCount}/${airdrop.maxQualifiers}`}
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-5 w-5">
+                    <AvatarFallback className="text-[10px]">
+                      {airdrop.creator.slice(2, 4).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-xs text-muted-foreground">
+                    {formatAddress(airdrop.creator)}
                   </span>
-                </div>
-
-                <Separator orientation="vertical" className="h-6" />
-
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  <span className="font-medium">{formatTimeLeft(BigInt(airdrop.deadline))}</span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Avatar className="h-5 w-5">
-                  <AvatarFallback className="text-[10px]">
-                    {airdrop.creator.slice(2, 4).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-xs text-muted-foreground">
-                  {formatAddress(airdrop.creator)}
-                </span>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setQuickView(true);
+                  }}
+                  className="flex-1"
+                >
+                  <Eye className="h-4 w-4 mr-1" />
+                  Quick View
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    shareLink(`/airdrops/${airdrop.id}`, "Share this airdrop");
+                  }}
+                >
+                  <Share2 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => router.push(`/airdrops/${airdrop.id}`)}
+                  className="flex-1"
+                >
+                  View Details
+                </Button>
               </div>
             </CardContent>
           </div>
         </div>
       </Card>
+
+      {/* Quick View Dialog */}
+      <Dialog open={quickView} onOpenChange={setQuickView}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{airdrop.title}</DialogTitle>
+            <DialogDescription>
+              Airdrop #{airdrop.id} • {formatETH(airdrop.perQualifier)} STT per user
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Image */}
+            {airdrop.imageUrl && (
+              <div className="relative w-full h-48 overflow-hidden rounded-lg bg-muted">
+                <IpfsImage
+                  cid={airdrop.imageUrl.replace("ipfs://", "")}
+                  alt={airdrop.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-muted rounded p-2">
+                <p className="text-xs text-muted-foreground">Per Qualifier</p>
+                <p className="font-bold">{formatETH(airdrop.perQualifier)} STT</p>
+              </div>
+              <div className="bg-muted rounded p-2">
+                <p className="text-xs text-muted-foreground">Participants</p>
+                <p className="font-bold">{airdrop.qualifiersCount}/{airdrop.maxQualifiers}</p>
+              </div>
+              <div className="bg-muted rounded p-2">
+                <p className="text-xs text-muted-foreground">Status</p>
+                <p className="font-bold">{getStatusText()}</p>
+              </div>
+            </div>
+
+            {/* Progress */}
+            <div>
+              <div className="mb-2 flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Progress</span>
+                <span className="font-bold">{Math.round(progress)}%</span>
+              </div>
+              <Progress value={progress} className="h-2" />
+            </div>
+
+            {/* Description */}
+            <div>
+              <h4 className="font-semibold text-sm mb-1">Description</h4>
+              <p className="text-sm text-muted-foreground">
+                {airdrop.description?.replace(/\n\nImage:.*$/, "") || "Social media promotion task"}
+              </p>
+            </div>
+
+            {/* Requirements */}
+            {airdrop.requirements && (
+              <div>
+                <h4 className="font-semibold text-sm mb-1">Requirements</h4>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {airdrop.requirements}
+                </p>
+              </div>
+            )}
+
+            {/* Time Left */}
+            <div className="flex items-center gap-2 text-sm">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">
+                {formatTimeLeft(BigInt(airdrop.deadline))}
+              </span>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2 pt-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setQuickView(false)}
+              >
+                Close
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={() => {
+                  setQuickView(false);
+                  router.push(`/airdrops/${airdrop.id}`);
+                }}
+              >
+                View Full Details
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      </>
     );
   }
 
   return (
+    <>
     <Card
-      className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 cursor-pointer"
-      onClick={() => router.push(`/airdrops/${airdrop.id}`)}
+      className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5"
     >
       {/* Status Badge */}
       <div className="absolute top-2 right-2 z-10">
@@ -199,7 +344,7 @@ export default function AirdropCard({
         </div>
       </CardHeader>
 
-      <CardContent className="p-3 pt-0">
+      <CardContent className="p-3 pt-0 space-y-3">
         {/* Reward Section */}
         <div className="flex items-center justify-between p-2 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
           <div className="flex items-center gap-1.5">
@@ -215,7 +360,138 @@ export default function AirdropCard({
             </AvatarFallback>
           </Avatar>
         </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setQuickView(true);
+            }}
+            className="flex-1"
+          >
+            <Eye className="h-4 w-4 mr-1" />
+            Quick View
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              shareLink(`/airdrops/${airdrop.id}`, "Share this airdrop");
+            }}
+          >
+            <Share2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => router.push(`/airdrops/${airdrop.id}`)}
+            className="flex-1"
+          >
+            View
+          </Button>
+        </div>
       </CardContent>
     </Card>
+
+    {/* Quick View Dialog */}
+    <Dialog open={quickView} onOpenChange={setQuickView}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{airdrop.title}</DialogTitle>
+          <DialogDescription>
+            Airdrop #{airdrop.id} • {formatETH(airdrop.perQualifier)} STT per user
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Image */}
+          {airdrop.imageUrl && (
+            <div className="relative w-full h-48 overflow-hidden rounded-lg bg-muted">
+              <IpfsImage
+                cid={airdrop.imageUrl.replace("ipfs://", "")}
+                alt={airdrop.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-muted rounded p-2">
+              <p className="text-xs text-muted-foreground">Per Qualifier</p>
+              <p className="font-bold">{formatETH(airdrop.perQualifier)} STT</p>
+            </div>
+            <div className="bg-muted rounded p-2">
+              <p className="text-xs text-muted-foreground">Participants</p>
+              <p className="font-bold">{airdrop.qualifiersCount}/{airdrop.maxQualifiers}</p>
+            </div>
+            <div className="bg-muted rounded p-2">
+              <p className="text-xs text-muted-foreground">Status</p>
+              <p className="font-bold">{getStatusText()}</p>
+            </div>
+          </div>
+
+          {/* Progress */}
+          <div>
+            <div className="mb-2 flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Progress</span>
+              <span className="font-bold">{Math.round(progress)}%</span>
+            </div>
+            <Progress value={progress} className="h-2" />
+          </div>
+
+          {/* Description */}
+          <div>
+            <h4 className="font-semibold text-sm mb-1">Description</h4>
+            <p className="text-sm text-muted-foreground">
+              {airdrop.description?.replace(/\n\nImage:.*$/, "") || "Social media promotion task"}
+            </p>
+          </div>
+
+          {/* Requirements */}
+          {airdrop.requirements && (
+            <div>
+              <h4 className="font-semibold text-sm mb-1">Requirements</h4>
+              <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                {airdrop.requirements}
+              </p>
+            </div>
+          )}
+
+          {/* Time Left */}
+          <div className="flex items-center gap-2 text-sm">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">
+              {formatTimeLeft(BigInt(airdrop.deadline))}
+            </span>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 pt-2">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setQuickView(false)}
+            >
+              Close
+            </Button>
+            <Button
+              className="flex-1"
+              onClick={() => {
+                setQuickView(false);
+                router.push(`/airdrops/${airdrop.id}`);
+              }}
+            >
+              View Full Details
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

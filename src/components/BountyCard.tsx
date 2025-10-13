@@ -13,11 +13,22 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Clock,
   Users,
   Trophy,
+  Eye,
+  Share2,
 } from "lucide-react";
+import { useShare } from "@/hooks/useShare";
 
 // V2 Interfaces
 interface Reply {
@@ -90,6 +101,8 @@ export default function BountyCard({
   const { address } = useAccount();
   const [metadata, setMetadata] = useState<BountyMetadata | null>(null);
   const [, setIsLoadingMetadata] = useState(false);
+  const [quickView, setQuickView] = useState(false);
+  const { shareLink } = useShare();
 
   const isCreator = address?.toLowerCase() === bounty.creator.toLowerCase();
   const isExpired = BigInt(Math.floor(Date.now() / 1000)) > bounty.deadline;
@@ -132,9 +145,9 @@ export default function BountyCard({
 
   if (viewMode === "list") {
     return (
+      <>
       <Card
-        className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 cursor-pointer"
-        onClick={() => router.push(`/bounties/${bounty.id}`)}
+        className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5"
       >
         <div className="flex flex-row">
           {/* Image Section */}
@@ -165,52 +178,177 @@ export default function BountyCard({
               </div>
             </CardHeader>
 
-            <CardContent className="pt-0 pb-3 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
-                  <Trophy className="h-3.5 w-3.5 text-primary" />
-                  <span className="text-lg font-bold text-primary">
-                    {formatETH(bounty.amount)}
+            <CardContent className="pt-0 pb-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <Trophy className="h-3.5 w-3.5 text-primary" />
+                    <span className="text-lg font-bold text-primary">
+                      {formatETH(bounty.amount)}
+                    </span>
+                    <span className="text-xs font-medium text-primary">STT</span>
+                  </div>
+
+                  <Separator orientation="vertical" className="h-6" />
+
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Users className="h-3 w-3" />
+                    <span className="font-medium">{bounty.submissions.length}</span>
+                  </div>
+
+                  <Separator orientation="vertical" className="h-6" />
+
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Clock className="h-3 w-3" />
+                    <span className="font-medium">{formatTimeLeft(bounty.deadline)}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-5 w-5">
+                    <AvatarFallback className="text-[10px]">
+                      {bounty.creator.slice(2, 4).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-xs text-muted-foreground">
+                    {formatAddress(bounty.creator)}
                   </span>
-                  <span className="text-xs font-medium text-primary">STT</span>
-                </div>
-
-                <Separator orientation="vertical" className="h-6" />
-
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Users className="h-3 w-3" />
-                  <span className="font-medium">{bounty.submissions.length}</span>
-                </div>
-
-                <Separator orientation="vertical" className="h-6" />
-
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  <span className="font-medium">{formatTimeLeft(bounty.deadline)}</span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Avatar className="h-5 w-5">
-                  <AvatarFallback className="text-[10px]">
-                    {bounty.creator.slice(2, 4).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-xs text-muted-foreground">
-                  {formatAddress(bounty.creator)}
-                </span>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setQuickView(true);
+                  }}
+                  className="flex-1"
+                >
+                  <Eye className="h-4 w-4 mr-1" />
+                  Quick View
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    shareLink(`/bounties/${bounty.id}`, "Share this bounty");
+                  }}
+                >
+                  <Share2 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => router.push(`/bounties/${bounty.id}`)}
+                  className="flex-1"
+                >
+                  View Details
+                </Button>
               </div>
             </CardContent>
           </div>
         </div>
       </Card>
+
+      {/* Quick View Dialog - same for list view */}
+      <Dialog open={quickView} onOpenChange={setQuickView}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{metadata?.title || bounty.description.split("\n")[0]}</DialogTitle>
+            <DialogDescription>
+              Bounty #{bounty.id} • {formatETH(bounty.amount)} STT
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Image */}
+            {metadata?.images && metadata.images.length > 0 && (
+              <div className="relative w-full h-48 overflow-hidden rounded-lg bg-muted">
+                <img
+                  src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
+                  alt={metadata.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-muted rounded p-2">
+                <p className="text-xs text-muted-foreground">Reward</p>
+                <p className="font-bold">{formatETH(bounty.amount)} STT</p>
+              </div>
+              <div className="bg-muted rounded p-2">
+                <p className="text-xs text-muted-foreground">Submissions</p>
+                <p className="font-bold">{bounty.submissions.length}</p>
+              </div>
+              <div className="bg-muted rounded p-2">
+                <p className="text-xs text-muted-foreground">Status</p>
+                <p className="font-bold">{BountyStatusEnum[bounty.status]}</p>
+              </div>
+            </div>
+
+            {/* Description */}
+            {metadata?.description && (
+              <div>
+                <h4 className="font-semibold text-sm mb-1">Description</h4>
+                <p className="text-sm text-muted-foreground">{metadata.description}</p>
+              </div>
+            )}
+
+            {/* Requirements */}
+            {metadata?.requirements && metadata.requirements.length > 0 && (
+              <div>
+                <h4 className="font-semibold text-sm mb-1">Requirements</h4>
+                <ul className="list-disc list-inside space-y-0.5">
+                  {metadata.requirements.map((req, i) => (
+                    <li key={i} className="text-sm text-muted-foreground">{req}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Time Left */}
+            <div className="flex items-center gap-2 text-sm">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span className="text-muted-foreground">
+                {formatTimeLeft(bounty.deadline)}
+              </span>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2 pt-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setQuickView(false)}
+              >
+                Close
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={() => {
+                  setQuickView(false);
+                  router.push(`/bounties/${bounty.id}`);
+                }}
+              >
+                View Full Details
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      </>
     );
   }
 
   return (
+    <>
     <Card
-      className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 cursor-pointer"
-      onClick={() => router.push(`/bounties/${bounty.id}`)}
+      className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5"
     >
       {/* Status Badge */}
       <div className="absolute top-2 right-2 z-10">
@@ -255,7 +393,7 @@ export default function BountyCard({
         </div>
       </CardHeader>
 
-      <CardContent className="p-3 pt-0">
+      <CardContent className="p-3 pt-0 space-y-3">
         {/* Reward Section */}
         <div className="flex items-center justify-between p-2 rounded-lg bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20">
           <div className="flex items-center gap-1.5">
@@ -271,7 +409,131 @@ export default function BountyCard({
             </AvatarFallback>
           </Avatar>
         </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setQuickView(true);
+            }}
+            className="flex-1"
+          >
+            <Eye className="h-4 w-4 mr-1" />
+            Quick View
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              shareLink(`/bounties/${bounty.id}`, "Share this bounty");
+            }}
+          >
+            <Share2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => router.push(`/bounties/${bounty.id}`)}
+            className="flex-1"
+          >
+            View
+          </Button>
+        </div>
       </CardContent>
     </Card>
+
+    {/* Quick View Dialog */}
+    <Dialog open={quickView} onOpenChange={setQuickView}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{metadata?.title || bounty.description.split("\n")[0]}</DialogTitle>
+          <DialogDescription>
+            Bounty #{bounty.id} • {formatETH(bounty.amount)} STT
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Image */}
+          {metadata?.images && metadata.images.length > 0 && (
+            <div className="relative w-full h-48 overflow-hidden rounded-lg bg-muted">
+              <img
+                src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
+                alt={metadata.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-muted rounded p-2">
+              <p className="text-xs text-muted-foreground">Reward</p>
+              <p className="font-bold">{formatETH(bounty.amount)} STT</p>
+            </div>
+            <div className="bg-muted rounded p-2">
+              <p className="text-xs text-muted-foreground">Submissions</p>
+              <p className="font-bold">{bounty.submissions.length}</p>
+            </div>
+            <div className="bg-muted rounded p-2">
+              <p className="text-xs text-muted-foreground">Status</p>
+              <p className="font-bold">{BountyStatusEnum[bounty.status]}</p>
+            </div>
+          </div>
+
+          {/* Description */}
+          {metadata?.description && (
+            <div>
+              <h4 className="font-semibold text-sm mb-1">Description</h4>
+              <p className="text-sm text-muted-foreground">{metadata.description}</p>
+            </div>
+          )}
+
+          {/* Requirements */}
+          {metadata?.requirements && metadata.requirements.length > 0 && (
+            <div>
+              <h4 className="font-semibold text-sm mb-1">Requirements</h4>
+              <ul className="list-disc list-inside space-y-0.5">
+                {metadata.requirements.map((req, i) => (
+                  <li key={i} className="text-sm text-muted-foreground">{req}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Time Left */}
+          <div className="flex items-center gap-2 text-sm">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">
+              {formatTimeLeft(bounty.deadline)}
+            </span>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 pt-2">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setQuickView(false)}
+            >
+              Close
+            </Button>
+            <Button
+              className="flex-1"
+              onClick={() => {
+                setQuickView(false);
+                router.push(`/bounties/${bounty.id}`);
+              }}
+            >
+              View Full Details
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

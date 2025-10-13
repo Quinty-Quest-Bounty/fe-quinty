@@ -15,6 +15,8 @@ import {
   ZK_VERIFICATION_ABI,
 } from "../utils/contracts";
 import { parseETH, formatETH, wagmiConfig } from "../utils/web3";
+import { useAlertDialog } from "@/hooks/useAlertDialog";
+import { useShare } from "@/hooks/useShare";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -44,6 +46,7 @@ import {
   Clock,
   Edit,
   MessageSquare,
+  Share2,
 } from "lucide-react";
 
 // Enums matching contract
@@ -89,6 +92,8 @@ export default function LookingForGrantManager() {
   const { writeContract, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({ hash });
+  const { showAlert } = useAlertDialog();
+  const { shareLink } = useShare();
 
   const [requests, setRequests] = useState<FundingRequest[]>([]);
   const [activeTab, setActiveTab] = useState<"create" | "browse" | "my-requests">("browse");
@@ -306,12 +311,20 @@ export default function LookingForGrantManager() {
   // Handle create request
   const handleCreateRequest = async () => {
     if (!isVerified) {
-      alert("You must be ZK verified to create a funding request");
+      showAlert({
+        title: "Verification Required",
+        description: "You must be ZK verified to create a funding request",
+        variant: "warning"
+      });
       return;
     }
 
     if (!newRequest.title || !newRequest.projectDetails || !newRequest.fundingGoal) {
-      alert("Please fill in all required fields");
+      showAlert({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "warning"
+      });
       return;
     }
 
@@ -353,14 +366,22 @@ export default function LookingForGrantManager() {
       });
     } catch (error) {
       console.error("Error creating request:", error);
-      alert("Failed to create funding request");
+      showAlert({
+        title: "Creation Failed",
+        description: "Failed to create funding request",
+        variant: "destructive"
+      });
     }
   };
 
   // Handle support request
   const handleSupportRequest = async (requestId: number) => {
     if (!supportAmount || parseFloat(supportAmount) <= 0) {
-      alert("Please enter a valid support amount");
+      showAlert({
+        title: "Invalid Amount",
+        description: "Please enter a valid support amount",
+        variant: "warning"
+      });
       return;
     }
 
@@ -375,14 +396,22 @@ export default function LookingForGrantManager() {
       setSupportAmount("");
     } catch (error) {
       console.error("Error supporting request:", error);
-      alert("Failed to support request");
+      showAlert({
+        title: "Support Failed",
+        description: "Failed to support request",
+        variant: "destructive"
+      });
     }
   };
 
   // Handle post update
   const handlePostUpdate = async (requestId: number) => {
     if (!updateContent) {
-      alert("Please enter update content");
+      showAlert({
+        title: "Missing Content",
+        description: "Please enter update content",
+        variant: "warning"
+      });
       return;
     }
 
@@ -402,14 +431,22 @@ export default function LookingForGrantManager() {
       setUpdateImage("");
     } catch (error) {
       console.error("Error posting update:", error);
-      alert("Failed to post update");
+      showAlert({
+        title: "Update Failed",
+        description: "Failed to post update",
+        variant: "destructive"
+      });
     }
   };
 
   // Handle withdraw funds
   const handleWithdrawFunds = async (requestId: number, amount: string) => {
     if (!amount || parseFloat(amount) <= 0) {
-      alert("Please enter a valid withdrawal amount");
+      showAlert({
+        title: "Invalid Amount",
+        description: "Please enter a valid withdrawal amount",
+        variant: "warning"
+      });
       return;
     }
 
@@ -422,7 +459,11 @@ export default function LookingForGrantManager() {
       });
     } catch (error) {
       console.error("Error withdrawing funds:", error);
-      alert("Failed to withdraw funds");
+      showAlert({
+        title: "Withdrawal Failed",
+        description: "Failed to withdraw funds",
+        variant: "destructive"
+      });
     }
   };
 
@@ -611,13 +652,22 @@ export default function LookingForGrantManager() {
             </div>
           )}
 
-          <Button
-            onClick={() => handleViewRequest(request)}
-            variant="outline"
-            className="w-full"
-          >
-            View Details
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => handleViewRequest(request)}
+              variant="outline"
+              className="flex-1"
+            >
+              View Details
+            </Button>
+            <Button
+              onClick={() => shareLink(`/funding/looking-for-grant/${request.id}`, "Share this project")}
+              variant="ghost"
+              size="sm"
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );

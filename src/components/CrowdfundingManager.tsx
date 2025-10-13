@@ -16,6 +16,8 @@ import {
   CampaignStatus,
 } from "../utils/contracts";
 import { parseETH, formatETH, wagmiConfig, formatAddress } from "../utils/web3";
+import { useAlertDialog } from "@/hooks/useAlertDialog";
+import { useShare } from "@/hooks/useShare";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -44,6 +46,7 @@ import {
   Target,
   MessageSquare,
   CheckCircle2,
+  Share2,
 } from "lucide-react";
 
 enum MilestoneStatus {
@@ -83,6 +86,8 @@ export default function CrowdfundingManager() {
   const { writeContract, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({ hash });
+  const { showAlert } = useAlertDialog();
+  const { shareLink } = useShare();
 
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [activeTab, setActiveTab] = useState<"create" | "browse" | "my-campaigns">("browse");
@@ -269,12 +274,20 @@ export default function CrowdfundingManager() {
   // Handle create campaign
   const handleCreateCampaign = async () => {
     if (!isVerified) {
-      alert("You must be ZK verified to create a crowdfunding campaign");
+      showAlert({
+        title: "Verification Required",
+        description: "You must be ZK verified to create a crowdfunding campaign",
+        variant: "warning"
+      });
       return;
     }
 
     if (!newCampaign.title || !newCampaign.fundingGoal || milestoneInputs.length === 0) {
-      alert("Please fill in all required fields and add at least one milestone");
+      showAlert({
+        title: "Missing Information",
+        description: "Please fill in all required fields and add at least one milestone",
+        variant: "warning"
+      });
       return;
     }
 
@@ -284,7 +297,11 @@ export default function CrowdfundingManager() {
     );
 
     if (validMilestones.length === 0) {
-      alert("Please add at least one valid milestone");
+      showAlert({
+        title: "Invalid Milestones",
+        description: "Please add at least one valid milestone",
+        variant: "warning"
+      });
       return;
     }
 
@@ -294,7 +311,11 @@ export default function CrowdfundingManager() {
       0
     );
     if (Math.abs(totalMilestoneAmount - parseFloat(newCampaign.fundingGoal)) > 0.0001) {
-      alert(`Milestones must sum to funding goal. Current sum: ${totalMilestoneAmount} ETH`);
+      showAlert({
+        title: "Milestone Mismatch",
+        description: `Milestones must sum to funding goal. Current sum: ${totalMilestoneAmount} ETH`,
+        variant: "warning"
+      });
       return;
     }
 
@@ -334,7 +355,11 @@ export default function CrowdfundingManager() {
   // Handle contribute
   const handleContribute = async (campaignId: number) => {
     if (!contributeAmount || parseFloat(contributeAmount) <= 0) {
-      alert("Please enter a valid contribution amount");
+      showAlert({
+        title: "Invalid Amount",
+        description: "Please enter a valid contribution amount",
+        variant: "warning"
+      });
       return;
     }
 
@@ -366,7 +391,11 @@ export default function CrowdfundingManager() {
       setTimeout(() => loadMilestones(campaignId), 2000);
     } catch (error) {
       console.error("Error releasing milestone:", error);
-      alert("Failed to release milestone");
+      showAlert({
+        title: "Release Failed",
+        description: "Failed to release milestone",
+        variant: "destructive"
+      });
     }
   };
 
@@ -387,7 +416,11 @@ export default function CrowdfundingManager() {
       }, 2000);
     } catch (error) {
       console.error("Error withdrawing milestone:", error);
-      alert("Failed to withdraw milestone");
+      showAlert({
+        title: "Withdrawal Failed",
+        description: "Failed to withdraw milestone",
+        variant: "destructive"
+      });
     }
   };
 
@@ -589,17 +622,26 @@ export default function CrowdfundingManager() {
             </div>
           </div>
 
-          <Button
-            onClick={() => {
-              setSelectedCampaign(campaign);
-              loadMilestones(campaign.id);
-              setShowDetailsModal(true);
-            }}
-            variant="outline"
-            className="w-full"
-          >
-            View Details
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => {
+                setSelectedCampaign(campaign);
+                loadMilestones(campaign.id);
+                setShowDetailsModal(true);
+              }}
+              variant="outline"
+              className="flex-1"
+            >
+              View Details
+            </Button>
+            <Button
+              onClick={() => shareLink(`/funding/crowdfunding/${campaign.id}`, "Share this campaign")}
+              variant="ghost"
+              size="sm"
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );
