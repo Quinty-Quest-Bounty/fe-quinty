@@ -33,6 +33,7 @@ export const wagmiConfig = getDefaultConfig({
   transports: {
     [baseSepoliaChain.id]: http(),
   },
+  ssr: true,
 });
 
 // Utility functions
