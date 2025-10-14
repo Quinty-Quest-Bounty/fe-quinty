@@ -2,160 +2,117 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
-import NetworkBanner from "../components/NetworkBanner";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { Separator } from "../components/ui/separator";
+import { Gravity, MatterBody } from "../components/ui/gravity";
+import { Footer } from "../components/Footer";
+import { Safari } from "../components/ui/safari";
+import DotPattern from "../components/ui/dot-pattern";
+import { TextRotate } from "../components/ui/text-rotate";
+import { LinkPreview } from "../components/ui/link-preview";
 import {
   Target,
-  ShieldCheck,
   Users,
   Coins,
-  Sparkles,
-  ArrowUpRight,
-  Trophy,
-  Inbox,
-  Workflow,
-  Lock,
-  Landmark,
-  Vote,
-  Rocket,
   Network,
   BadgeCheck,
+  Vote,
+  Landmark,
+  Mail,
 } from "lucide-react";
 
-const capabilityGroups = [
+const allFeatures = [
   {
-    title: "Core bounty engine",
-    description:
-      "Launch ETH-backed bounties with blind submissions, milestone approvals, and automatic enforcement baked in.",
+    title: "Bounty",
+    descriptions: [
+      "Launch ETH-backed bounties",
+      "Blind submissions system",
+      "Milestone approvals",
+      "Automatic enforcement",
+    ],
     icon: Target,
-    bullets: [
-      "Programmable escrow with milestone payouts and auto-slash on expiry",
-      "Blind IPFS submissions that reveal only after selection",
-      "Multiple winner splits for collaborative deliveries",
-    ],
+    status: "Live",
   },
   {
-    title: "Oprec & contributor playbooks",
-    description:
-      "Qualify talent before the bounty starts. Applicants showcase work, build teams, and graduate straight into delivery.",
-    icon: Workflow,
-    bullets: [
-      "Open recruitment funnels with portfolio drops via IPFS",
-      "Team applications and approvals managed on-chain",
-      "Seamless handoff into the live bounty once accepted",
+    title: "Disputes",
+    descriptions: [
+      "Community-driven resolution",
+      "Stake-weighted voting",
+      "Transparent arbitration",
+      "Fast verdict windows",
     ],
+    icon: Vote,
+    status: "Soon",
   },
   {
-    title: "Reputation & soulbound signals",
-    description:
-      "Reward sustained contribution with non-transferable achievements that actually mean something.",
+    title: "NFT Reputation",
+    descriptions: [
+      "Soulbound NFT badges",
+      "Track achievements",
+      "Season milestones",
+      "On-chain proof",
+    ],
     icon: BadgeCheck,
-    bullets: [
-      "Soulbound NFT badges covering 7 contributor archetypes",
-      "Seasonal milestones (1 → 100) tracked automatically",
-      "First-touch and latest-activity stats to prove consistency",
+    status: "Live",
+  },
+  {
+    title: "Funding",
+    descriptions: [
+      "Multi-purpose funding",
+      "Flexible use cases",
+      "Transparent management",
+      "Community control",
     ],
+    icon: Landmark,
+    status: "Live",
+  },
+  {
+    title: "Grant",
+    descriptions: [
+      "Structured programs",
+      "Staged approvals",
+      "Claim-based disbursement",
+      "Progress tracking",
+    ],
+    icon: Coins,
+    status: "Live",
+  },
+  {
+    title: "Crowdfunding",
+    descriptions: [
+      "Milestone-based unlocks",
+      "Community governance",
+      "Refund protection",
+      "Goal tracking",
+    ],
+    icon: Users,
+    status: "Live",
   },
 ];
 
-const programModules = [
-  {
-    name: "Grant program orchestration",
-    summary:
-      "Run structured funding rounds with staged approvals, claims, and progress updates direct from the protocol.",
-    icon: Landmark,
-    bullets: [
-      "Organizations publish grant briefs with IPFS context",
-      "Applicants submit, reviewers approve per milestone",
-      "Claim-based disbursement keeps every round accountable",
-    ],
-  },
-  {
-    name: "Looking for Grant (LFG)",
-    summary:
-      "Give founders a credible surface to court investors, social proof traction, and receive flexible contributions.",
-    icon: Rocket,
-    bullets: [
-      "Anytime contributions without all-or-nothing pressure",
-      "Creator-controlled withdrawals with transparent logs",
-      "IPFS-driven updates to keep backers in the loop",
-    ],
-  },
-  {
-    name: "Crowdfunding with guardrails",
-    summary:
-      "Set milestone-based unlocks so funds only move when the community signs off on progress.",
-    icon: Lock,
-    bullets: [
-      "All-or-nothing refunds if the campaign misses its goal",
-      "Sequential milestone releases to avoid rug pulls",
-      "Automatic refunds on failed checkpoints",
-    ],
-  },
-  {
-    name: "Airdrop & growth bounties",
-    summary:
-      "Reward promo squads without spreadsheets—verifiers review submissions, the vault handles the rest.",
-    icon: Sparkles,
-    bullets: [
-      "Fixed reward pools with contributor caps",
-      "Verifier roster with approval / rejection flows",
-      "Cancellation lever for campaigns that shift direction",
-    ],
-  },
-  {
-    name: "ZK-enabled verification",
-    summary:
-      "Tie wallets to real social identity and institutional proofs through a Reclaim-ready verification layer.",
-    icon: ShieldCheck,
-    bullets: [
-      "Manual & institutional verification hooks shipped",
-      "Social handles linked on-chain for transparency",
-      "Designed to plug directly into Reclaim Protocol",
-    ],
-  },
-  {
-    name: "Dispute resolution desk",
-    summary:
-      "Escalate stalled work to a community jury that stakes reputation to rule quickly and transparently.",
-    icon: Vote,
-    bullets: [
-      "Stake-weighted voting with fast verdict windows",
-      "Protocols can designate neutral arbitrators",
-      "Coming to mainnet with governance dashboards",
-    ],
-  },
+const bountyStackFeatures = [
+  "ETH Escrow",
+  "Blind Submissions",
+  "Milestone Payouts",
+  "Team Splits",
+  "IPFS Storage",
+  "Auto-Slash",
+  "Dispute Resolution",
+  "Soulbound Badges",
+  "Grant Programs",
+  "Crowdfunding",
+  "ZK Verification",
+  "On-Chain Governance",
 ];
 
 const heroStats = [
-  {
-    label: "Builders verified",
-    value: "2,300+",
-    caption: "Reputation-backed contributors in the network",
-    icon: Users,
-  },
-  {
-    label: "Escrow secured",
-    value: "5k ETH",
-    caption: "Rewards locked across missions and seasons",
-    icon: Coins,
-  },
-  {
-    label: "Contracts live",
-    value: "9",
-    caption: "Production deployments on Base Sepolia",
-    icon: Network,
-  },
+  { label: "Builders", value: "2,300+", icon: Users },
+  { label: "Escrow", value: "5k ETH", icon: Coins },
+  { label: "Contracts", value: "9", icon: Network },
 ];
 
 const contractReferences = [
@@ -187,433 +144,288 @@ const contractReferences = [
 
 export default function Home() {
   const router = useRouter();
-  const { isConnected } = useAccount();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <main className="px-4 pb-32 pt-12 sm:px-6 lg:px-0">
         <div className="mx-auto w-full max-w-6xl">
-          <section className="relative overflow-hidden rounded-3xl border border-primary/10 bg-gradient-to-b from-background via-[#f1ecff] to-background px-6 py-16 sm:px-12 sm:py-20 lg:px-16">
-            <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_top,_rgba(123,97,255,0.25),transparent_55%)] sm:block" />
-            <div className="relative grid gap-16 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
-              <div className="space-y-10">
-                <Badge
-                  variant="outline"
-                  className="rounded-full border-primary/40 bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-primary"
-                >
-                  Live on Base Sepolia
-                </Badge>
-                <div className="space-y-6">
-                  <h1 className="text-balance text-4xl font-semibold leading-tight tracking-tight sm:text-5xl lg:text-[3.5rem]">
-                    A complete bounty studio for serious ecosystems.
-                  </h1>
-                  <p className="max-w-xl text-lg leading-relaxed text-foreground/80 sm:text-xl">
-                    Quinty ships the entire on-chain stack you need to brief,
-                    fund, and ship community work—from ETH escrow and blind
-                    submissions to grants, disputes, soulbound reputation, and
-                    ZK-powered verification anchored to Base.
-                  </p>
-                </div>
+          <section className="mx-auto mb-10 max-w-7xl px-6 md:mb-20 xl:px-0">
+            <div className="relative flex flex-col items-center border border-gray-200 rounded-3xl overflow-hidden">
+              {/* Dot Pattern Background */}
+              <DotPattern width={5} height={5} className="fill-gray-300/30" />
 
-                <div className="flex flex-wrap items-center gap-4">
-                  <Button size="lg" onClick={() => router.push("/bounties")}>
+              {/* Decorative corner dots */}
+              <div className="absolute -left-1 -top-1 h-2 w-2 bg-[#0EA885] z-10" />
+              <div className="absolute -bottom-1 -left-1 h-2 w-2 bg-[#0EA885] z-10" />
+              <div className="absolute -right-1 -top-1 h-2 w-2 bg-[#0EA885] z-10" />
+              <div className="absolute -bottom-1 -right-1 h-2 w-2 bg-[#0EA885] z-10" />
+
+              <div className="relative z-20 mx-auto max-w-7xl py-12 px-6 md:py-16 xl:py-24">
+                <div className="text-center space-y-8">
+                  <Badge
+                    variant="outline"
+                    className="rounded-full border-gray-300 bg-gray-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-gray-600"
+                  >
+                    Live on Base Sepolia
+                  </Badge>
+
+                  <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl">
+                    <span className="block text-foreground">Complete bounty</span>
+                    <span className="block text-[#0EA885]">
+                      studio for ecosystems
+                    </span>
+                  </h1>
+
+                  <p className="mx-auto max-w-2xl text-lg text-foreground/70 md:text-xl">
+                    On-chain bounties, grants, reputation, and disputes—all in one protocol.
+                  </p>
+
+                  <Button
+                    size="lg"
+                    onClick={() => router.push("/bounties")}
+                  >
                     Explore bounties
                   </Button>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="mt-16 grid gap-6 sm:grid-cols-3 max-w-4xl mx-auto">
                   {heroStats.map((stat) => (
                     <div
                       key={stat.label}
-                      className="rounded-2xl border border-primary/15 bg-white/70 p-6 shadow-sm backdrop-blur"
+                      className="rounded-2xl border border-gray-200 bg-white/90 p-6 text-center shadow-lg backdrop-blur hover:scale-105 hover:border-gray-300 transition-all"
                     >
-                      <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-foreground/65">
-                        <stat.icon className="h-4 w-4" />
-                        {stat.label}
-                      </div>
-                      <p className="mt-3 text-3xl font-semibold">
-                        {stat.value}
-                      </p>
-                      <p className="mt-1 text-sm text-foreground/70">
-                        {stat.caption}
-                      </p>
+                      <stat.icon className="mx-auto h-6 w-6 text-gray-500 mb-2" />
+                      <p className="mt-2 text-3xl font-bold">{stat.value}</p>
+                      <p className="text-sm text-gray-500 mt-1">{stat.label}</p>
                     </div>
                   ))}
-                </div>
-              </div>
-
-              <div className="relative">
-                <div className="absolute -left-10 top-12 hidden h-24 w-24 rounded-full bg-primary/20 blur-3xl sm:block" />
-                <div className="absolute -right-16 top-0 hidden h-32 w-32 rounded-full bg-purple-500/15 blur-3xl sm:block" />
-                <div className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-8 shadow-2xl backdrop-blur">
-                  <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-foreground/65">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    Snapshot · Base x Builder DAO
-                  </div>
-                  <div className="mt-6 space-y-5">
-                    <h3 className="text-2xl font-semibold">
-                      Community launch sprint, run end-to-end in Quinty.
-                    </h3>
-                    <p className="text-sm leading-relaxed text-foreground/70">
-                      Protocol founders post the bounty, escrow 5 ETH, and let
-                      curated contributors deliver launch narrative assets.
-                      Milestones are reviewed weekly, funds release
-                      automatically, and disputes escalate to the jury when
-                      needed.
-                    </p>
-                    <Separator />
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="rounded-2xl border border-border/50 bg-background/70 p-4">
-                        <p className="text-xs uppercase tracking-[0.2em] text-foreground/60">
-                          Reward in escrow
-                        </p>
-                        <p className="mt-2 text-xl font-semibold">5 ETH</p>
-                        <p className="text-xs text-foreground/60">
-                          Released upon acceptance
-                        </p>
-                      </div>
-                      <div className="rounded-2xl border border-border/50 bg-background/70 p-4">
-                        <p className="text-xs uppercase tracking-[0.2em] text-foreground/60">
-                          Timeline
-                        </p>
-                        <p className="mt-2 text-xl font-semibold">10 days</p>
-                        <p className="text-xs text-foreground/60">
-                          Milestones reviewed weekly
-                        </p>
-                      </div>
-                    </div>
-                    <div className="rounded-2xl border border-border/50 bg-background/70 p-4">
-                      <p className="text-xs uppercase tracking-[0.2em] text-foreground/60">
-                        Deliverables locked in contract
-                      </p>
-                      <ul className="mt-3 space-y-2 text-sm text-foreground/80">
-                        <li className="flex items-center gap-2">
-                          <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                          Launch narrative & product messaging
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                          Visual system for social rollout
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                          Incentive breakdown for contributors
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
           </section>
 
-          <section className="mt-32 space-y-12">
-            <div className="space-y-4">
+          {/* Animated Title */}
+          <section className="mt-24">
+            <div className="text-center mb-16">
               <Badge
                 variant="secondary"
-                className="rounded-full px-4 py-1 text-xs uppercase tracking-[0.2em]"
+                className="rounded-full px-4 py-1 text-xs uppercase tracking-[0.2em] border-gray-300 bg-gray-50 text-gray-600"
               >
-                Bounty Stack
+                Core Features
               </Badge>
-              <div className="max-w-3xl space-y-6">
-                <h2 className="text-balance text-3xl font-semibold sm:text-4xl lg:text-5xl">
-                  Every bounty touchpoint, from recruitment to delivery, already
-                  automated.
-                </h2>
-                <p className="text-lg text-foreground/80">
-                  We built nine production contracts so you can orchestrate
-                  complex programs without duct tape. Spin up a bounty today,
-                  layer in recruitment filters tomorrow, and keep reputation
-                  sticky the whole way.
-                </p>
+              <div className="mt-8">
+                <Gravity gravity={{ x: 0, y: 1 }} className="h-32 w-full">
+                  {["Built", "for", "production"].map((word, i) => (
+                    <MatterBody
+                      key={word}
+                      matterBodyOptions={{ friction: 0.3, restitution: 0.6 }}
+                      x={`${15 + i * 30}%`}
+                      y="5%"
+                    >
+                      <span className="inline-block rounded-full bg-[#0EA885] px-8 py-3 text-2xl font-bold text-white sm:text-3xl lg:text-4xl shadow-lg">
+                        {word}
+                      </span>
+                    </MatterBody>
+                  ))}
+                </Gravity>
               </div>
             </div>
+          </section>
 
-            <div className="grid gap-6 md:grid-cols-3">
-              {capabilityGroups.map((item) => (
-                <Card
-                  key={item.title}
-                  className="h-full border-primary/15 bg-white/85 shadow-sm"
+          {/* All Features - Side by Side */}
+          <section className="mt-24 space-y-20">
+            {allFeatures.map((feature, index) => (
+              <div
+                key={feature.title}
+                className={`grid gap-12 lg:grid-cols-2 lg:items-center ${
+                  index % 2 === 1 ? "lg:flex-row-reverse" : ""
+                }`}
+              >
+                {/* Safari Browser Preview */}
+                <div
+                  className={`order-1 ${
+                    index % 2 === 1 ? "lg:order-2" : "lg:order-1"
+                  }`}
                 >
-                  <CardHeader className="space-y-5">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                      <item.icon className="h-6 w-6" />
+                  <Safari
+                    url={`quinty.xyz/${feature.title.toLowerCase()}`}
+                    className="w-full"
+                  >
+                    <div className="relative h-full w-full bg-gray-50 p-16">
+                      <div className="relative flex flex-col items-center justify-center gap-8 h-full">
+                        <div className="flex h-40 w-40 items-center justify-center rounded-full bg-gray-100 backdrop-blur-sm shadow-2xl">
+                          <feature.icon className="h-20 w-20 text-gray-600" />
+                        </div>
+                        {feature.status === "Soon" && (
+                          <Badge className="bg-gray-800 text-white px-6 py-2 text-lg font-semibold">
+                            Coming Soon
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                    <CardTitle className="text-xl">{item.title}</CardTitle>
-                    <CardDescription className="text-base leading-relaxed text-foreground/75">
-                      {item.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3 text-sm text-foreground/75">
-                    {item.bullets.map((bullet) => (
-                      <div key={bullet} className="flex items-start gap-3">
-                        <div className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
-                        <span>{bullet}</span>
+                  </Safari>
+                </div>
+
+                {/* Text Side */}
+                <div
+                  className={`order-2 space-y-6 ${
+                    index % 2 === 1 ? "lg:order-1" : "lg:order-2"
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <Badge
+                      variant="outline"
+                      className="rounded-full border-gray-300 bg-gray-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-gray-600"
+                    >
+                      {feature.status}
+                    </Badge>
+                  </div>
+                  <h2 className="text-4xl font-bold sm:text-5xl lg:text-6xl text-foreground">
+                    {feature.title}
+                  </h2>
+                  <div className="text-xl leading-relaxed flex items-center gap-2">
+                    <TextRotate
+                      texts={feature.descriptions}
+                      mainClassName="text-xl font-semibold text-gray-600"
+                      rotationInterval={2500}
+                      staggerFrom="last"
+                      staggerDuration={0.02}
+                    />
+                  </div>
+                  <Button size="lg" className="mt-4">
+                    Learn more
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </section>
+
+          {/* Bounty Stack */}
+          <section className="mt-24">
+            <div className="text-center space-y-4 mb-8">
+              <Badge
+                variant="secondary"
+                className="rounded-full px-4 py-1 text-xs uppercase tracking-[0.2em] border-gray-300 bg-gray-50 text-gray-600"
+              >
+                Full Stack
+              </Badge>
+              <h2 className="text-3xl font-semibold sm:text-4xl text-foreground">
+                Everything you need
+              </h2>
+            </div>
+            <div className="rounded-3xl border border-gray-200 bg-white/90 p-8">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                {bountyStackFeatures.map((feature) => (
+                  <div
+                    key={feature}
+                    className="rounded-xl border border-gray-200 bg-white/60 px-4 py-3 text-center text-sm font-medium backdrop-blur-sm transition-all hover:scale-105 hover:border-gray-300 hover:bg-gray-50"
+                  >
+                    {feature}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Contracts */}
+          <section className="mt-24">
+            <Card className="border border-gray-200 bg-white/90">
+              <CardContent className="px-6 py-8">
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-2xl font-semibold text-foreground">
+                        Deployed on Base Sepolia
+                      </h3>
+                      <p className="text-sm text-gray-500 mt-2">
+                        9 contracts · 68 tests passing
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="h-fit border-gray-300 bg-gray-50 text-gray-600">
+                      <Network className="mr-2 h-3 w-3" />
+                      Chain ID 84532
+                    </Badge>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {contractReferences.map((reference) => (
+                      <div
+                        key={reference.address}
+                        className="rounded-xl border border-gray-200 bg-background/50 p-3 hover:border-gray-300 transition-colors"
+                      >
+                        <p className="text-xs font-semibold text-gray-700">{reference.label}</p>
+                        <code className="mt-1 block break-all text-[10px] text-gray-500">
+                          {reference.address}
+                        </code>
                       </div>
                     ))}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <Card className="border-border/60 bg-card/90">
-              <CardContent className="grid gap-8 px-6 py-10 sm:px-12 lg:grid-cols-[0.6fr_1.4fr] lg:items-center">
-                <div className="space-y-4">
-                  <Badge
-                    variant="secondary"
-                    className="rounded-full px-4 py-1 text-xs uppercase tracking-[0.2em]"
-                  >
-                    How it feels
-                  </Badge>
-                  <h3 className="text-2xl font-semibold sm:text-3xl">
-                    Brief, approve, release, repeat. Everything else is defined
-                    in the contract.
-                  </h3>
-                  <p className="text-base leading-relaxed text-foreground/75">
-                    A single flow carries work from open recruitment into bounty
-                    delivery. Reviewers collaborate in private, contributors
-                    focus on execution, and the protocol handles payouts the
-                    moment milestones clear.
-                  </p>
-                </div>
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <div className="space-y-4 rounded-2xl border border-border/60 bg-background/80 p-6">
-                    <p className="text-xs uppercase tracking-[0.2em] text-foreground/60">
-                      For bounty creators
-                    </p>
-                    <ul className="space-y-3 text-sm text-foreground/75">
-                      <li>Scope the work with blind submission templates.</li>
-                      <li>Lock ETH in escrow with fallback slashing.</li>
-                      <li>Invite reviewers and escalate disputes instantly.</li>
-                    </ul>
-                  </div>
-                  <div className="space-y-4 rounded-2xl border border-border/60 bg-background/80 p-6">
-                    <p className="text-xs uppercase tracking-[0.2em] text-foreground/60">
-                      For contributors
-                    </p>
-                    <ul className="space-y-3 text-sm text-foreground/75">
-                      <li>
-                        Get discovered via Oprec funnels and team formation.
-                      </li>
-                      <li>Submit encrypted work, reveal only when selected.</li>
-                      <li>
-                        Earn soulbound milestones that stack across seasons.
-                      </li>
-                    </ul>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </section>
 
-          <section className="mt-32 space-y-12">
-            <div className="max-w-3xl space-y-6">
-              <Badge
-                variant="secondary"
-                className="rounded-full px-4 py-1 text-xs uppercase tracking-[0.2em]"
-              >
-                Program Modules
-              </Badge>
-              <h2 className="text-balance text-3xl font-semibold sm:text-4xl lg:text-5xl">
-                More than bounties—run grants, crowdfunding, and growth ops from
-                one surface.
-              </h2>
-              <p className="text-lg text-foreground/80">
-                Each module ships with production-ready contracts,
-                documentation, and ABIs. Mix and match to support your ecosystem
-                without leaving the Quinty dashboard.
+          {/* CTA with LinkPreview */}
+          <section className="mt-24 text-center rounded-3xl border border-gray-200 bg-white/90 px-8 py-16">
+            <h2 className="text-3xl font-semibold sm:text-4xl lg:text-5xl mb-6 text-foreground">
+              Ready to launch?
+            </h2>
+            <div className="mt-6 text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              <p className="mb-4">
+                Start building with{" "}
+                <LinkPreview
+                  url="https://quinty.xyz/bounties"
+                  className="font-bold text-[#0EA885] hover:text-[#0EA885]/80 transition-colors"
+                >
+                  Quinty Bounties
+                </LinkPreview>{" "}
+                and launch your first on-chain program today.
+              </p>
+              <p>
+                Need help getting started? Check out our{" "}
+                <LinkPreview
+                  url="https://quinty.xyz/docs"
+                  className="font-bold text-[#0EA885] hover:text-[#0EA885]/80 transition-colors"
+                >
+                  Documentation
+                </LinkPreview>{" "}
+                or reach out to{" "}
+                <LinkPreview
+                  url="mailto:team@quinty.xyz"
+                  className="font-bold text-[#0EA885] hover:text-[#0EA885]/80 transition-colors"
+                >
+                  our team
+                </LinkPreview>
+                .
               </p>
             </div>
-
-            <div className="grid gap-5 md:grid-cols-2">
-              {programModules.map((module) => (
-                <Card
-                  key={module.name}
-                  className="border-primary/15 bg-white/85 shadow-sm"
-                >
-                  <CardHeader className="space-y-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                      <module.icon className="h-6 w-6" />
-                    </div>
-                    <CardTitle>{module.name}</CardTitle>
-                    <CardDescription className="text-base leading-relaxed text-foreground/75">
-                      {module.summary}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3 text-sm text-foreground/75">
-                    {module.bullets.map((bullet) => (
-                      <div key={bullet} className="flex items-start gap-3">
-                        <div className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary" />
-                        <span>{bullet}</span>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="mt-12 flex flex-wrap justify-center gap-4">
+              <Button
+                size="lg"
+                onClick={() => router.push("/bounties?create=true")}
+                className="text-lg px-8"
+              >
+                Launch a bounty
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => router.push("/docs")}
+                className="text-lg px-8"
+              >
+                Read docs
+              </Button>
             </div>
-          </section>
-
-          <section className="mt-32 space-y-6">
-            <Badge
-              variant="secondary"
-              className="rounded-full px-4 py-1 text-xs uppercase tracking-[0.2em]"
-            >
-              On-Chain Proof
-            </Badge>
-            <Card className="border-primary/15 bg-white/85">
-              <CardContent className="flex flex-col gap-8 px-6 py-8 sm:px-10 lg:flex-row lg:items-start lg:justify-between">
-                <div className="max-w-xl space-y-4">
-                  <h2 className="text-3xl font-semibold sm:text-4xl">
-                    Fully deployed on Base Sepolia.
-                  </h2>
-                  <p className="text-sm leading-relaxed text-foreground/70 sm:text-base">
-                    Nine verified contracts, 68 tests green, and ABIs waiting in{" "}
-                    <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
-                      /contracts
-                    </code>{" "}
-                    so you can wire the frontend in minutes.
-                  </p>
-                  <ul className="grid gap-3 text-sm text-foreground/75 sm:grid-cols-2">
-                    <li className="flex items-center gap-2">
-                      <ShieldCheck className="h-4 w-4 text-primary" />
-                      Base Sepolia · Chain ID 84532
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Trophy className="h-4 w-4 text-primary" />
-                      Tests · 68 / 68 passing
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <Network className="h-4 w-4 text-primary" />
-                      ABIs · fe-quinty/contracts
-                    </li>
-                  </ul>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2 lg:w-[420px]">
-                  {contractReferences.map((reference) => (
-                    <div
-                      key={reference.address}
-                      className="rounded-xl border border-primary/15 bg-background/80 p-4 text-xs text-foreground/75 shadow-sm"
-                    >
-                      <p className="text-sm font-semibold text-foreground">
-                        {reference.label}
-                      </p>
-                      <code className="mt-2 block break-all text-[11px] text-foreground/60">
-                        {reference.address}
-                      </code>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-
-          <section className="mt-32 rounded-3xl border border-primary/15 bg-gradient-to-br from-white via-[#f3edff] to-white">
-            <div className="grid gap-12 px-6 py-12 sm:px-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-              <div className="space-y-6">
-                <Badge
-                  variant="secondary"
-                  className="rounded-full px-4 py-1 text-xs uppercase tracking-[0.2em]"
-                >
-                  Work With Us
-                </Badge>
-                <h2 className="text-3xl font-semibold sm:text-4xl">
-                  Ready to run your first program end-to-end on-chain?
-                </h2>
-                <p className="text-lg text-foreground/80">
-                  We’ll help you scope the bounty, configure governance
-                  settings, and preflight contributor onboarding. From there,
-                  Quinty automates the heavy lifting.
-                </p>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-foreground/75">
-                  <div className="flex items-center gap-2">
-                    <Inbox className="h-4 w-4 text-primary" />
-                    <a
-                      href="mailto:team@quinty.xyz"
-                      className="hover:text-primary"
-                    >
-                      team@quinty.xyz
-                    </a>
-                  </div>
-                  <Separator
-                    orientation="vertical"
-                    className="hidden h-4 sm:block"
-                  />
-                  <span>Next-day onboarding calls available</span>
-                </div>
-                <div className="flex flex-wrap items-center gap-4">
-                  <Button
-                    size="lg"
-                    onClick={() => router.push("/bounties?create=true")}
-                  >
-                    Launch a bounty
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    onClick={() => router.push("/docs")}
-                  >
-                    Browse the docs
-                  </Button>
-                </div>
-              </div>
-              <div className="space-y-6 rounded-2xl border border-primary/20 bg-background/75 p-6">
-                <p className="text-xs uppercase tracking-[0.2em] text-foreground/60">
-                  Why teams choose Quinty
-                </p>
-                <ul className="space-y-4 text-sm text-foreground/80">
-                  <li className="flex items-start gap-3">
-                    <ShieldCheck className="mt-0.5 h-4 w-4 text-primary" />
-                    <span>
-                      Designed with community governance in mind—no hidden
-                      levers.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <Users className="mt-0.5 h-4 w-4 text-primary" />
-                    <span>
-                      Reputation and soulbound badges keep talent accountable
-                      over multiple seasons.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <Sparkles className="mt-0.5 h-4 w-4 text-primary" />
-                    <span>
-                      ZK, grants, crowdfunding, and disputes all ship as native
-                      modules.
-                    </span>
-                  </li>
-                </ul>
-              </div>
+            <div className="mt-8 flex items-center justify-center gap-2 text-base text-gray-500">
+              <Mail className="h-5 w-5" />
+              <a href="mailto:team@quinty.xyz" className="hover:text-[#0EA885] transition-colors">
+                team@quinty.xyz
+              </a>
             </div>
           </section>
         </div>
       </main>
 
-      <footer className="border-t border-border/60">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10 text-sm text-foreground/80 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-0">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-foreground">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                <Target className="h-4 w-4 text-primary" />
-              </div>
-              <span className="text-base font-semibold text-foreground">
-                Quinty
-              </span>
-            </div>
-            <p className="max-w-md">
-              The decentralized bounty studio looking after both sides of the
-              table—funders and contributors alike.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-4 text-xs uppercase tracking-wide">
-            <span>Base Sepolia</span>
-            <Separator orientation="vertical" className="h-4" />
-            <span>Transparent governance</span>
-            <Separator orientation="vertical" className="h-4" />
-            <span>Open source ethos</span>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
