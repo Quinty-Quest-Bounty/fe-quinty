@@ -23,6 +23,7 @@ import { Target, ShieldCheck, Menu, CheckCircle2, Sparkles, X } from "lucide-rea
 import { CONTRACT_ADDRESSES, ZK_VERIFICATION_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
 import { wagmiConfig } from "../utils/web3";
 import { useAlertDialog } from "@/hooks/useAlertDialog";
+import { useReclaimVerification } from "@/hooks/useReclaimVerification";
 
 const navItems = [
   { name: "Bounties", link: "/bounties" },
@@ -39,6 +40,7 @@ export default function Header() {
   const { writeContract, data: hash, isPending } = useWriteContract();
   const { isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
   const { showAlert } = useAlertDialog();
+  const { verifyTwitter, isVerifying: isReclaimVerifying, error: reclaimError } = useReclaimVerification();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
@@ -74,38 +76,62 @@ export default function Header() {
     checkVerification();
   }, [address, zkVerificationAddress, isConfirmed]);
 
-  // Handle verification submission
+  // Handle verification submission with Reclaim Protocol
   const handleVerify = async () => {
-    if (!verifyForm.socialHandle) {
-      showAlert({
-        title: "Missing Information",
-        description: "Please enter your social handle (e.g., Twitter/X username)",
-        variant: "warning",
-      });
-      return;
-    }
-
     try {
-      const placeholderProof = new Uint8Array(32);
+      console.log("Starting verification process...");
 
+      showAlert({
+        title: "Starting Verification",
+        description: "Opening Reclaim Protocol verification window. Please complete Twitter verification.",
+      });
+
+      // Start Reclaim verification
+      const result = await verifyTwitter();
+
+      console.log("Verification result:", result);
+
+      if (!result) {
+        console.log("Verification cancelled or failed");
+        showAlert({
+          title: "Verification Cancelled",
+          description: reclaimError || "Twitter verification was cancelled or failed. Please try again.",
+          variant: "warning",
+        });
+        return;
+      }
+
+      // Extract Twitter handle from claim data
+      const twitterHandle = result.claimData.parameters || verifyForm.socialHandle || "unknown";
+
+      console.log("Submitting proof to smart contract...");
+      console.log("Twitter handle:", twitterHandle);
+      console.log("Institution:", verifyForm.institutionName);
+
+      // Submit proof to smart contract
       writeContract({
         address: zkVerificationAddress as `0x${string}`,
         abi: ZK_VERIFICATION_ABI,
         functionName: "submitZKProof",
         args: [
-          `0x${Array.from(placeholderProof).map(b => b.toString(16).padStart(2, '0')).join('')}`,
-          verifyForm.socialHandle,
-          verifyForm.institutionName,
+          result.proof,
+          twitterHandle,
+          verifyForm.institutionName || "",
         ],
+      });
+
+      showAlert({
+        title: "Verification Successful",
+        description: `Your Twitter account ${twitterHandle ? '@' + twitterHandle : ''} has been verified with zero-knowledge proof! Confirming transaction...`,
       });
 
       setVerifyForm({ socialHandle: "", institutionName: "" });
       setShowVerifyModal(false);
     } catch (error) {
-      console.error("Error verifying:", error);
+      console.error("❌ Error in verification flow:", error);
       showAlert({
         title: "Verification Failed",
-        description: "Unable to verify your identity. Please try again.",
+        description: reclaimError || (error instanceof Error ? error.message : "Unable to verify your identity. Please try again."),
         variant: "destructive",
       });
     }
@@ -266,26 +292,27 @@ export default function Header() {
             </DialogTitle>
             <DialogDescription className="text-base">
               {isVerified
-                ? "You're already verified! Update your information below if needed."
-                : "Link your social identity to create funding requests, grants, and crowdfunding campaigns."}
+                ? "You're already verified! Your Twitter account is linked with zero-knowledge proof."
+                : "Verify your Twitter account using Reclaim Protocol's zero-knowledge proof technology."}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-5 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="socialHandle" className="text-sm font-medium">
-                Social Handle <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="socialHandle"
-                placeholder="@yourhandle"
-                value={verifyForm.socialHandle}
-                onChange={(e) => setVerifyForm({ ...verifyForm, socialHandle: e.target.value })}
-                className="h-11"
-              />
-              <p className="text-xs text-muted-foreground">
-                Your Twitter/X username or other social handle
-              </p>
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+              <div className="flex gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">How It Works</p>
+                  <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+                    <li>Click "Verify with Reclaim Protocol" below</li>
+                    <li>Log in to your Twitter/X account securely</li>
+                    <li>Reclaim generates a zero-knowledge proof</li>
+                    <li>Your Twitter identity is verified without exposing credentials</li>
+                  </ol>
+                </div>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -298,19 +325,23 @@ export default function Header() {
                 value={verifyForm.institutionName}
                 onChange={(e) => setVerifyForm({ ...verifyForm, institutionName: e.target.value })}
                 className="h-11"
+                disabled={isReclaimVerifying || isPending}
               />
+              <p className="text-xs text-muted-foreground">
+                Optional: Add your organization for additional credibility
+              </p>
             </div>
 
             <div className="rounded-xl border border-border bg-muted/50 p-4">
               <div className="flex gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                  <ShieldCheck className="h-4 w-4 text-primary" />
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-green-100 dark:bg-green-950">
+                  <ShieldCheck className="h-4 w-4 text-green-600 dark:text-green-400" />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm font-medium">Privacy First</p>
+                  <p className="text-sm font-medium">Privacy Protected</p>
                   <p className="text-xs text-muted-foreground">
-                    Using placeholder ZK verification. In production, we'll integrate with Reclaim Protocol
-                    to verify your social accounts without revealing credentials.
+                    Powered by Reclaim Protocol. Your credentials are never exposed.
+                    Only cryptographic proof of ownership is generated and verified on-chain.
                   </p>
                 </div>
               </div>
@@ -321,24 +352,32 @@ export default function Header() {
             <Button
               variant="outline"
               onClick={() => setShowVerifyModal(false)}
-              disabled={isPending}
+              disabled={isReclaimVerifying || isPending}
             >
               Cancel
             </Button>
             <Button
               onClick={handleVerify}
-              disabled={isPending}
+              disabled={isReclaimVerifying || isPending}
               className="gap-2"
             >
-              {isPending ? (
+              {isReclaimVerifying ? (
                 <>
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
-                  Verifying...
+                  Opening Reclaim...
+                </>
+              ) : isPending ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                  Submitting Proof...
                 </>
               ) : isVerified ? (
                 "Update Verification"
               ) : (
-                "Verify Identity"
+                <>
+                  <ShieldCheck className="h-4 w-4" />
+                  Verify with Reclaim Protocol
+                </>
               )}
             </Button>
           </DialogFooter>

@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { Gravity, MatterBody } from "../components/ui/gravity";
 import { Footer } from "../components/Footer";
 import { Safari } from "../components/ui/safari";
 import DotPattern from "../components/ui/dot-pattern";
@@ -201,35 +200,36 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Animated Title */}
+          {/* Platform Preview - Safari Component */}
           <section className="mt-24">
-            <div className="text-center mb-16">
+            <div className="text-center mb-12">
               <Badge
                 variant="secondary"
                 className="rounded-full px-4 py-1 text-xs uppercase tracking-[0.2em] border-gray-300 bg-gray-50 text-gray-600"
               >
-                Core Features
+                Platform Preview
               </Badge>
-              <div className="mt-8">
-                <Gravity gravity={{ x: 0, y: 1 }} className="h-32 w-full">
-                  {["Built", "for", "production"].map((word, i) => (
-                    <MatterBody
-                      key={word}
-                      matterBodyOptions={{ friction: 0.3, restitution: 0.6 }}
-                      x={`${15 + i * 30}%`}
-                      y="5%"
-                    >
-                      <span className="inline-block rounded-full bg-[#0EA885] px-8 py-3 text-2xl font-bold text-white sm:text-3xl lg:text-4xl shadow-lg">
-                        {word}
-                      </span>
-                    </MatterBody>
-                  ))}
-                </Gravity>
-              </div>
+              <h2 className="mt-6 text-3xl font-semibold sm:text-4xl text-foreground">
+                Built for production
+              </h2>
             </div>
+
+            <Safari url="quinty.xyz" className="w-full">
+              <div className="relative h-full w-full bg-gradient-to-br from-gray-50 to-gray-100 p-16">
+                <div className="relative flex flex-col items-center justify-center gap-8 h-full">
+                  <div className="flex h-40 w-40 items-center justify-center rounded-full bg-white backdrop-blur-sm shadow-2xl border border-gray-200">
+                    <Target className="h-20 w-20 text-[#0EA885]" />
+                  </div>
+                  <div className="text-center space-y-2">
+                    <h3 className="text-2xl font-bold text-gray-900">Quinty Platform</h3>
+                    <p className="text-gray-600">Complete bounty studio for ecosystems</p>
+                  </div>
+                </div>
+              </div>
+            </Safari>
           </section>
 
-          {/* All Features - Side by Side */}
+          {/* All Features - Side by Side with Image Placeholders */}
           <section className="mt-24 space-y-20">
             {allFeatures.map((feature, index) => (
               <div
@@ -238,29 +238,30 @@ export default function Home() {
                   index % 2 === 1 ? "lg:flex-row-reverse" : ""
                 }`}
               >
-                {/* Safari Browser Preview */}
+                {/* Image Placeholder */}
                 <div
                   className={`order-1 ${
                     index % 2 === 1 ? "lg:order-2" : "lg:order-1"
                   }`}
                 >
-                  <Safari
-                    url={`quinty.xyz/${feature.title.toLowerCase()}`}
-                    className="w-full"
-                  >
-                    <div className="relative h-full w-full bg-gray-50 p-16">
-                      <div className="relative flex flex-col items-center justify-center gap-8 h-full">
-                        <div className="flex h-40 w-40 items-center justify-center rounded-full bg-gray-100 backdrop-blur-sm shadow-2xl">
-                          <feature.icon className="h-20 w-20 text-gray-600" />
-                        </div>
-                        {feature.status === "Soon" && (
-                          <Badge className="bg-gray-800 text-white px-6 py-2 text-lg font-semibold">
-                            Coming Soon
-                          </Badge>
-                        )}
+                  <div className="relative w-full aspect-[16/10] rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 overflow-hidden group hover:border-[#0EA885] transition-colors">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8">
+                      <feature.icon className="h-16 w-16 text-gray-400 group-hover:text-[#0EA885] transition-colors" />
+                      <div className="text-center space-y-2">
+                        <p className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                          {feature.title} Preview
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          Screenshot placeholder - Add your image here
+                        </p>
                       </div>
+                      {feature.status === "Soon" && (
+                        <Badge className="bg-gray-800 text-white px-4 py-1.5 text-sm">
+                          Coming Soon
+                        </Badge>
+                      )}
                     </div>
-                  </Safari>
+                  </div>
                 </div>
 
                 {/* Text Side */}
