@@ -41,6 +41,7 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Separator } from "../../../components/ui/separator";
 import { Checkbox } from "../../../components/ui/checkbox";
+import { Alert, AlertDescription } from "../../../components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -100,14 +101,27 @@ interface Bounty {
   selectedWinners: readonly string[];
   selectedSubmissionIds: readonly bigint[];
   metadataCid?: string;
+  hasOprec?: boolean;
+  oprecDeadline?: bigint;
+}
+
+interface OprecApplication {
+  applicant: string;
+  teamMembers: readonly string[];
+  workExamples: string;
+  skillDescription: string;
+  timestamp: bigint;
+  approved: boolean;
+  rejected: boolean;
 }
 
 const BountyStatusEnum = [
-  "Open",
-  "Pending Reveal",
-  "Resolved",
-  "Disputed",
-  "Expired",
+  "Open Rec", // 0: OPREC
+  "Open", // 1: OPEN
+  "Pending Reveal", // 2: PENDING_REVEAL
+  "Resolved", // 3: RESOLVED
+  "Disputed", // 4: DISPUTED
+  "Expired", // 5: EXPIRED
 ];
 
 export default function BountyDetailPage() {
@@ -121,6 +135,7 @@ export default function BountyDetailPage() {
   const [metadata, setMetadata] = useState<BountyMetadata | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [submissionCid, setSubmissionCid] = useState("");
+  const [teamMembers, setTeamMembers] = useState<string[]>([]);
   const [selectedSubmissions, setSelectedSubmissions] = useState<number[]>([]);
   const [winnerRanks, setWinnerRanks] = useState<{ [subId: number]: number }>(
     {}
@@ -132,6 +147,17 @@ export default function BountyDetailPage() {
   const [copied, setCopied] = useState(false);
   const [viewingCid, setViewingCid] = useState<string | null>(null);
   const [viewingTitle, setViewingTitle] = useState<string>("");
+
+  // OPREC related state
+  const [oprecApplications, setOprecApplications] = useState<OprecApplication[]>([]);
+  const [oprecForm, setOprecForm] = useState({
+    teamMembers: [""],
+    workExamples: "",
+    skillDescription: "",
+  });
+  const [selectedApplicationIds, setSelectedApplicationIds] = useState<number[]>([]);
+  const [isApprovedParticipant, setIsApprovedParticipant] = useState(false);
+  const [userOprecApplication, setUserOprecApplication] = useState<OprecApplication | null>(null);
 
   const { writeContract, data: hash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
@@ -161,6 +187,8 @@ export default function BountyDetailPage() {
           slashPercent,
           selectedWinners,
           selectedSubmissionIds,
+          hasOprec,
+          oprecDeadline,
         ] = bountyArray;
 
         // Get submissions
@@ -205,7 +233,25 @@ export default function BountyDetailPage() {
           selectedWinners,
           selectedSubmissionIds,
           metadataCid,
+          hasOprec,
+          oprecDeadline,
         });
+
+        // Load OPREC applications if hasOprec
+        if (hasOprec) {
+          await loadOprecApplications();
+        }
+
+        // Check if current user is approved participant
+        if (address && hasOprec) {
+          const isApproved = await readContract(wagmiConfig, {
+            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+            abi: QUINTY_ABI,
+            functionName: "approvedParticipants",
+            args: [BigInt(bountyId), address],
+          });
+          setIsApprovedParticipant(isApproved as boolean);
+        }
 
         // Load metadata
         if (metadataCid) {
@@ -243,21 +289,172 @@ export default function BountyDetailPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const submitSolution = async () => {
-    if (!bounty || !submissionCid.trim()) return;
-    const depositAmount = bounty.amount / BigInt(10);
+  // Load OPREC applications
+  const loadOprecApplications = async () => {
+    try {
+      const appCount = await readContract(wagmiConfig, {
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+        abi: QUINTY_ABI,
+        functionName: "getOprecApplicationCount",
+        args: [BigInt(bountyId)],
+      });
+
+      const apps: OprecApplication[] = [];
+      for (let i = 0; i < Number(appCount); i++) {
+        const appData = await readContract(wagmiConfig, {
+          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+          abi: QUINTY_ABI,
+          functionName: "getOprecApplication",
+          args: [BigInt(bountyId), BigInt(i)],
+        });
+        const [applicant, teamMembers, workExamples, skillDescription, timestamp, approved, rejected] = appData as [
+          string,
+          readonly string[],
+          string,
+          string,
+          bigint,
+          boolean,
+          boolean
+        ];
+        const app = { applicant, teamMembers, workExamples, skillDescription, timestamp, approved, rejected };
+        apps.push(app);
+
+        // Check if this is current user's application
+        if (address && applicant.toLowerCase() === address.toLowerCase()) {
+          setUserOprecApplication(app);
+        }
+      }
+      setOprecApplications(apps);
+    } catch (error) {
+      console.error("Error loading OPREC applications:", error);
+    }
+  };
+
+  // Apply to OPREC
+  const applyToOprec = async () => {
+    if (!oprecForm.workExamples.trim() || !oprecForm.skillDescription.trim()) {
+      showAlert({
+        title: "Missing Information",
+        description: "Please provide work examples and skill description",
+      });
+      return;
+    }
+
+    try {
+      const validTeamMembers = oprecForm.teamMembers
+        .filter(addr => addr.trim())
+        .filter(addr => /^0x[a-fA-F0-9]{40}$/.test(addr.trim()));
+
+      writeContract({
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+        abi: QUINTY_ABI,
+        functionName: "applyToOprec",
+        args: [
+          BigInt(bountyId),
+          validTeamMembers as `0x${string}`[],
+          oprecForm.workExamples,
+          oprecForm.skillDescription,
+        ],
+      });
+
+      setOprecForm({ teamMembers: [""], workExamples: "", skillDescription: "" });
+    } catch (error) {
+      console.error("Error applying to OPREC:", error);
+      showAlert({
+        title: "Application Failed",
+        description: error instanceof Error ? error.message : "Failed to submit application",
+      });
+    }
+  };
+
+  // Approve OPREC applications
+  const approveApplications = async () => {
+    if (selectedApplicationIds.length === 0) return;
 
     try {
       writeContract({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
+        functionName: "approveOprecApplications",
+        args: [BigInt(bountyId), selectedApplicationIds.map(id => BigInt(id))],
+      });
+      setSelectedApplicationIds([]);
+    } catch (error) {
+      console.error("Error approving applications:", error);
+    }
+  };
+
+  // Reject OPREC applications
+  const rejectApplications = async () => {
+    if (selectedApplicationIds.length === 0) return;
+
+    try {
+      writeContract({
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+        abi: QUINTY_ABI,
+        functionName: "rejectOprecApplications",
+        args: [BigInt(bountyId), selectedApplicationIds.map(id => BigInt(id))],
+      });
+      setSelectedApplicationIds([]);
+    } catch (error) {
+      console.error("Error rejecting applications:", error);
+    }
+  };
+
+  // End OPREC phase
+  const endOprecPhase = async () => {
+    try {
+      writeContract({
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+        abi: QUINTY_ABI,
+        functionName: "endOprecPhase",
+        args: [BigInt(bountyId)],
+      });
+    } catch (error) {
+      console.error("Error ending OPREC phase:", error);
+    }
+  };
+
+  const submitSolution = async () => {
+    if (!bounty || !submissionCid.trim()) {
+      showAlert({
+        title: "Missing Information",
+        description: "Please enter an IPFS CID for your solution",
+      });
+      return;
+    }
+
+    // Check OPREC approval if hasOprec
+    if (bounty.hasOprec && !isApprovedParticipant) {
+      showAlert({
+        title: "Not Approved",
+        description: "You must be approved in the OPREC phase to submit a solution",
+      });
+      return;
+    }
+
+    const depositAmount = bounty.amount / BigInt(10);
+
+    try {
+      const validTeamMembers = teamMembers
+        .filter(addr => addr.trim())
+        .filter(addr => /^0x[a-fA-F0-9]{40}$/.test(addr.trim()));
+
+      writeContract({
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+        abi: QUINTY_ABI,
         functionName: "submitSolution",
-        args: [BigInt(bountyId), submissionCid],
+        args: [BigInt(bountyId), submissionCid, validTeamMembers as `0x${string}`[]],
         value: depositAmount,
       });
       setSubmissionCid("");
+      setTeamMembers([]);
     } catch (error) {
       console.error("Error submitting solution:", error);
+      showAlert({
+        title: "Submission Failed",
+        description: error instanceof Error ? error.message : "Failed to submit solution. Please try again.",
+      });
     }
   };
 
@@ -600,8 +797,8 @@ export default function BountyDetailPage() {
 
               <Separator className="my-4" />
 
-              {/* Winners Display */}
-              {bounty.status === 1 && bounty.selectedWinners.length > 0 && (
+              {/* Winners Display - Show on PENDING_REVEAL and after */}
+              {bounty.status >= 2 && bounty.selectedWinners.length > 0 && (
                 <div className="mb-4">
                   <h3 className="text-sm font-semibold mb-2">
                     Selected Winners ({bounty.selectedWinners.length})
@@ -667,8 +864,226 @@ export default function BountyDetailPage() {
                 </div>
               )}
 
-              {/* Submit Solution Section */}
-              {bounty.status === 0 && !isCreator && (
+              {/* Apply to OPREC Section */}
+              {bounty.hasOprec && bounty.status === 0 && !isCreator && (
+                <div className="mb-4">
+                  {userOprecApplication ? (
+                    // User already applied
+                    <Card className={
+                      userOprecApplication.approved
+                        ? "border-green-200 bg-green-50 dark:bg-green-950"
+                        : userOprecApplication.rejected
+                        ? "border-red-200 bg-red-50 dark:bg-red-950"
+                        : "border-yellow-200 bg-yellow-50 dark:bg-yellow-950"
+                    }>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          {userOprecApplication.approved
+                            ? "✅ OPREC Application Approved"
+                            : userOprecApplication.rejected
+                            ? "❌ OPREC Application Rejected"
+                            : "⏳ OPREC Application Pending"}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="space-y-2 text-sm">
+                          {userOprecApplication.approved && (
+                            <p className="text-green-700 dark:text-green-300">
+                              Your application has been approved! You can submit solutions when bounty status changes to OPEN.
+                            </p>
+                          )}
+                          {userOprecApplication.rejected && (
+                            <p className="text-red-700 dark:text-red-300">
+                              Your application was rejected by the bounty creator.
+                            </p>
+                          )}
+                          {!userOprecApplication.approved && !userOprecApplication.rejected && (
+                            <p className="text-yellow-700 dark:text-yellow-300">
+                              Your application is pending review by the bounty creator.
+                            </p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    // User hasn't applied yet
+                    <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          Apply to OPREC (Open Recruitment)
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="space-y-3">
+                          <p className="text-sm text-muted-foreground">
+                            Deadline: {new Date(Number(bounty.oprecDeadline) * 1000).toLocaleString()}
+                          </p>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Team Members (Optional)</label>
+                          {oprecForm.teamMembers.map((member, idx) => (
+                            <div key={idx} className="flex gap-2">
+                              <Input
+                                placeholder="0x..."
+                                value={member}
+                                onChange={(e) => {
+                                  const newMembers = [...oprecForm.teamMembers];
+                                  newMembers[idx] = e.target.value;
+                                  setOprecForm({ ...oprecForm, teamMembers: newMembers });
+                                }}
+                                className="flex-1"
+                              />
+                              {idx === oprecForm.teamMembers.length - 1 && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setOprecForm({ ...oprecForm, teamMembers: [...oprecForm.teamMembers, ""] })}
+                                >
+                                  +
+                                </Button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Work Examples *</label>
+                          <textarea
+                            placeholder="Links to your previous work, portfolio, GitHub, etc."
+                            value={oprecForm.workExamples}
+                            onChange={(e) => setOprecForm({ ...oprecForm, workExamples: e.target.value })}
+                            className="w-full p-2 border rounded-md text-sm"
+                            rows={3}
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Skill Description *</label>
+                          <textarea
+                            placeholder="Describe your relevant skills and experience"
+                            value={oprecForm.skillDescription}
+                            onChange={(e) => setOprecForm({ ...oprecForm, skillDescription: e.target.value })}
+                            className="w-full p-2 border rounded-md text-sm"
+                            rows={3}
+                          />
+                        </div>
+
+                          <Button
+                            onClick={applyToOprec}
+                            disabled={isPending || isConfirming}
+                            className="w-full"
+                            size="sm"
+                          >
+                            {isPending || isConfirming ? "Applying..." : "Apply to OPREC"}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              )}
+
+              {/* OPREC Applications Management (Creator Only) */}
+              {bounty.hasOprec && bounty.status === 0 && isCreator && (
+                <div className="mb-4">
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          OPREC Applications ({oprecApplications.length})
+                        </CardTitle>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={endOprecPhase}
+                          disabled={isPending}
+                        >
+                          End OPREC Phase
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="space-y-3">
+                        {oprecApplications.length === 0 ? (
+                          <p className="text-sm text-muted-foreground text-center py-4">
+                            No applications yet
+                          </p>
+                        ) : (
+                          <>
+                            {oprecApplications.map((app, idx) => (
+                              <Card key={idx} className={app.approved ? "bg-green-50 dark:bg-green-950" : app.rejected ? "bg-red-50 dark:bg-red-950" : ""}>
+                                <CardContent className="pt-3 pb-3">
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="flex-1 space-y-2">
+                                      <div className="flex items-center gap-2">
+                                        <input
+                                          type="checkbox"
+                                          checked={selectedApplicationIds.includes(idx)}
+                                          onChange={(e) => {
+                                            if (e.target.checked) {
+                                              setSelectedApplicationIds([...selectedApplicationIds, idx]);
+                                            } else {
+                                              setSelectedApplicationIds(selectedApplicationIds.filter(id => id !== idx));
+                                            }
+                                          }}
+                                          disabled={app.approved || app.rejected}
+                                          className="h-4 w-4"
+                                        />
+                                        <p className="text-sm font-medium">{formatAddress(app.applicant)}</p>
+                                        {app.approved && <Badge variant="default" className="text-xs">Approved</Badge>}
+                                        {app.rejected && <Badge variant="destructive" className="text-xs">Rejected</Badge>}
+                                      </div>
+                                      {app.teamMembers.length > 0 && (
+                                        <p className="text-xs text-muted-foreground">
+                                          Team: {app.teamMembers.map(m => formatAddress(m)).join(", ")}
+                                        </p>
+                                      )}
+                                      <p className="text-xs text-muted-foreground">
+                                        <strong>Work:</strong> {app.workExamples}
+                                      </p>
+                                      <p className="text-xs text-muted-foreground">
+                                        <strong>Skills:</strong> {app.skillDescription}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                            {selectedApplicationIds.length > 0 && (
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  onClick={approveApplications}
+                                  disabled={isPending}
+                                  className="flex-1"
+                                >
+                                  Approve Selected ({selectedApplicationIds.length})
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={rejectApplications}
+                                  disabled={isPending}
+                                  className="flex-1"
+                                >
+                                  Reject Selected ({selectedApplicationIds.length})
+                                </Button>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* Submit Solution Section - Only OPEN (1) status allows submissions */}
+              {bounty.status === 1 && !isCreator && !isExpired && (
                 <div className="mb-4">
                   <Card className="border-primary/20 bg-primary/5">
                     <CardHeader className="pb-3">
@@ -679,6 +1094,14 @@ export default function BountyDetailPage() {
                     </CardHeader>
                     <CardContent className="pt-0">
                       <div className="space-y-3">
+                        {bounty.hasOprec && !isApprovedParticipant && (
+                          <Alert variant="destructive">
+                            <AlertDescription>
+                              You must be approved in the OPREC phase to submit a solution.
+                            </AlertDescription>
+                          </Alert>
+                        )}
+
                         <div className="space-y-1.5">
                           <Input
                             placeholder="Enter IPFS CID of your solution"
@@ -690,10 +1113,49 @@ export default function BountyDetailPage() {
                             Upload your solution to IPFS and paste the CID here
                           </p>
                         </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Team Members (Optional)</label>
+                          <p className="text-xs text-muted-foreground">
+                            Add wallet addresses of team members who contributed to this solution
+                          </p>
+                          {teamMembers.map((member, idx) => (
+                            <div key={idx} className="flex gap-2">
+                              <Input
+                                placeholder="0x..."
+                                value={member}
+                                onChange={(e) => {
+                                  const newMembers = [...teamMembers];
+                                  newMembers[idx] = e.target.value;
+                                  setTeamMembers(newMembers);
+                                }}
+                                className="flex-1 text-sm"
+                              />
+                              {idx === teamMembers.length - 1 ? (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setTeamMembers([...teamMembers, ""])}
+                                >
+                                  +
+                                </Button>
+                              ) : (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setTeamMembers(teamMembers.filter((_, i) => i !== idx))}
+                                >
+                                  -
+                                </Button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+
                         <Button
                           onClick={submitSolution}
                           disabled={
-                            isPending || isConfirming || !submissionCid.trim()
+                            isPending || isConfirming || !submissionCid.trim() || (bounty.hasOprec && !isApprovedParticipant)
                           }
                           className="w-full"
                           size="sm"
@@ -744,7 +1206,7 @@ export default function BountyDetailPage() {
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
-                              {isCreator && bounty.status === 0 && (
+                              {isCreator && bounty.status === 1 && (
                                 <div className="flex items-center gap-2">
                                   <Checkbox
                                     id={`submission-${index}`}
@@ -781,7 +1243,7 @@ export default function BountyDetailPage() {
                                 </div>
                               )}
 
-                              {isWinner && bounty.status === 1 && (
+                              {isWinner && bounty.status === 2 && (
                                 <Badge
                                   variant={
                                     winnerIndex === 0 ? "default" : "secondary"
@@ -862,8 +1324,8 @@ export default function BountyDetailPage() {
                             </div>
                           )}
 
-                          {/* Add Reply */}
-                          {bounty.status === 0 &&
+                          {/* Add Reply - Only on OPEN status */}
+                          {bounty.status === 1 &&
                             (isCreator ||
                               address?.toLowerCase() ===
                                 sub.solver.toLowerCase()) && (
@@ -891,8 +1353,9 @@ export default function BountyDetailPage() {
                               </div>
                             )}
 
-                          {/* Reveal Solution */}
-                          {bounty.status === 1 &&
+                          {/* Reveal Solution - Only for winners on PENDING_REVEAL status */}
+                          {bounty.status === 2 &&
+                            isWinner &&
                             address?.toLowerCase() ===
                               sub.solver.toLowerCase() &&
                             !sub.revealed && (
@@ -927,7 +1390,7 @@ export default function BountyDetailPage() {
                             )}
 
                           {/* Already Revealed */}
-                          {bounty.status === 1 && sub.revealed && isWinner && (
+                          {bounty.status === 2 && sub.revealed && isWinner && (
                             <div className="mt-3 pt-3 border-t flex items-center justify-between">
                               <Badge
                                 variant="outline"
@@ -952,9 +1415,9 @@ export default function BountyDetailPage() {
                   })}
                   </div>
 
-                  {/* Select Winners Button */}
+                  {/* Select Winners Button - Only on OPEN status */}
                   {isCreator &&
-                    bounty.status === 0 &&
+                    bounty.status === 1 &&
                     selectedSubmissions.length > 0 && (
                       <Card className="mt-4 bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
                         <CardContent className="py-3 px-4">

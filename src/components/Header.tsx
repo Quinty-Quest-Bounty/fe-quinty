@@ -30,6 +30,7 @@ const navItems = [
   { name: "Reputation", link: "/reputation" },
   { name: "Airdrops", link: "/airdrops" },
   { name: "Funding", link: "/funding" },
+  { name: "History", link: "/history" },
 ];
 
 export default function Header() {

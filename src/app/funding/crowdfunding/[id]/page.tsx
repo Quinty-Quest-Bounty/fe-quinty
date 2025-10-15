@@ -109,36 +109,44 @@ export default function CrowdfundingDetailPage() {
       });
 
       const [
-        id,
         creator,
         title,
-        description,
-        goal,
-        raisedAmount,
+        projectDetails,
+        socialAccounts,
+        fundingGoal,
+        totalRaised,
         deadline,
-        status,
         createdAt,
-        milestoneCount,
+        status,
+        totalWithdrawn,
       ] = campaignData as [
+        string,
+        string,
+        string,
+        string,
         bigint,
-        string,
-        string,
-        string,
         bigint,
         bigint,
         bigint,
         number,
-        bigint,
         bigint
       ];
 
+      // Get milestone count separately
+      const milestoneCount = await readContract(wagmiConfig, {
+        address: contractAddress as `0x${string}`,
+        abi: CROWDFUNDING_ABI,
+        functionName: "getMilestoneCount",
+        args: [BigInt(campaignId)],
+      });
+
       setCampaign({
-        id: Number(id),
+        id: Number(campaignId),
         creator,
         title,
-        description,
-        goal,
-        raisedAmount,
+        description: projectDetails,
+        goal: fundingGoal,
+        raisedAmount: totalRaised,
         deadline,
         status,
         createdAt,

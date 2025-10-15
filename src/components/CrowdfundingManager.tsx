@@ -18,6 +18,7 @@ import {
 import { parseETH, formatETH, wagmiConfig, formatAddress } from "../utils/web3";
 import { useAlertDialog } from "@/hooks/useAlertDialog";
 import { useShare } from "@/hooks/useShare";
+import FundingCard, { type FundingItem } from "./FundingCard";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -576,75 +577,22 @@ export default function CrowdfundingManager() {
     </Card>
   );
 
-  // Render campaign card
-  const renderCampaignCard = (campaign: Campaign) => {
-    const progress = Number((campaign.totalRaised * BigInt(100)) / campaign.fundingGoal);
-    const isExpired = Number(campaign.deadline) * 1000 < Date.now();
-    const isOwner = address?.toLowerCase() === campaign.creator.toLowerCase();
-
-    return (
-      <Card key={campaign.id} className="hover:shadow-lg transition-shadow">
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <CardTitle className="text-xl mb-2">{campaign.title}</CardTitle>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>By {formatAddress(campaign.creator)}</span>
-                <Badge variant={campaign.status === CampaignStatus.Active ? "default" : "secondary"}>
-                  {statusLabels[campaign.status]}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Progress</span>
-              <span className="font-semibold">
-                {formatETH(campaign.totalRaised)} / {formatETH(campaign.fundingGoal)} ETH
-              </span>
-            </div>
-            <Progress value={Math.min(progress, 100)} />
-            <p className="text-xs text-muted-foreground">{progress}% funded • {campaign.contributionCount} backers</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <Target className="h-4 w-4 text-muted-foreground" />
-              <span>{campaign.milestoneCount} milestones</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span>
-                {isExpired ? "Expired" : new Date(Number(campaign.deadline) * 1000).toLocaleDateString()}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex gap-2">
-            <Button
-              onClick={() => {
-                setSelectedCampaign(campaign);
-                loadMilestones(campaign.id);
-                setShowDetailsModal(true);
-              }}
-              variant="outline"
-              className="flex-1"
-            >
-              View Details
-            </Button>
-            <Button
-              onClick={() => shareLink(`/funding/crowdfunding/${campaign.id}`, "Share this campaign")}
-              variant="ghost"
-              size="sm"
-            >
-              <Share2 className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
+  // Convert Campaign to FundingItem
+  const convertCampaignToFundingItem = (campaign: Campaign): FundingItem => {
+    return {
+      id: campaign.id,
+      creator: campaign.creator,
+      title: campaign.title,
+      description: campaign.projectDetails,
+      deadline: campaign.deadline,
+      createdAt: campaign.createdAt,
+      type: "crowdfunding",
+      goal: campaign.fundingGoal,
+      raisedAmount: campaign.totalRaised,
+      contributorCount: campaign.contributionCount,
+      milestoneCount: campaign.milestoneCount,
+      status: campaign.status,
+    };
   };
 
   // Render details modal
@@ -821,7 +769,9 @@ export default function CrowdfundingManager() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {campaigns.map((campaign) => renderCampaignCard(campaign))}
+              {campaigns.map((campaign) => (
+                <FundingCard key={campaign.id} funding={convertCampaignToFundingItem(campaign)} />
+              ))}
             </div>
           )}
         </div>
@@ -840,7 +790,9 @@ export default function CrowdfundingManager() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {campaigns
                 .filter((c) => c.creator.toLowerCase() === address?.toLowerCase())
-                .map((campaign) => renderCampaignCard(campaign))}
+                .map((campaign) => (
+                  <FundingCard key={campaign.id} funding={convertCampaignToFundingItem(campaign)} />
+                ))}
             </div>
           )}
         </div>

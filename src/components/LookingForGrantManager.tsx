@@ -17,6 +17,7 @@ import {
 import { parseETH, formatETH, wagmiConfig } from "../utils/web3";
 import { useAlertDialog } from "@/hooks/useAlertDialog";
 import { useShare } from "@/hooks/useShare";
+import FundingCard, { type FundingItem } from "./FundingCard";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -601,76 +602,21 @@ export default function LookingForGrantManager() {
     </Card>
   );
 
-  // Render request card
-  const renderRequestCard = (request: FundingRequest) => {
-    const progress = Number((request.totalRaised * BigInt(100)) / request.fundingGoal);
-    const isExpired = Number(request.deadline) * 1000 < Date.now();
-
-    return (
-      <Card key={request.id} className="hover:shadow-lg transition-shadow">
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <CardTitle className="text-xl mb-2">{request.title}</CardTitle>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span className="truncate">By {request.requester.slice(0, 6)}...{request.requester.slice(-4)}</span>
-                <Badge variant={request.status === RequestStatus.ACTIVE ? "default" : "secondary"}>
-                  {statusLabels[request.status]}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Progress</span>
-              <span className="font-semibold">
-                {formatETH(request.totalRaised)} / {formatETH(request.fundingGoal)} ETH
-              </span>
-            </div>
-            <Progress value={Math.min(progress, 100)} />
-            <p className="text-xs text-muted-foreground">{progress}% funded</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span>{request.supporterCount} supporters</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span>
-                {isExpired ? "Expired" : new Date(Number(request.deadline) * 1000).toLocaleDateString()}
-              </span>
-            </div>
-          </div>
-
-          {request.userContribution > 0 && (
-            <div className="bg-blue-50 p-2 rounded text-sm">
-              Your contribution: {formatETH(request.userContribution)} ETH
-            </div>
-          )}
-
-          <div className="flex gap-2">
-            <Button
-              onClick={() => handleViewRequest(request)}
-              variant="outline"
-              className="flex-1"
-            >
-              View Details
-            </Button>
-            <Button
-              onClick={() => shareLink(`/funding/looking-for-grant/${request.id}`, "Share this project")}
-              variant="ghost"
-              size="sm"
-            >
-              <Share2 className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
+  // Convert FundingRequest to FundingItem
+  const convertRequestToFundingItem = (request: FundingRequest): FundingItem => {
+    return {
+      id: request.id,
+      creator: request.requester,
+      title: request.title,
+      description: request.projectDetails,
+      deadline: request.deadline,
+      createdAt: request.createdAt,
+      type: "looking-for-grant",
+      fundingGoal: request.fundingGoal,
+      raisedAmount: request.totalRaised,
+      supporterCount: request.supporterCount,
+      status: request.status,
+    };
   };
 
   // Render request details dialog
@@ -903,7 +849,9 @@ export default function LookingForGrantManager() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {requests.map((request) => renderRequestCard(request))}
+              {requests.map((request) => (
+                <FundingCard key={request.id} funding={convertRequestToFundingItem(request)} />
+              ))}
             </div>
           )}
         </div>
@@ -922,7 +870,9 @@ export default function LookingForGrantManager() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {requests
                 .filter((r) => r.requester.toLowerCase() === address?.toLowerCase())
-                .map((request) => renderRequestCard(request))}
+                .map((request) => (
+                  <FundingCard key={request.id} funding={convertRequestToFundingItem(request)} />
+                ))}
             </div>
           )}
         </div>

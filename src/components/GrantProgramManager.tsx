@@ -18,6 +18,7 @@ import {
 import { parseETH, formatETH, wagmiConfig, formatAddress } from "../utils/web3";
 import { useAlertDialog } from "@/hooks/useAlertDialog";
 import { useShare } from "@/hooks/useShare";
+import FundingCard, { type FundingItem } from "./FundingCard";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -576,86 +577,22 @@ export default function GrantProgramManager() {
     </Card>
   );
 
-  // Render grant card
-  const renderGrantCard = (grant: Grant) => {
-    const isExpired = Number(grant.applicationDeadline) * 1000 < Date.now();
-    const isOwner = address?.toLowerCase() === grant.giver.toLowerCase();
-
-    return (
-      <Card key={grant.id} className="hover:shadow-lg transition-shadow">
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <CardTitle className="text-xl mb-2">{grant.title}</CardTitle>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>By {formatAddress(grant.giver)}</span>
-                <Badge variant={grant.status === GrantStatus.Open ? "default" : "secondary"}>
-                  {statusLabels[grant.status]}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-green-600" />
-              <span className="font-semibold">{formatETH(grant.totalFunds)} ETH</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span>{grant.selectedRecipientsCount}/{grant.maxApplicants} selected</span>
-            </div>
-          </div>
-
-          <div className="text-sm">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Calendar className="h-4 w-4" />
-              <span>
-                Applications: {isExpired ? "Closed" : new Date(Number(grant.applicationDeadline) * 1000).toLocaleDateString()}
-              </span>
-            </div>
-          </div>
-
-          <Separator />
-
-          <div className="flex gap-2">
-            <Button
-              onClick={() => {
-                setSelectedGrant(grant);
-                loadApplications(grant.id);
-                setShowApplyModal(true);
-              }}
-              variant="outline"
-              className="flex-1"
-              disabled={grant.status !== GrantStatus.Open || isExpired}
-            >
-              Apply
-            </Button>
-            <Button
-              onClick={() => shareLink(`/funding/grant-program/${grant.id}`, "Share this grant")}
-              variant="ghost"
-              size="sm"
-            >
-              <Share2 className="h-4 w-4" />
-            </Button>
-            {isOwner && (
-              <Button
-                onClick={() => {
-                  setSelectedGrant(grant);
-                  loadApplications(grant.id);
-                  setShowManageModal(true);
-                }}
-                variant="default"
-                className="flex-1"
-              >
-                Manage
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    );
+  // Convert Grant to FundingItem
+  const convertGrantToFundingItem = (grant: Grant): FundingItem => {
+    return {
+      id: grant.id,
+      creator: grant.giver,
+      title: grant.title,
+      description: grant.description,
+      deadline: grant.applicationDeadline,
+      createdAt: grant.createdAt,
+      type: "grant",
+      totalFunds: grant.totalFunds,
+      maxApplicants: grant.maxApplicants,
+      applicationCount: grant.applicationCount,
+      selectedRecipientsCount: grant.selectedRecipientsCount,
+      status: grant.status,
+    };
   };
 
   // Render apply modal
@@ -874,7 +811,9 @@ export default function GrantProgramManager() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {grants.map((grant) => renderGrantCard(grant))}
+              {grants.map((grant) => (
+                <FundingCard key={grant.id} funding={convertGrantToFundingItem(grant)} />
+              ))}
             </div>
           )}
         </div>
@@ -893,7 +832,9 @@ export default function GrantProgramManager() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {grants
                 .filter((g) => g.giver.toLowerCase() === address?.toLowerCase())
-                .map((grant) => renderGrantCard(grant))}
+                .map((grant) => (
+                  <FundingCard key={grant.id} funding={convertGrantToFundingItem(grant)} />
+                ))}
             </div>
           )}
         </div>

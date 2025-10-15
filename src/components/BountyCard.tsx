@@ -81,11 +81,12 @@ interface BountyCardProps {
 }
 
 const BountyStatusEnum = [
-  "Open",
-  "Pending Reveal",
-  "Resolved",
-  "Disputed",
-  "Expired",
+  "Open Rec", // 0: OPREC
+  "Open", // 1: OPEN
+  "Pending Reveal", // 2: PENDING_REVEAL
+  "Resolved", // 3: RESOLVED
+  "Disputed", // 4: DISPUTED
+  "Expired", // 5: EXPIRED
 ];
 
 export default function BountyCard({
@@ -129,14 +130,16 @@ export default function BountyCard({
   const getStatusVariant = (status: number) => {
     switch (status) {
       case 0:
-        return "default"; // Open
+        return "secondary"; // OPREC
       case 1:
-        return "secondary"; // Pending Reveal
+        return "default"; // Open
       case 2:
-        return "outline"; // Resolved
+        return "secondary"; // Pending Reveal
       case 3:
-        return "destructive"; // Disputed
+        return "outline"; // Resolved
       case 4:
+        return "destructive"; // Disputed
+      case 5:
         return "secondary"; // Expired
       default:
         return "outline";

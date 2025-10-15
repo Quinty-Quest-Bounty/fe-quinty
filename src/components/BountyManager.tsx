@@ -73,16 +73,18 @@ interface Bounty {
   deadline: bigint;
   allowMultipleWinners: boolean;
   winnerShares: readonly bigint[];
-  status: number; // Enum: 0:OPEN, 1:PENDING_REVEAL, 2:RESOLVED, 3:DISPUTED, 4:EXPIRED
+  status: number; // Enum: 0:OPREC, 1:OPEN, 2:PENDING_REVEAL, 3:RESOLVED, 4:DISPUTED, 5:EXPIRED
   slashPercent: bigint;
   submissions: readonly Submission[];
   selectedWinners: readonly string[];
   selectedSubmissionIds: readonly bigint[];
   metadataCid?: string;
+  hasOprec?: boolean;
+  oprecDeadline?: bigint;
 }
 
 export default function BountyManager() {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
   const { writeContract, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
@@ -91,7 +93,7 @@ export default function BountyManager() {
 
   // State
   const [bounties, setBounties] = useState<Bounty[]>([]);
-  const [activeTab, setActiveTab] = useState<"create" | "browse" | "manage">(
+  const [activeTab, setActiveTab] = useState<"create" | "browse" | "my-bounties">(
     "browse"
   );
 
@@ -247,6 +249,8 @@ export default function BountyManager() {
             slashPercent,
             selectedWinners,
             selectedSubmissionIds,
+            hasOprec,
+            oprecDeadline,
           ] = bountyArray;
 
           // 2. Get submissions separately
@@ -292,6 +296,8 @@ export default function BountyManager() {
             selectedWinners,
             selectedSubmissionIds,
             metadataCid,
+            hasOprec,
+            oprecDeadline,
           });
         }
       } catch (error) {
@@ -572,6 +578,7 @@ export default function BountyManager() {
         <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
           {[
             { id: "browse", label: "Browse", icon: Target },
+            { id: "my-bounties", label: "My Bounties", icon: Users },
             { id: "create", label: "Create", icon: Plus },
           ].map((tab) => (
             <Button
@@ -781,6 +788,57 @@ export default function BountyManager() {
                           <span>25%</span>
                           <span>50%</span>
                         </div>
+                      </div>
+
+                      {/* OPREC Phase Option */}
+                      <div className="space-y-3 p-4 border border-gray-200 rounded-lg bg-muted/30">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            id="hasOprec"
+                            name="hasOprec"
+                            type="checkbox"
+                            checked={newBounty.hasOprec}
+                            onChange={(e) =>
+                              setNewBounty({
+                                ...newBounty,
+                                hasOprec: e.target.checked,
+                              })
+                            }
+                            className="h-4 w-4 text-primary border-gray-300 rounded"
+                          />
+                          <label
+                            htmlFor="hasOprec"
+                            className="text-sm font-medium flex items-center gap-1"
+                          >
+                            <Users className="w-4 h-4" />
+                            Enable OPREC (Open Recruitment) Phase
+                          </label>
+                        </div>
+                        <p className="text-xs text-muted-foreground ml-6">
+                          Only approved participants can submit solutions after OPREC phase ends
+                        </p>
+
+                        {newBounty.hasOprec && (
+                          <div className="ml-6 mt-3 space-y-2">
+                            <label className="text-sm font-medium text-gray-700">
+                              OPREC Deadline *
+                            </label>
+                            <Input
+                              type="datetime-local"
+                              value={newBounty.oprecDeadline}
+                              onChange={(e) =>
+                                setNewBounty({
+                                  ...newBounty,
+                                  oprecDeadline: e.target.value,
+                                })
+                              }
+                              className="border-gray-300"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              Deadline for participants to apply to OPREC
+                            </p>
+                          </div>
+                        )}
                       </div>
 
                       <div className="space-y-3">
@@ -1312,6 +1370,58 @@ export default function BountyManager() {
                   onRevealSolution={revealSolution}
                 />
               ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* My Bounties Tab - Creator's bounties management */}
+      {activeTab === "my-bounties" && (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h3 className="text-2xl font-bold text-gray-900">
+              My Bounties
+            </h3>
+            <div className="text-sm text-muted-foreground">
+              {bounties.filter(b => address && b.creator.toLowerCase() === address.toLowerCase()).length} bounty{bounties.filter(b => address && b.creator.toLowerCase() === address.toLowerCase()).length !== 1 ? 'ies' : ''}
+            </div>
+          </div>
+
+          {!isConnected ? (
+            <div className="text-center py-12 bg-muted/30 rounded-lg border border-dashed">
+              <Users className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+              <p className="text-lg font-medium mb-2">Connect Your Wallet</p>
+              <p className="text-sm text-muted-foreground">
+                Please connect your wallet to view your bounties
+              </p>
+            </div>
+          ) : bounties.filter(b => address && b.creator.toLowerCase() === address.toLowerCase()).length === 0 ? (
+            <div className="text-center py-12 bg-muted/30 rounded-lg border border-dashed">
+              <Target className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+              <p className="text-lg font-medium mb-2">No Bounties Created</p>
+              <p className="text-sm text-muted-foreground mb-4">
+                You haven't created any bounties yet
+              </p>
+              <Button onClick={() => setActiveTab("create")}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Your First Bounty
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {bounties
+                .filter(b => address && b.creator.toLowerCase() === address.toLowerCase())
+                .map((bounty) => (
+                  <BountyCard
+                    key={bounty.id}
+                    bounty={bounty}
+                    onSubmitSolution={submitSolution}
+                    onSelectWinners={selectWinners}
+                    onTriggerSlash={triggerSlash}
+                    onAddReply={addReply}
+                    onRevealSolution={revealSolution}
+                  />
+                ))}
             </div>
           )}
         </div>

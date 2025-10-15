@@ -2,10 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import {
-  Card,
-  CardContent,
-} from "../components/ui/card";
+import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Gravity, MatterBody } from "../components/ui/gravity";
@@ -170,20 +167,20 @@ export default function Home() {
                   </Badge>
 
                   <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl">
-                    <span className="block text-foreground">Complete bounty</span>
+                    <span className="block text-foreground">
+                      Complete bounty
+                    </span>
                     <span className="block text-[#0EA885]">
                       studio for ecosystems
                     </span>
                   </h1>
 
                   <p className="mx-auto max-w-2xl text-lg text-foreground/70 md:text-xl">
-                    On-chain bounties, grants, reputation, and disputes—all in one protocol.
+                    On-chain bounties, grants, reputation, and disputes—all in
+                    one protocol.
                   </p>
 
-                  <Button
-                    size="lg"
-                    onClick={() => router.push("/bounties")}
-                  >
+                  <Button size="lg" onClick={() => router.push("/bounties")}>
                     Explore bounties
                   </Button>
                 </div>
@@ -292,9 +289,6 @@ export default function Home() {
                       staggerDuration={0.02}
                     />
                   </div>
-                  <Button size="lg" className="mt-4">
-                    Learn more
-                  </Button>
                 </div>
               </div>
             ))}
@@ -341,7 +335,10 @@ export default function Home() {
                         9 contracts · 68 tests passing
                       </p>
                     </div>
-                    <Badge variant="outline" className="h-fit border-gray-300 bg-gray-50 text-gray-600">
+                    <Badge
+                      variant="outline"
+                      className="h-fit border-gray-300 bg-gray-50 text-gray-600"
+                    >
                       <Network className="mr-2 h-3 w-3" />
                       Chain ID 84532
                     </Badge>
@@ -352,7 +349,9 @@ export default function Home() {
                         key={reference.address}
                         className="rounded-xl border border-gray-200 bg-background/50 p-3 hover:border-gray-300 transition-colors"
                       >
-                        <p className="text-xs font-semibold text-gray-700">{reference.label}</p>
+                        <p className="text-xs font-semibold text-gray-700">
+                          {reference.label}
+                        </p>
                         <code className="mt-1 block break-all text-[10px] text-gray-500">
                           {reference.address}
                         </code>
@@ -398,26 +397,12 @@ export default function Home() {
                 .
               </p>
             </div>
-            <div className="mt-12 flex flex-wrap justify-center gap-4">
-              <Button
-                size="lg"
-                onClick={() => router.push("/bounties?create=true")}
-                className="text-lg px-8"
-              >
-                Launch a bounty
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => router.push("/docs")}
-                className="text-lg px-8"
-              >
-                Read docs
-              </Button>
-            </div>
             <div className="mt-8 flex items-center justify-center gap-2 text-base text-gray-500">
               <Mail className="h-5 w-5" />
-              <a href="mailto:team@quinty.xyz" className="hover:text-[#0EA885] transition-colors">
+              <a
+                href="mailto:team@quinty.xyz"
+                className="hover:text-[#0EA885] transition-colors"
+              >
                 team@quinty.xyz
               </a>
             </div>
