@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -17,7 +18,6 @@ import {
   BadgeCheck,
   Vote,
   Landmark,
-  Mail,
 } from "lucide-react";
 
 const allFeatures = [
@@ -156,38 +156,41 @@ function useScrollAnimation() {
 
 export default function Home() {
   const router = useRouter();
-  const platformRef = useScrollAnimation();
-  const bountyStackRef = useScrollAnimation();
-  const contractsRef = useScrollAnimation();
-  const ctaRef = useScrollAnimation();
-
-  // Create refs for each feature
-  const featureRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("animate-in");
-          }
-        });
-      },
-      {
-        threshold: 0.1,
-        rootMargin: "0px 0px -50px 0px",
-      }
-    );
-
-    featureRefs.current.forEach((ref) => {
-      if (ref) observer.observe(ref);
-    });
-
-    return () => {
-      featureRefs.current.forEach((ref) => {
-        if (ref) observer.unobserve(ref);
-      });
+    const observerOptions = {
+      threshold: 0.15,
+      rootMargin: "0px 0px -80px 0px",
     };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const target = entry.target as HTMLElement;
+
+          // Add animation classes based on data attributes
+          if (target.dataset.animation === "fade-scale") {
+            target.classList.add("scroll-fade-scale");
+          } else if (target.dataset.animation === "slide-left") {
+            target.classList.add("scroll-slide-left");
+          } else if (target.dataset.animation === "slide-right") {
+            target.classList.add("scroll-slide-right");
+          } else if (target.dataset.animation === "slide-bottom") {
+            target.classList.add("scroll-slide-bottom");
+          } else if (target.dataset.animation === "zoom-in") {
+            target.classList.add("scroll-zoom-in");
+          }
+
+          observer.unobserve(target);
+        }
+      });
+    }, observerOptions);
+
+    // Observe all elements with data-animation attribute
+    const animatedElements = document.querySelectorAll("[data-animation]");
+    animatedElements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
   }, []);
 
   return (
@@ -195,9 +198,9 @@ export default function Home() {
       <main className="px-4 pb-32 pt-12 sm:px-6 lg:px-0">
         <div className="mx-auto w-full max-w-6xl">
           <section className="mx-auto mb-10 max-w-7xl px-6 md:mb-20 xl:px-0">
-            <div className="relative flex flex-col items-center border border-gray-200 rounded-3xl overflow-hidden transition-all duration-300 hover:shadow-xl">
+            <div className="relative flex flex-col items-center rounded-3xl overflow-hidden transition-all duration-300 shadow-md hover:shadow-xl min-h-[80vh] justify-center">
               {/* Dot Pattern Background */}
-              <DotPattern width={5} height={5} className="fill-gray-300/30" />
+              <DotPattern width={10} height={10} className="fill-gray-400/60" />
 
               {/* Decorative corner dots */}
               <div className="absolute -left-1 -top-1 h-2 w-2 bg-[#0EA885] z-10 animate-pulse" />
@@ -205,14 +208,31 @@ export default function Home() {
               <div className="absolute -right-1 -top-1 h-2 w-2 bg-[#0EA885] z-10 animate-pulse" />
               <div className="absolute -bottom-1 -right-1 h-2 w-2 bg-[#0EA885] z-10 animate-pulse" />
 
-              <div className="relative z-20 mx-auto max-w-7xl py-12 px-6 md:py-16 xl:py-24">
+              <div className="relative z-20 mx-auto w-full max-w-7xl py-8 px-6 md:py-12 xl:py-16">
                 <div className="text-center space-y-8">
-                  <Badge
-                    variant="outline"
-                    className="rounded-full border-gray-300 bg-gray-50 px-4 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-gray-600 animate-fade-in"
-                  >
-                    Live on Base Sepolia
-                  </Badge>
+                  {/* Logo + Brand */}
+                  <div className="flex flex-col items-center gap-4 animate-fade-in">
+                    <div className="relative h-20 w-20 md:h-24 md:w-24">
+                      <Image
+                        src="/images/quinty-logo.png"
+                        alt="Quinty Logo"
+                        fill
+                        className="object-contain brightness-0"
+                        priority
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+                        Quinty
+                      </h2>
+                      <Badge
+                        variant="outline"
+                        className="rounded-full border-gray-300 bg-gray-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-600"
+                      >
+                        Live on Base Sepolia
+                      </Badge>
+                    </div>
+                  </div>
 
                   <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl animate-slide-up">
                     <span className="block text-foreground">
@@ -240,16 +260,28 @@ export default function Home() {
                     Explore bounties
                   </Button>
                 </div>
+
+                {/* Hero Stats */}
+                <div className="mt-12 grid gap-6 sm:grid-cols-3 max-w-4xl mx-auto">
+                  {heroStats.map((stat, index) => (
+                    <div
+                      key={stat.label}
+                      className="rounded-2xl border border-gray-200 bg-white/90 p-6 text-center shadow-lg backdrop-blur hover:scale-105 hover:border-gray-300 hover:shadow-2xl transition-all duration-300 animate-fade-in-up"
+                      style={{ animationDelay: `${400 + index * 100}ms` }}
+                    >
+                      <stat.icon className="mx-auto h-6 w-6 text-gray-500 mb-2 transition-colors duration-300 group-hover:text-[#0EA885]" />
+                      <p className="mt-2 text-3xl font-bold">{stat.value}</p>
+                      <p className="text-sm text-gray-500 mt-1">{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </section>
 
           {/* Platform Preview - Safari Component */}
-          <section
-            ref={platformRef}
-            className="mt-24 scroll-animate opacity-0 translate-y-10"
-          >
-            <div className="text-center mb-12">
+          <section className="mt-24">
+            <div className="text-center mb-12" data-animation="fade-scale">
               <Badge
                 variant="secondary"
                 className="rounded-full px-4 py-1 text-xs uppercase tracking-[0.2em] border-gray-300 bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors duration-200"
@@ -261,12 +293,22 @@ export default function Home() {
               </h2>
             </div>
 
-            <div className="hover:scale-[1.01] transition-transform duration-500">
+            <div
+              className="hover:scale-[1.01] transition-transform duration-500"
+              data-animation="zoom-in"
+            >
               <Safari url="quinty.xyz" className="w-full">
                 <div className="relative h-full w-full bg-gradient-to-br from-gray-50 to-gray-100 p-16">
                   <div className="relative flex flex-col items-center justify-center gap-8 h-full">
-                    <div className="flex h-40 w-40 items-center justify-center rounded-full bg-white backdrop-blur-sm shadow-2xl border border-gray-200 hover:shadow-3xl hover:scale-110 transition-all duration-300">
-                      <Target className="h-20 w-20 text-[#0EA885] animate-pulse" />
+                    <div className="relative flex h-40 w-40 items-center justify-center rounded-full bg-white backdrop-blur-sm shadow-2xl border border-gray-200 hover:shadow-3xl hover:scale-110 transition-all duration-300">
+                      <div className="relative h-24 w-24">
+                        <Image
+                          src="/images/quinty-logo.png"
+                          alt="Quinty Logo"
+                          fill
+                          className="object-contain brightness-0"
+                        />
+                      </div>
                     </div>
                     <div className="text-center space-y-2">
                       <h3 className="text-2xl font-bold text-gray-900">
@@ -287,18 +329,18 @@ export default function Home() {
             {allFeatures.map((feature, index) => (
               <div
                 key={feature.title}
-                ref={(el) => {
-                  featureRefs.current[index] = el;
-                }}
                 className={`grid gap-12 lg:grid-cols-2 lg:items-center ${
                   index % 2 === 1 ? "lg:flex-row-reverse" : ""
-                } group scroll-animate opacity-0 translate-y-10`}
+                } group`}
               >
                 {/* Image Placeholder */}
                 <div
                   className={`order-1 ${
                     index % 2 === 1 ? "lg:order-2" : "lg:order-1"
                   }`}
+                  data-animation={
+                    index % 2 === 0 ? "slide-left" : "slide-right"
+                  }
                 >
                   <div className="relative w-full aspect-[16/10] rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 overflow-hidden hover:border-[#0EA885] transition-all duration-500 hover:scale-[1.02] hover:shadow-xl">
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8">
@@ -325,6 +367,9 @@ export default function Home() {
                   className={`order-2 space-y-6 ${
                     index % 2 === 1 ? "lg:order-1" : "lg:order-2"
                   }`}
+                  data-animation={
+                    index % 2 === 0 ? "slide-right" : "slide-left"
+                  }
                 >
                   <div className="flex items-center gap-4">
                     <Badge
@@ -346,11 +391,11 @@ export default function Home() {
           </section>
 
           {/* Bounty Stack */}
-          <section
-            ref={bountyStackRef}
-            className="mt-24 scroll-animate opacity-0 translate-y-10"
-          >
-            <div className="text-center space-y-4 mb-8">
+          <section className="mt-24">
+            <div
+              className="text-center space-y-4 mb-8"
+              data-animation="fade-scale"
+            >
               <Badge
                 variant="secondary"
                 className="rounded-full px-4 py-1 text-xs uppercase tracking-[0.2em] border-gray-300 bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors duration-200"
@@ -361,12 +406,17 @@ export default function Home() {
                 Everything you need
               </h2>
             </div>
-            <div className="rounded-3xl border border-gray-200 bg-white/90 p-8 hover:shadow-xl transition-shadow duration-300">
+            <div
+              className="rounded-3xl border border-gray-200 bg-white/90 p-8 hover:shadow-xl transition-shadow duration-300"
+              data-animation="slide-bottom"
+            >
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                {bountyStackFeatures.map((feature) => (
+                {bountyStackFeatures.map((feature, index) => (
                   <div
                     key={feature}
-                    className="rounded-xl border border-gray-200 bg-white/60 px-4 py-3 text-center text-sm font-medium backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-[#0EA885] hover:bg-gray-50 hover:shadow-md"
+                    className={`rounded-xl border border-gray-200 bg-white/60 px-4 py-3 text-center text-sm font-medium backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-[#0EA885] hover:bg-gray-50 hover:shadow-md stagger-${
+                      (index % 6) + 1
+                    }`}
                   >
                     {feature}
                   </div>
@@ -376,10 +426,7 @@ export default function Home() {
           </section>
 
           {/* Contracts */}
-          <section
-            ref={contractsRef}
-            className="mt-24 scroll-animate opacity-0 translate-y-10"
-          >
+          <section className="mt-24" data-animation="zoom-in">
             <Card className="border border-gray-200 bg-white/90">
               <CardContent className="px-6 py-8">
                 <div className="space-y-6">
@@ -422,22 +469,24 @@ export default function Home() {
 
           {/* CTA with LinkPreview */}
           <section
-            ref={ctaRef}
-            className="mt-24 text-center rounded-3xl border border-gray-200 bg-white/90 px-8 py-16 hover:shadow-xl transition-all duration-500 scroll-animate opacity-0 translate-y-10"
+            className="mt-24 text-center rounded-3xl border border-gray-200 bg-white/90 px-8 py-16 hover:shadow-xl transition-all duration-500"
+            data-animation="fade-scale"
           >
             <h2 className="text-3xl font-semibold sm:text-4xl lg:text-5xl mb-6 text-foreground hover:text-[#0EA885] transition-colors duration-300">
-              Ready to launch?
+              Where Smart Contracts Meet Smart Users.
             </h2>
+
             <div className="mt-6 text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               <p className="mb-4">
-                Start building with{" "}
+                Design, fund, and verify your first on-chain program — with
+                reputation that can’t be faked. Start building with{" "}
                 <LinkPreview
                   url="https://quinty.xyz/bounties"
                   className="font-bold text-[#0EA885] hover:text-[#0EA885]/80 transition-all duration-200 hover:underline"
                 >
-                  Quinty Bounties
+                  Quinty
                 </LinkPreview>{" "}
-                and launch your first on-chain program today.
+                and join the on-chain workforce.
               </p>
               <p>
                 Need help getting started? Check out our{" "}
@@ -457,13 +506,23 @@ export default function Home() {
                 .
               </p>
             </div>
+
             <div className="mt-8 flex items-center justify-center gap-2 text-base text-gray-500 hover:text-[#0EA885] transition-colors duration-300">
-              <Mail className="h-5 w-5" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="h-5 w-5"
+              >
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.508 11.24H17.48l-5.245-6.864L6.216 21.75H2.906l7.732-8.847L2.426 2.25h5.135l4.713 6.173L18.244 2.25Zm-1.161 17.52h1.833L7.084 4.126H5.116l11.967 15.644Z" />
+              </svg>
               <a
-                href="mailto:team@quinty.xyz"
+                href="https://x.com/quintyxyz"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="hover:text-[#0EA885] transition-colors duration-200"
               >
-                team@quinty.xyz
+                @quintyxyz
               </a>
             </div>
           </section>

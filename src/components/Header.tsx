@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Link from "next/link";
+import Image from "next/image";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { readContract } from "@wagmi/core";
 import { cn } from "@/lib/utils";
@@ -152,10 +153,16 @@ export default function Header() {
             <button
               type="button"
               onClick={() => router.push("/")}
-              className="flex items-center gap-2 transition-transform hover:scale-105"
+              className="flex items-center gap-3 transition-transform hover:scale-105"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary via-primary to-primary/60 shadow-lg shadow-primary/30">
-                <Target className="h-5 w-5 text-primary-foreground" />
+              <div className="relative h-9 w-9">
+                <Image
+                  src="/images/quinty-logo.png"
+                  alt="Quinty Logo"
+                  fill
+                  className="object-contain brightness-0 dark:brightness-100"
+                  priority
+                />
               </div>
               <span className="hidden text-xl font-bold tracking-tight sm:inline-block">
                 Quinty

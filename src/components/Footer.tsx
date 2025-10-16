@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Target, Github, Twitter, Mail } from "lucide-react";
+import Image from "next/image";
+import { Github, Twitter, Mail } from "lucide-react";
 import { Separator } from "./ui/separator";
 
 const socialLinks = [
@@ -17,9 +18,14 @@ export function Footer() {
         {/* Logo and Description */}
         <div className="mb-10 flex flex-col items-center justify-between gap-6 md:flex-row md:items-start">
           <div className="flex max-w-md flex-col items-center space-y-4 text-center md:items-start md:text-left">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                <Target className="h-5 w-5 text-primary" />
+            <Link href="/" className="flex items-center gap-3">
+              <div className="relative h-10 w-10">
+                <Image
+                  src="/images/quinty-logo.png"
+                  alt="Quinty Logo"
+                  fill
+                  className="object-contain brightness-0 dark:brightness-100"
+                />
               </div>
               <span className="text-xl font-semibold text-foreground">
                 Quinty
