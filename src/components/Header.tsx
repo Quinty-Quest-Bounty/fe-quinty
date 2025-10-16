@@ -176,13 +176,11 @@ export default function Header() {
                   key={item.name}
                   href={item.link}
                   className={cn(
-                    "relative rounded-lg px-4 py-2 text-sm font-medium transition-colors",
-                    "hover:text-primary",
-                    "group"
+                    "relative rounded-xl px-4 py-2 text-sm font-medium transition-all duration-300",
+                    "hover:text-primary hover:bg-primary/10 hover:scale-105 hover:shadow-md"
                   )}
                 >
                   {item.name}
-                  <span className="absolute inset-x-2 -bottom-px h-px bg-gradient-to-r from-primary/0 via-primary/70 to-primary/0 opacity-0 transition-opacity group-hover:opacity-100" />
                 </Link>
               ))}
             </nav>
@@ -265,7 +263,7 @@ export default function Header() {
                       key={item.name}
                       href={item.link}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="rounded-lg px-4 py-3 text-base font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+                      className="rounded-xl px-4 py-3 text-base font-medium transition-all duration-300 hover:bg-primary/10 hover:text-primary hover:translate-x-2 hover:shadow-md hover:scale-[1.02]"
                     >
                       {item.name}
                     </Link>
