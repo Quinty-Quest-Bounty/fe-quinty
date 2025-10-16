@@ -33,8 +33,7 @@ export function Footer() {
             </Link>
             <p className="text-sm leading-relaxed text-foreground/70">
               The decentralized bounty studio built for serious ecosystems.
-              Launch ETH-backed bounties, manage grants, and build
-              reputation—all on-chain.
+              Escrow replaces trust with truth — funds don’t lie.
             </p>
           </div>
 
