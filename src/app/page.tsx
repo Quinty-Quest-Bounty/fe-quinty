@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -23,43 +23,50 @@ import {
 const allFeatures = [
   {
     title: "On-Chain Bounties",
-    description: "Post tasks, lock ETH in escrow, and reward the best work — no missed payments, no copycats. Every submission is encrypted until the deadline.",
+    description:
+      "Post tasks, lock ETH in escrow, and reward the best work — no missed payments, no copycats.",
     icon: Target,
     status: "Live",
   },
   {
     title: "Soulbound Reputation",
-    description: "Your wins become badges. Each milestone mints an immutable NFT that proves your contribution — forever.",
+    description:
+      "Your wins become badges. Each milestone mints an immutable NFT that proves your contribution — forever.",
     icon: BadgeCheck,
     status: "Live",
   },
   {
     title: "Community Disputes",
-    description: "No biased moderators. Disputes are resolved by stake-weighted community votes — justice written in Solidity.",
+    description:
+      "No biased moderators. Disputes are resolved by stake-weighted community votes — justice written in Solidity.",
     icon: Vote,
     status: "Soon",
   },
   {
     title: "Grants Without Friction",
-    description: "VCs and orgs can fund selected builders directly. Applicants claim verified grants with progress tracked on-chain.",
+    description:
+      "VCs and orgs can fund selected builders directly. Applicants claim verified grants with progress tracked on-chain.",
     icon: Coins,
     status: "Live",
   },
   {
     title: "Anti-Rug Crowdfunding",
-    description: "Milestone-based funding ensures accountability. If goals aren't met, contributors get their ETH back automatically.",
+    description:
+      "Milestone-based funding ensures accountability. If goals aren't met, contributors get their ETH back automatically.",
     icon: Users,
     status: "Live",
   },
   {
     title: "ZK Identity Verification",
-    description: "Link your social proof without doxxing yourself. Verify with zero-knowledge — privacy meets credibility.",
+    description:
+      "Link your social proof without doxxing yourself. Verify with zero-knowledge — privacy meets credibility.",
     icon: BadgeCheck,
     status: "Live",
   },
   {
     title: "Airdrop Bounties & LFG Mode",
-    description: "Launch your campaign, grow your movement, or raise flexible startup funds. Everything transparent, everything Base-powered.",
+    description:
+      "Launch your campaign, grow your movement, or raise flexible startup funds. Everything transparent, everything Base-powered.",
     icon: Landmark,
     status: "Live",
   },
@@ -113,8 +120,75 @@ const contractReferences = [
   },
 ];
 
+// Custom hook for scroll-triggered animations
+function useScrollAnimation() {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("animate-in");
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: "0px 0px -100px 0px",
+      }
+    );
+
+    const currentRef = ref.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, []);
+
+  return ref;
+}
+
 export default function Home() {
   const router = useRouter();
+  const platformRef = useScrollAnimation();
+  const bountyStackRef = useScrollAnimation();
+  const contractsRef = useScrollAnimation();
+  const ctaRef = useScrollAnimation();
+
+  // Create refs for each feature
+  const featureRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("animate-in");
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: "0px 0px -50px 0px",
+      }
+    );
+
+    featureRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => {
+      featureRefs.current.forEach((ref) => {
+        if (ref) observer.unobserve(ref);
+      });
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -166,26 +240,15 @@ export default function Home() {
                     Explore bounties
                   </Button>
                 </div>
-
-                <div className="mt-16 grid gap-6 sm:grid-cols-3 max-w-4xl mx-auto">
-                  {heroStats.map((stat, index) => (
-                    <div
-                      key={stat.label}
-                      className="rounded-2xl border border-gray-200 bg-white/90 p-6 text-center shadow-lg backdrop-blur hover:scale-105 hover:border-gray-300 hover:shadow-2xl transition-all duration-300 animate-fade-in-up"
-                      style={{ animationDelay: `${400 + index * 100}ms` }}
-                    >
-                      <stat.icon className="mx-auto h-6 w-6 text-gray-500 mb-2 transition-colors duration-300 group-hover:text-[#0EA885]" />
-                      <p className="mt-2 text-3xl font-bold">{stat.value}</p>
-                      <p className="text-sm text-gray-500 mt-1">{stat.label}</p>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
           </section>
 
           {/* Platform Preview - Safari Component */}
-          <section className="mt-24 animate-fade-in-up animation-delay-500">
+          <section
+            ref={platformRef}
+            className="mt-24 scroll-animate opacity-0 translate-y-10"
+          >
             <div className="text-center mb-12">
               <Badge
                 variant="secondary"
@@ -206,8 +269,12 @@ export default function Home() {
                       <Target className="h-20 w-20 text-[#0EA885] animate-pulse" />
                     </div>
                     <div className="text-center space-y-2">
-                      <h3 className="text-2xl font-bold text-gray-900">Quinty Platform</h3>
-                      <p className="text-gray-600">Complete bounty studio for ecosystems</p>
+                      <h3 className="text-2xl font-bold text-gray-900">
+                        Quinty Platform
+                      </h3>
+                      <p className="text-gray-600">
+                        Complete bounty studio for ecosystems
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -220,16 +287,18 @@ export default function Home() {
             {allFeatures.map((feature, index) => (
               <div
                 key={feature.title}
+                ref={(el) => {
+                  featureRefs.current[index] = el;
+                }}
                 className={`grid gap-12 lg:grid-cols-2 lg:items-center ${
                   index % 2 === 1 ? "lg:flex-row-reverse" : ""
-                } group`}
+                } group scroll-animate opacity-0 translate-y-10`}
               >
                 {/* Image Placeholder */}
                 <div
                   className={`order-1 ${
                     index % 2 === 1 ? "lg:order-2" : "lg:order-1"
-                  } animate-fade-in-up`}
-                  style={{ animationDelay: `${index * 100}ms` }}
+                  }`}
                 >
                   <div className="relative w-full aspect-[16/10] rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 overflow-hidden hover:border-[#0EA885] transition-all duration-500 hover:scale-[1.02] hover:shadow-xl">
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-8">
@@ -255,8 +324,7 @@ export default function Home() {
                 <div
                   className={`order-2 space-y-6 ${
                     index % 2 === 1 ? "lg:order-1" : "lg:order-2"
-                  } animate-slide-in-right`}
-                  style={{ animationDelay: `${index * 100 + 200}ms` }}
+                  }`}
                 >
                   <div className="flex items-center gap-4">
                     <Badge
@@ -278,7 +346,10 @@ export default function Home() {
           </section>
 
           {/* Bounty Stack */}
-          <section className="mt-24 animate-fade-in-up">
+          <section
+            ref={bountyStackRef}
+            className="mt-24 scroll-animate opacity-0 translate-y-10"
+          >
             <div className="text-center space-y-4 mb-8">
               <Badge
                 variant="secondary"
@@ -292,11 +363,10 @@ export default function Home() {
             </div>
             <div className="rounded-3xl border border-gray-200 bg-white/90 p-8 hover:shadow-xl transition-shadow duration-300">
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                {bountyStackFeatures.map((feature, index) => (
+                {bountyStackFeatures.map((feature) => (
                   <div
                     key={feature}
-                    className="rounded-xl border border-gray-200 bg-white/60 px-4 py-3 text-center text-sm font-medium backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-[#0EA885] hover:bg-gray-50 hover:shadow-md animate-fade-in"
-                    style={{ animationDelay: `${index * 50}ms` }}
+                    className="rounded-xl border border-gray-200 bg-white/60 px-4 py-3 text-center text-sm font-medium backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-[#0EA885] hover:bg-gray-50 hover:shadow-md"
                   >
                     {feature}
                   </div>
@@ -306,7 +376,10 @@ export default function Home() {
           </section>
 
           {/* Contracts */}
-          <section className="mt-24">
+          <section
+            ref={contractsRef}
+            className="mt-24 scroll-animate opacity-0 translate-y-10"
+          >
             <Card className="border border-gray-200 bg-white/90">
               <CardContent className="px-6 py-8">
                 <div className="space-y-6">
@@ -348,7 +421,10 @@ export default function Home() {
           </section>
 
           {/* CTA with LinkPreview */}
-          <section className="mt-24 text-center rounded-3xl border border-gray-200 bg-white/90 px-8 py-16 hover:shadow-xl transition-all duration-500 animate-fade-in-up">
+          <section
+            ref={ctaRef}
+            className="mt-24 text-center rounded-3xl border border-gray-200 bg-white/90 px-8 py-16 hover:shadow-xl transition-all duration-500 scroll-animate opacity-0 translate-y-10"
+          >
             <h2 className="text-3xl font-semibold sm:text-4xl lg:text-5xl mb-6 text-foreground hover:text-[#0EA885] transition-colors duration-300">
               Ready to launch?
             </h2>

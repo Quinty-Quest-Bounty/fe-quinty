@@ -259,6 +259,16 @@
     animation-delay: 500ms;
   }
 
+  /* Scroll-triggered animations */
+  .scroll-animate {
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  }
+
+  .scroll-animate.animate-in {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
+
   /* Enhanced focus styles */
   .focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2;
