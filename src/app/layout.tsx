@@ -2,11 +2,17 @@ import "./globals.css";
 import Providers from "./providers";
 import Header from "../components/Header";
 import { Space_Grotesk } from "next/font/google";
+import type { Metadata } from "next";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Quinty  - Decentralized Bounty System",
   description:
     "A transparent bounty platform with  governance, reputation NFTs, and dispute resolution on Base Sepolia",
+  icons: {
+    icon: "/images/quinty-logo.png",
+    shortcut: "/images/quinty-logo.png",
+    apple: "/images/quinty-logo.png",
+  },
 };
 
 const spaceGrotesk = Space_Grotesk({
