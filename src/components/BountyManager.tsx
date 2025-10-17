@@ -96,6 +96,8 @@ export default function BountyManager() {
   const [activeTab, setActiveTab] = useState<"create" | "browse" | "my-bounties">(
     "browse"
   );
+  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   // Form states
   const [newBounty, setNewBounty] = useState({
@@ -574,6 +576,30 @@ export default function BountyManager() {
       loadBountiesAndSubmissions();
     }
   }, [bountyCounter]);
+
+  // Filter bounties based on selected filters
+  const getFilteredBounties = () => {
+    return bounties.filter((bounty) => {
+      // Type filter
+      if (typeFilter !== "all") {
+        // Extract type from metadata if available
+        const bountyType = bounty.metadataCid ? "development" : "other"; // Simplified - you'd need to load metadata to get actual type
+        if (bountyType !== typeFilter) return false;
+      }
+
+      // Status filter
+      if (statusFilter !== "all") {
+        const isExpired = BigInt(Math.floor(Date.now() / 1000)) > bounty.deadline;
+        const isResolved = bounty.status === 3; // RESOLVED status
+
+        if (statusFilter === "active" && (isExpired || isResolved)) return false;
+        if (statusFilter === "resolved" && !isResolved) return false;
+        if (statusFilter === "expired" && !isExpired) return false;
+      }
+
+      return true;
+    });
+  };
 
   if (!isConnected) {
     return (
@@ -1350,14 +1376,15 @@ export default function BountyManager() {
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h3 className="text-2xl font-bold text-gray-900">
-              All Bounties ({bounties.length})
+              All Bounties ({getFilteredBounties().length})
             </h3>
             <div className="flex gap-2">
-              <Select>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
                 <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
                   <SelectItem value="development">Development</SelectItem>
                   <SelectItem value="design">Design</SelectItem>
                   <SelectItem value="marketing">Marketing</SelectItem>
@@ -1365,11 +1392,12 @@ export default function BountyManager() {
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
-              <Select>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="resolved">Resolved</SelectItem>
                   <SelectItem value="expired">Expired</SelectItem>
@@ -1378,7 +1406,7 @@ export default function BountyManager() {
             </div>
           </div>
 
-          {bounties.length === 0 ? (
+          {getFilteredBounties().length === 0 ? (
             <div className="text-center py-12">
               <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                 <span className="text-2xl">🎯</span>
@@ -1396,7 +1424,7 @@ export default function BountyManager() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {bounties.map((bounty) => (
+              {getFilteredBounties().map((bounty) => (
                 <BountyCard
                   key={bounty.id}
                   bounty={bounty}

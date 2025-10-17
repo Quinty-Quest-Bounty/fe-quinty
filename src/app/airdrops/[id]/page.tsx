@@ -14,7 +14,7 @@ import {
   BASE_SEPOLIA_CHAIN_ID,
 } from "../../../utils/contracts";
 import { formatETH, formatTimeLeft, formatAddress, wagmiConfig } from "../../../utils/web3";
-import { IpfsImage } from "../../../utils/ipfs";
+import { IpfsImage, uploadToIpfs } from "../../../utils/ipfs";
 import { useAlert } from "../../../hooks/useAlert";
 import {
   Breadcrumb,
@@ -46,6 +46,8 @@ import {
   FileText,
   Target,
   Loader2,
+  Upload,
+  X,
 } from "lucide-react";
 
 interface Airdrop {
@@ -89,6 +91,8 @@ export default function AirdropDetailPage() {
     ipfsProofCid: "",
     description: "",
   });
+  const [uploadedProofImage, setUploadedProofImage] = useState<File | null>(null);
+  const [isUploadingProof, setIsUploadingProof] = useState(false);
 
   const { writeContract, data: hash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
@@ -184,6 +188,7 @@ export default function AirdropDetailPage() {
     if (isConfirmed) {
       loadAirdrop();
       setNewEntry({ twitterUrl: "", ipfsProofCid: "", description: "" });
+      setUploadedProofImage(null);
     }
   }, [isConfirmed]);
 
@@ -195,14 +200,44 @@ export default function AirdropDetailPage() {
   };
 
   const submitEntry = async () => {
-    if (!newEntry.ipfsProofCid.trim()) return;
+    if (!uploadedProofImage && !newEntry.ipfsProofCid.trim()) {
+      showAlert({
+        title: "Missing Proof",
+        description: "Please upload a proof image or enter an IPFS CID",
+      });
+      return;
+    }
 
     try {
+      let proofCid = newEntry.ipfsProofCid;
+
+      // Upload image to IPFS if a file is selected
+      if (uploadedProofImage) {
+        setIsUploadingProof(true);
+        try {
+          proofCid = await uploadToIpfs(uploadedProofImage, {
+            airdropId: airdropId,
+            type: "airdrop-proof",
+          });
+          console.log("Proof uploaded to IPFS:", proofCid);
+        } catch (uploadError) {
+          console.error("Error uploading proof to IPFS:", uploadError);
+          showAlert({
+            title: "Upload Failed",
+            description: "Failed to upload proof to IPFS. Please try again.",
+          });
+          setIsUploadingProof(false);
+          return;
+        } finally {
+          setIsUploadingProof(false);
+        }
+      }
+
       writeContract({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
         abi: AIRDROP_ABI,
         functionName: "submitEntry",
-        args: [BigInt(airdropId), newEntry.ipfsProofCid],
+        args: [BigInt(airdropId), proofCid],
       });
     } catch (error) {
       console.error("Error submitting entry:", error);
@@ -527,19 +562,62 @@ export default function AirdropDetailPage() {
                           </div>
 
                           <div className="space-y-1.5">
-                            <Label htmlFor="ipfsProof" className="text-xs">IPFS Proof CID *</Label>
-                            <Input
-                              id="ipfsProof"
-                              placeholder="QmExample123..."
-                              value={newEntry.ipfsProofCid}
-                              onChange={(e) =>
-                                setNewEntry({ ...newEntry, ipfsProofCid: e.target.value })
-                              }
-                              required
-                              className="text-sm h-8"
-                            />
+                            <Label htmlFor="proofImage" className="text-xs">Upload Proof Image *</Label>
+
+                            {!uploadedProofImage ? (
+                              <div className="border-2 border-dashed rounded-lg p-4 transition-colors border-muted-foreground/25 hover:border-muted-foreground/50">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      setUploadedProofImage(file);
+                                      setNewEntry({ ...newEntry, ipfsProofCid: "" });
+                                    }
+                                  }}
+                                  className="hidden"
+                                  id="proof-image-upload"
+                                />
+                                <label
+                                  htmlFor="proof-image-upload"
+                                  className="cursor-pointer flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                  <div className="w-10 h-10 mb-2 bg-muted rounded-full flex items-center justify-center">
+                                    <Upload className="w-5 h-5" />
+                                  </div>
+                                  <span className="text-xs font-medium mb-1">
+                                    Click to upload proof
+                                  </span>
+                                  <span className="text-xs text-center">
+                                    JPG, PNG, GIF up to 10MB
+                                  </span>
+                                </label>
+                              </div>
+                            ) : (
+                              <div className="relative group">
+                                <img
+                                  src={URL.createObjectURL(uploadedProofImage)}
+                                  alt="Proof preview"
+                                  className="w-full h-32 object-cover rounded-lg border"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="icon"
+                                  onClick={() => setUploadedProofImage(null)}
+                                  className="absolute -top-2 -right-2 w-6 h-6"
+                                >
+                                  <X className="w-3 h-3" />
+                                </Button>
+                                <div className="text-xs text-muted-foreground mt-1 truncate">
+                                  {uploadedProofImage.name}
+                                </div>
+                              </div>
+                            )}
+
                             <p className="text-xs text-muted-foreground">
-                              Upload screenshots or proof to IPFS and paste the CID here
+                              Upload a screenshot or proof image (will be uploaded to IPFS)
                             </p>
                           </div>
 
@@ -559,11 +637,16 @@ export default function AirdropDetailPage() {
 
                           <Button
                             onClick={submitEntry}
-                            disabled={!newEntry.ipfsProofCid.trim() || isPending || isConfirming}
+                            disabled={(!uploadedProofImage && !newEntry.ipfsProofCid.trim()) || isPending || isConfirming || isUploadingProof}
                             className="w-full"
                             size="sm"
                           >
-                            {isPending || isConfirming ? (
+                            {isUploadingProof ? (
+                              <>
+                                <Upload className="w-3 h-3 mr-2 animate-spin" />
+                                Uploading to IPFS...
+                              </>
+                            ) : isPending || isConfirming ? (
                               <>
                                 <Clock className="w-3 h-3 mr-2 animate-spin" />
                                 Submitting...

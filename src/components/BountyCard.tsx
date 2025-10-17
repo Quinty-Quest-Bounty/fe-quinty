@@ -150,17 +150,43 @@ export default function BountyCard({
     return (
       <>
       <Card
-        className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5"
+        className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 cursor-pointer"
+        onClick={() => router.push(`/bounties/${bounty.id}`)}
       >
         <div className="flex flex-row">
           {/* Image Section */}
           {metadata?.images && metadata.images.length > 0 && (
-            <div className="relative w-48 h-32 overflow-hidden bg-muted flex-shrink-0">
+            <div className="relative w-64 h-40 overflow-hidden bg-muted flex-shrink-0">
               <img
                 src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
                 alt={metadata.title}
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
+              {/* Quick View and Share buttons overlay */}
+              <div className="absolute top-2 left-2 flex gap-1">
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setQuickView(true);
+                  }}
+                  className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    shareLink(`/bounties/${bounty.id}`, "Share this bounty");
+                  }}
+                  className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+                >
+                  <Share2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
             </div>
           )}
 
@@ -217,39 +243,6 @@ export default function BountyCard({
                     {formatAddress(bounty.creator)}
                   </span>
                 </div>
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setQuickView(true);
-                  }}
-                  className="flex-1"
-                >
-                  <Eye className="h-4 w-4 mr-1" />
-                  Quick View
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    shareLink(`/bounties/${bounty.id}`, "Share this bounty");
-                  }}
-                >
-                  <Share2 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => router.push(`/bounties/${bounty.id}`)}
-                  className="flex-1"
-                >
-                  View Details
-                </Button>
               </div>
             </CardContent>
           </div>
@@ -351,7 +344,8 @@ export default function BountyCard({
   return (
     <>
     <Card
-      className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5"
+      className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 cursor-pointer"
+      onClick={() => router.push(`/bounties/${bounty.id}`)}
     >
       {/* Status Badge */}
       <div className="absolute top-2 right-2 z-10">
@@ -362,12 +356,37 @@ export default function BountyCard({
 
       {/* Image Section */}
       {metadata?.images && metadata.images.length > 0 && (
-        <div className="relative w-full h-32 overflow-hidden bg-muted">
+        <div className="relative w-full h-48 overflow-hidden bg-muted">
           <img
             src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
             alt={metadata.title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
+          {/* Quick View and Share buttons overlay */}
+          <div className="absolute top-2 left-2 flex gap-1">
+            <Button
+              variant="secondary"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                setQuickView(true);
+              }}
+              className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+            >
+              <Eye className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                shareLink(`/bounties/${bounty.id}`, "Share this bounty");
+              }}
+              className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </div>
       )}
 
@@ -396,7 +415,7 @@ export default function BountyCard({
         </div>
       </CardHeader>
 
-      <CardContent className="p-3 pt-0 space-y-3">
+      <CardContent className="p-3 pt-0">
         {/* Reward Section */}
         <div className="flex items-center justify-between p-2 rounded-lg bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20">
           <div className="flex items-center gap-1.5">
@@ -411,40 +430,6 @@ export default function BountyCard({
               {bounty.creator.slice(2, 4).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              setQuickView(true);
-            }}
-            className="flex-1"
-          >
-            <Eye className="h-4 w-4 mr-1" />
-            Quick View
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              shareLink(`/bounties/${bounty.id}`, "Share this bounty");
-            }}
-          >
-            <Share2 className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => router.push(`/bounties/${bounty.id}`)}
-            className="flex-1"
-          >
-            View
-          </Button>
         </div>
       </CardContent>
     </Card>

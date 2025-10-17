@@ -19,7 +19,7 @@ import {
   formatAddress,
   wagmiConfig,
 } from "../../../utils/web3";
-import { fetchMetadataFromIpfs, BountyMetadata } from "../../../utils/ipfs";
+import { fetchMetadataFromIpfs, BountyMetadata, uploadToIpfs } from "../../../utils/ipfs";
 import { useAlert } from "../../../hooks/useAlert";
 import {
   Breadcrumb,
@@ -70,6 +70,8 @@ import {
   DollarSign,
   Send,
   Loader2,
+  Upload,
+  X,
 } from "lucide-react";
 
 interface Reply {
@@ -147,6 +149,8 @@ export default function BountyDetailPage() {
   const [copied, setCopied] = useState(false);
   const [viewingCid, setViewingCid] = useState<string | null>(null);
   const [viewingTitle, setViewingTitle] = useState<string>("");
+  const [uploadedSolutionImage, setUploadedSolutionImage] = useState<File | null>(null);
+  const [isUploadingSolution, setIsUploadingSolution] = useState(false);
 
   // OPREC related state
   const [oprecApplications, setOprecApplications] = useState<OprecApplication[]>([]);
@@ -416,10 +420,10 @@ export default function BountyDetailPage() {
   };
 
   const submitSolution = async () => {
-    if (!bounty || !submissionCid.trim()) {
+    if (!bounty || (!uploadedSolutionImage && !submissionCid.trim())) {
       showAlert({
         title: "Missing Information",
-        description: "Please enter an IPFS CID for your solution",
+        description: "Please upload a solution image or enter an IPFS CID",
       });
       return;
     }
@@ -436,6 +440,30 @@ export default function BountyDetailPage() {
     const depositAmount = bounty.amount / BigInt(10);
 
     try {
+      let solutionCid = submissionCid;
+
+      // Upload image to IPFS if a file is selected
+      if (uploadedSolutionImage) {
+        setIsUploadingSolution(true);
+        try {
+          solutionCid = await uploadToIpfs(uploadedSolutionImage, {
+            bountyId: bountyId,
+            type: "bounty-solution",
+          });
+          console.log("Solution uploaded to IPFS:", solutionCid);
+        } catch (uploadError) {
+          console.error("Error uploading solution to IPFS:", uploadError);
+          showAlert({
+            title: "Upload Failed",
+            description: "Failed to upload solution to IPFS. Please try again.",
+          });
+          setIsUploadingSolution(false);
+          return;
+        } finally {
+          setIsUploadingSolution(false);
+        }
+      }
+
       const validTeamMembers = teamMembers
         .filter(addr => addr.trim())
         .filter(addr => /^0x[a-fA-F0-9]{40}$/.test(addr.trim()));
@@ -444,11 +472,12 @@ export default function BountyDetailPage() {
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "submitSolution",
-        args: [BigInt(bountyId), submissionCid, validTeamMembers as `0x${string}`[]],
+        args: [BigInt(bountyId), solutionCid, validTeamMembers as `0x${string}`[]],
         value: depositAmount,
       });
       setSubmissionCid("");
       setTeamMembers([]);
+      setUploadedSolutionImage(null);
     } catch (error) {
       console.error("Error submitting solution:", error);
       showAlert({
@@ -1103,14 +1132,62 @@ export default function BountyDetailPage() {
                         )}
 
                         <div className="space-y-1.5">
-                          <Input
-                            placeholder="Enter IPFS CID of your solution"
-                            value={submissionCid}
-                            onChange={(e) => setSubmissionCid(e.target.value)}
-                            className="text-sm"
-                          />
+                          <label className="text-sm font-medium">Upload Solution Image *</label>
+
+                          {!uploadedSolutionImage ? (
+                            <div className="border-2 border-dashed rounded-lg p-4 transition-colors border-muted-foreground/25 hover:border-muted-foreground/50">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    setUploadedSolutionImage(file);
+                                    setSubmissionCid("");
+                                  }
+                                }}
+                                className="hidden"
+                                id="solution-image-upload"
+                              />
+                              <label
+                                htmlFor="solution-image-upload"
+                                className="cursor-pointer flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                <div className="w-10 h-10 mb-2 bg-muted rounded-full flex items-center justify-center">
+                                  <Upload className="w-5 h-5" />
+                                </div>
+                                <span className="text-xs font-medium mb-1">
+                                  Click to upload solution
+                                </span>
+                                <span className="text-xs text-center">
+                                  JPG, PNG, GIF up to 10MB
+                                </span>
+                              </label>
+                            </div>
+                          ) : (
+                            <div className="relative group">
+                              <img
+                                src={URL.createObjectURL(uploadedSolutionImage)}
+                                alt="Solution preview"
+                                className="w-full h-32 object-cover rounded-lg border"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                onClick={() => setUploadedSolutionImage(null)}
+                                className="absolute -top-2 -right-2 w-6 h-6"
+                              >
+                                <X className="w-3 h-3" />
+                              </Button>
+                              <div className="text-xs text-muted-foreground mt-1 truncate">
+                                {uploadedSolutionImage.name}
+                              </div>
+                            </div>
+                          )}
+
                           <p className="text-xs text-muted-foreground">
-                            Upload your solution to IPFS and paste the CID here
+                            Upload your solution image (will be uploaded to IPFS)
                           </p>
                         </div>
 
@@ -1155,12 +1232,17 @@ export default function BountyDetailPage() {
                         <Button
                           onClick={submitSolution}
                           disabled={
-                            isPending || isConfirming || !submissionCid.trim() || (bounty.hasOprec && !isApprovedParticipant)
+                            isPending || isConfirming || isUploadingSolution || (!uploadedSolutionImage && !submissionCid.trim()) || (bounty.hasOprec && !isApprovedParticipant)
                           }
                           className="w-full"
                           size="sm"
                         >
-                          {isPending || isConfirming ? (
+                          {isUploadingSolution ? (
+                            <>
+                              <Upload className="w-3 h-3 mr-2 animate-spin" />
+                              Uploading to IPFS...
+                            </>
+                          ) : isPending || isConfirming ? (
                             <>
                               <Clock className="w-3 h-3 mr-2 animate-spin" />
                               Submitting...
