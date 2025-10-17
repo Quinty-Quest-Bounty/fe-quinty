@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAccount } from "wagmi";
 import { useZKVerification } from "../hooks/useZKVerification";
+import { useSocialVerification } from "../hooks/useSocialVerification";
 import {
   Dialog,
   DialogContent,
@@ -21,52 +22,57 @@ import {
   CheckCircle,
   AlertCircle,
   Loader2,
-  ExternalLink
+  ExternalLink,
+  Twitter,
+  X,
 } from "lucide-react";
 import { getExplorerUrl } from "../utils/contracts";
 
 export default function ZKVerificationModal() {
   const { address } = useAccount();
-  const { verificationData, loading, isVerified, submitProof } = useZKVerification();
+  const { verificationData, isVerified, submitProof } = useZKVerification();
+  const {
+    twitterAccount,
+    connectTwitter,
+    disconnectTwitter,
+    isConnecting,
+    error: socialError,
+    isConnected,
+  } = useSocialVerification();
+
   const [isOpen, setIsOpen] = useState(false);
-  const [socialHandle, setSocialHandle] = useState("");
   const [institutionName, setInstitutionName] = useState("");
-  const [proofData, setProofData] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const handleConnectTwitter = async () => {
+    await connectTwitter();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!socialHandle.trim()) {
-      setError("Social handle is required");
+    if (!isConnected || !twitterAccount) {
+      setError("Please connect your Twitter account");
       return;
     }
 
-    // For now, generate a dummy proof hash
-    // In production, this would come from Reclaim Protocol
     const dummyProof = `0x${Buffer.from(
-      `proof-${socialHandle}-${Date.now()}`
-    ).toString('hex')}`;
+      `proof-${twitterAccount.username}-${Date.now()}`
+    ).toString("hex")}`;
 
     try {
       setSubmitting(true);
       setError(null);
 
-      const hash = await submitProof(
-        dummyProof,
-        socialHandle,
-        institutionName
-      );
+      const hash = await submitProof(dummyProof, twitterAccount.username, institutionName);
 
       setTxHash(hash);
 
       // Reset form
       setTimeout(() => {
-        setSocialHandle("");
         setInstitutionName("");
-        setProofData("");
         setIsOpen(false);
         setTxHash(null);
       }, 3000);
@@ -91,10 +97,9 @@ export default function ZKVerificationModal() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>ZK Identity Verification</DialogTitle>
+          <DialogTitle>Twitter Verification</DialogTitle>
           <DialogDescription>
-            Verify your identity using zero-knowledge proofs to link your wallet
-            with social accounts without revealing sensitive information.
+            Connect your Twitter/X account to verify your identity on-chain.
           </DialogDescription>
         </DialogHeader>
 
@@ -109,8 +114,18 @@ export default function ZKVerificationModal() {
 
             <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
               <div>
-                <Label className="text-sm text-gray-600">Social Handle</Label>
-                <p className="font-medium">{verificationData.socialHandle}</p>
+                <Label className="text-sm text-gray-600">Twitter Account</Label>
+                <div className="mt-2 flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
+                  <Twitter className="h-5 w-5 text-blue-500" />
+                  <span className="font-medium">{verificationData.socialHandle}</span>
+                  <Badge
+                    variant="outline"
+                    className="ml-auto bg-green-100 text-green-700 border-green-300"
+                  >
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Verified
+                  </Badge>
+                </div>
               </div>
 
               {verificationData.institutionName && (
@@ -126,30 +141,71 @@ export default function ZKVerificationModal() {
                   {new Date(Number(verificationData.verifiedAt) * 1000).toLocaleString()}
                 </p>
               </div>
-
-              <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">
-                <CheckCircle className="h-3 w-3 mr-1" />
-                Verified
-              </Badge>
             </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="socialHandle">
-                Social Handle <span className="text-red-500">*</span>
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">
+                Connect Twitter/X Account <span className="text-red-500">*</span>
               </Label>
-              <Input
-                id="socialHandle"
-                placeholder="@username"
-                value={socialHandle}
-                onChange={(e) => setSocialHandle(e.target.value)}
-                disabled={submitting}
-                required
-              />
-              <p className="text-xs text-gray-500">
-                Your Twitter, GitHub, or other social platform handle
+              <p className="text-sm text-gray-500">
+                Connect your Twitter account to verify your identity.
               </p>
+
+              <div
+                className={`flex items-center justify-between p-4 border rounded-lg ${
+                  isConnected ? "bg-blue-50 border-blue-200" : "bg-white"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Twitter className="h-6 w-6 text-blue-500" />
+                  <div>
+                    <p className="font-medium">Twitter / X</p>
+                    {twitterAccount && (
+                      <p className="text-sm text-gray-600">{twitterAccount.username}</p>
+                    )}
+                  </div>
+                </div>
+
+                {isConnected ? (
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant="outline"
+                      className="bg-green-100 text-green-700 border-green-300"
+                    >
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Connected
+                    </Badge>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={disconnectTwitter}
+                      disabled={submitting}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleConnectTwitter}
+                    disabled={isConnecting || submitting}
+                  >
+                    {isConnecting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Connecting...
+                      </>
+                    ) : (
+                      "Connect"
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -163,13 +219,14 @@ export default function ZKVerificationModal() {
               />
             </div>
 
-            <Alert className="border-blue-500 bg-blue-50">
-              <AlertCircle className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-blue-900 text-xs">
-                <strong>Demo Mode:</strong> In production, this would integrate with Reclaim Protocol
-                for actual ZK proof generation. For now, a demo proof will be generated.
-              </AlertDescription>
-            </Alert>
+            {socialError && (
+              <Alert className="border-orange-500 bg-orange-50">
+                <AlertCircle className="h-4 w-4 text-orange-600" />
+                <AlertDescription className="text-orange-900 text-sm">
+                  {socialError}
+                </AlertDescription>
+              </Alert>
+            )}
 
             {error && (
               <Alert className="border-red-500 bg-red-50">
@@ -187,7 +244,7 @@ export default function ZKVerificationModal() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Verification successful!</span>
                     <a
-                      href={getExplorerUrl(txHash, 'tx')}
+                      href={getExplorerUrl(txHash, "tx")}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs flex items-center gap-1 text-blue-600 hover:underline"
@@ -211,7 +268,7 @@ export default function ZKVerificationModal() {
               </Button>
               <Button
                 type="submit"
-                disabled={submitting || !socialHandle.trim()}
+                disabled={submitting || !isConnected}
                 className="flex-1"
               >
                 {submitting ? (
@@ -222,7 +279,7 @@ export default function ZKVerificationModal() {
                 ) : (
                   <>
                     <ShieldCheck className="h-4 w-4 mr-2" />
-                    Verify
+                    Submit Verification
                   </>
                 )}
               </Button>
@@ -231,10 +288,10 @@ export default function ZKVerificationModal() {
         )}
 
         <div className="mt-4 p-3 bg-gray-50 rounded-lg text-xs text-gray-600">
-          <strong>About ZK Verification:</strong>
+          <strong>About Twitter Verification:</strong>
           <ul className="mt-1 ml-4 list-disc space-y-1">
-            <li>Proves ownership without revealing private data</li>
-            <li>Links wallet to social identity on-chain</li>
+            <li>Proves Twitter account ownership via OAuth</li>
+            <li>Your Twitter handle is stored on-chain</li>
             <li>Required for creating grants and crowdfunding campaigns</li>
             <li>One-time verification per wallet</li>
           </ul>
