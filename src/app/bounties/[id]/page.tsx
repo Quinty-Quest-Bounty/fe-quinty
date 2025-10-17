@@ -705,16 +705,13 @@ export default function BountyDetailPage() {
 
               {/* Images */}
               {metadata?.images && metadata.images.length > 0 && (
-                <div className="mt-3">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {metadata.images.map((cid, index) => (
-                      <img
-                        key={index}
-                        src={`https://ipfs.io/ipfs/${cid}`}
-                        alt={`Bounty image ${index + 1}`}
-                        className="rounded-lg object-cover w-full h-32"
-                      />
-                    ))}
+                <div className="mt-3 flex justify-center">
+                  <div className="w-full max-w-2xl">
+                    <img
+                      src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
+                      alt={metadata.title}
+                      className="w-full h-auto rounded-xl shadow-sm"
+                    />
                   </div>
                 </div>
               )}

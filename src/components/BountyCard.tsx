@@ -262,11 +262,11 @@ export default function BountyCard({
           <div className="space-y-4">
             {/* Image */}
             {metadata?.images && metadata.images.length > 0 && (
-              <div className="relative w-full h-48 overflow-hidden rounded-lg bg-muted">
+              <div className="relative w-full flex justify-center">
                 <img
                   src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
                   alt={metadata.title}
-                  className="w-full h-full object-cover"
+                  className="max-w-full h-auto max-h-[500px] object-contain rounded-xl shadow-sm"
                 />
               </div>
             )}
@@ -447,11 +447,11 @@ export default function BountyCard({
         <div className="space-y-4">
           {/* Image */}
           {metadata?.images && metadata.images.length > 0 && (
-            <div className="relative w-full h-48 overflow-hidden rounded-lg bg-muted">
+            <div className="relative w-full flex justify-center">
               <img
                 src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
                 alt={metadata.title}
-                className="w-full h-full object-cover"
+                className="max-w-full h-auto max-h-[500px] object-contain rounded-xl shadow-sm"
               />
             </div>
           )}

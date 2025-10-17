@@ -200,11 +200,11 @@ export default function AirdropCard({
           <div className="space-y-4">
             {/* Image */}
             {airdrop.imageUrl && (
-              <div className="relative w-full h-48 overflow-hidden rounded-lg bg-muted">
+              <div className="relative w-full flex justify-center">
                 <IpfsImage
                   cid={airdrop.imageUrl.replace("ipfs://", "")}
                   alt={airdrop.title}
-                  className="w-full h-full object-cover"
+                  className="max-w-full h-auto max-h-[500px] object-contain rounded-xl shadow-sm"
                 />
               </div>
             )}
@@ -395,11 +395,11 @@ export default function AirdropCard({
         <div className="space-y-4">
           {/* Image */}
           {airdrop.imageUrl && (
-            <div className="relative w-full h-48 overflow-hidden rounded-lg bg-muted">
+            <div className="relative w-full flex justify-center">
               <IpfsImage
                 cid={airdrop.imageUrl.replace("ipfs://", "")}
                 alt={airdrop.title}
-                className="w-full h-full object-cover"
+                className="max-w-full h-auto max-h-[500px] object-contain rounded-xl shadow-sm"
               />
             </div>
           )}

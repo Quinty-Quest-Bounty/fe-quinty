@@ -390,12 +390,14 @@ export default function AirdropDetailPage() {
 
               {/* Campaign Image */}
               {airdrop.imageUrl && (
-                <div className="mt-3">
-                  <IpfsImage
-                    cid={airdrop.imageUrl.replace("ipfs://", "")}
-                    alt={airdrop.title}
-                    className="w-full h-48 object-cover rounded-lg"
-                  />
+                <div className="mt-3 flex justify-center">
+                  <div className="w-full max-w-2xl">
+                    <IpfsImage
+                      cid={airdrop.imageUrl.replace("ipfs://", "")}
+                      alt={airdrop.title}
+                      className="w-full h-auto rounded-xl shadow-sm"
+                    />
+                  </div>
                 </div>
               )}
 
