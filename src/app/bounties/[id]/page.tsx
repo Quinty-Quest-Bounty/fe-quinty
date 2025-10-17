@@ -569,10 +569,10 @@ export default function BountyDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-          <p className="text-muted-foreground mt-6">Loading bounty...</p>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4">
+        <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
+          <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto text-[#0EA885]" />
+          <p className="text-muted-foreground mt-6 text-sm sm:text-base">Loading bounty...</p>
         </div>
       </div>
     );
@@ -580,13 +580,16 @@ export default function BountyDetailPage() {
 
   if (!bounty) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">Bounty not found</h2>
-          <p className="text-muted-foreground mb-4">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4">
+        <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Bounty not found</h2>
+          <p className="text-muted-foreground mb-6 text-sm sm:text-base">
             The bounty you're looking for doesn't exist.
           </p>
-          <Button onClick={() => router.push("/bounties")}>
+          <Button
+            onClick={() => router.push("/bounties")}
+            className="rounded-[0.75rem] hover:scale-105 active:scale-95 transition-all duration-300"
+          >
             Back to Bounties
           </Button>
         </div>
@@ -602,18 +605,20 @@ export default function BountyDetailPage() {
     : 1;
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 relative">
       {/* Loading Overlay */}
       {(isPending || isConfirming) && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="p-8 rounded-[2rem] shadow-lg border border-white/60 bg-white/70 backdrop-blur-xl">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="p-8 sm:p-10 rounded-[2rem] shadow-2xl border border-white/60 bg-white/90 backdrop-blur-xl max-w-sm animate-in fade-in zoom-in duration-300">
             <div className="flex flex-col items-center gap-6">
-              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+              <div className="p-4 rounded-[1.25rem] bg-[#0EA885]/10">
+                <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-[#0EA885]" />
+              </div>
               <div className="text-center">
-                <p className="font-semibold text-lg">
+                <p className="font-bold text-lg sm:text-xl mb-2">
                   {isPending ? "Waiting for approval..." : "Confirming transaction..."}
                 </p>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground">
                   Please don't close this page
                 </p>
               </div>
@@ -622,81 +627,85 @@ export default function BountyDetailPage() {
         </div>
       )}
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Breadcrumb */}
-        <Breadcrumb className="mb-6">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                onClick={() => router.push("/")}
-                className="cursor-pointer hover:text-foreground transition-colors"
-              >
-                Home
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <ChevronRight className="h-4 w-4" />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                onClick={() => router.push("/bounties")}
-                className="cursor-pointer hover:text-foreground transition-colors"
-              >
-                Bounties
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <ChevronRight className="h-4 w-4" />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbPage>Bounty #{bountyId}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        <div className="mb-6 sm:mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md hover:shadow-lg transition-all duration-300">
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    onClick={() => router.push("/")}
+                    className="cursor-pointer hover:text-[#0EA885] transition-all duration-300 text-sm font-medium active:scale-95"
+                  >
+                    Home
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator>
+                  <ChevronRight className="h-4 w-4 text-foreground/40" />
+                </BreadcrumbSeparator>
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    onClick={() => router.push("/bounties")}
+                    className="cursor-pointer hover:text-[#0EA885] transition-all duration-300 text-sm font-medium active:scale-95"
+                  >
+                    Bounties
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator>
+                  <ChevronRight className="h-4 w-4 text-foreground/40" />
+                </BreadcrumbSeparator>
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="text-sm font-semibold text-[#0EA885]">Bounty #{bountyId}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </div>
 
         {/* Main Content */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Header Card */}
-          <Card className="rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.01]">
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-start gap-3">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                      <Target className="h-4 w-4 text-primary" />
+          <Card className="rounded-[1.5rem] sm:rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.01]">
+            <CardHeader className="pb-3 sm:pb-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4">
+                <div className="flex-1 w-full">
+                  <div className="flex items-start gap-3 mb-2">
+                    <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-[1rem] bg-gradient-to-br from-[#0EA885]/10 to-[#0EA885]/5 border border-[#0EA885]/20">
+                      <Target className="h-5 w-5 sm:h-6 sm:w-6 text-[#0EA885]" />
                     </div>
-                    <div>
-                      <CardTitle className="text-lg">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg sm:text-xl font-bold">
                         {metadata?.title || bounty.description.split("\n")[0]}
                       </CardTitle>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <span className="text-xs text-muted-foreground font-medium">
                           Created by
                         </span>
-                        <Badge variant="outline" className="text-xs py-0 h-5">
+                        <Badge variant="outline" className="text-xs py-0.5 h-auto px-2 rounded-full border-white/60 bg-white/50">
                           {formatAddress(bounty.creator)}
                         </Badge>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Badge variant="default" className="text-xs">{statusLabel}</Badge>
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <Badge variant="default" className="text-xs rounded-full px-3 py-1 bg-[#0EA885] hover:bg-[#0EA885]/90">{statusLabel}</Badge>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={copyLink}
-                    className="gap-1 h-7 px-2"
+                    className="gap-1.5 h-auto px-3 py-1.5 rounded-full border-white/60 bg-white/50 hover:bg-white/70 hover:scale-105 active:scale-95 transition-all duration-300"
                   >
                     {copied ? (
                       <>
                         <Check className="w-3 h-3" />
-                        <span className="text-xs">Copied!</span>
+                        <span className="text-xs font-medium">Copied!</span>
                       </>
                     ) : (
                       <>
                         <Copy className="w-3 h-3" />
-                        <span className="text-xs">Share</span>
+                        <span className="text-xs font-medium">Share</span>
                       </>
                     )}
                   </Button>

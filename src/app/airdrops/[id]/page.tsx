@@ -246,10 +246,10 @@ export default function AirdropDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-          <p className="text-muted-foreground mt-6">Loading airdrop...</p>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4">
+        <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
+          <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto text-[#0EA885]" />
+          <p className="text-muted-foreground mt-6 text-sm sm:text-base">Loading airdrop...</p>
         </div>
       </div>
     );
@@ -257,11 +257,11 @@ export default function AirdropDetailPage() {
 
   if (!airdrop) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">Airdrop not found</h2>
-          <p className="text-muted-foreground mb-4">The airdrop you're looking for doesn't exist.</p>
-          <Button onClick={() => router.push("/airdrops")}>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4">
+        <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Airdrop not found</h2>
+          <p className="text-muted-foreground mb-6 text-sm sm:text-base">The airdrop you're looking for doesn't exist.</p>
+          <Button onClick={() => router.push("/airdrops")} className="rounded-[0.75rem] hover:scale-105 active:scale-95 transition-all duration-300">
             Back to Airdrops
           </Button>
         </div>
@@ -291,18 +291,20 @@ export default function AirdropDetailPage() {
   };
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 relative">
       {/* Loading Overlay */}
       {(isPending || isConfirming) && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="p-8 rounded-[2rem] shadow-lg border border-white/60 bg-white/70 backdrop-blur-xl">
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="p-8 sm:p-10 rounded-[2rem] shadow-2xl border border-white/60 bg-white/90 backdrop-blur-xl max-w-sm">
             <div className="flex flex-col items-center gap-6">
-              <Loader2 className="h-12 w-12 animate-spin text-primary" />
+              <div className="p-4 rounded-[1.25rem] bg-[#0EA885]/10">
+                <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-[#0EA885]" />
+              </div>
               <div className="text-center">
-                <p className="font-semibold text-lg">
+                <p className="font-bold text-lg sm:text-xl mb-2">
                   {isPending ? "Waiting for approval..." : "Confirming transaction..."}
                 </p>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-muted-foreground">
                   Please don't close this page
                 </p>
               </div>
@@ -311,37 +313,41 @@ export default function AirdropDetailPage() {
         </div>
       )}
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Breadcrumb */}
-        <Breadcrumb className="mb-6">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                onClick={() => router.push("/")}
-                className="cursor-pointer hover:text-foreground transition-colors"
-              >
-                Home
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <ChevronRight className="h-4 w-4" />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                onClick={() => router.push("/airdrops")}
-                className="cursor-pointer hover:text-foreground transition-colors"
-              >
-                Airdrops
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <ChevronRight className="h-4 w-4" />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbPage>Airdrop #{airdropId}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        <div className="mb-6 sm:mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md hover:shadow-lg transition-all duration-300">
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    onClick={() => router.push("/")}
+                    className="cursor-pointer hover:text-[#0EA885] transition-all duration-300 text-sm font-medium active:scale-95"
+                  >
+                    Home
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator>
+                  <ChevronRight className="h-4 w-4 text-foreground/40" />
+                </BreadcrumbSeparator>
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    onClick={() => router.push("/airdrops")}
+                    className="cursor-pointer hover:text-[#0EA885] transition-all duration-300 text-sm font-medium active:scale-95"
+                  >
+                    Airdrops
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator>
+                  <ChevronRight className="h-4 w-4 text-foreground/40" />
+                </BreadcrumbSeparator>
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="text-sm font-semibold text-[#0EA885]">Airdrop #{airdropId}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </div>
 
         {/* Main Content */}
         <div className="space-y-6">

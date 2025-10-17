@@ -24,96 +24,100 @@ export default function FundingPage() {
   const [selectedType, setSelectedType] = useState<FundingType>("looking-for-grant");
 
   return (
-    <div className="min-h-screen">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Breadcrumb Navigation */}
-        <Breadcrumb className="mb-6">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                onClick={() => router.push("/")}
-                className="cursor-pointer hover:text-foreground transition-colors"
-              >
-                Home
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator>
-              <ChevronRight className="h-4 w-4" />
-            </BreadcrumbSeparator>
-            <BreadcrumbItem>
-              <BreadcrumbPage>Funding</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        <div className="mb-6 sm:mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md hover:shadow-lg transition-all duration-300">
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    onClick={() => router.push("/")}
+                    className="cursor-pointer hover:text-[#0EA885] transition-all duration-300 text-sm font-medium active:scale-95"
+                  >
+                    Home
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator>
+                  <ChevronRight className="h-4 w-4 text-foreground/40" />
+                </BreadcrumbSeparator>
+                <BreadcrumbItem>
+                  <BreadcrumbPage className="text-sm font-semibold text-[#0EA885]">Funding</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </div>
 
         {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-3">Funding Platform</h1>
-          <p className="text-muted-foreground text-lg">
+        <div className="mb-8 sm:mb-10 rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-6 sm:p-8 hover:shadow-2xl transition-all duration-500">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Funding Platform</h1>
+          <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
             Discover funding opportunities, create grant programs, or launch crowdfunding campaigns
           </p>
         </div>
 
         {/* Type Selection Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-8">
           <Card
-            className={`cursor-pointer rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] ${
+            className={`group cursor-pointer rounded-[1.5rem] sm:rounded-[2rem] border transition-all duration-500 hover:scale-[1.03] active:scale-[0.98] ${
               selectedType === "looking-for-grant"
-                ? "ring-2 ring-primary"
-                : "opacity-70"
+                ? "ring-2 ring-[#0EA885] border-[#0EA885]/40 bg-[#0EA885]/5 backdrop-blur-xl shadow-xl"
+                : "border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-2xl opacity-70 hover:opacity-100"
             }`}
             onClick={() => setSelectedType("looking-for-grant")}
           >
             <CardContent className="pt-6 text-center">
               <div className="mb-4 flex justify-center">
-                <div className="p-3 bg-blue-100 rounded-[1.25rem] transition-all duration-300 hover:scale-110">
-                  <Rocket className="h-8 w-8 text-blue-600" />
+                <div className="p-3 sm:p-4 bg-gradient-to-br from-blue-100 to-blue-50 rounded-[1.25rem] transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-md">
+                  <Rocket className="h-7 w-7 sm:h-8 sm:w-8 text-blue-600" />
                 </div>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Looking for Grant</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="text-lg sm:text-xl font-bold mb-2">Looking for Grant</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 Showcase your project to attract VCs and investors. Flexible funding - withdraw anytime.
               </p>
             </CardContent>
           </Card>
 
           <Card
-            className={`cursor-pointer rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] ${
+            className={`group cursor-pointer rounded-[1.5rem] sm:rounded-[2rem] border transition-all duration-500 hover:scale-[1.03] active:scale-[0.98] ${
               selectedType === "grant-program"
-                ? "ring-2 ring-primary"
-                : "opacity-70"
+                ? "ring-2 ring-[#0EA885] border-[#0EA885]/40 bg-[#0EA885]/5 backdrop-blur-xl shadow-xl"
+                : "border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-2xl opacity-70 hover:opacity-100"
             }`}
             onClick={() => setSelectedType("grant-program")}
           >
             <CardContent className="pt-6 text-center">
               <div className="mb-4 flex justify-center">
-                <div className="p-3 bg-green-100 rounded-[1.25rem] transition-all duration-300 hover:scale-110">
-                  <Gift className="h-8 w-8 text-green-600" />
+                <div className="p-3 sm:p-4 bg-gradient-to-br from-green-100 to-green-50 rounded-[1.25rem] transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-md">
+                  <Gift className="h-7 w-7 sm:h-8 sm:w-8 text-green-600" />
                 </div>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Offering a Grant</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="text-lg sm:text-xl font-bold mb-2">Offering a Grant</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 VCs and orgs create grant programs to fund promising projects. Review applications and distribute funds.
               </p>
             </CardContent>
           </Card>
 
           <Card
-            className={`cursor-pointer rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] ${
+            className={`group cursor-pointer rounded-[1.5rem] sm:rounded-[2rem] border transition-all duration-500 hover:scale-[1.03] active:scale-[0.98] ${
               selectedType === "crowdfunding"
-                ? "ring-2 ring-primary"
-                : "opacity-70"
+                ? "ring-2 ring-[#0EA885] border-[#0EA885]/40 bg-[#0EA885]/5 backdrop-blur-xl shadow-xl"
+                : "border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-2xl opacity-70 hover:opacity-100"
             }`}
             onClick={() => setSelectedType("crowdfunding")}
           >
             <CardContent className="pt-6 text-center">
               <div className="mb-4 flex justify-center">
-                <div className="p-3 bg-pink-100 rounded-[1.25rem] transition-all duration-300 hover:scale-110">
-                  <Heart className="h-8 w-8 text-pink-600" />
+                <div className="p-3 sm:p-4 bg-gradient-to-br from-pink-100 to-pink-50 rounded-[1.25rem] transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-md">
+                  <Heart className="h-7 w-7 sm:h-8 sm:w-8 text-pink-600" />
                 </div>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Crowdfunding</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="text-lg sm:text-xl font-bold mb-2">Crowdfunding</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 All-or-nothing funding for social movements. Milestone-based fund release with transparent tracking.
               </p>
             </CardContent>

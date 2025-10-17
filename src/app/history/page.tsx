@@ -631,10 +631,10 @@ export default function HistoryPage() {
 
   if (!address) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">Connect Your Wallet</h2>
-          <p className="text-muted-foreground mb-4">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4">
+        <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Connect Your Wallet</h2>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Please connect your wallet to view transaction history
           </p>
         </div>
@@ -644,71 +644,79 @@ export default function HistoryPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-          <p className="text-muted-foreground mt-6">Loading transaction history...</p>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4">
+        <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
+          <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto text-[#0EA885]" />
+          <p className="text-muted-foreground mt-6 text-sm sm:text-base">Loading transaction history...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Transaction History</h1>
-          <p className="text-muted-foreground">
+        <div className="mb-8 sm:mb-10 rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-6 sm:p-8 hover:shadow-2xl transition-all duration-500">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Transaction History</h1>
+          <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
             View all your interactions with Quinty smart contracts
           </p>
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardContent className="p-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <Card className="rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.03] group">
+            <CardContent className="p-4 sm:p-5">
               <div className="flex items-center gap-2 mb-2">
-                <Target className="h-4 w-4 text-blue-600" />
-                <p className="text-xs text-muted-foreground">Bounties</p>
+                <div className="p-1.5 rounded-lg bg-blue-100 group-hover:scale-110 transition-transform duration-300">
+                  <Target className="h-4 w-4 text-blue-600" />
+                </div>
+                <p className="text-xs text-muted-foreground font-medium">Bounties</p>
               </div>
-              <p className="text-2xl font-bold">
+              <p className="text-2xl sm:text-3xl font-bold">
                 {transactions.filter((tx) => tx.contractType === "Quinty").length}
               </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-4">
+          <Card className="rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.03] group">
+            <CardContent className="p-4 sm:p-5">
               <div className="flex items-center gap-2 mb-2">
-                <Gift className="h-4 w-4 text-green-600" />
-                <p className="text-xs text-muted-foreground">Grants</p>
+                <div className="p-1.5 rounded-lg bg-green-100 group-hover:scale-110 transition-transform duration-300">
+                  <Gift className="h-4 w-4 text-green-600" />
+                </div>
+                <p className="text-xs text-muted-foreground font-medium">Grants</p>
               </div>
-              <p className="text-2xl font-bold">
+              <p className="text-2xl sm:text-3xl font-bold">
                 {transactions.filter((tx) => tx.contractType === "GrantProgram").length}
               </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-4">
+          <Card className="rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.03] group">
+            <CardContent className="p-4 sm:p-5">
               <div className="flex items-center gap-2 mb-2">
-                <Users className="h-4 w-4 text-purple-600" />
-                <p className="text-xs text-muted-foreground">Crowdfunding</p>
+                <div className="p-1.5 rounded-lg bg-purple-100 group-hover:scale-110 transition-transform duration-300">
+                  <Users className="h-4 w-4 text-purple-600" />
+                </div>
+                <p className="text-xs text-muted-foreground font-medium">Crowdfunding</p>
               </div>
-              <p className="text-2xl font-bold">
+              <p className="text-2xl sm:text-3xl font-bold">
                 {transactions.filter((tx) => tx.contractType === "Crowdfunding").length}
               </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent className="p-4">
+          <Card className="rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.03] group">
+            <CardContent className="p-4 sm:p-5">
               <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="h-4 w-4 text-orange-600" />
-                <p className="text-xs text-muted-foreground">LFG</p>
+                <div className="p-1.5 rounded-lg bg-orange-100 group-hover:scale-110 transition-transform duration-300">
+                  <TrendingUp className="h-4 w-4 text-orange-600" />
+                </div>
+                <p className="text-xs text-muted-foreground font-medium">LFG</p>
               </div>
-              <p className="text-2xl font-bold">
+              <p className="text-2xl sm:text-3xl font-bold">
                 {transactions.filter((tx) => tx.contractType === "LookingForGrant").length}
               </p>
             </CardContent>
@@ -716,13 +724,15 @@ export default function HistoryPage() {
         </div>
 
         {/* Filter */}
-        <div className="flex items-center gap-4 mb-6">
-          <Filter className="h-5 w-5 text-muted-foreground" />
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6 p-4 rounded-[1.25rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md">
+          <div className="p-2 rounded-lg bg-[#0EA885]/10">
+            <Filter className="h-4 w-4 sm:h-5 sm:w-5 text-[#0EA885]" />
+          </div>
           <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-full sm:w-48 rounded-[0.75rem] border-white/60">
               <SelectValue placeholder="Filter by type" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-[0.75rem]">
               <SelectItem value="all">All Transactions</SelectItem>
               <SelectItem value="bounties">Bounties</SelectItem>
               <SelectItem value="grants">Grants</SelectItem>
@@ -731,23 +741,30 @@ export default function HistoryPage() {
               <SelectItem value="airdrops">Airdrops</SelectItem>
             </SelectContent>
           </Select>
-          <span className="text-sm text-muted-foreground">
+          <span className="text-xs sm:text-sm text-muted-foreground font-medium px-3 py-1.5 rounded-full bg-[#0EA885]/10">
             {filteredTransactions.length} transaction{filteredTransactions.length !== 1 ? "s" : ""}
           </span>
         </div>
 
         {/* Transactions List */}
         {filteredTransactions.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No transactions found</h3>
-              <p className="text-muted-foreground mb-4">
+          <Card className="rounded-[1.5rem] sm:rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg">
+            <CardContent className="py-12 sm:py-16 text-center">
+              <div className="p-4 rounded-[1.25rem] bg-[#0EA885]/10 inline-flex mb-6">
+                <Clock className="h-10 w-10 sm:h-12 sm:w-12 text-[#0EA885]" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold mb-2">No transactions found</h3>
+              <p className="text-muted-foreground mb-6 text-sm sm:text-base">
                 {filter === "all"
                   ? "You haven't made any transactions yet"
                   : `No ${filter} transactions found`}
               </p>
-              <Button onClick={() => router.push("/bounties")}>Explore Bounties</Button>
+              <Button
+                onClick={() => router.push("/bounties")}
+                className="rounded-[0.75rem] hover:scale-105 active:scale-95 transition-all duration-300"
+              >
+                Explore Bounties
+              </Button>
             </CardContent>
           </Card>
         ) : (
@@ -759,14 +776,14 @@ export default function HistoryPage() {
               return (
                 <Card
                   key={tx.id}
-                  className="hover:shadow-md transition-shadow cursor-pointer"
+                  className="rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
                   onClick={() => router.push(getRouteForTransaction(tx))}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-4 flex-1 min-w-0">
-                        <div className={`flex h-10 w-10 items-center justify-center rounded-lg border ${colorClass}`}>
-                          <Icon className="h-5 w-5" />
+                  <CardContent className="p-4 sm:p-5">
+                    <div className="flex items-center justify-between gap-3 sm:gap-4">
+                      <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                        <div className={`flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-[0.75rem] sm:rounded-[1rem] border ${colorClass} group-hover:scale-110 transition-transform duration-300`}>
+                          <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
                         </div>
 
                         <div className="flex-1 min-w-0">
@@ -796,8 +813,8 @@ export default function HistoryPage() {
                         </div>
                       </div>
 
-                      <Button variant="ghost" size="sm">
-                        <ExternalLink className="h-4 w-4" />
+                      <Button variant="ghost" size="sm" className="rounded-[0.75rem] hover:bg-[#0EA885]/10 hover:scale-110 active:scale-95 transition-all duration-300">
+                        <ExternalLink className="h-4 w-4 text-[#0EA885]" />
                       </Button>
                     </div>
                   </CardContent>
