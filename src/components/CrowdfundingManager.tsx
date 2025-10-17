@@ -592,7 +592,7 @@ export default function CrowdfundingManager() {
         <div className="space-y-2">
           <Label>Social Accounts</Label>
           <Input
-            placeholder="Twitter, website, etc."
+            placeholder="X, website, etc."
             value={newCampaign.socialAccounts}
             onChange={(e) => setNewCampaign({ ...newCampaign, socialAccounts: e.target.value })}
           />

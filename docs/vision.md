@@ -91,7 +91,7 @@ We're creating infrastructure that makes trustless collaboration as easy as send
 
 3. **ZK Verification Production** (March)
    - Reclaim Protocol integration
-   - Twitter/X proof verification
+   - X proof verification
    - GitHub integration
    - Institution verification system
 
@@ -531,7 +531,7 @@ Bring your community on-chain. Govern yourselves. Keep 100% of value you create.
 
 - **Website:** https://quinty.app
 - **GitHub:** https://github.com/quinty-protocol
-- **Twitter:** @QuintyProtocol (coming soon)
+- **X:** @QuintyProtocol (coming soon)
 - **Discord:** Join our community (coming soon)
 - **Mirror:** Read our essays (coming soon)
 

@@ -102,7 +102,7 @@ Visit the Base Sepolia faucet and get free testnet ETH:
 
 1. **Verify Your Identity (Required)**
    - Click "Verify Identity" in header
-   - Enter social handle (e.g., @yourtwitter)
+   - Enter social handle (e.g., @yourhandle)
    - Submit verification transaction
    - Wait for confirmation
 

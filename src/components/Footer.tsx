@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Github, Twitter, Mail } from "lucide-react";
+import { Github, X, Mail } from "lucide-react";
 import { Separator } from "./ui/separator";
 
 const socialLinks = [
-  { name: "Twitter", href: "https://twitter.com/quinty", icon: Twitter },
+  { name: "X", href: "https://x.com/quinty", icon: X },
   { name: "GitHub", href: "https://github.com/quinty", icon: Github },
   { name: "Email", href: "mailto:team@quinty.xyz", icon: Mail },
 ];

@@ -480,7 +480,7 @@ Prevent spam and scams by verifying identity before creation of:
 
 ### Future Implementation (Reclaim Protocol)
 
-**Step 1:** User proves Twitter/X ownership
+**Step 1:** User proves X ownership
 - Reclaim SDK generates ZK proof
 - Cryptographically proves account ownership
 - No passwords/tokens revealed

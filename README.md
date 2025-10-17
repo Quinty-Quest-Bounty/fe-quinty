@@ -53,7 +53,7 @@ Visit http://localhost:3000
 
 ## 🔐 X Social Verification Setup
 
-To enable X (Twitter) verification, you need to set up OAuth:
+To enable X verification, you need to set up OAuth:
 
 1. Go to [X Developer Portal](https://developer.twitter.com/en/portal/dashboard)
 2. Create a new app and enable OAuth 2.0
@@ -61,7 +61,7 @@ To enable X (Twitter) verification, you need to set up OAuth:
 4. Copy your Client ID
 5. Add to `.env.local`: `NEXT_PUBLIC_TWITTER_CLIENT_ID=your_client_id`
 
-**For detailed instructions, see [TWITTER_SETUP.md](./TWITTER_SETUP.md)**
+**Note:** You'll also need to add `TWITTER_CLIENT_SECRET` to `.env.local` for secure backend verification.
 
 ## 📋 Contract Addresses (Base Sepolia)
 
@@ -146,7 +146,7 @@ We're building infrastructure for the onchain work economy where:
 ✅ All contracts deployed on Base Sepolia
 ✅ Full frontend with 6 core features
 ✅ Soulbound NFT badge system
-✅ X (Twitter) Social Verification via OAuth
+✅ X Social Verification via OAuth
 🚧 Dispute Resolver (coming soon)
 
 **Production Ready** ✅
@@ -170,7 +170,7 @@ MIT - Open source and free to use.
 - **Documentation:** [docs/](./docs/)
 - **Website:** Coming soon
 - **GitHub:** This repository
-- **Twitter:** @QuintyProtocol (coming soon)
+- **X:** @QuintyProtocol (coming soon)
 - **Discord:** Join our community (coming soon)
 
 ---

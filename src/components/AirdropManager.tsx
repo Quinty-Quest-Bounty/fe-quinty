@@ -895,7 +895,7 @@ export default function AirdropManager() {
                             setNewAirdrop({ ...newAirdrop, requirements: e.target.value })
                           }
                           rows={3}
-                          placeholder="e.g., Post on X/Twitter with #Quinty hashtag, get 100+ likes, include wallet address..."
+                          placeholder="e.g., Post on X with #Quinty hashtag, get 100+ likes, include wallet address..."
                           className="border-gray-300 focus:border-gray-500 focus:ring-gray-500/20 resize-none"
                           required
                         />
@@ -1210,13 +1210,13 @@ export default function AirdropManager() {
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="twitterUrl">Twitter/X Post URL</Label>
+                  <Label htmlFor="twitterUrl">X Post URL</Label>
                   <div className="relative">
                     <ExternalLink className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="twitterUrl"
                       type="url"
-                      placeholder="https://twitter.com/..."
+                      placeholder="https://x.com/..."
                       value={
                         newEntry.airdropId === modalAirdropId
                           ? newEntry.twitterUrl
@@ -1355,7 +1355,7 @@ export default function AirdropManager() {
                             <strong>
                               {entry.ipfsProofCid.includes("twitter.com") ||
                               entry.ipfsProofCid.includes("x.com")
-                                ? "Twitter/X Post:"
+                                ? "X Post:"
                                 : "IPFS:"}
                             </strong>{" "}
                             {entry.ipfsProofCid.includes("twitter.com") ||
@@ -1602,7 +1602,7 @@ export default function AirdropManager() {
                                             entry.ipfsProofCid.includes("x.com") ? (
                                               <>
                                                 <ExternalLink className="w-3 h-3 text-gray-400" />
-                                                <span>Twitter/X Post: </span>
+                                                <span>X Post: </span>
                                                 <a
                                                   href={entry.ipfsProofCid}
                                                   target="_blank"

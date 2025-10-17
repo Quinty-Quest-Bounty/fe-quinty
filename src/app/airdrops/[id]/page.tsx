@@ -505,7 +505,7 @@ export default function AirdropDetailPage() {
                             userEntry.ipfsProofCid.includes("x.com") ? (
                               <>
                                 <ExternalLink className="w-3 h-3 text-muted-foreground" />
-                                <span className="text-xs">Twitter/X Post: </span>
+                                <span className="text-xs">X Post: </span>
                                 <a
                                   href={userEntry.ipfsProofCid}
                                   target="_blank"
@@ -547,13 +547,13 @@ export default function AirdropDetailPage() {
                       <CardContent className="pt-0">
                         <div className="space-y-3">
                           <div className="space-y-1.5">
-                            <Label htmlFor="twitterUrl" className="text-xs">Twitter/X Post URL</Label>
+                            <Label htmlFor="twitterUrl" className="text-xs">X Post URL</Label>
                             <div className="relative">
                               <ExternalLink className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3 w-3 text-muted-foreground" />
                               <Input
                                 id="twitterUrl"
                                 type="url"
-                                placeholder="https://twitter.com/..."
+                                placeholder="https://x.com/..."
                                 value={newEntry.twitterUrl}
                                 onChange={(e) =>
                                   setNewEntry({ ...newEntry, twitterUrl: e.target.value })
@@ -711,7 +711,7 @@ export default function AirdropDetailPage() {
                                   entry.ipfsProofCid.includes("x.com") ? (
                                     <>
                                       <ExternalLink className="w-3 h-3" />
-                                      <span>Twitter/X Post: </span>
+                                      <span>X Post: </span>
                                       <a
                                         href={entry.ipfsProofCid}
                                         target="_blank"

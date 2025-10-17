@@ -106,7 +106,7 @@ When bounties expire or disputes arise:
 - **On-chain stats** - Total submissions, wins, bounties created, first/last activity
 
 ### 6. **ZK Verification** - Identity Layer
-- **Privacy-first** - Connect wallet to Twitter/X without revealing credentials
+- **Privacy-first** - Connect wallet to X without revealing credentials
 - **Required for creation** - Must verify to create grants, crowdfunding, LFG
 - **Visual badges** - Verified users show checkmark in UI
 - **Reclaim Protocol ready** - Placeholder mode now, production-ready ZK proofs coming

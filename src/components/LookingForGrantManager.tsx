@@ -703,7 +703,7 @@ export default function LookingForGrantManager() {
         <div className="space-y-2">
           <Label>Social Accounts</Label>
           <Input
-            placeholder="Twitter, GitHub, etc."
+            placeholder="X, GitHub, etc."
             value={newRequest.socialAccounts}
             onChange={(e) => setNewRequest({ ...newRequest, socialAccounts: e.target.value })}
           />

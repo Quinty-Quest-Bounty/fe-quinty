@@ -798,7 +798,7 @@ export default function GrantProgramManager() {
             <div className="space-y-2">
               <Label>Social Accounts</Label>
               <Input
-                placeholder="Twitter, GitHub, website..."
+                placeholder="X, GitHub, website..."
                 value={applyForm.socialAccounts}
                 onChange={(e) => setApplyForm({ ...applyForm, socialAccounts: e.target.value })}
               />

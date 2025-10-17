@@ -514,7 +514,7 @@ export default function GrantProgramDetailPage() {
                         <Label htmlFor="socialAccounts" className="text-xs">Social Accounts</Label>
                         <Input
                           id="socialAccounts"
-                          placeholder="Twitter, GitHub, etc."
+                          placeholder="X, GitHub, etc."
                           value={applyForm.socialAccounts}
                           onChange={(e) => setApplyForm({ ...applyForm, socialAccounts: e.target.value })}
                           className="text-sm h-8"

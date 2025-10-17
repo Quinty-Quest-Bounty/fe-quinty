@@ -98,7 +98,7 @@ export default function ZKVerificationModal() {
         <DialogHeader>
           <DialogTitle>X Verification</DialogTitle>
           <DialogDescription>
-            Connect your X (formerly Twitter) account to verify your identity on-chain.
+            Connect your X account to verify your identity on-chain.
           </DialogDescription>
         </DialogHeader>
 
