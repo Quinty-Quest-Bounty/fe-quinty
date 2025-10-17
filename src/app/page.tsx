@@ -189,17 +189,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50/50 via-teal-50/30 to-emerald-50/50 text-foreground relative">
-      {/* Animated Background Blobs */}
-      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 -left-4 w-96 h-96 bg-green-200/25 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
-        <div className="absolute top-0 -right-4 w-96 h-96 bg-teal-200/25 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
-        <div className="absolute -bottom-8 left-20 w-96 h-96 bg-emerald-200/25 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
-        <div className="absolute top-1/2 left-1/2 w-[500px] h-[500px] bg-cyan-200/25 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-6000"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-lime-200/25 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-8000"></div>
-        <div className="absolute top-1/3 right-1/3 w-80 h-80 bg-teal-300/20 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-3000"></div>
-      </div>
-
+    <div className="min-h-screen text-foreground relative">
       <main className="relative px-4 pb-16 pt-8 sm:px-6 sm:pb-24 sm:pt-12 lg:px-0 lg:pb-32">
         <div className="mx-auto w-full max-w-6xl">
           <section className="mx-auto mb-8 max-w-7xl px-4 sm:mb-10 sm:px-6 md:mb-20 xl:px-0">

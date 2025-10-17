@@ -301,7 +301,7 @@ export default function GrantProgramDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
           <p className="text-muted-foreground mt-6">Loading grant program...</p>
@@ -312,7 +312,7 @@ export default function GrantProgramDetailPage() {
 
   if (!grant) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-2">Grant not found</h2>
           <p className="text-muted-foreground mb-4">The grant program you're looking for doesn't exist.</p>
@@ -330,7 +330,7 @@ export default function GrantProgramDetailPage() {
   const userApplication = applications.find((app) => app.applicant.toLowerCase() === address?.toLowerCase());
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen relative">
       {/* Loading Overlay */}
       {(isPending || isConfirming) && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">

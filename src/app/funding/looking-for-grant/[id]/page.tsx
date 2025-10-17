@@ -277,7 +277,7 @@ export default function LookingForGrantDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
           <p className="text-muted-foreground mt-4">Loading funding request...</p>
@@ -288,7 +288,7 @@ export default function LookingForGrantDetailPage() {
 
   if (!request) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-2">Request not found</h2>
           <p className="text-muted-foreground mb-4">The funding request you're looking for doesn't exist.</p>
@@ -316,7 +316,7 @@ export default function LookingForGrantDetailPage() {
   const projectDescription = request.projectDetails.split("\n\nLinks:")[0];
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen relative">
       {/* Loading Overlay */}
       {(isPending || isConfirming) && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">

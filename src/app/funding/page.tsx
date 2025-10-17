@@ -24,7 +24,7 @@ export default function FundingPage() {
   const [selectedType, setSelectedType] = useState<FundingType>("looking-for-grant");
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Breadcrumb Navigation */}
         <Breadcrumb className="mb-6">

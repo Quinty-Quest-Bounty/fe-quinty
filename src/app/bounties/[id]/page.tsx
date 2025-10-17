@@ -569,7 +569,7 @@ export default function BountyDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
           <p className="text-muted-foreground mt-6">Loading bounty...</p>
@@ -580,7 +580,7 @@ export default function BountyDetailPage() {
 
   if (!bounty) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-2">Bounty not found</h2>
           <p className="text-muted-foreground mb-4">
@@ -602,7 +602,7 @@ export default function BountyDetailPage() {
     : 1;
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen relative">
       {/* Loading Overlay */}
       {(isPending || isConfirming) && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
