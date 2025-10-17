@@ -57,16 +57,16 @@ export default function FundingPage() {
         {/* Type Selection Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card
-            className={`cursor-pointer transition-all hover:shadow-lg ${
+            className={`cursor-pointer rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] ${
               selectedType === "looking-for-grant"
-                ? "ring-2 ring-primary shadow-lg"
+                ? "ring-2 ring-primary"
                 : "opacity-70"
             }`}
             onClick={() => setSelectedType("looking-for-grant")}
           >
             <CardContent className="pt-6 text-center">
               <div className="mb-4 flex justify-center">
-                <div className="p-3 bg-blue-100 rounded-full">
+                <div className="p-3 bg-blue-100 rounded-[1.25rem] transition-all duration-300 hover:scale-110">
                   <Rocket className="h-8 w-8 text-blue-600" />
                 </div>
               </div>
@@ -78,16 +78,16 @@ export default function FundingPage() {
           </Card>
 
           <Card
-            className={`cursor-pointer transition-all hover:shadow-lg ${
+            className={`cursor-pointer rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] ${
               selectedType === "grant-program"
-                ? "ring-2 ring-primary shadow-lg"
+                ? "ring-2 ring-primary"
                 : "opacity-70"
             }`}
             onClick={() => setSelectedType("grant-program")}
           >
             <CardContent className="pt-6 text-center">
               <div className="mb-4 flex justify-center">
-                <div className="p-3 bg-green-100 rounded-full">
+                <div className="p-3 bg-green-100 rounded-[1.25rem] transition-all duration-300 hover:scale-110">
                   <Gift className="h-8 w-8 text-green-600" />
                 </div>
               </div>
@@ -99,16 +99,16 @@ export default function FundingPage() {
           </Card>
 
           <Card
-            className={`cursor-pointer transition-all hover:shadow-lg ${
+            className={`cursor-pointer rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] ${
               selectedType === "crowdfunding"
-                ? "ring-2 ring-primary shadow-lg"
+                ? "ring-2 ring-primary"
                 : "opacity-70"
             }`}
             onClick={() => setSelectedType("crowdfunding")}
           >
             <CardContent className="pt-6 text-center">
               <div className="mb-4 flex justify-center">
-                <div className="p-3 bg-pink-100 rounded-full">
+                <div className="p-3 bg-pink-100 rounded-[1.25rem] transition-all duration-300 hover:scale-110">
                   <Heart className="h-8 w-8 text-pink-600" />
                 </div>
               </div>

@@ -334,7 +334,7 @@ export default function GrantProgramDetailPage() {
       {/* Loading Overlay */}
       {(isPending || isConfirming) && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-card p-8 rounded-lg shadow-lg border">
+          <div className="p-8 rounded-[2rem] shadow-lg border border-white/60 bg-white/70 backdrop-blur-xl">
             <div className="flex flex-col items-center gap-6">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
               <div className="text-center">
@@ -385,7 +385,7 @@ export default function GrantProgramDetailPage() {
         {/* Main Content */}
         <div className="space-y-6">
           {/* Header Card */}
-          <Card>
+          <Card className="rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.01]">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start gap-3">
                 <div className="flex-1">
@@ -431,7 +431,7 @@ export default function GrantProgramDetailPage() {
 
               {/* Stats Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-3 border border-green-200">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-[1.25rem] p-3 border border-green-200 transition-all duration-300 hover:scale-105">
                   <div className="flex items-center gap-1 mb-1">
                     <DollarSign className="w-3 h-3 text-green-600" />
                     <span className="text-xs font-medium text-muted-foreground">Total Funds</span>
@@ -441,7 +441,7 @@ export default function GrantProgramDetailPage() {
                   </p>
                 </div>
 
-                <div className="bg-muted/50 rounded-lg p-3">
+                <div className="bg-muted/50 rounded-[1.25rem] p-3 transition-all duration-300 hover:scale-105">
                   <div className="flex items-center gap-1 mb-1">
                     <Users className="w-3 h-3 text-muted-foreground" />
                     <span className="text-xs font-medium text-muted-foreground">Recipients</span>
@@ -452,7 +452,7 @@ export default function GrantProgramDetailPage() {
                   <Progress value={progress} className="h-1 mt-1.5" />
                 </div>
 
-                <div className="bg-muted/50 rounded-lg p-3">
+                <div className="bg-muted/50 rounded-[1.25rem] p-3 transition-all duration-300 hover:scale-105">
                   <div className="flex items-center gap-1 mb-1">
                     <Calendar className="w-3 h-3 text-muted-foreground" />
                     <span className="text-xs font-medium text-muted-foreground">Applications</span>
@@ -462,7 +462,7 @@ export default function GrantProgramDetailPage() {
                   </p>
                 </div>
 
-                <div className="bg-muted/50 rounded-lg p-3">
+                <div className="bg-muted/50 rounded-[1.25rem] p-3 transition-all duration-300 hover:scale-105">
                   <div className="flex items-center gap-1 mb-1">
                     <Clock className="w-3 h-3 text-muted-foreground" />
                     <span className="text-xs font-medium text-muted-foreground">Applications</span>
@@ -489,7 +489,7 @@ export default function GrantProgramDetailPage() {
 
               {/* Apply Section */}
               {!isCreator && !userApplication && grant.status === GrantStatus.Open && !isExpired && (
-                <Card className="border-primary/20 bg-primary/5 mb-4">
+                <Card className="rounded-[1.5rem] border-primary/20 bg-primary/5 mb-4 shadow-md hover:shadow-lg transition-all duration-300">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center gap-2">
                       <Gift className="w-4 h-4" />
@@ -549,7 +549,7 @@ export default function GrantProgramDetailPage() {
 
               {/* User Application Status */}
               {userApplication && (
-                <Card className="bg-blue-50 border-blue-200 mb-4">
+                <Card className="rounded-[1.5rem] bg-blue-50 border-blue-200 mb-4 shadow-md hover:shadow-lg transition-all duration-300">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base flex items-center gap-2">
                       <CheckCircle className="w-4 h-4" />
@@ -596,7 +596,7 @@ export default function GrantProgramDetailPage() {
                   </h3>
                   <div className="space-y-2">
                     {applications.map((app, idx) => (
-                      <Card key={idx}>
+                      <Card key={idx} className="rounded-[1.25rem] transition-all duration-300 hover:shadow-md">
                         <CardContent className="py-3 px-4">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">

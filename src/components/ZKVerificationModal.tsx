@@ -23,8 +23,7 @@ import {
   AlertCircle,
   Loader2,
   ExternalLink,
-  Twitter,
-  X,
+  X as XIcon,
 } from "lucide-react";
 import { getExplorerUrl } from "../utils/contracts";
 
@@ -32,9 +31,9 @@ export default function ZKVerificationModal() {
   const { address } = useAccount();
   const { verificationData, isVerified, submitProof } = useZKVerification();
   const {
-    twitterAccount,
-    connectTwitter,
-    disconnectTwitter,
+    xAccount,
+    connectX,
+    disconnectX,
     isConnecting,
     error: socialError,
     isConnected,
@@ -46,27 +45,27 @@ export default function ZKVerificationModal() {
   const [txHash, setTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleConnectTwitter = async () => {
-    await connectTwitter();
+  const handleConnectX = async () => {
+    await connectX();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!isConnected || !twitterAccount) {
-      setError("Please connect your Twitter account");
+    if (!isConnected || !xAccount) {
+      setError("Please connect your X account");
       return;
     }
 
     const dummyProof = `0x${Buffer.from(
-      `proof-${twitterAccount.username}-${Date.now()}`
+      `proof-${xAccount.username}-${Date.now()}`
     ).toString("hex")}`;
 
     try {
       setSubmitting(true);
       setError(null);
 
-      const hash = await submitProof(dummyProof, twitterAccount.username, institutionName);
+      const hash = await submitProof(dummyProof, xAccount.username, institutionName);
 
       setTxHash(hash);
 
@@ -97,9 +96,9 @@ export default function ZKVerificationModal() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Twitter Verification</DialogTitle>
+          <DialogTitle>X Verification</DialogTitle>
           <DialogDescription>
-            Connect your Twitter/X account to verify your identity on-chain.
+            Connect your X (formerly Twitter) account to verify your identity on-chain.
           </DialogDescription>
         </DialogHeader>
 
@@ -114,10 +113,10 @@ export default function ZKVerificationModal() {
 
             <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
               <div>
-                <Label className="text-sm text-gray-600">Twitter Account</Label>
-                <div className="mt-2 flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
-                  <Twitter className="h-5 w-5 text-blue-500" />
-                  <span className="font-medium">{verificationData.socialHandle}</span>
+                <Label className="text-sm text-gray-600">X Account</Label>
+                <div className="mt-2 flex items-center gap-2 p-3 bg-black rounded-lg">
+                  <XIcon className="h-5 w-5 text-white" />
+                  <span className="font-medium text-white">{verificationData.socialHandle}</span>
                   <Badge
                     variant="outline"
                     className="ml-auto bg-green-100 text-green-700 border-green-300"
@@ -147,65 +146,68 @@ export default function ZKVerificationModal() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-3">
               <Label className="text-base font-semibold">
-                Connect Twitter/X Account <span className="text-red-500">*</span>
+                Connect X Account <span className="text-red-500">*</span>
               </Label>
               <p className="text-sm text-gray-500">
-                Connect your Twitter account to verify your identity.
+                Connect your X account to verify your identity.
               </p>
 
               <div
-                className={`flex items-center justify-between p-4 border rounded-lg ${
-                  isConnected ? "bg-blue-50 border-blue-200" : "bg-white"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <Twitter className="h-6 w-6 text-blue-500" />
-                  <div>
-                    <p className="font-medium">Twitter / X</p>
-                    {twitterAccount && (
-                      <p className="text-sm text-gray-600">{twitterAccount.username}</p>
-                    )}
+                  className={`flex items-center justify-between p-4 border rounded-lg ${
+                    isConnected ? "bg-black border-gray-800" : "bg-white"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <XIcon className={`h-6 w-6 ${isConnected ? "text-white" : "text-black"}`} />
+                    <div>
+                      <p className={`font-medium ${isConnected ? "text-white" : ""}`}>X</p>
+                      {xAccount && (
+                        <p className={`text-sm ${isConnected ? "text-gray-300" : "text-gray-600"}`}>
+                          {xAccount.username}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                {isConnected ? (
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant="outline"
-                      className="bg-green-100 text-green-700 border-green-300"
-                    >
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Connected
-                    </Badge>
+                  {isConnected ? (
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className="bg-green-100 text-green-700 border-green-300"
+                      >
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Connected
+                      </Badge>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={disconnectX}
+                        disabled={submitting}
+                        className="text-white hover:bg-gray-800"
+                      >
+                        <XIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
                     <Button
                       type="button"
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
-                      onClick={disconnectTwitter}
-                      disabled={submitting}
+                      onClick={handleConnectX}
+                      disabled={isConnecting || submitting}
                     >
-                      <X className="h-4 w-4" />
+                      {isConnecting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Connecting...
+                        </>
+                      ) : (
+                        "Connect"
+                      )}
                     </Button>
-                  </div>
-                ) : (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleConnectTwitter}
-                    disabled={isConnecting || submitting}
-                  >
-                    {isConnecting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Connecting...
-                      </>
-                    ) : (
-                      "Connect"
-                    )}
-                  </Button>
-                )}
-              </div>
+                  )}
+                </div>
             </div>
 
             <div className="space-y-2">
@@ -257,41 +259,41 @@ export default function ZKVerificationModal() {
             )}
 
             <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsOpen(false)}
-                disabled={submitting}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={submitting || !isConnected}
-                className="flex-1"
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <ShieldCheck className="h-4 w-4 mr-2" />
-                    Submit Verification
-                  </>
-                )}
-              </Button>
-            </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsOpen(false)}
+                  disabled={submitting}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={submitting || !isConnected}
+                  className="flex-1"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck className="h-4 w-4 mr-2" />
+                      Submit Verification
+                    </>
+                  )}
+                </Button>
+              </div>
           </form>
         )}
 
         <div className="mt-4 p-3 bg-gray-50 rounded-lg text-xs text-gray-600">
-          <strong>About Twitter Verification:</strong>
+          <strong>About X Verification:</strong>
           <ul className="mt-1 ml-4 list-disc space-y-1">
-            <li>Proves Twitter account ownership via OAuth</li>
-            <li>Your Twitter handle is stored on-chain</li>
+            <li>Proves X account ownership via OAuth</li>
+            <li>Your X username is stored on-chain</li>
             <li>Required for creating grants and crowdfunding campaigns</li>
             <li>One-time verification per wallet</li>
           </ul>

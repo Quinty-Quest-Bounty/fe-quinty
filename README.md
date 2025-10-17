@@ -8,6 +8,7 @@ Quinty is a trustless collaboration platform built on Base that combines on-chai
 
 - **100% Escrow Protection** - All funds locked upfront, eliminating payment risk
 - **Soulbound Reputation** - Permanent on-chain achievements via NFT badges
+- **X Social Verification** - Verify identity via OAuth (no smartphone required)
 - **Democratic Disputes** - Community-powered resolution with stake-weighted voting
 - **Zero Platform Fees** - Only gas costs, no middleman cuts
 - **Full Transparency** - All transactions visible on Base blockchain
@@ -42,13 +43,25 @@ npm install
 
 # Set up environment
 cp .env.example .env.local
-# Add your WalletConnect Project ID and Pinata JWT
+# Add your WalletConnect Project ID, Pinata JWT, and X Client ID
 
 # Run development server
 npm run dev
 ```
 
 Visit http://localhost:3000
+
+## 🔐 X Social Verification Setup
+
+To enable X (Twitter) verification, you need to set up OAuth:
+
+1. Go to [X Developer Portal](https://developer.twitter.com/en/portal/dashboard)
+2. Create a new app and enable OAuth 2.0
+3. Set callback URI: `http://localhost:3000/auth/callback`
+4. Copy your Client ID
+5. Add to `.env.local`: `NEXT_PUBLIC_TWITTER_CLIENT_ID=your_client_id`
+
+**For detailed instructions, see [TWITTER_SETUP.md](./TWITTER_SETUP.md)**
 
 ## 📋 Contract Addresses (Base Sepolia)
 
@@ -60,7 +73,7 @@ Visit http://localhost:3000
 | Grant Program | `0xf70fBEba52Cc2A6F1e511179A10BdB4B820c7879` |
 | Crowdfunding | `0x64aC0a7A52f3E0a414D8344f6A4620b51dFfB6C2` |
 | Looking for Grant | `0x423fb3E158B8bA79Fabbd387dAEb844DC0709BeF` |
-| ZK Verification | `0xe3cd834a963B3A6A550aed05ece2535B02C83E3a` |
+| Social Verification | `0xe3cd834a963B3A6A550aed05ece2535B02C83E3a` |
 | Airdrop Bounty | `0x79dAe15C3612854F6bd025f7CDc6D4CDEE289049` |
 | Dispute Resolver | `0xF04b0Ec52bFe602D0D38bEA4f613ABb7cFA79FB5` |
 
@@ -133,7 +146,7 @@ We're building infrastructure for the onchain work economy where:
 ✅ All contracts deployed on Base Sepolia
 ✅ Full frontend with 6 core features
 ✅ Soulbound NFT badge system
-✅ ZK verification (placeholder mode)
+✅ X (Twitter) Social Verification via OAuth
 🚧 Dispute Resolver (coming soon)
 
 **Production Ready** ✅

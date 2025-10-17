@@ -606,7 +606,7 @@ export default function BountyDetailPage() {
       {/* Loading Overlay */}
       {(isPending || isConfirming) && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-card p-8 rounded-lg shadow-lg border">
+          <div className="p-8 rounded-[2rem] shadow-lg border border-white/60 bg-white/70 backdrop-blur-xl">
             <div className="flex flex-col items-center gap-6">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
               <div className="text-center">
@@ -657,7 +657,7 @@ export default function BountyDetailPage() {
         {/* Main Content */}
         <div className="space-y-6">
           {/* Header Card */}
-          <Card>
+          <Card className="rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.01]">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start gap-3">
                 <div className="flex-1">
@@ -718,7 +718,7 @@ export default function BountyDetailPage() {
 
               {/* Stats Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">
-                <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg p-3 border border-primary/20">
+                <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-[1.25rem] p-3 border border-primary/20 transition-all duration-300 hover:scale-105">
                   <div className="flex items-center gap-1 mb-1">
                     <DollarSign className="w-3 h-3 text-primary" />
                     <span className="text-xs font-medium text-muted-foreground">
@@ -730,7 +730,7 @@ export default function BountyDetailPage() {
                   </p>
                 </div>
 
-                <div className="bg-muted/50 rounded-lg p-3">
+                <div className="bg-muted/50 rounded-[1.25rem] p-3 transition-all duration-300 hover:scale-105">
                   <div className="flex items-center gap-1 mb-1">
                     <Clock className="w-3 h-3 text-muted-foreground" />
                     <span className="text-xs font-medium text-muted-foreground">
@@ -742,7 +742,7 @@ export default function BountyDetailPage() {
                   </p>
                 </div>
 
-                <div className="bg-muted/50 rounded-lg p-3">
+                <div className="bg-muted/50 rounded-[1.25rem] p-3 transition-all duration-300 hover:scale-105">
                   <div className="flex items-center gap-1 mb-1">
                     <Users className="w-3 h-3 text-muted-foreground" />
                     <span className="text-xs font-medium text-muted-foreground">
@@ -754,7 +754,7 @@ export default function BountyDetailPage() {
                   </p>
                 </div>
 
-                <div className="bg-muted/50 rounded-lg p-3">
+                <div className="bg-muted/50 rounded-[1.25rem] p-3 transition-all duration-300 hover:scale-105">
                   <div className="flex items-center gap-1 mb-1">
                     <Shield className="w-3 h-3 text-muted-foreground" />
                     <span className="text-xs font-medium text-muted-foreground">
@@ -895,13 +895,13 @@ export default function BountyDetailPage() {
                 <div className="mb-4">
                   {userOprecApplication ? (
                     // User already applied
-                    <Card className={
+                    <Card className={`rounded-[1.5rem] shadow-md hover:shadow-lg transition-all duration-300 ${
                       userOprecApplication.approved
                         ? "border-green-200 bg-green-50 dark:bg-green-950"
                         : userOprecApplication.rejected
                         ? "border-red-200 bg-red-50 dark:bg-red-950"
                         : "border-yellow-200 bg-yellow-50 dark:bg-yellow-950"
-                    }>
+                    }`}>
                       <CardHeader className="pb-3">
                         <CardTitle className="text-base flex items-center gap-2">
                           <Users className="w-4 h-4" />
@@ -934,7 +934,7 @@ export default function BountyDetailPage() {
                     </Card>
                   ) : (
                     // User hasn't applied yet
-                    <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950">
+                    <Card className="rounded-[1.5rem] border-blue-200 bg-blue-50 dark:bg-blue-950 shadow-md hover:shadow-lg transition-all duration-300">
                       <CardHeader className="pb-3">
                         <CardTitle className="text-base flex items-center gap-2">
                           <Users className="w-4 h-4" />
@@ -1014,7 +1014,7 @@ export default function BountyDetailPage() {
               {/* OPREC Applications Management (Creator Only) */}
               {bounty.hasOprec && bounty.status === 0 && isCreator && (
                 <div className="mb-4">
-                  <Card>
+                  <Card className="rounded-[1.5rem] shadow-md hover:shadow-lg transition-all duration-300">
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-base flex items-center gap-2">
@@ -1040,7 +1040,7 @@ export default function BountyDetailPage() {
                         ) : (
                           <>
                             {oprecApplications.map((app, idx) => (
-                              <Card key={idx} className={app.approved ? "bg-green-50 dark:bg-green-950" : app.rejected ? "bg-red-50 dark:bg-red-950" : ""}>
+                              <Card key={idx} className={`rounded-[1.25rem] transition-all duration-300 hover:shadow-md ${app.approved ? "bg-green-50 dark:bg-green-950" : app.rejected ? "bg-red-50 dark:bg-red-950" : ""}`}>
                                 <CardContent className="pt-3 pb-3">
                                   <div className="flex items-start justify-between gap-3">
                                     <div className="flex-1 space-y-2">
@@ -1111,7 +1111,7 @@ export default function BountyDetailPage() {
               {/* Submit Solution Section - Only OPEN (1) status allows submissions */}
               {bounty.status === 1 && !isCreator && !isExpired && (
                 <div className="mb-4">
-                  <Card className="border-primary/20 bg-primary/5">
+                  <Card className="rounded-[1.5rem] border-primary/20 bg-primary/5 shadow-md hover:shadow-lg transition-all duration-300">
                     <CardHeader className="pb-3">
                       <CardTitle className="text-base flex items-center gap-2">
                         <Send className="w-4 h-4" />
@@ -1275,7 +1275,7 @@ export default function BountyDetailPage() {
                     return (
                       <Card
                         key={index}
-                        className={`${
+                        className={`rounded-[1.25rem] transition-all duration-300 hover:shadow-lg ${
                           isWinner
                             ? "bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200"
                             : ""
@@ -1498,7 +1498,7 @@ export default function BountyDetailPage() {
                   {isCreator &&
                     bounty.status === 1 &&
                     selectedSubmissions.length > 0 && (
-                      <Card className="mt-4 bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+                      <Card className="rounded-[1.5rem] mt-4 bg-gradient-to-r from-green-50 to-blue-50 border-green-200 shadow-md hover:shadow-lg transition-all duration-300">
                         <CardContent className="py-3 px-4">
                           <div className="flex justify-between items-center">
                             <div>
@@ -1571,7 +1571,7 @@ export default function BountyDetailPage() {
 
       {/* IPFS Content Viewer Dialog */}
       <Dialog open={!!viewingCid} onOpenChange={() => setViewingCid(null)}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto rounded-[2rem]">
           <DialogHeader>
             <DialogTitle>{viewingTitle}</DialogTitle>
             <DialogDescription className="text-xs">

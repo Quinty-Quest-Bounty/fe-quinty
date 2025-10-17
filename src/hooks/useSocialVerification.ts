@@ -1,17 +1,17 @@
 import { useState, useCallback } from "react";
 
-export interface TwitterAccount {
+export interface XAccount {
   username: string;
   userId: string;
   verified: boolean;
 }
 
 export function useSocialVerification() {
-  const [twitterAccount, setTwitterAccount] = useState<TwitterAccount | null>(null);
+  const [xAccount, setXAccount] = useState<XAccount | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const buildTwitterAuthUrl = useCallback((): string | null => {
+  const buildXAuthUrl = useCallback((): string | null => {
     const clientId = process.env.NEXT_PUBLIC_TWITTER_CLIENT_ID;
 
     if (!clientId) return null;
@@ -37,15 +37,15 @@ export function useSocialVerification() {
     return `https://twitter.com/i/oauth2/authorize?${params.toString()}`;
   }, []);
 
-  const connectTwitter = useCallback(async (): Promise<TwitterAccount | null> => {
+  const connectX = useCallback(async (): Promise<XAccount | null> => {
     setIsConnecting(true);
     setError(null);
 
     try {
-      const authUrl = buildTwitterAuthUrl();
+      const authUrl = buildXAuthUrl();
 
       if (!authUrl) {
-        throw new Error('Twitter Client ID not configured. Please add NEXT_PUBLIC_TWITTER_CLIENT_ID to .env.local');
+        throw new Error('X Client ID not configured. Please add NEXT_PUBLIC_TWITTER_CLIENT_ID to .env.local');
       }
 
       // Open OAuth popup
@@ -56,7 +56,7 @@ export function useSocialVerification() {
 
       const popup = window.open(
         authUrl,
-        'twitter_oauth',
+        'x_oauth',
         `width=${width},height=${height},left=${left},top=${top}`
       );
 
@@ -64,7 +64,7 @@ export function useSocialVerification() {
         throw new Error('Failed to open OAuth popup. Please allow popups.');
       }
 
-      // Wait for OAuth callback
+      // Wait for OAuth callback with REAL data
       return new Promise((resolve, reject) => {
         const handleMessage = async (event: MessageEvent) => {
           if (event.origin !== window.location.origin) return;
@@ -75,13 +75,14 @@ export function useSocialVerification() {
             window.removeEventListener('message', handleMessage);
             popup?.close();
 
-            const account: TwitterAccount = {
-              username: data.username || `twitter_user_${Date.now()}`,
-              userId: data.userId || `${Date.now()}`,
+            // Received REAL verified data from backend
+            const account: XAccount = {
+              username: `@${data.username}`, // Add @ prefix
+              userId: data.userId,
               verified: true,
             };
 
-            setTwitterAccount(account);
+            setXAccount(account);
             setIsConnecting(false);
             resolve(account);
           } else if (type === 'oauth_error' && provider === 'twitter') {
@@ -126,23 +127,23 @@ export function useSocialVerification() {
         }, 5 * 60 * 1000);
       });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to connect Twitter';
+      const errorMessage = err instanceof Error ? err.message : 'Failed to connect X';
       setError(errorMessage);
       setIsConnecting(false);
       return null;
     }
-  }, [buildTwitterAuthUrl, isConnecting]);
+  }, [buildXAuthUrl, isConnecting]);
 
-  const disconnectTwitter = useCallback(() => {
-    setTwitterAccount(null);
+  const disconnectX = useCallback(() => {
+    setXAccount(null);
   }, []);
 
   return {
-    twitterAccount,
-    connectTwitter,
-    disconnectTwitter,
+    xAccount,
+    connectX,
+    disconnectX,
     isConnecting,
     error,
-    isConnected: !!twitterAccount,
+    isConnected: !!xAccount,
   };
 }

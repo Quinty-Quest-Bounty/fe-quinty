@@ -406,7 +406,7 @@ export default function CrowdfundingDetailPage() {
 
       {/* Stats Grid */}
       <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
           <CardContent className="p-4">
             <div className="flex items-start justify-between">
               <div>
@@ -420,7 +420,7 @@ export default function CrowdfundingDetailPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
           <CardContent className="p-4">
             <div className="flex items-start justify-between">
               <div>
@@ -434,7 +434,7 @@ export default function CrowdfundingDetailPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
           <CardContent className="p-4">
             <div className="flex items-start justify-between">
               <div>
@@ -448,7 +448,7 @@ export default function CrowdfundingDetailPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
           <CardContent className="p-4">
             <div className="flex items-start justify-between">
               <div>
@@ -471,7 +471,7 @@ export default function CrowdfundingDetailPage() {
       </div>
 
       {/* Progress Bar */}
-      <Card className="mb-6">
+      <Card className="rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md hover:shadow-lg transition-all duration-300 mb-6">
         <CardContent className="p-4">
           <div className="mb-2 flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Campaign Progress</span>
@@ -482,7 +482,7 @@ export default function CrowdfundingDetailPage() {
       </Card>
 
       {/* Description */}
-      <Card className="mb-6">
+      <Card className="rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md hover:shadow-lg transition-all duration-300 mb-6">
         <CardContent className="p-4">
           <h2 className="mb-3 text-lg font-bold">Campaign Description</h2>
           <p className="whitespace-pre-wrap text-sm text-muted-foreground">
@@ -492,12 +492,12 @@ export default function CrowdfundingDetailPage() {
       </Card>
 
       {/* Milestones */}
-      <Card className="mb-6">
+      <Card className="rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md hover:shadow-lg transition-all duration-300 mb-6">
         <CardContent className="p-4">
           <h2 className="mb-4 text-lg font-bold">Milestones</h2>
           <div className="space-y-3">
             {milestones.map((milestone, idx) => (
-              <Card key={idx}>
+              <Card key={idx} className="rounded-[1.25rem] border border-white/60 bg-white/70 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300">
                 <CardContent className="py-3">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
@@ -578,7 +578,7 @@ export default function CrowdfundingDetailPage() {
       {!isCreator &&
         campaign.status === CampaignStatus.ACTIVE &&
         !isExpired && (
-          <Card className="mb-6">
+          <Card className="rounded-[1.5rem] border-primary/20 bg-primary/5 mb-6 shadow-md hover:shadow-lg transition-all duration-300">
             <CardContent className="p-4">
               <h2 className="mb-4 text-lg font-bold">Contribute to Campaign</h2>
               <div className="space-y-3">
@@ -613,7 +613,7 @@ export default function CrowdfundingDetailPage() {
             c.contributor.toLowerCase() === address?.toLowerCase() &&
             !c.refunded
         ) && (
-          <Card className="mb-6">
+          <Card className="rounded-[1.5rem] border-red-200 bg-red-50 mb-6 shadow-md hover:shadow-lg transition-all duration-300">
             <CardContent className="p-4">
               <h2 className="mb-4 text-lg font-bold text-red-600 dark:text-red-400">
                 Campaign Failed - Refund Available
@@ -632,7 +632,7 @@ export default function CrowdfundingDetailPage() {
 
       {/* Contributors List */}
       {contributors.length > 0 && (
-        <Card>
+        <Card className="rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md hover:shadow-lg transition-all duration-300">
           <CardContent className="p-4">
             <h2 className="mb-4 text-lg font-bold">
               Contributors ({contributors.length})
