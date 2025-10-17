@@ -14,7 +14,6 @@ import {
   BASE_SEPOLIA_CHAIN_ID,
 } from "../../utils/contracts";
 import { formatETH, formatAddress, wagmiConfig } from "../../utils/web3";
-import TetrisLoading from "../../components/ui/tetris-loader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,6 +38,7 @@ import {
   XCircle,
   Clock,
   Filter,
+  Loader2,
 } from "lucide-react";
 
 interface Transaction {
@@ -646,7 +646,7 @@ export default function HistoryPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <TetrisLoading size="md" speed="fast" />
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
           <p className="text-muted-foreground mt-6">Loading transaction history...</p>
         </div>
       </div>

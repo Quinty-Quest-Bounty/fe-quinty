@@ -11,7 +11,6 @@ import {
 } from "../../../../utils/contracts";
 import { formatETH, formatAddress, wagmiConfig, parseETH } from "../../../../utils/web3";
 import { useAlertDialog } from "@/hooks/useAlertDialog";
-import TetrisLoading from "../../../../components/ui/tetris-loader";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -39,6 +38,7 @@ import {
   TrendingUp,
   ExternalLink,
   Share2,
+  Loader2,
 } from "lucide-react";
 
 enum RequestStatus {
@@ -279,8 +279,8 @@ export default function LookingForGrantDetailPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <TetrisLoading size="md" speed="fast" />
-          <p className="text-muted-foreground mt-6">Loading funding request...</p>
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+          <p className="text-muted-foreground mt-4">Loading funding request...</p>
         </div>
       </div>
     );
@@ -322,7 +322,7 @@ export default function LookingForGrantDetailPage() {
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-card p-8 rounded-lg shadow-lg border">
             <div className="flex flex-col items-center gap-6">
-              <TetrisLoading size="md" speed="fast" />
+              <Loader2 className="h-12 w-12 animate-spin text-primary" />
               <div className="text-center">
                 <p className="font-semibold text-lg">
                   {isPending ? "Waiting for approval..." : "Confirming transaction..."}

@@ -11,7 +11,6 @@ import {
 } from "../../../../utils/contracts";
 import { formatETH, formatAddress, wagmiConfig, parseETH } from "../../../../utils/web3";
 import { useAlertDialog } from "@/hooks/useAlertDialog";
-import TetrisLoading from "../../../../components/ui/tetris-loader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +28,7 @@ import {
   CheckCircle,
   Clock,
   ArrowRight,
+  Loader2,
 } from "lucide-react";
 
 enum CampaignStatus {
@@ -326,7 +326,7 @@ export default function CrowdfundingDetailPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <TetrisLoading />
+        <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
       </div>
     );
   }

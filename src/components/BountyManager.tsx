@@ -140,6 +140,7 @@ export default function BountyManager() {
 
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const [newSubmission, setNewSubmission] = useState({
     bountyId: 0,
@@ -189,6 +190,33 @@ export default function BountyManager() {
   // Remove image from upload list
   const removeImage = (index: number) => {
     setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Handle drag events
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const newFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+      if (newFiles.length > 0) {
+        setUploadedFiles((prev) => [...prev, ...newFiles]);
+      }
+    }
   };
 
   // Upload images to IPFS and get CIDs
@@ -1160,7 +1188,16 @@ export default function BountyManager() {
                         Images (Optional)
                       </label>
 
-                      <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 hover:border-muted-foreground/50 transition-colors">
+                      <div
+                        className={`border-2 border-dashed rounded-lg p-6 transition-colors ${
+                          isDragOver
+                            ? "border-primary bg-primary/5"
+                            : "border-muted-foreground/25 hover:border-muted-foreground/50"
+                        }`}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                      >
                         <input
                           type="file"
                           multiple
@@ -1177,7 +1214,7 @@ export default function BountyManager() {
                             <Upload className="w-6 h-6" />
                           </div>
                           <span className="text-sm font-medium mb-1">
-                            Click to upload images
+                            {isDragOver ? "Drop images here" : "Click to upload or drag and drop"}
                           </span>
                           <span className="text-xs text-center">
                             JPG, PNG, GIF up to 10MB each

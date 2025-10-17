@@ -18,6 +18,7 @@ import {
 import { parseETH, formatETH, wagmiConfig, formatAddress } from "../utils/web3";
 import { useAlertDialog } from "@/hooks/useAlertDialog";
 import { useShare } from "@/hooks/useShare";
+import { uploadToIpfs } from "../utils/ipfs";
 import FundingCard, { type FundingItem } from "./FundingCard";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -47,6 +48,8 @@ import {
   XCircle,
   Clock,
   Share2,
+  Upload,
+  X,
 } from "lucide-react";
 
 enum ApplicationStatus {
@@ -108,6 +111,7 @@ export default function GrantProgramManager() {
     applicationDeadline: "",
     distributionDeadline: "",
     amount: "",
+    imageUrl: "",
   });
 
   const [applyForm, setApplyForm] = useState({
@@ -115,6 +119,12 @@ export default function GrantProgramManager() {
     socialAccounts: "",
     requestedAmount: "",
   });
+
+  // Image upload states
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const [approvalForm, setApprovalForm] = useState<{
     applicationIds: number[];
@@ -291,6 +301,73 @@ export default function GrantProgramManager() {
     }
   };
 
+  // Image handling functions
+  const validateAndSetImage = (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      showAlert({
+        title: "Invalid File",
+        description: "Please select an image file",
+        variant: "warning"
+      });
+      return false;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      showAlert({
+        title: "File Too Large",
+        description: "Image size must be less than 5MB",
+        variant: "warning"
+      });
+      return false;
+    }
+
+    setSelectedImage(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImagePreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+    return true;
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      validateAndSetImage(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      validateAndSetImage(file);
+    }
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    setIsDragOver(false);
+    setNewGrant({ ...newGrant, imageUrl: "" });
+  };
+
   // Handle create grant
   const handleCreateGrant = async () => {
     if (!isVerified) {
@@ -330,13 +407,42 @@ export default function GrantProgramManager() {
     }
 
     try {
+      let finalImageUrl = newGrant.imageUrl;
+
+      // Upload image first if selected but not yet uploaded
+      if (selectedImage && !finalImageUrl) {
+        setIsUploading(true);
+        try {
+          const cid = await uploadToIpfs(selectedImage, {
+            name: `grant-image-${Date.now()}`,
+            type: "grant-banner",
+          });
+          finalImageUrl = `ipfs://${cid}`;
+        } catch (error) {
+          console.error("Error uploading image:", error);
+          showAlert({
+            title: "Upload Failed",
+            description: "Error uploading image. Please try again.",
+            variant: "destructive"
+          });
+          return;
+        } finally {
+          setIsUploading(false);
+        }
+      }
+
+      // Include image URL in description if available
+      const descriptionWithImage = finalImageUrl
+        ? `${newGrant.description}\n\nImage: ${finalImageUrl}`
+        : newGrant.description;
+
       writeContract({
         address: contractAddress as `0x${string}`,
         abi: GRANT_PROGRAM_ABI,
         functionName: "createGrant",
         args: [
           newGrant.title,
-          newGrant.description,
+          descriptionWithImage,
           BigInt(newGrant.maxApplicants),
           BigInt(appDeadline),
           BigInt(distDeadline),
@@ -351,7 +457,10 @@ export default function GrantProgramManager() {
         applicationDeadline: "",
         distributionDeadline: "",
         amount: "",
+        imageUrl: "",
       });
+      setSelectedImage(null);
+      setImagePreview(null);
     } catch (error) {
       console.error("Error creating grant:", error);
     }
@@ -517,6 +626,64 @@ export default function GrantProgramManager() {
           />
         </div>
 
+        <div className="space-y-2">
+          <Label>Grant Program Image (Optional)</Label>
+          {imagePreview ? (
+            <div className="relative">
+              <img
+                src={imagePreview}
+                alt="Grant preview"
+                className="w-full h-40 object-cover rounded-lg border border-gray-200"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={removeImage}
+                className="absolute top-2 right-2 h-8 w-8 p-0 bg-white"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <div
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
+                isDragOver
+                  ? "border-primary bg-primary/5"
+                  : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <div className="space-y-3">
+                <div className="flex justify-center">
+                  <Upload className="h-8 w-8 text-gray-400" />
+                </div>
+                <div className="space-y-1">
+                  <Label
+                    htmlFor="grant-image-upload"
+                    className="cursor-pointer font-medium text-sm text-gray-900"
+                  >
+                    {isDragOver ? "Drop image here" : "Upload an image"}
+                    <span className="text-gray-500 ml-1">or drag and drop</span>
+                  </Label>
+                  <Input
+                    id="grant-image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    className="hidden"
+                  />
+                </div>
+                <p className="text-xs text-gray-500">
+                  PNG, JPG, GIF up to 5MB
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Total Funds (ETH) *</Label>
@@ -564,8 +731,17 @@ export default function GrantProgramManager() {
           </div>
         </div>
 
-        <Button onClick={handleCreateGrant} disabled={isPending || !isVerified} className="w-full">
-          {isPending ? "Creating..." : "Create Grant Program"}
+        <Button onClick={handleCreateGrant} disabled={isPending || !isVerified || isUploading} className="w-full">
+          {isUploading ? (
+            <>
+              <Upload className="w-4 h-4 mr-2 animate-spin" />
+              Uploading Image...
+            </>
+          ) : isPending ? (
+            "Creating..."
+          ) : (
+            "Create Grant Program"
+          )}
         </Button>
 
         {error && (

@@ -16,7 +16,6 @@ import {
 import { formatETH, formatTimeLeft, formatAddress, wagmiConfig } from "../../../utils/web3";
 import { IpfsImage } from "../../../utils/ipfs";
 import { useAlert } from "../../../hooks/useAlert";
-import TetrisLoading from "../../../components/ui/tetris-loader";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -46,6 +45,7 @@ import {
   Coins,
   FileText,
   Target,
+  Loader2,
 } from "lucide-react";
 
 interface Airdrop {
@@ -213,7 +213,7 @@ export default function AirdropDetailPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <TetrisLoading size="md" speed="fast" />
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
           <p className="text-muted-foreground mt-6">Loading airdrop...</p>
         </div>
       </div>
@@ -262,7 +262,7 @@ export default function AirdropDetailPage() {
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="bg-card p-8 rounded-lg shadow-lg border">
             <div className="flex flex-col items-center gap-6">
-              <TetrisLoading size="md" speed="fast" />
+              <Loader2 className="h-12 w-12 animate-spin text-primary" />
               <div className="text-center">
                 <p className="font-semibold text-lg">
                   {isPending ? "Waiting for approval..." : "Confirming transaction..."}

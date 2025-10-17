@@ -18,6 +18,7 @@ import {
 import { parseETH, formatETH, wagmiConfig, formatAddress } from "../utils/web3";
 import { useAlertDialog } from "@/hooks/useAlertDialog";
 import { useShare } from "@/hooks/useShare";
+import { uploadToIpfs } from "../utils/ipfs";
 import FundingCard, { type FundingItem } from "./FundingCard";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
@@ -48,6 +49,8 @@ import {
   MessageSquare,
   CheckCircle2,
   Share2,
+  Upload,
+  X,
 } from "lucide-react";
 
 enum MilestoneStatus {
@@ -105,6 +108,7 @@ export default function CrowdfundingManager() {
     socialAccounts: "",
     fundingGoal: "",
     deadline: "",
+    imageUrl: "",
   });
 
   const [milestoneInputs, setMilestoneInputs] = useState<{ description: string; amount: string }[]>([
@@ -113,6 +117,12 @@ export default function CrowdfundingManager() {
 
   const [contributeAmount, setContributeAmount] = useState("");
   const [updateContent, setUpdateContent] = useState("");
+
+  // Image upload states
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const contractAddress = CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Crowdfunding;
   const zkVerificationAddress = CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].ZKVerification;
@@ -272,6 +282,73 @@ export default function CrowdfundingManager() {
     setMilestoneInputs(milestoneInputs.filter((_, i) => i !== index));
   };
 
+  // Image handling functions
+  const validateAndSetImage = (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      showAlert({
+        title: "Invalid File",
+        description: "Please select an image file",
+        variant: "warning"
+      });
+      return false;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      showAlert({
+        title: "File Too Large",
+        description: "Image size must be less than 5MB",
+        variant: "warning"
+      });
+      return false;
+    }
+
+    setSelectedImage(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImagePreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+    return true;
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      validateAndSetImage(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      validateAndSetImage(file);
+    }
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    setIsDragOver(false);
+    setNewCampaign({ ...newCampaign, imageUrl: "" });
+  };
+
   // Handle create campaign
   const handleCreateCampaign = async () => {
     if (!isVerified) {
@@ -325,13 +402,42 @@ export default function CrowdfundingManager() {
       : Math.floor(Date.now() / 1000) + 60 * 24 * 60 * 60; // 60 days default
 
     try {
+      let finalImageUrl = newCampaign.imageUrl;
+
+      // Upload image first if selected but not yet uploaded
+      if (selectedImage && !finalImageUrl) {
+        setIsUploading(true);
+        try {
+          const cid = await uploadToIpfs(selectedImage, {
+            name: `campaign-image-${Date.now()}`,
+            type: "campaign-banner",
+          });
+          finalImageUrl = `ipfs://${cid}`;
+        } catch (error) {
+          console.error("Error uploading image:", error);
+          showAlert({
+            title: "Upload Failed",
+            description: "Error uploading image. Please try again.",
+            variant: "destructive"
+          });
+          return;
+        } finally {
+          setIsUploading(false);
+        }
+      }
+
+      // Include image URL in project details if available
+      const projectDetailsWithImage = finalImageUrl
+        ? `${newCampaign.projectDetails}\n\nImage: ${finalImageUrl}`
+        : newCampaign.projectDetails;
+
       writeContract({
         address: contractAddress as `0x${string}`,
         abi: CROWDFUNDING_ABI,
         functionName: "createCampaign",
         args: [
           newCampaign.title,
-          newCampaign.projectDetails,
+          projectDetailsWithImage,
           newCampaign.socialAccounts,
           parseETH(newCampaign.fundingGoal),
           BigInt(deadlineTimestamp),
@@ -346,8 +452,11 @@ export default function CrowdfundingManager() {
         socialAccounts: "",
         fundingGoal: "",
         deadline: "",
+        imageUrl: "",
       });
       setMilestoneInputs([{ description: "", amount: "" }]);
+      setSelectedImage(null);
+      setImagePreview(null);
     } catch (error) {
       console.error("Error creating campaign:", error);
     }
@@ -489,6 +598,64 @@ export default function CrowdfundingManager() {
           />
         </div>
 
+        <div className="space-y-2">
+          <Label>Campaign Image (Optional)</Label>
+          {imagePreview ? (
+            <div className="relative">
+              <img
+                src={imagePreview}
+                alt="Campaign preview"
+                className="w-full h-40 object-cover rounded-lg border border-gray-200"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={removeImage}
+                className="absolute top-2 right-2 h-8 w-8 p-0 bg-white"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <div
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
+                isDragOver
+                  ? "border-primary bg-primary/5"
+                  : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+              }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <div className="space-y-3">
+                <div className="flex justify-center">
+                  <Upload className="h-8 w-8 text-gray-400" />
+                </div>
+                <div className="space-y-1">
+                  <Label
+                    htmlFor="campaign-image-upload"
+                    className="cursor-pointer font-medium text-sm text-gray-900"
+                  >
+                    {isDragOver ? "Drop image here" : "Upload an image"}
+                    <span className="text-gray-500 ml-1">or drag and drop</span>
+                  </Label>
+                  <Input
+                    id="campaign-image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    className="hidden"
+                  />
+                </div>
+                <p className="text-xs text-gray-500">
+                  PNG, JPG, GIF up to 5MB
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Funding Goal (ETH) *</Label>
@@ -564,8 +731,17 @@ export default function CrowdfundingManager() {
           </p>
         </div>
 
-        <Button onClick={handleCreateCampaign} disabled={isPending || !isVerified} className="w-full">
-          {isPending ? "Creating..." : "Create Campaign"}
+        <Button onClick={handleCreateCampaign} disabled={isPending || !isVerified || isUploading} className="w-full">
+          {isUploading ? (
+            <>
+              <Upload className="w-4 h-4 mr-2 animate-spin" />
+              Uploading Image...
+            </>
+          ) : isPending ? (
+            "Creating..."
+          ) : (
+            "Create Campaign"
+          )}
         </Button>
 
         {error && (
