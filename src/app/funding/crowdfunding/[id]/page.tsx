@@ -168,25 +168,38 @@ export default function CrowdfundingDetailPage() {
       setMilestones(milestonesData);
 
       // Load contributors
-      const contributorCount = await readContract(wagmiConfig, {
-        address: contractAddress as `0x${string}`,
-        abi: CROWDFUNDING_ABI,
-        functionName: "getContributorCount",
-        args: [BigInt(campaignId)],
-      });
-
-      const contributorsData: Contributor[] = [];
-      for (let i = 0; i < Number(contributorCount); i++) {
-        const contrib = await readContract(wagmiConfig, {
+      try {
+        const contributionCount = await readContract(wagmiConfig, {
           address: contractAddress as `0x${string}`,
           abi: CROWDFUNDING_ABI,
-          functionName: "getContributor",
-          args: [BigInt(campaignId), BigInt(i)],
+          functionName: "getContributionCount",
+          args: [BigInt(campaignId)],
         });
-        const [contributor, amount, refunded] = contrib as [string, bigint, boolean];
-        contributorsData.push({ contributor, amount, refunded });
+
+        console.log(`Loading ${contributionCount} contributors for campaign ${campaignId}`);
+
+        const contributorsData: Contributor[] = [];
+        for (let i = 0; i < Number(contributionCount); i++) {
+          try {
+            const contrib = await readContract(wagmiConfig, {
+              address: contractAddress as `0x${string}`,
+              abi: CROWDFUNDING_ABI,
+              functionName: "getContribution",
+              args: [BigInt(campaignId), BigInt(i)],
+            });
+            console.log(`Contributor ${i}:`, contrib);
+            const [contributor, amount, timestamp, refunded] = contrib as [string, bigint, bigint, boolean];
+            contributorsData.push({ contributor, amount, refunded });
+          } catch (error) {
+            console.error(`❌ Failed to load contributor ${i}:`, error);
+            // Still continue loading other contributors
+          }
+        }
+        console.log(`✅ Successfully loaded ${contributorsData.length} out of ${contributionCount} contributors`);
+        setContributors(contributorsData);
+      } catch (error) {
+        console.error("❌ Error loading contributors:", error);
       }
-      setContributors(contributorsData);
     } catch (error) {
       console.error("Error loading campaign:", error);
       showAlert({
