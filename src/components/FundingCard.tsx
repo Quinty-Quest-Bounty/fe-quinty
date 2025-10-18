@@ -117,9 +117,9 @@ export default function FundingCard({ funding, viewMode = "grid" }: FundingCardP
   };
 
   const getTypeBadgeColor = () => {
-    if (funding.type === "grant") return "bg-green-100 text-green-700 border-green-200";
-    if (funding.type === "crowdfunding") return "bg-blue-100 text-blue-700 border-blue-200";
-    return "bg-purple-100 text-purple-700 border-purple-200";
+    if (funding.type === "grant") return "bg-green-100/80 backdrop-blur-sm text-green-700 border-green-200/60";
+    if (funding.type === "crowdfunding") return "bg-blue-100/80 backdrop-blur-sm text-blue-700 border-blue-200/60";
+    return "bg-purple-100/80 backdrop-blur-sm text-purple-700 border-purple-200/60";
   };
 
   const getRoutePrefix = () => {
@@ -292,19 +292,19 @@ export default function FundingCard({ funding, viewMode = "grid" }: FundingCardP
             <div className="space-y-4">
               {/* Stats Grid */}
               <div className="grid grid-cols-3 gap-2">
-                <div className="bg-muted rounded p-2">
+                <div className="rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-sm shadow-sm p-2">
                   <p className="text-xs text-muted-foreground">
                     {funding.type === "grant" ? "Total Budget" : "Raised"}
                   </p>
                   <p className="font-bold">{getFundingAmount()} ETH</p>
                 </div>
-                <div className="bg-muted rounded p-2">
+                <div className="rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-sm shadow-sm p-2">
                   <p className="text-xs text-muted-foreground">
                     {funding.type === "grant" ? "Recipients" : "Goal"}
                   </p>
                   <p className="font-bold">{getFundingGoal()}</p>
                 </div>
-                <div className="bg-muted rounded p-2">
+                <div className="rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-sm shadow-sm p-2">
                   <p className="text-xs text-muted-foreground">Status</p>
                   <p className="font-bold">{getStatusLabel()}</p>
                 </div>
@@ -374,7 +374,7 @@ export default function FundingCard({ funding, viewMode = "grid" }: FundingCardP
 
         <CardHeader className="p-3 space-y-2">
           <div className="flex items-center gap-2 mb-2">
-            <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${getTypeBadgeColor()}`}>
+            <div className={`flex h-8 w-8 items-center justify-center rounded-[0.75rem] ${getTypeBadgeColor()} shadow-sm`}>
               <TypeIcon className="h-4 w-4" />
             </div>
             <Badge className={getTypeBadgeColor()} variant="outline">
@@ -483,19 +483,19 @@ export default function FundingCard({ funding, viewMode = "grid" }: FundingCardP
           <div className="space-y-4">
             {/* Stats Grid */}
             <div className="grid grid-cols-3 gap-2">
-              <div className="bg-muted rounded p-2">
+              <div className="rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-sm shadow-sm p-2">
                 <p className="text-xs text-muted-foreground">
                   {funding.type === "grant" ? "Total Budget" : "Raised"}
                 </p>
                 <p className="font-bold">{getFundingAmount()} ETH</p>
               </div>
-              <div className="bg-muted rounded p-2">
+              <div className="rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-sm shadow-sm p-2">
                 <p className="text-xs text-muted-foreground">
                   {funding.type === "grant" ? "Recipients" : "Goal"}
                 </p>
                 <p className="font-bold">{getFundingGoal()}</p>
               </div>
-              <div className="bg-muted rounded p-2">
+              <div className="rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-sm shadow-sm p-2">
                 <p className="text-xs text-muted-foreground">Status</p>
                 <p className="font-bold">{getStatusLabel()}</p>
               </div>
