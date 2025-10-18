@@ -86,7 +86,7 @@ export default function AirdropCard({
     return (
       <>
       <Card
-        className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 cursor-pointer"
+        className="group relative overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer hover:scale-[1.03] active:scale-[0.98]"
         onClick={() => router.push(`/airdrops/${airdrop.id}`)}
       >
         <div className="flex flex-row">
@@ -107,9 +107,9 @@ export default function AirdropCard({
                     e.stopPropagation();
                     setQuickView(true);
                   }}
-                  className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+                  className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md hover:shadow-lg hover:scale-110 active:scale-95 transition-all duration-300 border border-white/60"
                 >
-                  <Eye className="h-3.5 w-3.5" />
+                  <Eye className="h-4 w-4 text-[#0EA885]" />
                 </Button>
                 <Button
                   variant="secondary"
@@ -118,9 +118,9 @@ export default function AirdropCard({
                     e.stopPropagation();
                     shareLink(`/airdrops/${airdrop.id}`, "Share this airdrop");
                   }}
-                  className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+                  className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md hover:shadow-lg hover:scale-110 active:scale-95 transition-all duration-300 border border-white/60"
                 >
-                  <Share2 className="h-3.5 w-3.5" />
+                  <Share2 className="h-4 w-4 text-[#0EA885]" />
                 </Button>
               </div>
             </div>
@@ -137,7 +137,7 @@ export default function AirdropCard({
                     {airdrop.description?.replace(/\n\nImage:.*$/, "") || "Social media promotion task"}
                   </p>
                 </div>
-                <Badge variant={getStatusColor()} className="text-xs flex-shrink-0">
+                <Badge variant={getStatusColor()} className="text-xs rounded-full px-3 py-1 border-white/60 bg-white/80 backdrop-blur-sm shadow-md flex-shrink-0">
                   {getStatusText()}
                 </Badge>
               </div>
@@ -146,8 +146,10 @@ export default function AirdropCard({
             <CardContent className="pt-0 pb-3 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1.5">
-                    <Coins className="h-3.5 w-3.5 text-green-600" />
+                  <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[0.75rem] bg-gradient-to-r from-green-100/80 to-emerald-100/60 border border-green-200/60 shadow-sm backdrop-blur-sm">
+                    <div className="p-1 rounded-md bg-green-100/80">
+                      <Coins className="h-3.5 w-3.5 text-green-600" />
+                    </div>
                     <span className="text-lg font-bold text-green-600">
                       {formatETH(airdrop.perQualifier)}
                     </span>
@@ -189,7 +191,7 @@ export default function AirdropCard({
 
       {/* Quick View Dialog */}
       <Dialog open={quickView} onOpenChange={setQuickView}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto rounded-[1.5rem] sm:rounded-[2rem] border border-white/60 bg-white/95 backdrop-blur-xl">
           <DialogHeader>
             <DialogTitle>{airdrop.title}</DialogTitle>
             <DialogDescription>
@@ -264,13 +266,13 @@ export default function AirdropCard({
             <div className="flex gap-2 pt-2">
               <Button
                 variant="outline"
-                className="flex-1"
+                className="flex-1 rounded-[1rem] border-white/60 bg-white/70 backdrop-blur-sm hover:bg-white/90 hover:scale-105 active:scale-95 transition-all duration-300"
                 onClick={() => setQuickView(false)}
               >
                 Close
               </Button>
               <Button
-                className="flex-1"
+                className="flex-1 rounded-[1rem] bg-[#0EA885] hover:bg-[#0EA885]/90 hover:scale-105 active:scale-95 transition-all duration-300 shadow-md hover:shadow-lg"
                 onClick={() => {
                   setQuickView(false);
                   router.push(`/airdrops/${airdrop.id}`);
@@ -289,12 +291,12 @@ export default function AirdropCard({
   return (
     <>
     <Card
-      className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 cursor-pointer"
+      className="group relative overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer hover:scale-[1.03] active:scale-[0.98]"
       onClick={() => router.push(`/airdrops/${airdrop.id}`)}
     >
       {/* Status Badge */}
       <div className="absolute top-2 right-2 z-10">
-        <Badge variant={getStatusColor()} className="text-xs">
+        <Badge variant={getStatusColor()} className="text-xs rounded-full px-3 py-1 border-white/60 bg-white/80 backdrop-blur-sm shadow-md">
           {getStatusText()}
         </Badge>
       </div>
@@ -316,9 +318,9 @@ export default function AirdropCard({
                 e.stopPropagation();
                 setQuickView(true);
               }}
-              className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+              className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md hover:shadow-lg hover:scale-110 active:scale-95 transition-all duration-300 border border-white/60"
             >
-              <Eye className="h-3.5 w-3.5" />
+              <Eye className="h-4 w-4 text-[#0EA885]" />
             </Button>
             <Button
               variant="secondary"
@@ -327,9 +329,9 @@ export default function AirdropCard({
                 e.stopPropagation();
                 shareLink(`/airdrops/${airdrop.id}`, "Share this airdrop");
               }}
-              className="h-7 w-7 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+              className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md hover:shadow-lg hover:scale-110 active:scale-95 transition-all duration-300 border border-white/60"
             >
-              <Share2 className="h-3.5 w-3.5" />
+              <Share2 className="h-4 w-4 text-[#0EA885]" />
             </Button>
           </div>
         </div>
@@ -365,15 +367,17 @@ export default function AirdropCard({
 
       <CardContent className="p-3 pt-0">
         {/* Reward Section */}
-        <div className="flex items-center justify-between p-2 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
+        <div className="flex items-center justify-between p-2.5 rounded-[1rem] bg-gradient-to-r from-green-100/80 to-emerald-100/60 border border-green-200/60 shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-sm">
           <div className="flex items-center gap-1.5">
-            <Coins className="h-3.5 w-3.5 text-green-600" />
+            <div className="p-1.5 rounded-lg bg-green-100/80">
+              <Coins className="h-4 w-4 text-green-600" />
+            </div>
             <span className="text-base font-bold text-green-600">
               {formatETH(airdrop.perQualifier)}
             </span>
             <span className="text-xs font-medium text-green-600">STT</span>
           </div>
-          <Avatar className="h-5 w-5">
+          <Avatar className="h-5 w-5 border border-white/60 shadow-sm">
             <AvatarFallback className="text-[10px]">
               {airdrop.creator.slice(2, 4).toUpperCase()}
             </AvatarFallback>
@@ -384,7 +388,7 @@ export default function AirdropCard({
 
     {/* Quick View Dialog */}
     <Dialog open={quickView} onOpenChange={setQuickView}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto rounded-[1.5rem] sm:rounded-[2rem] border border-white/60 bg-white/95 backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle>{airdrop.title}</DialogTitle>
           <DialogDescription>
@@ -406,15 +410,15 @@ export default function AirdropCard({
 
           {/* Stats Grid */}
           <div className="grid grid-cols-3 gap-2">
-            <div className="bg-muted rounded p-2">
+            <div className="rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-sm shadow-sm p-2">
               <p className="text-xs text-muted-foreground">Per Qualifier</p>
               <p className="font-bold">{formatETH(airdrop.perQualifier)} STT</p>
             </div>
-            <div className="bg-muted rounded p-2">
+            <div className="rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-sm shadow-sm p-2">
               <p className="text-xs text-muted-foreground">Participants</p>
               <p className="font-bold">{airdrop.qualifiersCount}/{airdrop.maxQualifiers}</p>
             </div>
-            <div className="bg-muted rounded p-2">
+            <div className="rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-sm shadow-sm p-2">
               <p className="text-xs text-muted-foreground">Status</p>
               <p className="font-bold">{getStatusText()}</p>
             </div>

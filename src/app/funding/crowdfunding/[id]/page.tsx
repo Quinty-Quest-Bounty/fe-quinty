@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import {
   ChevronLeft,
+  ChevronRight,
   Share2,
   Target,
   Calendar,
@@ -338,16 +339,25 @@ export default function CrowdfundingDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
+          <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto text-[#0EA885]" />
+          <p className="text-muted-foreground mt-6 text-sm sm:text-base">Loading campaign...</p>
+        </div>
       </div>
     );
   }
 
   if (!campaign) {
     return (
-      <div className="container mx-auto max-w-4xl px-4 py-8">
-        <p className="text-center text-muted-foreground">Campaign not found</p>
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Campaign not found</h2>
+          <p className="text-muted-foreground mb-6 text-sm sm:text-base">The campaign you're looking for doesn't exist.</p>
+          <Button onClick={() => router.push("/funding")} className="rounded-[0.75rem] hover:scale-105 active:scale-95 transition-all duration-300">
+            Back to Funding
+          </Button>
+        </div>
       </div>
     );
   }
@@ -371,21 +381,24 @@ export default function CrowdfundingDetailPage() {
       : "Cancelled";
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 py-6">
-      {/* Breadcrumb */}
-      <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-        <button
-          onClick={() => router.push("/funding")}
-          className="flex items-center gap-1 transition-colors hover:text-foreground"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          Funding
-        </button>
-        <span>/</span>
-        <span>Crowdfunding</span>
-        <span>/</span>
-        <span className="text-foreground">#{campaign.id}</span>
-      </div>
+    <div className="min-h-screen relative">
+      <div className="container mx-auto max-w-4xl px-4 sm:px-6 py-6 sm:py-8">
+        {/* Breadcrumb */}
+        <div className="mb-6 sm:mb-8">
+          <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md hover:shadow-lg transition-all duration-300">
+            <button
+              onClick={() => router.push("/funding")}
+              className="flex items-center gap-1.5 text-sm font-medium hover:text-[#0EA885] transition-all duration-300 active:scale-95"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Funding
+            </button>
+            <ChevronRight className="h-4 w-4 text-foreground/40" />
+            <span className="text-sm text-muted-foreground font-medium">Crowdfunding</span>
+            <ChevronRight className="h-4 w-4 text-foreground/40" />
+            <span className="text-sm font-semibold text-[#0EA885]">#{campaign.id}</span>
+          </div>
+        </div>
 
       {/* Header */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -667,6 +680,7 @@ export default function CrowdfundingDetailPage() {
           </CardContent>
         </Card>
       )}
+      </div>
     </div>
   );
 }

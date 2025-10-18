@@ -246,7 +246,7 @@ export default function AirdropDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
           <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto text-[#0EA885]" />
           <p className="text-muted-foreground mt-6 text-sm sm:text-base">Loading airdrop...</p>
@@ -257,7 +257,7 @@ export default function AirdropDetailPage() {
 
   if (!airdrop) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
           <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Airdrop not found</h2>
           <p className="text-muted-foreground mb-6 text-sm sm:text-base">The airdrop you're looking for doesn't exist.</p>
@@ -291,7 +291,7 @@ export default function AirdropDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 relative">
+    <div className="min-h-screen relative">
       {/* Loading Overlay */}
       {(isPending || isConfirming) && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-50 flex items-center justify-center p-4">
