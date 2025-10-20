@@ -803,22 +803,22 @@ export default function AirdropManager() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex justify-center">
-        <div className="inline-flex h-10 items-center justify-center rounded-lg bg-gray-100 p-1">
+      <div className="flex justify-center px-4">
+        <div className="inline-flex h-9 sm:h-10 items-center justify-center rounded-lg bg-gray-100 p-0.5 sm:p-1 w-full sm:w-auto max-w-md">
           {navigationItems.map((item) => (
             <Button
               key={item.id}
               variant="ghost"
               size="sm"
               onClick={() => setActiveTab(item.id as any)}
-              className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors flex-1 sm:flex-none ${
                 activeTab === item.id
                   ? "bg-white text-gray-900 shadow-sm"
                   : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
               }`}
             >
-              <item.icon className="h-4 w-4 mr-2" />
-              {item.label}
+              <item.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-2" />
+              <span className="hidden xs:inline sm:inline">{item.label}</span>
             </Button>
           ))}
         </div>

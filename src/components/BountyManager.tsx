@@ -93,9 +93,9 @@ export default function BountyManager() {
 
   // State
   const [bounties, setBounties] = useState<Bounty[]>([]);
-  const [activeTab, setActiveTab] = useState<"create" | "browse" | "my-bounties">(
-    "browse"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "create" | "browse" | "my-bounties"
+  >("browse");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
@@ -214,7 +214,9 @@ export default function BountyManager() {
 
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
-      const newFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+      const newFiles = Array.from(files).filter((file) =>
+        file.type.startsWith("image/")
+      );
       if (newFiles.length > 0) {
         setUploadedFiles((prev) => [...prev, ...newFiles]);
       }
@@ -389,12 +391,14 @@ export default function BountyManager() {
 
       console.log("Creating bounty on blockchain...");
       // Calculate oprec deadline timestamp if enabled
-      const oprecDeadlineTimestamp = newBounty.hasOprec && newBounty.oprecDeadline
-        ? Math.floor(new Date(newBounty.oprecDeadline).getTime() / 1000)
-        : 0;
+      const oprecDeadlineTimestamp =
+        newBounty.hasOprec && newBounty.oprecDeadline
+          ? Math.floor(new Date(newBounty.oprecDeadline).getTime() / 1000)
+          : 0;
 
       writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+          .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "createBounty",
         args: [
@@ -481,7 +485,8 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+          .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "submitSolution",
         args: [BigInt(targetBountyId), targetIpfsCid],
@@ -505,7 +510,8 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+          .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "selectWinners",
         args: [BigInt(bountyId), winners, subIds.map((id) => BigInt(id))],
@@ -522,7 +528,8 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+          .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "triggerSlash",
         args: [BigInt(bountyId)],
@@ -539,7 +546,8 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+          .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "addReply",
         args: [BigInt(bountyId), BigInt(subId), content],
@@ -560,7 +568,8 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+          .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "revealSolution",
         args: [BigInt(bountyId), BigInt(subId), revealCid],
@@ -589,10 +598,12 @@ export default function BountyManager() {
 
       // Status filter
       if (statusFilter !== "all") {
-        const isExpired = BigInt(Math.floor(Date.now() / 1000)) > bounty.deadline;
+        const isExpired =
+          BigInt(Math.floor(Date.now() / 1000)) > bounty.deadline;
         const isResolved = bounty.status === 3; // RESOLVED status
 
-        if (statusFilter === "active" && (isExpired || isResolved)) return false;
+        if (statusFilter === "active" && (isExpired || isResolved))
+          return false;
         if (statusFilter === "resolved" && !isResolved) return false;
         if (statusFilter === "expired" && !isExpired) return false;
       }
@@ -628,11 +639,11 @@ export default function BountyManager() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex justify-center">
-        <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
+      <div className="flex justify-center px-4">
+        <div className="inline-flex h-9 sm:h-10 items-center justify-center rounded-md bg-muted p-0.5 sm:p-1 text-muted-foreground w-full sm:w-auto max-w-md">
           {[
             { id: "browse", label: "Browse", icon: Target },
-            { id: "my-bounties", label: "My Bounties", icon: Users },
+            { id: "my-bounties", label: "My", icon: Users },
             { id: "create", label: "Create", icon: Plus },
           ].map((tab) => (
             <Button
@@ -640,10 +651,13 @@ export default function BountyManager() {
               variant={activeTab === tab.id ? "default" : "ghost"}
               size="sm"
               onClick={() => setActiveTab(tab.id as any)}
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium ring-offset-background transition-all flex-1 sm:flex-none"
             >
-              <tab.icon className="h-4 w-4 mr-2" />
-              {tab.label} Bounties
+              <tab.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-2" />
+              <span className="hidden xs:inline ml-1 sm:ml-0">{tab.label}</span>
+              <span className="xs:hidden sm:hidden">
+                {tab.id === "browse" ? "B" : tab.id === "my-bounties" ? "M" : "C"}
+              </span>
             </Button>
           ))}
         </div>
@@ -663,7 +677,8 @@ export default function BountyManager() {
                 Create New Bounty
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Create a detailed bounty with IPFS metadata and smart contract escrow
+                Create a detailed bounty with IPFS metadata and smart contract
+                escrow
               </p>
             </div>
 
@@ -677,12 +692,16 @@ export default function BountyManager() {
                       <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
                         1
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900">Basic Information</h3>
+                      <h3 className="text-lg font-medium text-gray-900">
+                        Basic Information
+                      </h3>
                     </div>
 
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">Title *</label>
+                        <label className="text-sm font-medium text-gray-700">
+                          Title *
+                        </label>
                         <Input
                           type="text"
                           value={newBounty.title}
@@ -751,7 +770,9 @@ export default function BountyManager() {
                       <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
                         2
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900">Bounty Details</h3>
+                      <h3 className="text-lg font-medium text-gray-900">
+                        Bounty Details
+                      </h3>
                     </div>
 
                     <div className="space-y-4">
@@ -869,7 +890,8 @@ export default function BountyManager() {
                           </label>
                         </div>
                         <p className="text-xs text-muted-foreground ml-6">
-                          Only approved participants can submit solutions after OPREC phase ends
+                          Only approved participants can submit solutions after
+                          OPREC phase ends
                         </p>
 
                         {newBounty.hasOprec && (
@@ -1020,7 +1042,9 @@ export default function BountyManager() {
                       <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
                         3
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900">Requirements & Skills</h3>
+                      <h3 className="text-lg font-medium text-gray-900">
+                        Requirements & Skills
+                      </h3>
                     </div>
 
                     <div className="space-y-4">
@@ -1206,7 +1230,9 @@ export default function BountyManager() {
                       <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
                         4
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900">Media & Assets</h3>
+                      <h3 className="text-lg font-medium text-gray-900">
+                        Media & Assets
+                      </h3>
                     </div>
 
                     <div className="space-y-3">
@@ -1240,7 +1266,9 @@ export default function BountyManager() {
                             <Upload className="w-6 h-6" />
                           </div>
                           <span className="text-sm font-medium mb-1">
-                            {isDragOver ? "Drop images here" : "Click to upload or drag and drop"}
+                            {isDragOver
+                              ? "Drop images here"
+                              : "Click to upload or drag and drop"}
                           </span>
                           <span className="text-xs text-center">
                             JPG, PNG, GIF up to 10MB each
@@ -1291,78 +1319,80 @@ export default function BountyManager() {
                       <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
                         5
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900">Create Bounty</h3>
+                      <h3 className="text-lg font-medium text-gray-900">
+                        Create Bounty
+                      </h3>
                     </div>
 
                     {/* Transaction Status */}
                     {hash && (
-                        <div className="p-3 bg-blue-50/50 border border-blue-200 rounded-lg">
-                          <div className="space-y-2">
-                            <p className="text-xs font-medium">
-                              Transaction Hash:
-                            </p>
-                            <a
-                              href={`https://shannon-explorer.somnia.network/tx/${hash}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:text-blue-800 font-mono text-xs break-all"
-                            >
-                              {hash}
-                            </a>
-                            {isConfirming && (
-                              <div className="flex items-center gap-2 text-xs text-blue-600">
-                                <Clock className="w-3 h-3 animate-spin" />
-                                Waiting for confirmation...
-                              </div>
-                            )}
-                            {isConfirmed && (
-                              <div className="flex items-center gap-2 text-xs text-green-600">
-                                <span>✅</span>
-                                Transaction confirmed!
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                      {error && (
-                        <div className="p-3 bg-red-50/50 border border-red-200 rounded-lg">
-                          <p className="text-xs text-red-600">
-                            <strong>Error:</strong> {error.message}
+                      <div className="p-3 bg-blue-50/50 border border-blue-200 rounded-lg">
+                        <div className="space-y-2">
+                          <p className="text-xs font-medium">
+                            Transaction Hash:
                           </p>
+                          <a
+                            href={`https://shannon-explorer.somnia.network/tx/${hash}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 font-mono text-xs break-all"
+                          >
+                            {hash}
+                          </a>
+                          {isConfirming && (
+                            <div className="flex items-center gap-2 text-xs text-blue-600">
+                              <Clock className="w-3 h-3 animate-spin" />
+                              Waiting for confirmation...
+                            </div>
+                          )}
+                          {isConfirmed && (
+                            <div className="flex items-center gap-2 text-xs text-green-600">
+                              <span>✅</span>
+                              Transaction confirmed!
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
+                    )}
 
-                      <Button
-                        onClick={createBounty}
-                        disabled={
-                          isPending ||
-                          isConfirming ||
-                          !newBounty.title ||
-                          !newBounty.description ||
-                          !newBounty.amount ||
-                          !newBounty.deadline ||
-                          isUploadingImages
-                        }
-                        className="w-full"
-                      >
-                        {isUploadingImages ? (
-                          <>
-                            <Upload className="w-4 h-4 mr-2 animate-spin" />
-                            Uploading Images...
-                          </>
-                        ) : isPending || isConfirming ? (
-                          <>
-                            <Clock className="w-4 h-4 mr-2 animate-spin" />
-                            {isPending ? "Confirming..." : "Creating..."}
-                          </>
-                        ) : (
-                          <>
-                            <Target className="w-4 h-4 mr-2" />
-                            Create Bounty
-                          </>
-                        )}
-                      </Button>
+                    {error && (
+                      <div className="p-3 bg-red-50/50 border border-red-200 rounded-lg">
+                        <p className="text-xs text-red-600">
+                          <strong>Error:</strong> {error.message}
+                        </p>
+                      </div>
+                    )}
+
+                    <Button
+                      onClick={createBounty}
+                      disabled={
+                        isPending ||
+                        isConfirming ||
+                        !newBounty.title ||
+                        !newBounty.description ||
+                        !newBounty.amount ||
+                        !newBounty.deadline ||
+                        isUploadingImages
+                      }
+                      className="w-full"
+                    >
+                      {isUploadingImages ? (
+                        <>
+                          <Upload className="w-4 h-4 mr-2 animate-spin" />
+                          Uploading Images...
+                        </>
+                      ) : isPending || isConfirming ? (
+                        <>
+                          <Clock className="w-4 h-4 mr-2 animate-spin" />
+                          {isPending ? "Confirming..." : "Creating..."}
+                        </>
+                      ) : (
+                        <>
+                          <Target className="w-4 h-4 mr-2" />
+                          Create Bounty
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -1444,11 +1474,21 @@ export default function BountyManager() {
       {activeTab === "my-bounties" && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-2xl font-bold text-gray-900">
-              My Bounties
-            </h3>
+            <h3 className="text-2xl font-bold text-gray-900">My Bounties</h3>
             <div className="text-sm text-muted-foreground">
-              {bounties.filter(b => address && b.creator.toLowerCase() === address.toLowerCase()).length} bounty{bounties.filter(b => address && b.creator.toLowerCase() === address.toLowerCase()).length !== 1 ? 'ies' : ''}
+              {
+                bounties.filter(
+                  (b) =>
+                    address && b.creator.toLowerCase() === address.toLowerCase()
+                ).length
+              }{" "}
+              bounty
+              {bounties.filter(
+                (b) =>
+                  address && b.creator.toLowerCase() === address.toLowerCase()
+              ).length !== 1
+                ? "ies"
+                : ""}
             </div>
           </div>
 
@@ -1460,7 +1500,10 @@ export default function BountyManager() {
                 Please connect your wallet to view your bounties
               </p>
             </div>
-          ) : bounties.filter(b => address && b.creator.toLowerCase() === address.toLowerCase()).length === 0 ? (
+          ) : bounties.filter(
+              (b) =>
+                address && b.creator.toLowerCase() === address.toLowerCase()
+            ).length === 0 ? (
             <div className="text-center py-12 bg-muted/30 rounded-lg border border-dashed">
               <Target className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
               <p className="text-lg font-medium mb-2">No Bounties Created</p>
@@ -1475,7 +1518,10 @@ export default function BountyManager() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {bounties
-                .filter(b => address && b.creator.toLowerCase() === address.toLowerCase())
+                .filter(
+                  (b) =>
+                    address && b.creator.toLowerCase() === address.toLowerCase()
+                )
                 .map((bounty) => (
                   <BountyCard
                     key={bounty.id}

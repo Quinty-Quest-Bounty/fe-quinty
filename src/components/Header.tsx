@@ -29,21 +29,21 @@ export default function Header() {
   return (
     <>
       {/* Floating Navbar */}
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center pt-4 sm:pt-6">
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-50 flex justify-center pt-3 sm:pt-4 md:pt-6">
         <motion.header
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, type: "spring", bounce: 0.3 }}
-          className="pointer-events-auto mx-3 sm:mx-4 w-full max-w-7xl rounded-[1.75rem] sm:rounded-[2rem] border border-white/60 bg-white/70 dark:bg-background/80 dark:border-border/40 shadow-lg hover:shadow-2xl backdrop-blur-xl transition-all duration-500"
+          className="pointer-events-auto mx-2 sm:mx-3 md:mx-4 w-full max-w-7xl rounded-[1.5rem] sm:rounded-[1.75rem] md:rounded-[2rem] border border-white/60 bg-white/70 dark:bg-background/80 dark:border-border/40 shadow-lg hover:shadow-2xl backdrop-blur-xl transition-all duration-500"
         >
-          <div className="flex h-14 sm:h-16 items-center justify-between px-4 sm:px-6">
+          <div className="flex h-12 sm:h-14 md:h-16 items-center justify-between px-3 sm:px-4 md:px-6">
             {/* Logo */}
             <button
               type="button"
               onClick={() => router.push("/")}
-              className="flex items-center gap-2 sm:gap-3 transition-all duration-300 hover:scale-105 active:scale-95"
+              className="flex items-center gap-1.5 sm:gap-2 md:gap-3 transition-all duration-300 hover:scale-105 active:scale-95"
             >
-              <div className="relative h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-gradient-to-br from-[#0EA885]/10 to-[#0EA885]/5 p-1.5 sm:p-2 backdrop-blur-sm border border-[#0EA885]/20">
+              <div className="relative h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 rounded-lg sm:rounded-xl bg-gradient-to-br from-[#0EA885]/10 to-[#0EA885]/5 p-1 sm:p-1.5 md:p-2 backdrop-blur-sm border border-[#0EA885]/20">
                 <Image
                   src="/images/quinty-logo.png"
                   alt="Quinty Logo"
@@ -52,7 +52,7 @@ export default function Header() {
                   priority
                 />
               </div>
-              <span className="hidden text-lg sm:text-xl font-bold tracking-tight sm:inline-block bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+              <span className="hidden text-base sm:text-lg md:text-xl font-bold tracking-tight sm:inline-block bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
                 Quinty
               </span>
             </button>
@@ -145,7 +145,7 @@ export default function Header() {
       </div>
 
       {/* Spacer for fixed header */}
-      <div className="h-24" />
+      <div className="h-20 sm:h-22 md:h-24" />
     </>
   );
 }

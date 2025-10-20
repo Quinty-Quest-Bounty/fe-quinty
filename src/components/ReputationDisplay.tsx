@@ -305,8 +305,8 @@ export default function ReputationDisplay() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex justify-center">
-        <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
+      <div className="flex justify-center px-4">
+        <div className="inline-flex h-9 sm:h-10 items-center justify-center rounded-md bg-muted p-0.5 sm:p-1 text-muted-foreground w-full sm:w-auto max-w-md">
           {[
             { id: "profile", label: "Profile", icon: User },
             { id: "leaderboard", label: "Leaderboard", icon: TrendingUp },
@@ -317,10 +317,10 @@ export default function ReputationDisplay() {
               variant={selectedTab === tab.id ? "default" : "ghost"}
               size="sm"
               onClick={() => setSelectedTab(tab.id as any)}
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all"
+              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium ring-offset-background transition-all flex-1 sm:flex-none"
             >
-              <tab.icon className="h-4 w-4 mr-2" />
-              {tab.label}
+              <tab.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-2" />
+              <span className="hidden xs:inline ml-1 sm:ml-0">{tab.label}</span>
             </Button>
           ))}
         </div>

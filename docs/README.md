@@ -10,7 +10,7 @@ Quinty is a trustless collaboration platform that eliminates intermediaries from
 
 - **100% Escrow Protection** - All funds locked upfront, eliminating payment risk
 - **Soulbound Reputation** - Permanent on-chain achievements via NFT badges
-- **Democratic Disputes** - Community-powered resolution with stake-weighted voting
+- **Democratic Disputes (coming soon)** - Community-powered resolution with stake-weighted voting
 - **Zero Platform Fees** - Only gas costs, no middleman cuts
 - **Full Transparency** - All transactions visible on Base blockchain
 
@@ -59,7 +59,7 @@ All contracts are deployed and verified on Base Sepolia:
 | Grant Program | `0xf70fBEba52Cc2A6F1e511179A10BdB4B820c7879` |
 | Crowdfunding | `0x64aC0a7A52f3E0a414D8344f6A4620b51dFfB6C2` |
 | Looking for Grant | `0x423fb3E158B8bA79Fabbd387dAEb844DC0709BeF` |
-| ZK Verification | `0xe3cd834a963B3A6A550aed05ece2535B02C83E3a` |
+| Social Verification | `0xe3cd834a963B3A6A550aed05ece2535B02C83E3a` |
 | Airdrop Bounty | `0x79dAe15C3612854F6bd025f7CDc6D4CDEE289049` |
 | Dispute Resolver | `0xF04b0Ec52bFe602D0D38bEA4f613ABb7cFA79FB5` |
 

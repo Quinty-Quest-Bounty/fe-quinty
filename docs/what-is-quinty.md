@@ -37,7 +37,7 @@ Traditional platforms solve this with centralized intermediaries who take 20-30%
 
 **Key Protection:** Your deposit ensures creators take you seriously, and you get it back when you win.
 
-### For the Community (Dispute Resolvers)
+### For the Community (Dispute Resolvers) - Coming Soon
 
 **Stake → Vote → Earn**
 
@@ -105,13 +105,13 @@ When bounties expire or disputes arise:
 - **Non-transferable** - Badges are soulbound (can't be sold/transferred)
 - **On-chain stats** - Total submissions, wins, bounties created, first/last activity
 
-### 6. **ZK Verification** - Identity Layer
-- **Privacy-first** - Connect wallet to X without revealing credentials
+### 6. **Social Verification** - Identity Layer
+- **X account verification** - Verify X (Twitter) account ownership
 - **Required for creation** - Must verify to create grants, crowdfunding, LFG
 - **Visual badges** - Verified users show checkmark in UI
-- **Reclaim Protocol ready** - Placeholder mode now, production-ready ZK proofs coming
+- **Anti-spam** - Prevents anonymous accounts from creating scams
 
-### 7. **Dispute Resolution** - Democratic Justice
+### 7. **Dispute Resolution** - Democratic Justice (Coming Soon)
 - **Stake-weighted voting** - More stake = more influence
 - **Top 3 ranking** - Voters rank best submissions
 - **Proportional rewards** - Winners share slashed funds, voters earn 5-10%
@@ -185,8 +185,8 @@ Looking for Grant (0x423f...)
     ├── Supporter tracking
     └── Project updates
 
-ZK Verification (0xe3cd...)
-    ├── Identity verification via ZK proofs
+Social Verification (0xe3cd...)
+    ├── X account verification
     ├── Social handle → address mapping
     ├── Institution verification
     └── Gating for grant/crowdfunding creation
@@ -280,7 +280,7 @@ That's the world Quinty is building.
 ✅ **All contracts deployed on Base Sepolia**
 ✅ **Full frontend with 6 core features**
 ✅ **Soulbound NFT badge system**
-✅ **ZK verification (placeholder mode)**
+✅ **Social verification (X account verification)**
 🚧 **Dispute Resolver (coming soon)**
 
 **Production Ready** ✅

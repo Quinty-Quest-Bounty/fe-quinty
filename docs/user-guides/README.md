@@ -8,7 +8,7 @@ Comprehensive guides for using Quinty's features.
 - **[Grant Programs Guide](grants.md)** - How to create grants and apply
 - **[Crowdfunding Guide](crowdfunding.md)** - How to launch campaigns and contribute
 - **[Looking for Grant Guide](looking-for-grant.md)** - How to seek flexible VC funding
-- **[ZK Verification Guide](zk-verification.md)** - How to verify your identity
+- **[Social Verification Guide](social-verification.md)** - How to verify your X account
 - **[Reputation & NFT Badges](reputation.md)** - Understanding the reputation system
 
 ## Quick Links
