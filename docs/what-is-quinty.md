@@ -51,6 +51,7 @@ When bounties expire or disputes arise:
 ## The Quinty Ecosystem
 
 ### 1. **Quinty Core** - Task Bounty Engine
+
 - **100% ETH escrow** - All bounty funds locked at creation
 - **Blinded IPFS submissions** - Prevents solution copying
 - **Winner selection** - Creators choose winners after deadline
@@ -58,12 +59,14 @@ When bounties expire or disputes arise:
 - **Team support** - Multi-member submissions with profit sharing
 
 **Use Cases:**
+
 - "Build a DeFi dashboard → 5 ETH"
 - "Design NFT collection → 2 ETH"
 - "Write smart contract → 10 ETH"
 - "Create marketing campaign → 3 ETH"
 
 ### 2. **Grant Programs** - Institutional Funding
+
 - **Full escrow** - Grant funds locked upfront
 - **Application period** - Projects apply with details and requested amounts
 - **Selective approval** - Approve specific applicants with custom amounts
@@ -72,11 +75,13 @@ When bounties expire or disputes arise:
 - **NFT badges** - Both givers and recipients earn achievements
 
 **Use Cases:**
+
 - "Web3 Innovation Grant: $100K to 10 teams"
 - "DeFi Builder Grant: $50K for selected protocols"
 - "Social Impact Grant: $25K for community projects"
 
 ### 3. **Crowdfunding** - All-or-Nothing Campaigns
+
 - **Goal-based** - Must reach goal or auto-refunds
 - **Milestone system** - Funds unlock as milestones complete
 - **Sequential release** - Must complete milestone 1 before milestone 2
@@ -84,34 +89,40 @@ When bounties expire or disputes arise:
 - **Automatic refunds** - Contributors claim refunds if goal not reached
 
 **Use Cases:**
+
 - "Build Community Center → $10K goal → 3 milestones"
 - "Launch DApp → $50K goal → 5 milestones"
 - "Social Movement → $25K goal → 4 milestones"
 
 ### 4. **Looking for Grant** - Flexible Funding
+
 - **No all-or-nothing** - Keep funds even if goal not reached
 - **Withdraw anytime** - No milestone restrictions
 - **VC discovery** - VCs discover and back early-stage projects
 - **Progress updates** - Keep supporters informed
 
 **Use Cases:**
+
 - "Startup seeking runway → $100K"
 - "Open source project → $20K"
 - "Research initiative → $50K"
 
 ### 5. **Reputation System** - Soulbound NFTs
+
 - **7 badge types** - Creator, Solver, Team, Grant Giver/Recipient, Donor, Supporter
 - **5 tiers** - Bronze → Silver → Gold → Platinum → Diamond (1/10/25/50/100 achievements)
 - **Non-transferable** - Badges are soulbound (can't be sold/transferred)
 - **On-chain stats** - Total submissions, wins, bounties created, first/last activity
 
 ### 6. **Social Verification** - Identity Layer
+
 - **X account verification** - Verify X (Twitter) account ownership
 - **Required for creation** - Must verify to create grants, crowdfunding, LFG
 - **Visual badges** - Verified users show checkmark in UI
 - **Anti-spam** - Prevents anonymous accounts from creating scams
 
 ### 7. **Dispute Resolution** - Democratic Justice (Coming Soon)
+
 - **Stake-weighted voting** - More stake = more influence
 - **Top 3 ranking** - Voters rank best submissions
 - **Proportional rewards** - Winners share slashed funds, voters earn 5-10%
@@ -120,27 +131,34 @@ When bounties expire or disputes arise:
 ## Key Principles
 
 ### 1. **Trust Through Code**
+
 No centralized entity controls funds or reputation. Smart contracts enforce all rules transparently.
 
 ### 2. **Skin in the Game**
+
 - Creators escrow 100% upfront
 - Solvers deposit 10% to show commitment
 - Voters stake ETH to participate in disputes
 - Everyone has economic incentive to be honest
 
 ### 3. **Permanent Reputation**
+
 Your achievements are stored in soulbound NFTs that:
+
 - Can never be transferred or sold
 - Permanently prove your contribution history
 - Travel with you across all platforms that read Base
 
 ### 4. **Zero Platform Tax**
+
 Unlike Upwork (20% fee) or Gitcoin (platform fees), Quinty charges:
+
 - **0% platform fees**
 - Only blockchain gas costs
 - All funds go to creators/solvers
 
 ### 5. **Community-Powered**
+
 - Disputes resolved by community voting
 - Reputation built through participation
 - No central authority making decisions
@@ -148,6 +166,7 @@ Unlike Upwork (20% fee) or Gitcoin (platform fees), Quinty charges:
 ## Technical Architecture
 
 ### Smart Contract Layer (Base Sepolia)
+
 ```
 Quinty Core (0x7169...)
     ├── Manages bounties, submissions, winners
@@ -199,6 +218,7 @@ Dispute Resolver (0xF04b...) [COMING SOON]
 ```
 
 ### Frontend Layer (Next.js 14)
+
 - **React 18** + **TypeScript** for type safety
 - **Tailwind CSS** + **shadcn/ui** for beautiful design
 - **Wagmi v2** + **Viem** for Web3 interactions
@@ -206,6 +226,7 @@ Dispute Resolver (0xF04b...) [COMING SOON]
 - **IPFS (Pinata)** for decentralized storage
 
 ### Storage Layer
+
 - **On-chain** - All critical data (bounties, funds, reputation)
 - **IPFS** - Submissions, proofs, images, metadata
 - **Pinata** - IPFS pinning service
@@ -213,22 +234,29 @@ Dispute Resolver (0xF04b...) [COMING SOON]
 ## Security Model
 
 ### Escrow Protection
+
 All funds locked in smart contracts before any work begins. Creators can't rug pull.
 
 ### Deposit System (Bounties)
+
 10% deposit from solvers prevents spam. Refunded on win or reveal.
 
 ### Time-Based Slashing
+
 If creator doesn't resolve within deadline + grace period:
+
 - 25-50% automatically slashed
 - Sent to Dispute Resolver contract
 - Community votes on fair outcome
 
 ### Reentrancy Guards
+
 All fund transfers protected by OpenZeppelin's `ReentrancyGuard`.
 
 ### Access Control
+
 Only authorized addresses can:
+
 - Select winners (creator only)
 - Claim funds (winner only)
 - Mint badges (authorized contracts only)
@@ -247,18 +275,22 @@ Quinty is built exclusively on **Base Sepolia** (testnet) and will deploy to **B
 ## What Makes Quinty Different?
 
 ### vs Upwork/Fiverr
+
 - ❌ **Them:** 20% platform fees, centralized disputes, locked reputation
 - ✅ **Us:** 0% fees, community disputes, soulbound portable reputation
 
 ### vs Gitcoin/Giveth
+
 - ❌ **Them:** No task bounties, limited fund types, complex UI
 - ✅ **Us:** Full bounty system, 4 fund types, simple UX
 
 ### vs GoFundMe/Kickstarter
+
 - ❌ **Them:** Centralized, high fees (5-10%), no blockchain transparency
 - ✅ **Us:** Decentralized, no fees, full on-chain transparency
 
 ### vs Traditional Work Platforms
+
 - ❌ **Them:** Middleman takes cut, slow payments, trust through reputation scores
 - ✅ **Us:** No middleman, instant settlement, trust through code + soulbound NFTs
 
@@ -267,6 +299,7 @@ Quinty is built exclusively on **Base Sepolia** (testnet) and will deploy to **B
 Quinty is building the **operating system for the onchain work economy**.
 
 Imagine a world where:
+
 - Your reputation is truly yours (soulbound NFTs)
 - Trust is enforced by code, not corporations
 - Payments are instant and guaranteed
@@ -282,19 +315,5 @@ That's the world Quinty is building.
 ✅ **Soulbound NFT badge system**
 ✅ **Social verification (X account verification)**
 🚧 **Dispute Resolver (coming soon)**
-
-**Production Ready** ✅
-
-## Next Steps
-
-Ready to dive in?
-
-- [Quick Start Guide](quickstart.md) - Get started in 5 minutes
-- [How It Works](how-it-works.md) - Detailed workflows
-- [Smart Contracts](contracts.md) - Technical documentation
-- [User Guides](user-guides/README.md) - Feature-specific guides
-- [Vision & Roadmap](vision.md) - Future plans
-
----
 
 **Welcome to the future of work. Welcome to Quinty.** 🚀

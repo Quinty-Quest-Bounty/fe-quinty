@@ -480,6 +480,7 @@ Prevent spam and scams by verifying X (Twitter) account ownership before creatio
 - Enables creation forms
 
 **Benefits:**
+
 - Prevents anonymous spam accounts
 - Builds trust through social identity
 - No personal data stored on-chain
@@ -491,6 +492,7 @@ Prevent spam and scams by verifying X (Twitter) account ownership before creatio
 **Automatic Slashing:**
 
 When a bounty creator doesn't select winners within 7 days after deadline:
+
 1. Anyone can call `triggerSlash(bountyId)`
 2. 25-50% of bounty sent to Dispute Resolver
 3. Community votes on fair outcome
@@ -504,6 +506,7 @@ When a bounty creator doesn't select winners within 7 days after deadline:
 - Correct voters earn 5-10% reward
 
 **Benefits:**
+
 - Fair resolution when creators ghost
 - Economic incentive for honest voting
 - Transparent on-chain process
@@ -607,14 +610,3 @@ Quinty works through:
 **The result?**
 
 Zero-trust coordination at global scale. No middlemen. No fees. Just builders.
-
----
-
-**Next Steps:**
-
-- [User Guides](user-guides/README.md) - How to use each feature
-- [Developer Guides](developer-guides/README.md) - Integration tutorials
-- [Smart Contracts](contracts.md) - Technical deep dive
-- [Vision & Roadmap](vision.md) - What's next for Quinty
-
-**Ready to build? Let's go.** 🚀
