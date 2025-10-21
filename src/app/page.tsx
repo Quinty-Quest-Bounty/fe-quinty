@@ -58,9 +58,9 @@ const allFeatures = [
     status: "Live",
   },
   {
-    title: "ZK Identity Verification",
+    title: "Social Verification",
     description:
-      "Link your social proof without doxxing yourself. Verify with zero-knowledge — privacy meets credibility.",
+      "Verify your social identity with X — proof you’re really you.",
     icon: BadgeCheck,
     status: "Live",
   },
@@ -84,7 +84,7 @@ const bountyStackFeatures = [
   { text: "Soulbound Badges", color: "bg-indigo-200" },
   { text: "Grant Programs", color: "bg-rose-200" },
   { text: "Crowdfunding", color: "bg-cyan-200" },
-  { text: "ZK Verification", color: "bg-lime-200" },
+  { text: "Social Verification", color: "bg-lime-200" },
   { text: "Governance", color: "bg-fuchsia-200" },
 ];
 
