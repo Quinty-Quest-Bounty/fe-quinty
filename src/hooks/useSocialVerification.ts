@@ -6,23 +6,49 @@ export interface XAccount {
   verified: boolean;
 }
 
+// Generate a random code verifier for PKCE
+function generateCodeVerifier(): string {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  return base64URLEncode(array);
+}
+
+// Generate code challenge from verifier using SHA256
+async function generateCodeChallenge(verifier: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(verifier);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return base64URLEncode(new Uint8Array(hash));
+}
+
+// Base64 URL encode
+function base64URLEncode(buffer: Uint8Array): string {
+  const base64 = btoa(String.fromCharCode(...buffer));
+  return base64
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+}
+
 export function useSocialVerification() {
   const [xAccount, setXAccount] = useState<XAccount | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const buildXAuthUrl = useCallback((): string | null => {
+  const buildXAuthUrl = useCallback(async (): Promise<string | null> => {
     const clientId = process.env.NEXT_PUBLIC_TWITTER_CLIENT_ID;
 
     if (!clientId) return null;
 
     const redirectUri = `${window.location.origin}/auth/callback`;
     const state = Math.random().toString(36).substring(7);
-    const codeVerifier = Math.random().toString(36).substring(2, 15);
+    const codeVerifier = generateCodeVerifier();
+    const codeChallenge = await generateCodeChallenge(codeVerifier);
 
     // Store for validation
     sessionStorage.setItem('oauth_state_twitter', state);
     sessionStorage.setItem('oauth_verifier_twitter', codeVerifier);
+    sessionStorage.setItem('oauth_redirect_uri_twitter', redirectUri);
 
     const params = new URLSearchParams({
       client_id: clientId,
@@ -30,8 +56,8 @@ export function useSocialVerification() {
       scope: 'tweet.read users.read',
       response_type: 'code',
       state,
-      code_challenge: codeVerifier,
-      code_challenge_method: 'plain',
+      code_challenge: codeChallenge,
+      code_challenge_method: 'S256',
     });
 
     return `https://twitter.com/i/oauth2/authorize?${params.toString()}`;
@@ -42,7 +68,7 @@ export function useSocialVerification() {
     setError(null);
 
     try {
-      const authUrl = buildXAuthUrl();
+      const authUrl = await buildXAuthUrl();
 
       if (!authUrl) {
         throw new Error('X Client ID not configured. Please add NEXT_PUBLIC_TWITTER_CLIENT_ID to .env.local');

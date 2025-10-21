@@ -15,6 +15,7 @@ function OAuthCallbackContent() {
     // Check X state
     const storedState = sessionStorage.getItem('oauth_state_twitter');
     const codeVerifier = sessionStorage.getItem('oauth_verifier_twitter');
+    const redirectUri = sessionStorage.getItem('oauth_redirect_uri_twitter');
     const provider = storedState === state ? 'twitter' : '';
 
     if (error) {
@@ -35,10 +36,11 @@ function OAuthCallbackContent() {
       return;
     }
 
-    if (code && provider && codeVerifier) {
+    if (code && provider && codeVerifier && redirectUri) {
       // Clean up storage immediately
       sessionStorage.removeItem(`oauth_state_${provider}`);
       sessionStorage.removeItem(`oauth_verifier_${provider}`);
+      sessionStorage.removeItem(`oauth_redirect_uri_${provider}`);
 
       // Call backend to exchange code for REAL user data
       fetch('/api/x/verify', {
@@ -49,6 +51,7 @@ function OAuthCallbackContent() {
         body: JSON.stringify({
           code,
           codeVerifier,
+          redirectUri,
         }),
       })
         .then(async (res) => {

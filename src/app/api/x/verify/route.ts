@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { code, codeVerifier } = await request.json();
+    const { code, codeVerifier, redirectUri } = await request.json();
 
-    if (!code || !codeVerifier) {
+    if (!code || !codeVerifier || !redirectUri) {
       return NextResponse.json(
-        { error: 'Missing code or code verifier' },
+        { error: 'Missing required parameters' },
         { status: 400 }
       );
     }
@@ -20,8 +20,6 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`;
 
     // Step 1: Exchange code for access token
     const tokenResponse = await fetch('https://api.twitter.com/2/oauth2/token', {
@@ -40,9 +38,14 @@ export async function POST(request: NextRequest) {
 
     if (!tokenResponse.ok) {
       const error = await tokenResponse.text();
-      console.error('Token exchange failed:', error);
+      console.error('Token exchange failed:', {
+        status: tokenResponse.status,
+        error,
+        redirectUri,
+        clientId,
+      });
       return NextResponse.json(
-        { error: 'Failed to exchange code for token' },
+        { error: 'Failed to exchange code for token', details: error },
         { status: 400 }
       );
     }
