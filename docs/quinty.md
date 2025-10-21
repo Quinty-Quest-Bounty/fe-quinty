@@ -25,15 +25,15 @@ All Quinty smart contracts are deployed on **Base Sepolia Testnet** and verified
 
 | Contract | Address | Purpose |
 |----------|---------|---------|
-| **Quinty Core** | `0x7169c907F80f95b20232F5B979B1Aac392bD282a` | Main bounty engine with escrow |
-| **Reputation System** | `0x2dc731f796Df125B282484E844485814B2DCd363` | Tracks user stats and achievements |
-| **NFT Badges** | `0x80edb4Aeb39913FaFfDAC2a86F3184508B57AAe2` | Soulbound achievement NFTs |
-| **Grant Programs** | `0xf70fBEba52Cc2A6F1e511179A10BdB4B820c7879` | Institutional funding distribution |
-| **Crowdfunding** | `0x64aC0a7A52f3E0a414D8344f6A4620b51dFfB6C2` | All-or-nothing campaigns |
-| **Looking for Grant** | `0x423fb3E158B8bA79Fabbd387dAEb844DC0709BeF` | Flexible startup funding |
-| **Social Verification** | `0xe3cd834a963B3A6A550aed05ece2535B02C83E3a` | X account verification |
-| **Airdrop Bounty** | `0x79dAe15C3612854F6bd025f7CDc6D4CDEE289049` | Promotional campaigns |
-| **Dispute Resolver** | `0xF04b0Ec52bFe602D0D38bEA4f613ABb7cFA79FB5` | Community voting (coming soon) |
+| **Quinty Core** | `0x574bC7953bf4eD7Dd20987F4752C560f606Ebf1D` | Main bounty engine with escrow |
+| **Reputation System** | `0x7EbC0c18CF9B37076d326342Dba20e98A1F20c7e` | Tracks user stats and achievements |
+| **NFT Badges** | `0xD49a54aFb982c0b76554e34f1A76851ed725405F` | Soulbound achievement NFTs |
+| **Grant Programs** | `0x8b0B50732CCfB6308d5A63C1F9D70166DF63b661` | Institutional funding distribution |
+| **Crowdfunding** | `0x0bf8d6EB00b3C4cA6a9F1CFa6Cd40b4cE486F885` | All-or-nothing campaigns |
+| **Looking for Grant** | `0xcd01A6d3B8944080B3b1Bb79617415c0Ef895Cc6` | Flexible startup funding |
+| **Social Verification** | `0x045Fb080d926f049db7597c99B56aEccc8977F36` | X account verification |
+| **Airdrop Bounty** | `0x71C5f5C66e72bBFC7266429cA48ba65c38AFc6A4` | Promotional campaigns |
+| **Dispute Resolver** | `0x961659d12E9dE91dC543A75911b3b0D269769E82` | Community voting (coming soon) |
 
 ### Network Information
 
@@ -148,7 +148,7 @@ https://sepolia-explorer.base.org/address/[CONTRACT_ADDRESS]
 - **Testing:** Hardhat
 
 ### Infrastructure
-- **Blockchain:** Base Sepolia (testnet) ’ Base Mainnet (production)
+- **Blockchain:** Base Sepolia (testnet) ï¿½ Base Mainnet (production)
 - **Storage:** IPFS for metadata, images, and submissions
 - **Deployment:** Vercel Edge
 - **Analytics:** On-chain events
@@ -163,15 +163,15 @@ https://sepolia-explorer.base.org/address/[CONTRACT_ADDRESS]
 
 =& **X (Twitter):** [@QuintyProtocol](https://twitter.com/QuintyProtocol)
 
-=¬ **Discord:** [Join our community](https://discord.gg/quinty) *(coming soon)*
+=ï¿½ **Discord:** [Join our community](https://discord.gg/quinty) *(coming soon)*
 
-=ñ **Telegram:** [Quinty Official](https://t.me/quintyprotocol) *(coming soon)*
+=ï¿½ **Telegram:** [Quinty Official](https://t.me/quintyprotocol) *(coming soon)*
 
-=Ý **Mirror:** [Read our essays](https://mirror.xyz/quinty.eth) *(coming soon)*
+=ï¿½ **Mirror:** [Read our essays](https://mirror.xyz/quinty.eth) *(coming soon)*
 
-=» **GitHub:** [github.com/quinty-protocol](https://github.com/quinty-protocol)
+=ï¿½ **GitHub:** [github.com/quinty-protocol](https://github.com/quinty-protocol)
 
-=ç **Email:** hello@quinty.app
+=ï¿½ **Email:** hello@quinty.app
 
 ### Social Media
 
@@ -185,11 +185,11 @@ Follow us for updates, announcements, and community highlights:
 
 ### Developer Resources
 
-=Ú **Documentation:** [docs.quinty.app](https://docs.quinty.app)
+=ï¿½ **Documentation:** [docs.quinty.app](https://docs.quinty.app)
 
 =' **SDK:** Coming Q3 2025
 
-<¯ **API:** Coming Q3 2025
+<ï¿½ **API:** Coming Q3 2025
 
 = **Bug Bounty:** Coming after security audit
 
@@ -280,13 +280,13 @@ Quinty is committed to open-source development. All smart contracts and core pro
 
 ### Get Help
 
-=Ö **Documentation:** Read our [comprehensive guides](https://docs.quinty.app)
+=ï¿½ **Documentation:** Read our [comprehensive guides](https://docs.quinty.app)
 
-=¬ **Community Support:** Ask questions in Discord
+=ï¿½ **Community Support:** Ask questions in Discord
 
 = **Report Issues:** [GitHub Issues](https://github.com/quinty-protocol/quinty/issues)
 
-=ç **Business Inquiries:** partnerships@quinty.app
+=ï¿½ **Business Inquiries:** partnerships@quinty.app
 
 ### FAQs
 
@@ -311,7 +311,7 @@ A: Dispute Resolution UI is planned for Q1 2025.
 
 For press inquiries, partnership opportunities, or media requests:
 
-=ç **Press Contact:** press@quinty.app
+=ï¿½ **Press Contact:** press@quinty.app
 
 **Media Kit:** Coming soon
 
@@ -332,7 +332,7 @@ Special thanks to:
 
 **The future of work is trustless, global, and fair.**
 
-**The future of work is Quinty.** =€
+**The future of work is Quinty.** =ï¿½
 
 ---
 

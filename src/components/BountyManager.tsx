@@ -643,7 +643,7 @@ export default function BountyManager() {
         <div className="inline-flex h-9 sm:h-10 items-center justify-center rounded-md bg-muted p-0.5 sm:p-1 text-muted-foreground w-full sm:w-auto max-w-md">
           {[
             { id: "browse", label: "Browse", icon: Target },
-            { id: "my-bounties", label: "My", icon: Users },
+            { id: "my-bounties", label: "My Bounty", icon: Users },
             { id: "create", label: "Create", icon: Plus },
           ].map((tab) => (
             <Button
@@ -653,11 +653,8 @@ export default function BountyManager() {
               onClick={() => setActiveTab(tab.id as any)}
               className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium ring-offset-background transition-all flex-1 sm:flex-none"
             >
-              <tab.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-2" />
-              <span className="hidden xs:inline ml-1 sm:ml-0">{tab.label}</span>
-              <span className="xs:hidden sm:hidden">
-                {tab.id === "browse" ? "B" : tab.id === "my-bounties" ? "M" : "C"}
-              </span>
+              <tab.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:mr-2" />
+              <span className="hidden md:inline">{tab.label}</span>
             </Button>
           ))}
         </div>

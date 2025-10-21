@@ -91,27 +91,27 @@ const bountyStackFeatures = [
 const contractReferences = [
   {
     label: "Quinty Core",
-    address: "0x7169c907F80f95b20232F5B979B1Aac392bD282a",
+    address: "0x574bC7953bf4eD7Dd20987F4752C560f606Ebf1D",
   },
   {
     label: "Quinty Reputation",
-    address: "0x2dc731f796Df125B282484E844485814B2DCd363",
+    address: "0x7EbC0c18CF9B37076d326342Dba20e98A1F20c7e",
   },
   {
     label: "Dispute Resolver",
-    address: "0xF04b0Ec52bFe602D0D38bEA4f613ABb7cFA79FB5",
+    address: "0x961659d12E9dE91dC543A75911b3b0D269769E82",
   },
   {
     label: "Quinty NFT (Soulbound)",
-    address: "0x80edb4Aeb39913FaFfDAC2a86F3184508B57AAe2",
+    address: "0xD49a54aFb982c0b76554e34f1A76851ed725405F",
   },
   {
     label: "Grant Program",
-    address: "0xf70fBEba52Cc2A6F1e511179A10BdB4B820c7879",
+    address: "0x8b0B50732CCfB6308d5A63C1F9D70166DF63b661",
   },
   {
     label: "Crowdfunding",
-    address: "0x64aC0a7A52f3E0a414D8344f6A4620b51dFfB6C2",
+    address: "0x0bf8d6EB00b3C4cA6a9F1CFa6Cd40b4cE486F885",
   },
 ];
 
