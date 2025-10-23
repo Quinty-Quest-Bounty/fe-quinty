@@ -15,6 +15,5 @@ Comprehensive guides for using Quinty's features.
 
 - [Quick Start Guide](../quickstart.md) - Get started in 5 minutes
 - [How It Works](../how-it-works.md) - Understand the architecture
-- [Developer Guides](../developer-guides/README.md) - For developers
 
 Each guide provides step-by-step instructions with screenshots and examples.

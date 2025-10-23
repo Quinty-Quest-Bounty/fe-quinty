@@ -7,8 +7,22 @@
 - [Why Quinty?](why-quinty.md)
 - [How It Works](how-it-works.md)
 - [Quick Start Guide](quickstart.md)
-- [Vision & Roadmap](vision.md)
+- [Smart Contracts & Network](contracts.md)
 
 ## About Quinty
 
 - [Quinty Labs](quinty.md)
+
+## Guides
+
+- [User Guides](user-guides/README.md)
+  - [Bounties Guide](user-guides/bounties.md)
+  - [Grant Programs Guide](user-guides/grants.md)
+  - [Crowdfunding Guide](user-guides/crowdfunding.md)
+  - [Looking for Grant Guide](user-guides/looking-for-grant.md)
+  - [Social Verification Guide](user-guides/social-verification.md)
+  - [Reputation & NFT Badges](user-guides/reputation.md)
+
+## Developers
+
+- [Developer Guides](developer-guides/README.md)

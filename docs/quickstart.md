@@ -28,22 +28,7 @@ Visit the Base Sepolia faucet and get free testnet ETH:
 - Approve the network addition
 - Confirm the switch
 
-**Network Details:**
-
-- **Chain ID:** 84532
-- **RPC:** https://sepolia.base.org
-- **Explorer:** https://sepolia-explorer.base.org
-
-Name Value
-Network Name Base Sepolia
-Description A public testnet for Base.
-RPC Endpoint https://sepolia.base.org
-Rate limited and not for production systems.
-Flashblocks RPC Endpoint https://sepolia-preconf.base.org
-Rate limited and not for production systems.
-Chain ID 84532
-Currency Symbol ETH
-Block Explorer https://sepolia-explorer.base.org
+For full network details (RPC, explorer, faucet), see: [Smart Contracts & Network](contracts.md).
 
 ## Step 3: Choose Your Path
 

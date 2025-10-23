@@ -1,6 +1,6 @@
 # Why Quinty?
 
-The traditional work economy is broken. Quinty fixes it.
+The traditional work economy is broken. Quinty fixes it with trustless infrastructure, soulbound reputation, and zero platform fees.
 
 ## The Problems We Solve
 
@@ -98,196 +98,35 @@ The traditional work economy is broken. Quinty fixes it.
 - ✅ **Crowdfunding** - Milestone-based accountability
 - ✅ **Looking for Grant** - Flexible VC funding without equity
 
-## Why Decentralization Matters
-
-### Censorship Resistance
-
-- No platform can ban you
-- No country can block access
-- No corporation controls the rules
-- Operates 24/7 without downtime
-
-### Transparency
-
-- All bounties visible on-chain
-- All payments traceable
-- All reputation verifiable
-- All disputes public
-
-### Permissionless
-
-- No KYC required (for basic use)
-- Anyone can create/solve bounties
-- No approval needed to participate
-- Global access from day one
-
-### Programmable Trust
-
-- Smart contracts enforce rules
-- No human bias or error
-- Predictable outcomes
-- Trustless execution
-
 ## Why Base Blockchain?
 
-### 1. **Low Cost**
-
-- Gas fees: $0.01-$0.10 per transaction
-- Bounties can be as small as $10 and still make sense
-- No transaction minimums
-
-### 2. **Fast Finality**
-
-- 2-second block times
-- Instant payment confirmations
-- Real-time UI updates
-
-### 3. **Ethereum Security**
-
-- L2 rollup inherits Ethereum's security
-- Battle-tested infrastructure
-- Decentralized validator network
-
-### 4. **Easy Onboarding**
-
-- Coinbase integration
-- Millions of existing users
-- Simple wallet setup
-- Fiat on-ramps
-
-### 5. **Growing Ecosystem**
-
-- Thriving developer community
-- Rich tooling (wagmi, viem, RainbowKit)
-- Active builder scene
+- **Low Cost:** $0.01-$0.10 per transaction
+- **Fast Finality:** 2-second block times
+- **Ethereum Security:** L2 rollup inherits Ethereum's security
+- **Easy Onboarding:** Coinbase integration, fiat on-ramps
+- **Growing Ecosystem:** Rich tooling (wagmi, viem, RainbowKit)
 
 ## Real-World Use Cases
 
-### For Freelancers & Developers
+### Freelancers & Developers
 
-**Problem:** Upwork takes 20%, clients ghost after work completed
+- Keep 100% of earnings, instant payment, portable reputation
+- Example: Submit solution to "Build NFT marketplace - 5 ETH" bounty
 
-**Quinty Solution:**
+### Startups Seeking Funding
 
-1. Find bounty: "Build NFT marketplace - 5 ETH"
-2. Submit solution with 0.5 ETH deposit
-3. Get selected → Receive 5 ETH + 0.5 ETH deposit back
-4. Earn soulbound "BountySolver" NFT badge
-5. Build permanent on-chain reputation
+- Fast funding, no equity dilution, direct VC relationships
+- Example: Create "Looking for Grant" request, VCs support directly
 
-**Result:** Keep 100% of earnings, instant payment, portable reputation
+### VCs & Organizations
 
-### For Startups Seeking Funding
+- Transparent process, automated distribution, on-chain proof of impact
+- Example: Create grant program, approve projects, smart contract distributes funds
 
-**Problem:** VC process is slow, opaque, requires equity
+### Social Movements & Communities
 
-**Quinty Solution:**
-
-1. Verify X account ownership
-2. Create "Looking for Grant" request
-3. VCs browse and support directly
-4. Withdraw funds anytime, no goal requirement
-5. Post updates to keep supporters informed
-
-**Result:** Fast funding, no equity dilution, direct VC relationships
-
-### For VCs & Organizations
-
-**Problem:** Grant distribution is manual, opaque, no accountability
-
-**Quinty Solution:**
-
-1. Create grant program with 100 ETH
-2. Set criteria: "Web3 builders, 10 max recipients"
-3. Review applications transparently
-4. Approve 10 best projects with custom amounts
-5. Smart contract distributes funds automatically
-
-**Result:** Transparent process, automated distribution, on-chain proof of impact
-
-### For Social Movements & Communities
-
-**Problem:** Crowdfunding platforms take 5-10% fees, no accountability
-
-**Quinty Solution:**
-
-1. Create campaign: "Build Community Center - 10 ETH goal"
-2. Define milestones: "Land (4 ETH), Construction (3 ETH), Completion (3 ETH)"
-3. Community contributes
-4. Release milestones sequentially as work completes
-5. Automatic refunds if goal not reached
-
-**Result:** 0% fees, full transparency, milestone accountability
-
-### For Project Creators
-
-**Problem:** Platforms like Upwork/Fiverr take 20-30% and control your reputation
-
-**Quinty Solution:**
-
-1. Post bounty with full ETH escrowed (eliminates payment risk)
-2. Receive submissions (blinded to prevent copying)
-3. Select winners after deadline
-4. Smart contract auto-distributes funds
-5. Build reputation as fair creator
-
-**Result:** No platform fees, guaranteed solver quality (10% deposit), fair process
-
-## Economic Advantages
-
-### For Creators
-
-- **Save 20-30% on fees** - No Upwork/Fiverr cuts
-- **Guaranteed escrow** - Funds locked upfront
-- **Quality control** - 10% solver deposit ensures serious submissions
-- **Automatic slashing** - Don't resolve = lose money
-
-### For Solvers
-
-- **Keep 100% of earnings** - No platform fees
-- **Payment guaranteed** - Funds already escrowed
-- **Instant settlement** - 2-second blockchain finality
-- **Portable reputation** - Soulbound NFTs travel everywhere
-
-### For VCs/Grantors
-
-- **Transparent distribution** - All on-chain
-- **Automated processes** - Smart contracts handle payments
-- **On-chain impact** - Permanent proof of grants given
-- **Discover talent** - Reputation NFTs reveal top builders
-
-### For Community (coming soon)
-
-- **Earn from disputes** - 5-10% of slashed funds
-- **Build arbiter reputation** - Soulbound NFT for correct votes
-- **Aligned incentives** - Stake ETH = vote honestly
-- **Democratic process** - Community governs platform
-
-## Why Now?
-
-### 1. **Remote Work Explosion**
-
-- COVID-19 accelerated remote work adoption
-- Talent is now global
-- Trust systems need to scale globally
-
-### 2. **Web3 Maturity**
-
-- Base launched (low fees, fast finality)
-- Wallet UX improved (RainbowKit, WalletConnect)
-- Developer tooling mature (wagmi, viem)
-
-### 3. **Trust Crisis**
-
-- Centralized platforms losing user trust
-- Data breaches, censorship, arbitrary bans
-- Users want self-sovereign alternatives
-
-### 4. **DeFi Infrastructure**
-
-- Mature escrow patterns
-- Battle-tested security (OpenZeppelin)
-- Rich composability (NFTs, DAOs, tokens)
+- 0% fees, full transparency, milestone accountability
+- Example: "Build Community Center" campaign with sequential milestone releases
 
 ## The Quinty Advantage
 
@@ -311,47 +150,16 @@ Imagine in 5 years:
 - Other platforms integrate Quinty reputation
 - The entire work economy runs trustlessly
 
-## The Path Forward
-
-1. **Today:** Bounties + Grants + Crowdfunding on Base Sepolia (testnet)
-2. **Q1 2025:** Mainnet launch on Base + Dispute Resolution live
-3. **Q2 2025:** Social verification enhanced + Multi-chain support
-4. **Q3 2025:** DAO governance + Token launch
-5. **Q4 2025:** Mobile app + 1M+ users
-
 ## Why You Should Care
 
-### If you're a freelancer:
+- **Freelancers:** Keep 100% of earnings, build portable reputation
+- **Startups:** Get funded without equity dilution
+- **VCs/Organizations:** Distribute grants transparently, automate processes
+- **Creators:** Launch campaigns with 0% fees, milestone accountability
+- **Community (coming soon):** Earn from resolving disputes
 
-Stop wasting money on unused subscriptions and tokens across multiple platforms. Instead, share profits, buy reputation or VIP status, and keep 100% of your earnings while building a portable reputation.
+---
 
-### If you're a startup:
+**Traditional platforms are extractive intermediaries.** Quinty is trustless infrastructure for the future of work.
 
-Get funded without equity dilution. Flexible VC funding with no strings attached.
-
-### If you're a VC/organization:
-
-Distribute grants transparently. Automate processes, track impact on-chain.
-
-### If you're a creator:
-
-Launch campaigns with 0% fees. Milestone-based accountability builds trust.
-
-### If you're a community member (coming soon):
-
-Earn from resolving disputes. Build reputation as trusted arbiter.
-
-## Conclusion
-
-**Traditional platforms are extractive intermediaries.**
-
-They charge 20-30% fees, hold your reputation hostage, and offer arbitrary dispute resolution.
-
-**Quinty is a trustless coordination layer.**
-
-The future of work is:
-
-- **Permissionless** (anyone can participate)
-- **Trustless** (code enforces rules)
-- **Transparent** (all on-chain)
-- **Fair** (no extractive middlemen)
+For our full roadmap and vision, see [Vision & Roadmap](vision.md).

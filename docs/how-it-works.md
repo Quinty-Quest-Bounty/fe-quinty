@@ -1,7 +1,5 @@
 # How Quinty Works
 
-> _"Your next gig is a transaction away."_
-
 Quinty turns work into trustless transactions. Here's the complete architecture and workflow.
 
 ## The Quinty Philosophy
@@ -12,7 +10,7 @@ Traditional platforms use intermediaries for trust. Quinty uses:
 
 - **Escrow** - Locked funds = unlocked trust
 - **Code** - Smart contracts don't lie
-- **Community** - Democratic dispute resolution
+- **Community** - Democratic dispute resolution (soon)
 - **Reputation** - Soulbound proof of contribution
 
 > _"Escrow isn't a safety net. It's a handshake written in Solidity."_
@@ -25,7 +23,6 @@ Traditional platforms use intermediaries for trust. Quinty uses:
 
 - **Creators:** Escrow 100% bounty amount upfront
 - **Solvers:** Deposit 10% to show commitment
-- **Voters:** Stake ETH to participate in disputes
 
 > _"If you don't lock it, you don't mean it. Escrow separates the committed from the curious."_
 
@@ -49,7 +46,7 @@ Traditional platforms use intermediaries for trust. Quinty uses:
 - Portable across all platforms
 - Can never be deleted or taken away
 
-### 4. Community Is Judge
+### 4. Community Is Judge (soon)
 
 **When disputes arise, the community decides.**
 
@@ -70,7 +67,7 @@ Traditional platforms use intermediaries for trust. Quinty uses:
 - `deadline`: Unix timestamp when submissions close
 - `allowMultipleWinners`: true/false
 - `winnerShares`: Array of percentage splits (if multiple winners)
-- `slashPercent`: 25-50% (funds sent to disputes if creator ghosts)
+- `slashPercent`: 25-50% (funds sent to solver if creator ghosts)
 - `hasOprec`: Open recruitment phase (optional)
 - `oprecDeadline`: OPREC application deadline (if enabled)
 
@@ -174,7 +171,7 @@ Traditional platforms use intermediaries for trust. Quinty uses:
 - Anyone calls `triggerSlash(bountyId)`
 - Smart contract automatically:
   1. Slashes 25-50% of bounty (based on `slashPercent`)
-  2. Sends slashed funds to Dispute Resolver contract
+  2. Sends slashed funds to solver address
   3. Emits `BountySlashed` event
   4. Marks bounty `EXPIRED`
 

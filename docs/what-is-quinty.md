@@ -272,28 +272,6 @@ Quinty is built exclusively on **Base Sepolia** (testnet) and will deploy to **B
 4. **Coinbase Integration** - Easy onboarding for millions of users
 5. **Growing Ecosystem** - Thriving developer and user community
 
-## What Makes Quinty Different?
-
-### vs Upwork/Fiverr
-
-- ❌ **Them:** 20% platform fees, centralized disputes, locked reputation
-- ✅ **Us:** 0% fees, community disputes, soulbound portable reputation
-
-### vs Gitcoin/Giveth
-
-- ❌ **Them:** No task bounties, limited fund types, complex UI
-- ✅ **Us:** Full bounty system, 4 fund types, simple UX
-
-### vs GoFundMe/Kickstarter
-
-- ❌ **Them:** Centralized, high fees (5-10%), no blockchain transparency
-- ✅ **Us:** Decentralized, no fees, full on-chain transparency
-
-### vs Traditional Work Platforms
-
-- ❌ **Them:** Middleman takes cut, slow payments, trust through reputation scores
-- ✅ **Us:** No middleman, instant settlement, trust through code + soulbound NFTs
-
 ## The Vision
 
 Quinty is building the **operating system for the onchain work economy**.
@@ -310,10 +288,60 @@ That's the world Quinty is building.
 
 ## Current Status
 
-✅ **All contracts deployed on Base Sepolia**
-✅ **Full frontend with 6 core features**
-✅ **Soulbound NFT badge system**
-✅ **Social verification (X account verification)**
-🚧 **Dispute Resolver (coming soon)**
+- ✅ **All contracts deployed on Base Sepolia**
+- ✅ **Full frontend with 6 core features**
+- ✅ **Soulbound NFT badge system**
+- ✅ **Social verification (X account verification)**
+- 🚧 **Dispute Resolver (coming soon)**
+
+---
+
+## About Quinty Labs
+
+**Quinty Labs** is building the infrastructure for the onchain work economy. We're creating trustless coordination tools that eliminate intermediaries and enable direct collaboration between creators and builders worldwide.
+
+### Our Mission
+
+To make trustless collaboration as easy as sending a transaction. No bosses. No borders. Just builders.
+
+---
+
+## Technology Stack
+
+### Frontend
+
+- **Framework:** Next.js 14 (React 18)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS + shadcn/ui
+- **Web3:** Wagmi v2 + Viem
+- **Wallet:** RainbowKit
+- **Storage:** IPFS (Pinata)
+- **Animations:** Framer Motion
+
+### Smart Contracts
+
+- **Language:** Solidity ^0.8.20
+- **Standards:** OpenZeppelin
+- **Network:** Base (Ethereum L2)
+- **Testing:** Hardhat
+
+### Infrastructure
+
+- **Blockchain:** Base Sepolia (testnet) → Base Mainnet (production)
+- **Storage:** IPFS for metadata, images, and submissions
+- **Deployment:** Vercel Edge
+- **Analytics:** On-chain events
+
+---
+
+## Connect With Us
+
+**Website:** [https://quinty.app](https://quinty.vercel.app)
+
+**X:** [@QuintyProtocol](https://x.com/QuintyLabs)
+
+**GitHub:** [github.com/quinty-protocol](https://github.com/quinty-quest-bounty)
+
+---
 
 **Welcome to the future of work. Welcome to Quinty.** 🚀
