@@ -336,11 +336,11 @@ To make trustless collaboration as easy as sending a transaction. No bosses. No 
 
 ## Connect With Us
 
-**Website:** [https://quinty.app](https://quinty.vercel.app)
+**Website:** [https://quinty.vercel.app](https://quinty.vercel.app)
 
-**X:** [@QuintyProtocol](https://x.com/QuintyLabs)
+**X:** [@QuintyLabs](https://x.com/QuintyLabs)
 
-**GitHub:** [github.com/quinty-protocol](https://github.com/quinty-quest-bounty)
+**GitHub:** [github.com/Quinty-Quest-Bounty](https://github.com/Quinty-Quest-Bounty)
 
 ---
 
