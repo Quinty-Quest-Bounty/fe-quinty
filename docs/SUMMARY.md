@@ -9,10 +9,6 @@
 - [Quick Start Guide](quickstart.md)
 - [Smart Contracts & Network](contracts.md)
 
-## About Quinty
-
-- [Quinty Labs](quinty.md)
-
 ## Guides
 
 - [User Guides](user-guides/README.md)
@@ -22,7 +18,3 @@
   - [Looking for Grant Guide](user-guides/looking-for-grant.md)
   - [Social Verification Guide](user-guides/social-verification.md)
   - [Reputation & NFT Badges](user-guides/reputation.md)
-
-## Developers
-
-- [Developer Guides](developer-guides/README.md)
