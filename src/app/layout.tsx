@@ -1,5 +1,4 @@
 import "./globals.css";
-import "@coinbase/onchainkit/styles.css";
 import Providers from "./providers";
 import Header from "../components/Header";
 import { Space_Grotesk } from "next/font/google";
