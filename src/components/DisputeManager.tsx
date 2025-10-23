@@ -213,7 +213,8 @@ export default function DisputeManager() {
 
     try {
       const submissionCount = await readContract(wagmiConfig, {
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+          .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "getSubmissionCount",
         args: [BigInt(bountyId)],
@@ -767,7 +768,7 @@ export default function DisputeManager() {
 
                             <div className="bg-white rounded-lg p-4">
                               <label className="block text-sm font-bold text-gray-900 mb-3">
-                                💰 Your Stake Amount (STT)
+                                💰 Your Stake Amount (ETH)
                               </label>
                               <input
                                 type="number"

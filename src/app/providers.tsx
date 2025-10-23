@@ -1,9 +1,9 @@
 'use client';
 
-import '@rainbow-me/rainbowkit/styles.css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { OnchainKitProvider } from '@coinbase/onchainkit';
+import { baseSepolia } from 'wagmi/chains';
 import { WagmiProvider } from 'wagmi';
-import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { wagmiConfig } from '../utils/web3';
 import { AlertProvider } from '../hooks/useAlert';
 import { AlertDialogProvider } from '../hooks/useAlertDialog';
@@ -14,13 +14,16 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>
+        <OnchainKitProvider
+          apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
+          chain={baseSepolia}
+        >
           <AlertProvider>
             <AlertDialogProvider>
               {children}
             </AlertDialogProvider>
           </AlertProvider>
-        </RainbowKitProvider>
+        </OnchainKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );

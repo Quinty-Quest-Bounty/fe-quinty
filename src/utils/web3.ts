@@ -1,39 +1,23 @@
-import { createConfig, http } from "wagmi";
-import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import { defineChain } from "viem";
+import { http, createConfig } from "wagmi";
+import { baseSepolia } from "wagmi/chains";
+import { coinbaseWallet, metaMask, walletConnect } from "wagmi/connectors";
 
-// Define Base Sepolia Testnet
-const baseSepoliaChain = defineChain({
-  id: 84532,
-  name: "Base Sepolia",
-  network: "base-sepolia",
-  nativeCurrency: {
-    decimals: 18,
-    name: "Ethereum",
-    symbol: "ETH",
-  },
-  rpcUrls: {
-    public: { http: ["https://sepolia.base.org"] },
-    default: { http: ["https://sepolia.base.org"] },
-  },
-  blockExplorers: {
-    default: {
-      name: "Base Sepolia Explorer",
-      url: "https://sepolia-explorer.base.org",
-    },
-  },
-  testnet: true,
-});
-
-export const wagmiConfig = getDefaultConfig({
-  appName: "Quinty V2",
-  projectId:
-    process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "demo-project-id",
-  chains: [baseSepoliaChain],
-  transports: {
-    [baseSepoliaChain.id]: http(),
-  },
+export const wagmiConfig = createConfig({
+  chains: [baseSepolia],
+  connectors: [
+    coinbaseWallet({
+      appName: "Quinty",
+      preference: "smartWalletOnly",
+    }),
+    metaMask(),
+    walletConnect({
+      projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "",
+    }),
+  ],
   ssr: true,
+  transports: {
+    [baseSepolia.id]: http(),
+  },
 });
 
 // Utility functions

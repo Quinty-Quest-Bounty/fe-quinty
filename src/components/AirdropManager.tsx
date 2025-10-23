@@ -102,7 +102,9 @@ export default function AirdropManager() {
   // State
   const [airdrops, setAirdrops] = useState<Airdrop[]>([]);
   const [entries, setEntries] = useState<{ [airdropId: number]: Entry[] }>({});
-  const [entryCounts, setEntryCounts] = useState<{ [airdropId: number]: number }>({});
+  const [entryCounts, setEntryCounts] = useState<{
+    [airdropId: number]: number;
+  }>({});
   const [selectedAirdrop, setSelectedAirdrop] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"create" | "browse" | "manage">(
     "browse"
@@ -838,7 +840,8 @@ export default function AirdropManager() {
                 Create Promotion Campaign
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Launch transparent promotional campaigns with fixed ETH rewards for verified social media engagement
+                Launch transparent promotional campaigns with fixed ETH rewards
+                for verified social media engagement
               </p>
             </div>
 
@@ -852,17 +855,27 @@ export default function AirdropManager() {
                       <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
                         1
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900">Campaign Details</h3>
+                      <h3 className="text-lg font-medium text-gray-900">
+                        Campaign Details
+                      </h3>
                     </div>
 
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="title" className="text-sm font-medium text-gray-700">Campaign Title *</Label>
+                        <Label
+                          htmlFor="title"
+                          className="text-sm font-medium text-gray-700"
+                        >
+                          Campaign Title *
+                        </Label>
                         <Input
                           id="title"
                           value={newAirdrop.title}
                           onChange={(e) =>
-                            setNewAirdrop({ ...newAirdrop, title: e.target.value })
+                            setNewAirdrop({
+                              ...newAirdrop,
+                              title: e.target.value,
+                            })
                           }
                           placeholder="Enter campaign title..."
                           className="border-gray-300 focus:border-gray-500 focus:ring-gray-500/20"
@@ -871,12 +884,20 @@ export default function AirdropManager() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="description" className="text-sm font-medium text-gray-700">Campaign Description</Label>
+                        <Label
+                          htmlFor="description"
+                          className="text-sm font-medium text-gray-700"
+                        >
+                          Campaign Description
+                        </Label>
                         <Textarea
                           id="description"
                           value={newAirdrop.description}
                           onChange={(e) =>
-                            setNewAirdrop({ ...newAirdrop, description: e.target.value })
+                            setNewAirdrop({
+                              ...newAirdrop,
+                              description: e.target.value,
+                            })
                           }
                           rows={3}
                           placeholder="Describe your promotional campaign..."
@@ -885,14 +906,20 @@ export default function AirdropManager() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="requirements" className="text-sm font-medium text-gray-700">
+                        <Label
+                          htmlFor="requirements"
+                          className="text-sm font-medium text-gray-700"
+                        >
                           Requirements (What users need to do) *
                         </Label>
                         <Textarea
                           id="requirements"
                           value={newAirdrop.requirements}
                           onChange={(e) =>
-                            setNewAirdrop({ ...newAirdrop, requirements: e.target.value })
+                            setNewAirdrop({
+                              ...newAirdrop,
+                              requirements: e.target.value,
+                            })
                           }
                           rows={3}
                           placeholder="e.g., Post on X with #Quinty hashtag, get 100+ likes, include wallet address..."
@@ -909,7 +936,9 @@ export default function AirdropManager() {
                       <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
                         2
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900">Campaign Image</h3>
+                      <h3 className="text-lg font-medium text-gray-900">
+                        Campaign Image
+                      </h3>
                     </div>
 
                     <div className="space-y-3">
@@ -951,7 +980,9 @@ export default function AirdropManager() {
                                 className="cursor-pointer font-medium text-sm text-gray-900"
                               >
                                 Upload an image
-                                <span className="text-gray-500 ml-1">or drag and drop</span>
+                                <span className="text-gray-500 ml-1">
+                                  or drag and drop
+                                </span>
                               </Label>
                               <Input
                                 id="image-upload"
@@ -981,13 +1012,20 @@ export default function AirdropManager() {
                       <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
                         3
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900">Reward Settings</h3>
+                      <h3 className="text-lg font-medium text-gray-900">
+                        Reward Settings
+                      </h3>
                     </div>
 
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="reward" className="text-sm font-medium text-gray-700">Reward Per Qualifier (STT) *</Label>
+                          <Label
+                            htmlFor="reward"
+                            className="text-sm font-medium text-gray-700"
+                          >
+                            Reward Per Qualifier (ETH) *
+                          </Label>
                           <div className="relative">
                             <Coins className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                             <Input
@@ -1009,7 +1047,12 @@ export default function AirdropManager() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="maxQualifiers" className="text-sm font-medium text-gray-700">Max Qualifiers *</Label>
+                          <Label
+                            htmlFor="maxQualifiers"
+                            className="text-sm font-medium text-gray-700"
+                          >
+                            Max Qualifiers *
+                          </Label>
                           <div className="relative">
                             <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                             <Input
@@ -1031,7 +1074,12 @@ export default function AirdropManager() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="deadline" className="text-sm font-medium text-gray-700">Deadline *</Label>
+                        <Label
+                          htmlFor="deadline"
+                          className="text-sm font-medium text-gray-700"
+                        >
+                          Deadline *
+                        </Label>
                         <div className="relative">
                           <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                           <Input
@@ -1039,7 +1087,10 @@ export default function AirdropManager() {
                             type="datetime-local"
                             value={newAirdrop.deadline}
                             onChange={(e) =>
-                              setNewAirdrop({ ...newAirdrop, deadline: e.target.value })
+                              setNewAirdrop({
+                                ...newAirdrop,
+                                deadline: e.target.value,
+                              })
                             }
                             className="pl-10 border-gray-300 focus:border-gray-500 focus:ring-gray-500/20"
                             required
@@ -1056,7 +1107,9 @@ export default function AirdropManager() {
                         <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
                           4
                         </div>
-                        <h3 className="text-lg font-medium text-gray-900">Campaign Summary</h3>
+                        <h3 className="text-lg font-medium text-gray-900">
+                          Campaign Summary
+                        </h3>
                       </div>
 
                       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
@@ -1069,7 +1122,8 @@ export default function AirdropManager() {
                               {(
                                 parseFloat(newAirdrop.perQualifier) *
                                 newAirdrop.maxQualifiers
-                              ).toFixed(2)} ETH
+                              ).toFixed(2)}{" "}
+                              ETH
                             </div>
                           </div>
 
@@ -1128,15 +1182,17 @@ export default function AirdropManager() {
                         <>
                           <Plus className="w-4 h-4 mr-2" />
                           Create Campaign
-                          {newAirdrop.perQualifier && newAirdrop.maxQualifiers && (
-                            <span className="ml-2 opacity-80">
-                              (
-                              {(
-                                parseFloat(newAirdrop.perQualifier) *
-                                newAirdrop.maxQualifiers
-                              ).toFixed(2)} ETH)
-                            </span>
-                          )}
+                          {newAirdrop.perQualifier &&
+                            newAirdrop.maxQualifiers && (
+                              <span className="ml-2 opacity-80">
+                                (
+                                {(
+                                  parseFloat(newAirdrop.perQualifier) *
+                                  newAirdrop.maxQualifiers
+                                ).toFixed(2)}{" "}
+                                ETH)
+                              </span>
+                            )}
                         </>
                       )}
                     </Button>
@@ -1419,7 +1475,8 @@ export default function AirdropManager() {
             </h2>
             <div className="bg-gray-50 border border-gray-200 px-6 py-3 rounded-lg max-w-2xl mx-auto">
               <p className="text-gray-700 text-sm">
-                📝 Review submissions and select eligible participants for rewards
+                📝 Review submissions and select eligible participants for
+                rewards
               </p>
             </div>
           </div>
@@ -1440,7 +1497,8 @@ export default function AirdropManager() {
                     No Active Campaigns
                   </h3>
                   <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                    You don't have any active campaigns to manage. Create your first campaign to get started!
+                    You don't have any active campaigns to manage. Create your
+                    first campaign to get started!
                   </p>
                   <Button
                     onClick={() => setActiveTab("create")}
@@ -1458,7 +1516,10 @@ export default function AirdropManager() {
                     (a) => a.creator === address && !a.resolved && !a.cancelled
                   )
                   .map((airdrop) => (
-                    <div key={airdrop.id} className="bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+                    <div
+                      key={airdrop.id}
+                      className="bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                    >
                       {/* Campaign Header */}
                       <div className="p-6 border-b border-gray-200">
                         <div className="flex justify-between items-start">
@@ -1473,19 +1534,26 @@ export default function AirdropManager() {
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                               <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                                <div className="text-xs font-medium text-gray-500 mb-1">Reward</div>
+                                <div className="text-xs font-medium text-gray-500 mb-1">
+                                  Reward
+                                </div>
                                 <div className="text-sm font-medium text-gray-900">
                                   {formatETH(airdrop.perQualifier)} ETH each
                                 </div>
                               </div>
                               <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                                <div className="text-xs font-medium text-gray-500 mb-1">Progress</div>
+                                <div className="text-xs font-medium text-gray-500 mb-1">
+                                  Progress
+                                </div>
                                 <div className="text-sm font-medium text-gray-900">
-                                  {airdrop.qualifiersCount}/{airdrop.maxQualifiers} qualified
+                                  {airdrop.qualifiersCount}/
+                                  {airdrop.maxQualifiers} qualified
                                 </div>
                               </div>
                               <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-                                <div className="text-xs font-medium text-gray-500 mb-1">Deadline</div>
+                                <div className="text-xs font-medium text-gray-500 mb-1">
+                                  Deadline
+                                </div>
                                 <div className="text-sm font-medium text-gray-900">
                                   {formatTimeLeft(BigInt(airdrop.deadline))}
                                 </div>
@@ -1505,18 +1573,20 @@ export default function AirdropManager() {
                                 {isFinalizing ? "Finalizing..." : "Finalize"}
                               </Button>
                             )}
-                            {!airdrop.resolved && !airdrop.cancelled && airdrop.qualifiersCount === 0 && (
-                              <Button
-                                onClick={() => cancelAirdrop(airdrop.id)}
-                                disabled={isCancelling}
-                                variant="outline"
-                                size="sm"
-                                className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                              >
-                                <X className="w-3 h-3 mr-1" />
-                                {isCancelling ? "Cancelling..." : "Cancel"}
-                              </Button>
-                            )}
+                            {!airdrop.resolved &&
+                              !airdrop.cancelled &&
+                              airdrop.qualifiersCount === 0 && (
+                                <Button
+                                  onClick={() => cancelAirdrop(airdrop.id)}
+                                  disabled={isCancelling}
+                                  variant="outline"
+                                  size="sm"
+                                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                                >
+                                  <X className="w-3 h-3 mr-1" />
+                                  {isCancelling ? "Cancelling..." : "Cancel"}
+                                </Button>
+                              )}
                           </div>
                         </div>
                       </div>
@@ -1544,11 +1614,14 @@ export default function AirdropManager() {
                             className="border-gray-300 text-gray-700 hover:bg-gray-50"
                           >
                             <Eye className="w-3 h-3 mr-1" />
-                            {selectedAirdrop === airdrop.id ? "Hide Submissions" : "Review Submissions"}
+                            {selectedAirdrop === airdrop.id
+                              ? "Hide Submissions"
+                              : "Review Submissions"}
                           </Button>
                         </div>
 
-                        {!entries[airdrop.id] || entries[airdrop.id].length === 0 ? (
+                        {!entries[airdrop.id] ||
+                        entries[airdrop.id].length === 0 ? (
                           <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
                             <div className="flex justify-center mb-3">
                               <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -1556,7 +1629,8 @@ export default function AirdropManager() {
                               </div>
                             </div>
                             <p className="text-gray-600 text-sm">
-                              No submissions yet. Share your campaign to get participants!
+                              No submissions yet. Share your campaign to get
+                              participants!
                             </p>
                           </div>
                         ) : (
@@ -1567,7 +1641,9 @@ export default function AirdropManager() {
                                   <div
                                     key={index}
                                     className={`border rounded-lg p-4 transition-colors ${
-                                      verificationForm.qualifiedIndices.includes(index)
+                                      verificationForm.qualifiedIndices.includes(
+                                        index
+                                      )
                                         ? "border-gray-400 bg-gray-50"
                                         : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                                     }`}
@@ -1577,7 +1653,9 @@ export default function AirdropManager() {
                                         <div className="flex items-center gap-3 mb-3">
                                           <div className="h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center">
                                             <span className="text-xs font-medium text-gray-600">
-                                              {entry.solver.slice(0, 2).toUpperCase()}
+                                              {entry.solver
+                                                .slice(0, 2)
+                                                .toUpperCase()}
                                             </span>
                                           </div>
                                           <span className="font-medium text-gray-900">
@@ -1593,13 +1671,21 @@ export default function AirdropManager() {
                                                 : "border-gray-300 text-gray-600 bg-gray-50"
                                             }
                                           >
-                                            {entry.status === 1 ? "Approved" : entry.status === 2 ? "Rejected" : "Pending"}
+                                            {entry.status === 1
+                                              ? "Approved"
+                                              : entry.status === 2
+                                              ? "Rejected"
+                                              : "Pending"}
                                           </Badge>
                                         </div>
                                         <div className="text-sm text-gray-600 space-y-1">
                                           <div className="flex items-center gap-2">
-                                            {entry.ipfsProofCid.includes("twitter.com") ||
-                                            entry.ipfsProofCid.includes("x.com") ? (
+                                            {entry.ipfsProofCid.includes(
+                                              "twitter.com"
+                                            ) ||
+                                            entry.ipfsProofCid.includes(
+                                              "x.com"
+                                            ) ? (
                                               <>
                                                 <ExternalLink className="w-3 h-3 text-gray-400" />
                                                 <span>X Post: </span>
@@ -1615,19 +1701,25 @@ export default function AirdropManager() {
                                             ) : (
                                               <>
                                                 <FileText className="w-3 h-3 text-gray-400" />
-                                                <span>IPFS: {entry.ipfsProofCid}</span>
+                                                <span>
+                                                  IPFS: {entry.ipfsProofCid}
+                                                </span>
                                               </>
                                             )}
                                           </div>
                                           <div className="flex items-center gap-2">
                                             <Clock className="w-3 h-3 text-gray-400" />
                                             <span>
-                                              Submitted: {new Date(entry.timestamp * 1000).toLocaleDateString()}
+                                              Submitted:{" "}
+                                              {new Date(
+                                                entry.timestamp * 1000
+                                              ).toLocaleDateString()}
                                             </span>
                                           </div>
                                           {entry.feedback && (
                                             <div className="mt-2 p-2 bg-gray-100 border border-gray-200 rounded text-gray-700 text-xs">
-                                              <strong>Feedback:</strong> {entry.feedback}
+                                              <strong>Feedback:</strong>{" "}
+                                              {entry.feedback}
                                             </div>
                                           )}
                                         </div>
@@ -1635,9 +1727,17 @@ export default function AirdropManager() {
                                       <div className="flex gap-2 ml-4">
                                         <Button
                                           onClick={() => {
-                                            const newQualified = verificationForm.qualifiedIndices.includes(index)
-                                              ? verificationForm.qualifiedIndices.filter((i) => i !== index)
-                                              : [...verificationForm.qualifiedIndices, index];
+                                            const newQualified =
+                                              verificationForm.qualifiedIndices.includes(
+                                                index
+                                              )
+                                                ? verificationForm.qualifiedIndices.filter(
+                                                    (i) => i !== index
+                                                  )
+                                                : [
+                                                    ...verificationForm.qualifiedIndices,
+                                                    index,
+                                                  ];
                                             setVerificationForm({
                                               ...verificationForm,
                                               airdropId: airdrop.id,
@@ -1645,16 +1745,24 @@ export default function AirdropManager() {
                                             });
                                           }}
                                           variant={
-                                            verificationForm.qualifiedIndices.includes(index) ? "default" : "outline"
+                                            verificationForm.qualifiedIndices.includes(
+                                              index
+                                            )
+                                              ? "default"
+                                              : "outline"
                                           }
                                           size="sm"
                                           className={
-                                            verificationForm.qualifiedIndices.includes(index)
+                                            verificationForm.qualifiedIndices.includes(
+                                              index
+                                            )
                                               ? "bg-gray-900 hover:bg-gray-800 text-white"
                                               : "border-gray-300 text-gray-700 hover:bg-gray-50"
                                           }
                                         >
-                                          {verificationForm.qualifiedIndices.includes(index) ? (
+                                          {verificationForm.qualifiedIndices.includes(
+                                            index
+                                          ) ? (
                                             <>
                                               <Check className="w-3 h-3 mr-1" />
                                               Selected
@@ -1674,43 +1782,55 @@ export default function AirdropManager() {
                             )}
 
                             {/* Action Buttons */}
-                            {selectedAirdrop === airdrop.id && verificationForm.qualifiedIndices.length > 0 && (
-                              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                                <div className="flex justify-between items-center">
-                                  <div>
-                                    <h5 className="font-medium text-gray-900 mb-1">
-                                      Ready to Distribute Rewards
-                                    </h5>
-                                    <p className="text-sm text-gray-600">
-                                      {verificationForm.qualifiedIndices.length} participants selected •{" "}
-                                      {formatETH(
-                                        airdrop.perQualifier * BigInt(verificationForm.qualifiedIndices.length)
-                                      )}{" "}
-                                      ETH total
-                                    </p>
+                            {selectedAirdrop === airdrop.id &&
+                              verificationForm.qualifiedIndices.length > 0 && (
+                                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                  <div className="flex justify-between items-center">
+                                    <div>
+                                      <h5 className="font-medium text-gray-900 mb-1">
+                                        Ready to Distribute Rewards
+                                      </h5>
+                                      <p className="text-sm text-gray-600">
+                                        {
+                                          verificationForm.qualifiedIndices
+                                            .length
+                                        }{" "}
+                                        participants selected •{" "}
+                                        {formatETH(
+                                          airdrop.perQualifier *
+                                            BigInt(
+                                              verificationForm.qualifiedIndices
+                                                .length
+                                            )
+                                        )}{" "}
+                                        ETH total
+                                      </p>
+                                    </div>
+                                    <Button
+                                      onClick={() => {
+                                        verifyAndDistribute(
+                                          airdrop.id,
+                                          verificationForm.qualifiedIndices
+                                        );
+                                      }}
+                                      disabled={isDistributing}
+                                      className="bg-gray-900 hover:bg-gray-800 text-white font-medium transition-colors"
+                                    >
+                                      {isDistributing ? (
+                                        <>
+                                          <Clock className="w-4 h-4 mr-2 animate-spin" />
+                                          Distributing...
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Send className="w-4 h-4 mr-2" />
+                                          Distribute Rewards
+                                        </>
+                                      )}
+                                    </Button>
                                   </div>
-                                  <Button
-                                    onClick={() => {
-                                      verifyAndDistribute(airdrop.id, verificationForm.qualifiedIndices);
-                                    }}
-                                    disabled={isDistributing}
-                                    className="bg-gray-900 hover:bg-gray-800 text-white font-medium transition-colors"
-                                  >
-                                    {isDistributing ? (
-                                      <>
-                                        <Clock className="w-4 h-4 mr-2 animate-spin" />
-                                        Distributing...
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Send className="w-4 h-4 mr-2" />
-                                        Distribute Rewards
-                                      </>
-                                    )}
-                                  </Button>
                                 </div>
-                              </div>
-                            )}
+                              )}
                           </>
                         )}
                       </div>

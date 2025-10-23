@@ -2,7 +2,20 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import {
+  ConnectWallet,
+  Wallet,
+  WalletDropdown,
+  WalletDropdownLink,
+  WalletDropdownDisconnect,
+} from "@coinbase/onchainkit/wallet";
+import {
+  Address,
+  Avatar,
+  Name,
+  Identity,
+  EthBalance,
+} from "@coinbase/onchainkit/identity";
 import Link from "next/link";
 import Image from "next/image";
 import { useAccount } from "wagmi";
@@ -77,11 +90,27 @@ export default function Header() {
             {/* Desktop Actions */}
             <div className="hidden items-center gap-3 lg:flex">
               {isConnected && <ZKVerificationModal />}
-              <ConnectButton
-                accountStatus="address"
-                chainStatus="icon"
-                showBalance={false}
-              />
+              <Wallet>
+                <ConnectWallet>
+                  <Avatar className="h-6 w-6" />
+                  <Name />
+                </ConnectWallet>
+                <WalletDropdown>
+                  <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+                    <Avatar />
+                    <Name />
+                    <Address />
+                    <EthBalance />
+                  </Identity>
+                  <WalletDropdownLink
+                    icon="wallet"
+                    href="https://wallet.coinbase.com"
+                  >
+                    Wallet
+                  </WalletDropdownLink>
+                  <WalletDropdownDisconnect />
+                </WalletDropdown>
+              </Wallet>
             </div>
 
             {/* Mobile Menu Toggle */}
@@ -131,11 +160,27 @@ export default function Header() {
                     </motion.div>
                   ))}
                   <div className="mt-2 border-t border-white/40 dark:border-border/40 pt-4">
-                    <ConnectButton
-                      accountStatus="full"
-                      chainStatus="full"
-                      showBalance={true}
-                    />
+                    <Wallet>
+                      <ConnectWallet>
+                        <Avatar className="h-6 w-6" />
+                        <Name />
+                      </ConnectWallet>
+                      <WalletDropdown>
+                        <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+                          <Avatar />
+                          <Name />
+                          <Address />
+                          <EthBalance />
+                        </Identity>
+                        <WalletDropdownLink
+                          icon="wallet"
+                          href="https://wallet.coinbase.com"
+                        >
+                          Wallet
+                        </WalletDropdownLink>
+                        <WalletDropdownDisconnect />
+                      </WalletDropdown>
+                    </Wallet>
                   </div>
                 </nav>
               </motion.div>
