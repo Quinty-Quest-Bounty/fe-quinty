@@ -1,21 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import {
-  ConnectWallet,
-  Wallet,
-  WalletDropdown,
-  WalletDropdownLink,
-  WalletDropdownDisconnect,
-} from "@coinbase/onchainkit/wallet";
-import {
-  Address,
-  Avatar,
-  Name,
-  Identity,
-  EthBalance,
-} from "@coinbase/onchainkit/identity";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import Image from "next/image";
 import { useAccount } from "wagmi";
@@ -24,6 +11,11 @@ import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import ZKVerificationModal from "./ZKVerificationModal";
+
+const WalletComponents = dynamic(
+  () => import("./WalletComponents"),
+  { ssr: false }
+);
 
 const navItems = [
   { name: "Bounties", link: "/bounties" },
@@ -38,6 +30,11 @@ export default function Header() {
   const router = useRouter();
   const { isConnected } = useAccount();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   return (
     <>
@@ -90,27 +87,7 @@ export default function Header() {
             {/* Desktop Actions */}
             <div className="hidden items-center gap-3 lg:flex">
               {isConnected && <ZKVerificationModal />}
-              <Wallet>
-                <ConnectWallet>
-                  <Avatar className="h-6 w-6" />
-                  <Name />
-                </ConnectWallet>
-                <WalletDropdown>
-                  <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-                    <Avatar />
-                    <Name />
-                    <Address />
-                    <EthBalance />
-                  </Identity>
-                  <WalletDropdownLink
-                    icon="wallet"
-                    href="https://wallet.coinbase.com"
-                  >
-                    Wallet
-                  </WalletDropdownLink>
-                  <WalletDropdownDisconnect />
-                </WalletDropdown>
-              </Wallet>
+              {isMounted && <WalletComponents />}
             </div>
 
             {/* Mobile Menu Toggle */}
@@ -159,29 +136,11 @@ export default function Header() {
                       </Link>
                     </motion.div>
                   ))}
-                  <div className="mt-2 border-t border-white/40 dark:border-border/40 pt-4">
-                    <Wallet>
-                      <ConnectWallet>
-                        <Avatar className="h-6 w-6" />
-                        <Name />
-                      </ConnectWallet>
-                      <WalletDropdown>
-                        <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-                          <Avatar />
-                          <Name />
-                          <Address />
-                          <EthBalance />
-                        </Identity>
-                        <WalletDropdownLink
-                          icon="wallet"
-                          href="https://wallet.coinbase.com"
-                        >
-                          Wallet
-                        </WalletDropdownLink>
-                        <WalletDropdownDisconnect />
-                      </WalletDropdown>
-                    </Wallet>
-                  </div>
+                  {isMounted && (
+                    <div className="mt-2 border-t border-white/40 dark:border-border/40 pt-4">
+                      <WalletComponents />
+                    </div>
+                  )}
                 </nav>
               </motion.div>
             )}
