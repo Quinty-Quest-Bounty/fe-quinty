@@ -13,7 +13,7 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="relative mt-12 sm:mt-16 md:mt-24">
+    <footer className="relative mt-8 sm:mt-10 md:mt-16">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-0">
         <div className="rounded-[2rem] sm:rounded-[2.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 sm:p-12">
           {/* Logo and Description */}

@@ -21,7 +21,13 @@ import {
   uploadToIpfs,
   BountyMetadata,
 } from "../utils/ipfs";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -614,10 +620,20 @@ export default function BountyManager() {
 
   if (!isConnected) {
     return (
-      <div className="text-center py-8">
-        <p className="text-gray-700">
-          Please connect your wallet to use Quinty.
-        </p>
+      <div className="container mx-auto p-6">
+        <Card className="max-w-md mx-auto">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-4">
+              <Target className="h-8 w-8 text-primary" />
+            </div>
+            <CardTitle className="text-center mb-2">
+              Connect Your Wallet
+            </CardTitle>
+            <CardDescription className="text-center">
+              Please connect your wallet to access Quinty Bounties
+            </CardDescription>
+          </CardContent>
+        </Card>
       </div>
     );
   }

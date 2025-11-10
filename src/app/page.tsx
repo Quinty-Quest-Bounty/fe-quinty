@@ -190,7 +190,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen text-foreground relative">
-      <main className="relative px-4 pb-16 pt-8 sm:px-6 sm:pb-24 sm:pt-12 lg:px-0 lg:pb-32">
+      <main className="relative px-4 pt-8">
         <div className="mx-auto w-full max-w-6xl">
           <section className="mx-auto mb-8 max-w-7xl px-4 sm:mb-10 sm:px-6 md:mb-20 xl:px-0">
             <div className="relative flex flex-col items-center rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden shadow-lg hover:shadow-2xl min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] justify-center backdrop-blur-xl bg-white/70 border border-white/60 transition-all duration-500 hover:scale-[1.01]">
@@ -281,28 +281,14 @@ export default function Home() {
               data-animation="zoom-in"
             >
               <Safari url="quinty.xyz" className="w-full">
-                <div className="relative h-full w-full bg-gradient-to-br from-gray-50 to-gray-100 p-8 sm:p-12 md:p-16">
-                  <div className="relative flex flex-col items-center justify-center gap-4 sm:gap-6 md:gap-8 h-full">
-                    <div className="relative flex h-24 w-24 sm:h-32 sm:w-32 md:h-40 md:w-40 items-center justify-center rounded-full bg-white backdrop-blur-sm shadow-2xl border border-gray-200 hover:shadow-3xl hover:scale-110 transition-all duration-500">
-                      <div className="relative h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24">
-                        <Image
-                          src="/images/quinty-logo.png"
-                          alt="Quinty Logo"
-                          fill
-                          className="object-contain brightness-0"
-                        />
-                      </div>
-                    </div>
-                    <div className="text-center space-y-1 sm:space-y-2">
-                      <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
-                        Quinty Platform
-                      </h3>
-                      <p className="text-sm sm:text-base text-gray-600">
-                        Complete bounty studio for ecosystems
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <iframe
+                  className="w-full h-full min-h-[400px] sm:min-h-[500px] md:min-h-[600px]"
+                  src="https://www.youtube.com/embed/vTZMOdl3WVM?si=PegUg2l_zLAOeva3&autoplay=1&mute=1&loop=1&playlist=vTZMOdl3WVM"
+                  title="Quinty Platform Demo"
+                  style={{ border: 0 }}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
               </Safari>
             </div>
           </section>
@@ -367,55 +353,6 @@ export default function Home() {
             ))}
           </section>
 
-          {/* Bounty Stack */}
-          <section className="mt-12 sm:mt-16 md:mt-24">
-            <div
-              className="text-center space-y-2 sm:space-y-3 md:space-y-4 mb-6 sm:mb-8"
-              data-animation="fade-scale"
-            >
-              <Badge
-                variant="secondary"
-                className="rounded-full px-3 py-0.5 sm:px-4 sm:py-1 text-[10px] sm:text-xs uppercase tracking-[0.2em] border-gray-300 bg-gray-50 text-gray-600 hover:bg-gray-100 transition-all duration-300 hover:scale-105"
-              >
-                Full Stack
-              </Badge>
-              <h2 className="text-2xl font-semibold sm:text-3xl md:text-4xl text-foreground px-4">
-                Everything you need
-              </h2>
-            </div>
-            <div
-              className="relative rounded-[2.5rem] sm:rounded-[3rem] border border-white/60 bg-white/70 backdrop-blur-xl p-4 sm:p-6 md:p-8 hover:shadow-2xl overflow-hidden h-[400px] sm:h-[500px] md:h-[600px] shadow-lg transition-all duration-500 hover:border-white/80"
-              data-animation="slide-bottom"
-            >
-              <Gravity
-                gravity={{ x: 0, y: 0.5 }}
-                className="w-full h-full"
-                grabCursor={true}
-              >
-                {bountyStackFeatures.map((feature, index) => (
-                  <MatterBody
-                    key={feature.text}
-                    x={`${20 + (index % 6) * 15}%`}
-                    y={`${20 + Math.floor(index / 6) * 20}%`}
-                    angle={Math.random() * 20 - 10}
-                    matterBodyOptions={{
-                      restitution: 0.6,
-                      friction: 0.1,
-                      density: 0.002,
-                    }}
-                    isDraggable={false}
-                  >
-                    <div
-                      className={`rounded-[1.25rem] sm:rounded-[1.5rem] border-2 border-gray-300 ${feature.color} px-3 py-2 sm:px-4 sm:py-3 md:px-6 md:py-4 text-center text-sm sm:text-base md:text-lg font-bold shadow-lg select-none transition-all duration-300 hover:shadow-2xl hover:scale-105`}
-                    >
-                      {feature.text}
-                    </div>
-                  </MatterBody>
-                ))}
-              </Gravity>
-            </div>
-          </section>
-
           {/* Contracts */}
           <section className="mt-12 sm:mt-16 md:mt-24" data-animation="zoom-in">
             <Card className="border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.01]">
@@ -442,7 +379,7 @@ export default function Home() {
                     {contractReferences.map((reference) => (
                       <div
                         key={reference.address}
-                        className="rounded-[1rem] sm:rounded-[1.25rem] border border-gray-200 bg-background/50 p-2.5 sm:p-3 hover:border-gray-300 transition-all duration-300 hover:shadow-md hover:scale-105"
+                        className="rounded-[1rem] sm:rounded-[1.25rem] border border-gray-200 bg-background/50 p-2.5 sm:p-3"
                       >
                         <p className="text-[10px] sm:text-xs font-semibold text-gray-700">
                           {reference.label}
@@ -460,7 +397,7 @@ export default function Home() {
 
           {/* CTA with LinkPreview */}
           <section
-            className="mt-12 sm:mt-16 md:mt-24 text-center rounded-[2rem] sm:rounded-[2.5rem] border border-white/60 bg-white/70 backdrop-blur-xl px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 hover:shadow-2xl shadow-lg transition-all duration-500 hover:scale-[1.01] hover:border-white/80"
+            className="mt-6 sm:mt-8 md:mt-12 text-center rounded-[2rem] sm:rounded-[2.5rem] border border-white/60 bg-white/70 backdrop-blur-xl px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 hover:shadow-2xl shadow-lg transition-all duration-500 hover:scale-[1.01] hover:border-white/80"
             data-animation="fade-scale"
           >
             <h2 className="text-xl font-semibold sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl mb-4 sm:mb-6 text-foreground hover:text-[#0EA885] px-2 transition-colors duration-300">
@@ -468,7 +405,7 @@ export default function Home() {
             </h2>
 
             <div className="mt-4 sm:mt-6 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
-              <p className="mb-3 sm:mb-4">
+              <div className="mb-3 sm:mb-4">
                 Design, fund, and verify your first on-chain program — with
                 reputation that can't be faked. Start building with{" "}
                 <LinkPreview
@@ -478,11 +415,11 @@ export default function Home() {
                   Quinty
                 </LinkPreview>{" "}
                 and join the on-chain workforce.
-              </p>
-              <p>
+              </div>
+              <div>
                 Need help getting started? Check out our{" "}
                 <LinkPreview
-                  url="https://quinty.xyz/docs"
+                  url="https://quinty.gitbook.io/quinty-docs/"
                   className="font-bold text-[#0EA885] hover:text-[#0EA885]/80 hover:underline transition-all duration-300"
                 >
                   Documentation
@@ -495,7 +432,7 @@ export default function Home() {
                   our team
                 </LinkPreview>
                 .
-              </p>
+              </div>
             </div>
 
             <div className="mt-6 sm:mt-8 flex items-center justify-center gap-1.5 sm:gap-2 text-sm sm:text-base text-gray-500 hover:text-[#0EA885] transition-colors duration-300">
