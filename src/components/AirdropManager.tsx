@@ -154,6 +154,7 @@ export default function AirdropManager() {
         .AirdropBounty as `0x${string}`,
       abi: AIRDROP_ABI,
       functionName: "airdropCounter",
+      query: { enabled: true, retry: false, refetchOnWindowFocus: false },
     });
 
   // Watch for airdrop events
@@ -183,11 +184,12 @@ export default function AirdropManager() {
   const loadAirdrops = async () => {
     if (airdropCounter === undefined) return;
 
-    const loadedAirdrops: Airdrop[] = [];
-    const counts: { [airdropId: number]: number } = {};
+    try {
+      const loadedAirdrops: Airdrop[] = [];
+      const counts: { [airdropId: number]: number } = {};
 
-    for (let i = 1; i <= Number(airdropCounter); i++) {
-      try {
+      for (let i = 1; i <= Number(airdropCounter); i++) {
+        try {
         const airdrop = await readAirdrop(i);
         if (airdrop) {
           loadedAirdrops.push(airdrop);
@@ -202,12 +204,16 @@ export default function AirdropManager() {
           });
           counts[i] = Number(entryCount);
         }
-      } catch (error) {
-        console.error(`Error loading airdrop ${i}:`, error);
+        } catch (error) {
+          console.error(`Error loading airdrop ${i}:`, error);
+        }
       }
+      setAirdrops(loadedAirdrops.reverse());
+      setEntryCounts(counts);
+    } catch (error) {
+      console.error("Error loading airdrops:", error);
+      // Don't show error to user, just log it
     }
-    setAirdrops(loadedAirdrops.reverse());
-    setEntryCounts(counts);
   };
 
   // Read specific airdrop
@@ -758,25 +764,7 @@ export default function AirdropManager() {
     }
   }, [activeTab, address, airdrops]);
 
-  if (!isConnected) {
-    return (
-      <div className="container mx-auto p-6">
-        <Card className="max-w-md mx-auto">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-4">
-              <Gift className="h-8 w-8 text-primary" />
-            </div>
-            <CardTitle className="text-center mb-2">
-              Connect Your Wallet
-            </CardTitle>
-            <CardDescription className="text-center">
-              Please connect your wallet to access Airdrop Bounties
-            </CardDescription>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Remove the wallet connection blocker - let users browse without connecting
 
   const navigationItems = [
     { id: "browse", label: "Browse", icon: Search },
@@ -803,6 +791,25 @@ export default function AirdropManager() {
           </p>
         </div>
       </div>
+
+      {/* Wallet Connection Banner */}
+      {!isConnected && (
+        <Card className="border-purple-200 bg-purple-50/50 max-w-3xl mx-auto">
+          <CardContent className="flex items-center gap-4 py-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
+              <Gift className="h-5 w-5 text-purple-600" />
+            </div>
+            <div className="flex-1">
+              <CardTitle className="text-sm font-semibold text-purple-900">
+                Connect Your Wallet to Participate
+              </CardTitle>
+              <CardDescription className="text-xs text-purple-700">
+                Connect your wallet to create campaigns, submit entries, and distribute rewards
+              </CardDescription>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Tab Navigation */}
       <div className="flex justify-center px-4">
@@ -1161,7 +1168,13 @@ export default function AirdropManager() {
                   {/* Submit Button */}
                   <div className="pt-4">
                     <Button
-                      onClick={createAirdrop}
+                      onClick={() => {
+                        if (!isConnected) {
+                          alert("Please connect your wallet to create an airdrop campaign");
+                          return;
+                        }
+                        createAirdrop();
+                      }}
                       disabled={
                         isUploading ||
                         !newAirdrop.title ||

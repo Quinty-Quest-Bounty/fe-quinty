@@ -160,6 +160,7 @@ export default function BountyManager() {
     address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
     abi: QUINTY_ABI,
     functionName: "bountyCounter",
+    query: { enabled: true, retry: false, refetchOnWindowFocus: false },
   });
 
   // Watch for bounty events
@@ -257,14 +258,15 @@ export default function BountyManager() {
   const loadBountiesAndSubmissions = async () => {
     if (!bountyCounter) return;
 
-    const bountyIds = Array.from(
-      { length: Number(bountyCounter) },
-      (_, i) => i + 1
-    );
-    const loadedBounties: Bounty[] = [];
+    try {
+      const bountyIds = Array.from(
+        { length: Number(bountyCounter) },
+        (_, i) => i + 1
+      );
+      const loadedBounties: Bounty[] = [];
 
-    for (const id of bountyIds) {
-      try {
+      for (const id of bountyIds) {
+        try {
         // 1. Get all bounty metadata using the new robust function
         const bountyData = await readContract(wagmiConfig, {
           address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
@@ -338,12 +340,16 @@ export default function BountyManager() {
             oprecDeadline,
           });
         }
-      } catch (error) {
-        console.error(`Error loading bounty data for ID ${id}:`, error);
+        } catch (error) {
+          console.error(`Error loading bounty data for ID ${id}:`, error);
+        }
       }
-    }
 
-    setBounties(loadedBounties.reverse());
+      setBounties(loadedBounties.reverse());
+    } catch (error) {
+      console.error("Error loading bounties:", error);
+      // Don't show error to user, just log it
+    }
   };
 
   // Create bounty
@@ -618,25 +624,7 @@ export default function BountyManager() {
     });
   };
 
-  if (!isConnected) {
-    return (
-      <div className="container mx-auto p-6">
-        <Card className="max-w-md mx-auto">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-4">
-              <Target className="h-8 w-8 text-primary" />
-            </div>
-            <CardTitle className="text-center mb-2">
-              Connect Your Wallet
-            </CardTitle>
-            <CardDescription className="text-center">
-              Please connect your wallet to access Quinty Bounties
-            </CardDescription>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Remove the wallet connection blocker - let users browse without connecting
 
   return (
     <div className="container mx-auto p-6 space-y-8">
@@ -653,6 +641,25 @@ export default function BountyManager() {
           transparent project completion.
         </p>
       </div>
+
+      {/* Wallet Connection Banner */}
+      {!isConnected && (
+        <Card className="border-blue-200 bg-blue-50/50">
+          <CardContent className="flex items-center gap-4 py-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+              <Target className="h-5 w-5 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <CardTitle className="text-sm font-semibold text-blue-900">
+                Connect Your Wallet to Get Started
+              </CardTitle>
+              <CardDescription className="text-xs text-blue-700">
+                Connect your wallet to create bounties, submit solutions, and participate in the ecosystem
+              </CardDescription>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Tab Navigation */}
       <div className="flex justify-center px-4">
@@ -1377,7 +1384,13 @@ export default function BountyManager() {
                     )}
 
                     <Button
-                      onClick={createBounty}
+                      onClick={() => {
+                        if (!isConnected) {
+                          alert("Please connect your wallet to create a bounty");
+                          return;
+                        }
+                        createBounty();
+                      }}
                       disabled={
                         isPending ||
                         isConfirming ||
