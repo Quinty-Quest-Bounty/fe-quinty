@@ -394,66 +394,6 @@ export default function Home() {
               </CardContent>
             </Card>
           </section>
-
-          {/* CTA with LinkPreview */}
-          <section
-            className="mt-6 sm:mt-8 md:mt-12 text-center rounded-[2rem] sm:rounded-[2.5rem] border border-white/60 bg-white/70 backdrop-blur-xl px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 hover:shadow-2xl shadow-lg transition-all duration-500 hover:scale-[1.01] hover:border-white/80"
-            data-animation="fade-scale"
-          >
-            <h2 className="text-xl font-semibold sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl mb-4 sm:mb-6 text-foreground hover:text-[#0EA885] px-2 transition-colors duration-300">
-              Where Smart Contracts Meet Smart Users.
-            </h2>
-
-            <div className="mt-4 sm:mt-6 text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-2">
-              <div className="mb-3 sm:mb-4">
-                Design, fund, and verify your first on-chain program — with
-                reputation that can't be faked. Start building with{" "}
-                <LinkPreview
-                  url="https://quinty.xyz/bounties"
-                  className="font-bold text-[#0EA885] hover:text-[#0EA885]/80 hover:underline transition-all duration-300"
-                >
-                  Quinty
-                </LinkPreview>{" "}
-                and join the on-chain workforce.
-              </div>
-              <div>
-                Need help getting started? Check out our{" "}
-                <LinkPreview
-                  url="https://quinty.gitbook.io/quinty-docs/"
-                  className="font-bold text-[#0EA885] hover:text-[#0EA885]/80 hover:underline transition-all duration-300"
-                >
-                  Documentation
-                </LinkPreview>{" "}
-                or reach out to{" "}
-                <LinkPreview
-                  url="mailto:team@quinty.xyz"
-                  className="font-bold text-[#0EA885] hover:text-[#0EA885]/80 hover:underline transition-all duration-300"
-                >
-                  our team
-                </LinkPreview>
-                .
-              </div>
-            </div>
-
-            <div className="mt-6 sm:mt-8 flex items-center justify-center gap-1.5 sm:gap-2 text-sm sm:text-base text-gray-500 hover:text-[#0EA885] transition-colors duration-300">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="h-4 w-4 sm:h-5 sm:w-5"
-              >
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.508 11.24H17.48l-5.245-6.864L6.216 21.75H2.906l7.732-8.847L2.426 2.25h5.135l4.713 6.173L18.244 2.25Zm-1.161 17.52h1.833L7.084 4.126H5.116l11.967 15.644Z" />
-              </svg>
-              <a
-                href="https://x.com/quintyxyz"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-[#0EA885] transition-colors duration-300"
-              >
-                @quintyxyz
-              </a>
-            </div>
-          </section>
         </div>
       </main>
 

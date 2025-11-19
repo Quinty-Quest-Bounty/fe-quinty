@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Github, X, Mail } from "lucide-react";
+import { Github, X, Mail, BookOpen } from "lucide-react";
 import { Separator } from "./ui/separator";
 
 const socialLinks = [
@@ -36,6 +36,15 @@ export function Footer() {
                 The decentralized bounty studio built for serious ecosystems.
                 Escrow replaces trust with truth — funds don't lie.
               </p>
+              <a
+                href="https://quinty.gitbook.io/quinty-docs/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#0EA885] to-[#0EA885]/90 text-white font-semibold text-sm transition-all duration-300 hover:shadow-lg hover:shadow-[#0EA885]/20 hover:scale-105 active:scale-95"
+              >
+                <BookOpen className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
+                Read Documentation
+              </a>
             </div>
 
             {/* Social Links */}

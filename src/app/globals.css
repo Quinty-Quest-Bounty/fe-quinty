@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+  /* Prevent Tailwind base from resetting OnchainKit styles */
+  [class*="ock:"] {
+    all: revert-layer;
+  }
+
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
@@ -400,4 +405,5 @@
   .btn-secondary {
     @apply bg-white/80 backdrop-blur-sm border border-gray-200 hover:bg-white hover:shadow-md text-gray-700 font-medium px-6 py-3 rounded-lg transition-all duration-200;
   }
+
 }

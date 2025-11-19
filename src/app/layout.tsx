@@ -29,6 +29,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={spaceGrotesk.variable}>
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://unpkg.com/@coinbase/onchainkit@1.1.1/dist/assets/style.css"
+        />
+      </head>
       <body className={`${spaceGrotesk.className} antialiased bg-gradient-to-br from-green-50/50 via-teal-50/30 to-emerald-50/50 relative`}>
         {/* Animated Background Blobs */}
         <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">

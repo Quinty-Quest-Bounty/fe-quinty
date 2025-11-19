@@ -4,6 +4,7 @@
 .env.local
 .next
 .DS_Store
+.mcp.json
 
 # Compilation output
 /dist

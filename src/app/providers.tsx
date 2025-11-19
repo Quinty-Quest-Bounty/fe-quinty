@@ -23,6 +23,14 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         <OnchainKitProvider
           apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
           chain={baseSepolia}
+          config={{
+            appearance: {
+              name: 'Quinty',
+              logo: '/images/quinty-logo.png',
+              mode: 'light',
+              theme: 'default',
+            },
+          }}
         >
           <AlertProvider>
             <AlertDialogProvider>
