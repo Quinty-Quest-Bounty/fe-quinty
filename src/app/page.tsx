@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Card, CardContent } from "../components/ui/card";
@@ -9,8 +9,8 @@ import { Badge } from "../components/ui/badge";
 import { Footer } from "../components/Footer";
 import { Safari } from "../components/ui/safari";
 import DotPattern from "../components/ui/dot-pattern";
-import { LinkPreview } from "../components/ui/link-preview";
-import { Gravity, MatterBody } from "../components/ui/gravity";
+import { AnnouncementModal } from "../components/AnnouncementModal";
+import { AnnouncementBanner } from "../components/AnnouncementBanner";
 import {
   Target,
   Users,
@@ -151,6 +151,30 @@ function useScrollAnimation() {
 
 export default function Home() {
   const router = useRouter();
+  const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(false);
+
+  useEffect(() => {
+    // Check if user has already seen the announcement
+    const hasSeenAnnouncement = localStorage.getItem("hasSeenAnnouncement");
+
+    if (!hasSeenAnnouncement) {
+      // Show modal after a brief delay
+      const timer = setTimeout(() => {
+        setIsAnnouncementModalOpen(true);
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const handleCloseAnnouncement = () => {
+    setIsAnnouncementModalOpen(false);
+    localStorage.setItem("hasSeenAnnouncement", "true");
+  };
+
+  const handleOpenAnnouncement = () => {
+    setIsAnnouncementModalOpen(true);
+  };
 
   useEffect(() => {
     const observerOptions = {
@@ -190,6 +214,15 @@ export default function Home() {
 
   return (
     <div className="min-h-screen text-foreground relative">
+      {/* Announcement Modal */}
+      <AnnouncementModal
+        isOpen={isAnnouncementModalOpen}
+        onClose={handleCloseAnnouncement}
+      />
+
+      {/* Announcement Banner */}
+      <AnnouncementBanner onClick={handleOpenAnnouncement} />
+
       <main className="relative px-4 pt-8">
         <div className="mx-auto w-full max-w-6xl">
           <section className="mx-auto mb-8 max-w-7xl px-4 sm:mb-10 sm:px-6 md:mb-20 xl:px-0">
