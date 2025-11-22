@@ -16,7 +16,7 @@ export function AnnouncementBanner({ onClick }: AnnouncementBannerProps) {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.3, type: "spring", bounce: 0.3 }}
         onClick={onClick}
-        className="pointer-events-auto group relative flex items-center gap-2 sm:gap-2.5 rounded-full border-2 border-[#0EA885]/30 bg-gradient-to-r from-[#0EA885]/95 to-teal-600/95 px-4 py-2 sm:px-5 sm:py-2.5 shadow-lg backdrop-blur-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:border-[#0EA885]/50 active:scale-95"
+        className="pointer-events-auto group relative flex items-center gap-2 sm:gap-2.5 rounded-full border-2 border-[#0EA885]/30 bg-gradient-to-r from-[#0EA885]/95 to-teal-600/95 px-4 py-2 sm:px-5 sm:py-2.5 shadow-lg backdrop-blur-xl transition-all duration-300   hover:border-[#0EA885]/50 "
       >
         {/* Animated glow effect */}
         <div className="absolute inset-0 rounded-full bg-[#0EA885]/20 blur-md group-hover:blur-lg transition-all duration-300" />

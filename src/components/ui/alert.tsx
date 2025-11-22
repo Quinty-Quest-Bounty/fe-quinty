@@ -8,13 +8,13 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-white/60 bg-white/70 text-foreground hover:shadow-lg",
+        default: "border-white/60 bg-white/70 text-foreground ",
         destructive:
-          "border-destructive/50 bg-destructive/10 backdrop-blur-md text-destructive dark:border-destructive [&>svg]:text-destructive hover:shadow-lg",
+          "border-destructive/50 bg-destructive/10 backdrop-blur-md text-destructive dark:border-destructive [&>svg]:text-destructive ",
         success:
-          "border-green-500/50 text-green-600 bg-green-50/80 backdrop-blur-md dark:border-green-500 [&>svg]:text-green-600 hover:shadow-lg",
+          "border-green-500/50 text-green-600 bg-green-50/80 backdrop-blur-md dark:border-green-500 [&>svg]:text-green-600 ",
         warning:
-          "border-yellow-500/50 text-yellow-600 bg-yellow-50/80 backdrop-blur-md dark:border-yellow-500 [&>svg]:text-yellow-600 hover:shadow-lg",
+          "border-yellow-500/50 text-yellow-600 bg-yellow-50/80 backdrop-blur-md dark:border-yellow-500 [&>svg]:text-yellow-600 ",
       },
     },
     defaultVariants: {

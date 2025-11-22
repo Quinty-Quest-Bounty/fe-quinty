@@ -76,7 +76,7 @@ export default function AirdropCard({
     return (
       <>
         <Card
-          className="group relative overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer hover:scale-[1.03] active:scale-[0.98]"
+          className="group relative overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-300 cursor-pointer hover:brightness-95"
           onClick={() => router.push(`/airdrops/${airdrop.id}`)}
         >
           <div className="flex flex-row">
@@ -86,7 +86,7 @@ export default function AirdropCard({
                 <IpfsImage
                   cid={airdrop.imageUrl.replace("ipfs://", "")}
                   alt={airdrop.title}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                 />
                 {/* Quick View and Share buttons overlay */}
                 <div className="absolute top-2 left-2 flex gap-1">
@@ -97,7 +97,7 @@ export default function AirdropCard({
                       e.stopPropagation();
                       setQuickView(true);
                     }}
-                    className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md hover:shadow-lg hover:scale-110 active:scale-95 transition-all duration-300 border border-white/60"
+                    className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white transition-all duration-300 border border-white/60"
                   >
                     <Eye className="h-4 w-4 text-[#0EA885]" />
                   </Button>
@@ -111,7 +111,7 @@ export default function AirdropCard({
                         "Share this airdrop"
                       );
                     }}
-                    className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md hover:shadow-lg hover:scale-110 active:scale-95 transition-all duration-300 border border-white/60"
+                    className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white transition-all duration-300 border border-white/60"
                   >
                     <Share2 className="h-4 w-4 text-[#0EA885]" />
                   </Button>
@@ -133,7 +133,7 @@ export default function AirdropCard({
                   </div>
                   <Badge
                     variant={getStatusColor()}
-                    className="text-xs rounded-full px-3 py-1 border-white/60 bg-white/80 backdrop-blur-sm shadow-md flex-shrink-0"
+                    className="text-xs rounded-full px-3 py-1 border-white/60 bg-white/80 backdrop-blur-sm shadow-md flex-shrink-0 pointer-events-none"
                   >
                     {getStatusText()}
                   </Badge>
@@ -275,13 +275,13 @@ export default function AirdropCard({
               <div className="flex gap-2 pt-2">
                 <Button
                   variant="outline"
-                  className="flex-1 rounded-[1rem] border-white/60 bg-white/70 backdrop-blur-sm hover:bg-white/90 hover:scale-105 active:scale-95 transition-all duration-300"
+                  className="flex-1 rounded-[1rem] border-white/60 bg-white/70 backdrop-blur-sm hover:bg-white/90 transition-all duration-300"
                   onClick={() => setQuickView(false)}
                 >
                   Close
                 </Button>
                 <Button
-                  className="flex-1 rounded-[1rem] bg-[#0EA885] hover:bg-[#0EA885]/90 hover:scale-105 active:scale-95 transition-all duration-300 shadow-md hover:shadow-lg"
+                  className="flex-1 rounded-[1rem] bg-[#0EA885] hover:bg-[#0EA885]/90 transition-all duration-300"
                   onClick={() => {
                     setQuickView(false);
                     router.push(`/airdrops/${airdrop.id}`);
@@ -300,14 +300,14 @@ export default function AirdropCard({
   return (
     <>
       <Card
-        className="group relative overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer hover:scale-[1.03] active:scale-[0.98]"
+        className="group relative overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-300 cursor-pointer hover:brightness-95"
         onClick={() => router.push(`/airdrops/${airdrop.id}`)}
       >
         {/* Status Badge */}
         <div className="absolute top-2 right-2 z-10">
           <Badge
             variant={getStatusColor()}
-            className="text-xs rounded-full px-3 py-1 border-white/60 bg-white/80 backdrop-blur-sm shadow-md"
+            className="text-xs rounded-full px-3 py-1 border-white/60 bg-white/80 backdrop-blur-sm shadow-md pointer-events-none"
           >
             {getStatusText()}
           </Badge>
@@ -319,7 +319,7 @@ export default function AirdropCard({
             <IpfsImage
               cid={airdrop.imageUrl.replace("ipfs://", "")}
               alt={airdrop.title}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
             />
             {/* Quick View and Share buttons overlay */}
             <div className="absolute top-2 left-2 flex gap-1">
@@ -330,7 +330,7 @@ export default function AirdropCard({
                   e.stopPropagation();
                   setQuickView(true);
                 }}
-                className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md hover:shadow-lg hover:scale-110 active:scale-95 transition-all duration-300 border border-white/60"
+                className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md transition-all duration-300 border border-white/60"
               >
                 <Eye className="h-4 w-4 text-[#0EA885]" />
               </Button>
@@ -341,7 +341,7 @@ export default function AirdropCard({
                   e.stopPropagation();
                   shareLink(`/airdrops/${airdrop.id}`, "Share this airdrop");
                 }}
-                className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md hover:shadow-lg hover:scale-110 active:scale-95 transition-all duration-300 border border-white/60"
+                className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md transition-all duration-300 border border-white/60"
               >
                 <Share2 className="h-4 w-4 text-[#0EA885]" />
               </Button>
@@ -382,7 +382,7 @@ export default function AirdropCard({
 
         <CardContent className="p-3 pt-0">
           {/* Reward Section */}
-          <div className="flex items-center justify-between p-2.5 rounded-[1rem] bg-gradient-to-r from-green-100/80 to-emerald-100/60 border border-green-200/60 shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-sm">
+          <div className="flex items-center justify-between p-2.5 rounded-[1rem] bg-gradient-to-r from-green-100/80 to-emerald-100/60 border border-green-200/60 shadow-sm transition-all duration-300 backdrop-blur-sm hover:brightness-95">
             <div className="flex items-center gap-1.5">
               <div className="p-1.5 rounded-lg bg-green-100/80">
                 <Coins className="h-4 w-4 text-green-600" />

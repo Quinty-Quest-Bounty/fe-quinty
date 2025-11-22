@@ -95,7 +95,7 @@ export function AnnouncementModal({ isOpen, onClose }: AnnouncementModalProps) {
                     window.open("https://x.com/QuintyLabs", "_blank");
                     onClose();
                   }}
-                  className="bg-black hover:bg-gray-800 text-white px-5 py-2.5 sm:px-6 sm:py-3 text-sm sm:text-base font-semibold transition-all duration-300 hover:scale-105 w-full sm:w-auto"
+                  className="bg-black hover:bg-gray-800 text-white px-5 py-2.5 sm:px-6 sm:py-3 text-sm sm:text-base font-semibold transition-all duration-300  w-full sm:w-auto"
                 >
                   <svg
                     className="mr-2 h-4 w-4 sm:h-5 sm:w-5"

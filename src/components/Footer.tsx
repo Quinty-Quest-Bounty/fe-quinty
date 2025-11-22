@@ -15,11 +15,11 @@ export function Footer() {
   return (
     <footer className="relative mt-8 sm:mt-10 md:mt-16">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-0">
-        <div className="rounded-[2rem] sm:rounded-[2.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-2xl transition-all duration-500 p-8 sm:p-12">
+        <div className="rounded-[2rem] sm:rounded-[2.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg  transition-all duration-500 p-8 sm:p-12">
           {/* Logo and Description */}
           <div className="mb-8 sm:mb-10 flex flex-col items-center justify-between gap-6 md:flex-row md:items-start">
             <div className="flex max-w-md flex-col items-center space-y-4 text-center md:items-start md:text-left">
-              <Link href="/" className="group flex items-center gap-3 transition-all duration-300 hover:scale-105 active:scale-95">
+              <Link href="/" className="group flex items-center gap-3 transition-all duration-300  ">
                 <div className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-[1rem] bg-gradient-to-br from-[#0EA885]/10 to-[#0EA885]/5 p-2 backdrop-blur-sm border border-[#0EA885]/20 group-hover:border-[#0EA885]/40 transition-all duration-300">
                   <Image
                     src="/images/quinty-logo.png"
@@ -40,9 +40,9 @@ export function Footer() {
                 href="https://quinty.gitbook.io/quinty-docs/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#0EA885] to-[#0EA885]/90 text-white font-semibold text-sm transition-all duration-300 hover:shadow-lg hover:shadow-[#0EA885]/20 hover:scale-105 active:scale-95"
+                className="group inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#0EA885] to-[#0EA885]/90 text-white font-semibold text-sm transition-all duration-300  hover:shadow-[#0EA885]/20  "
               >
-                <BookOpen className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
+                <BookOpen className="h-4 w-4 transition-transform duration-300 group-" />
                 Read Documentation
               </a>
             </div>
@@ -55,9 +55,9 @@ export function Footer() {
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-[1rem] border border-white/60 bg-white/50 backdrop-blur-sm text-foreground/70 transition-all duration-300 hover:-translate-y-2 hover:border-[#0EA885]/40 hover:bg-[#0EA885]/10 hover:text-[#0EA885] hover:shadow-lg active:scale-95"
+                  className="group flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-[1rem] border border-white/60 bg-white/50 backdrop-blur-sm text-foreground/70 transition-all duration-300 hover:-translate-y-2 hover:border-[#0EA885]/40 hover:bg-[#0EA885]/10 hover:text-[#0EA885]  "
                 >
-                  <link.icon className="h-5 w-5 transition-transform duration-300 group-hover:scale-110" />
+                  <link.icon className="h-5 w-5 transition-transform duration-300 group-" />
                   <span className="sr-only">{link.name}</span>
                 </a>
               ))}
