@@ -124,7 +124,7 @@
   }
 
   .card-hover {
-    @apply transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1;
+    @apply transition-all duration-300 ease-out hover:brightness-95;
   }
 
   /* Custom scrollbar */
@@ -415,11 +415,11 @@
 
   /* Better button states */
   .btn-primary {
-    @apply bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105;
+    @apply bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200;
   }
 
   .btn-secondary {
-    @apply bg-white/80 backdrop-blur-sm border border-gray-200 hover:bg-white hover:shadow-md text-gray-700 font-medium px-6 py-3 rounded-lg transition-all duration-200;
+    @apply bg-white/80 backdrop-blur-sm border border-gray-200 hover:bg-white text-gray-700 font-medium px-6 py-3 rounded-lg transition-all duration-200;
   }
 
 }

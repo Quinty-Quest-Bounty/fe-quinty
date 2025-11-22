@@ -10,35 +10,35 @@ import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
 
 const OnchainKitProvider = dynamic(
-  () => import('@coinbase/onchainkit').then((mod) => mod.OnchainKitProvider),
-  { ssr: false }
+ () => import('@coinbase/onchainkit').then((mod) => mod.OnchainKitProvider),
+ { ssr: false }
 );
 
 const queryClient = new QueryClient();
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <OnchainKitProvider
-          apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
-          chain={baseSepolia}
-          config={{
-            appearance: {
-              name: 'Quinty',
-              logo: '/images/quinty-logo.png',
-              mode: 'light',
-              theme: 'default',
-            },
-          }}
-        >
-          <AlertProvider>
-            <AlertDialogProvider>
-              {children}
-            </AlertDialogProvider>
-          </AlertProvider>
-        </OnchainKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
-  );
+ return (
+ <WagmiProvider config={wagmiConfig}>
+ <QueryClientProvider client={queryClient}>
+  <OnchainKitProvider
+  apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
+  chain={baseSepolia}
+  config={{
+  appearance: {
+   name: 'Quinty',
+   logo: '/images/quinty-logo.png',
+   mode: 'light',
+   theme: 'default',
+  },
+  }}
+  >
+  <AlertProvider>
+  <AlertDialogProvider>
+   {children}
+  </AlertDialogProvider>
+  </AlertProvider>
+  </OnchainKitProvider>
+ </QueryClientProvider>
+ </WagmiProvider>
+ );
 }

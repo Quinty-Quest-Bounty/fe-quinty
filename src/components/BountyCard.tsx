@@ -144,7 +144,7 @@ export default function BountyCard({
     return (
       <>
         <Card
-          className="group relative overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+          className="group relative overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-300 cursor-pointer hover:brightness-95"
           onClick={() => router.push(`/bounties/${bounty.id}`)}
         >
           <div className="flex flex-row">
@@ -154,7 +154,7 @@ export default function BountyCard({
                 <img
                   src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
                   alt={metadata.title}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                 />
                 {/* Quick View and Share buttons overlay */}
                 <div className="absolute top-2 left-2 flex gap-1.5">
@@ -165,7 +165,7 @@ export default function BountyCard({
                       e.stopPropagation();
                       setQuickView(true);
                     }}
-                    className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md hover:shadow-lg hover:scale-110 active:scale-95 transition-all duration-300 border border-white/60"
+                    className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white transition-all duration-300 border border-white/60"
                   >
                     <Eye className="h-4 w-4 text-[#0EA885]" />
                   </Button>
@@ -176,7 +176,7 @@ export default function BountyCard({
                       e.stopPropagation();
                       shareLink(`/bounties/${bounty.id}`, "Share this bounty");
                     }}
-                    className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md hover:shadow-lg hover:scale-110 active:scale-95 transition-all duration-300 border border-white/60"
+                    className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white transition-all duration-300 border border-white/60"
                   >
                     <Share2 className="h-4 w-4 text-[#0EA885]" />
                   </Button>
@@ -197,7 +197,7 @@ export default function BountyCard({
                   </div>
                   <Badge
                     variant={getStatusVariant(bounty.status)}
-                    className="text-xs flex-shrink-0 rounded-full px-3 py-1 border-white/60 bg-white/50 backdrop-blur-sm"
+                    className="text-xs flex-shrink-0 rounded-full px-3 py-1 border-white/60 bg-white/50 backdrop-blur-sm pointer-events-none"
                   >
                     {statusLabel}
                   </Badge>
@@ -353,14 +353,14 @@ export default function BountyCard({
   return (
     <>
       <Card
-        className="group relative overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer hover:scale-[1.03] active:scale-[0.98]"
+        className="group relative overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-300 cursor-pointer hover:brightness-95"
         onClick={() => router.push(`/bounties/${bounty.id}`)}
       >
         {/* Status Badge */}
         <div className="absolute top-2 right-2 z-10">
           <Badge
             variant={getStatusVariant(bounty.status)}
-            className="text-xs rounded-full px-3 py-1 border-white/60 bg-white/80 backdrop-blur-sm shadow-md"
+            className="text-xs rounded-full px-3 py-1 border-white/60 bg-white/80 backdrop-blur-sm shadow-md pointer-events-none"
           >
             {statusLabel}
           </Badge>
@@ -372,7 +372,7 @@ export default function BountyCard({
             <img
               src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
               alt={metadata.title}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
             />
             {/* Quick View and Share buttons overlay */}
             <div className="absolute top-2 left-2 flex gap-1.5">
@@ -383,7 +383,7 @@ export default function BountyCard({
                   e.stopPropagation();
                   setQuickView(true);
                 }}
-                className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md hover:shadow-lg hover:scale-110 active:scale-95 transition-all duration-300 border border-white/60"
+                className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md transition-all duration-300 border border-white/60"
               >
                 <Eye className="h-4 w-4 text-[#0EA885]" />
               </Button>
@@ -394,7 +394,7 @@ export default function BountyCard({
                   e.stopPropagation();
                   shareLink(`/bounties/${bounty.id}`, "Share this bounty");
                 }}
-                className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md hover:shadow-lg hover:scale-110 active:scale-95 transition-all duration-300 border border-white/60"
+                className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md transition-all duration-300 border border-white/60"
               >
                 <Share2 className="h-4 w-4 text-[#0EA885]" />
               </Button>
@@ -429,7 +429,7 @@ export default function BountyCard({
 
         <CardContent className="p-3 pt-0">
           {/* Reward Section */}
-          <div className="flex items-center justify-between p-2.5 rounded-[1rem] bg-gradient-to-r from-[#0EA885]/10 to-[#0EA885]/5 border border-[#0EA885]/20 shadow-sm hover:shadow-md transition-all duration-300">
+          <div className="flex items-center justify-between p-2.5 rounded-[1rem] bg-gradient-to-r from-[#0EA885]/10 to-[#0EA885]/5 border border-[#0EA885]/20 shadow-sm transition-all duration-300 hover:brightness-95">
             <div className="flex items-center gap-1.5">
               <div className="p-1.5 rounded-lg bg-[#0EA885]/10">
                 <Trophy className="h-4 w-4 text-[#0EA885]" />

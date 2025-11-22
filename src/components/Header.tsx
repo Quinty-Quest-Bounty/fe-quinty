@@ -44,14 +44,14 @@ export default function Header() {
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, type: "spring", bounce: 0.3 }}
-          className="pointer-events-auto mx-2 sm:mx-3 md:mx-4 w-full max-w-7xl rounded-[1.5rem] sm:rounded-[1.75rem] md:rounded-[2rem] border border-white/60 bg-white/70 dark:bg-background/80 dark:border-border/40 shadow-lg hover:shadow-2xl backdrop-blur-xl transition-all duration-500"
+          className="pointer-events-auto mx-2 sm:mx-3 md:mx-4 w-full max-w-7xl rounded-[1.5rem] sm:rounded-[1.75rem] md:rounded-[2rem] border border-white/60 bg-white/70 dark:bg-background/80 dark:border-border/40 shadow-lg  backdrop-blur-xl transition-all duration-500"
         >
           <div className="flex h-12 sm:h-14 md:h-16 items-center justify-between px-3 sm:px-4 md:px-6">
             {/* Logo */}
             <button
               type="button"
               onClick={() => router.push("/")}
-              className="flex items-center gap-1.5 sm:gap-2 md:gap-3 transition-all duration-300 hover:scale-105 active:scale-95"
+              className="flex items-center gap-1.5 sm:gap-2 md:gap-3 transition-all duration-300  "
             >
               <div className="relative h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 rounded-lg sm:rounded-xl bg-gradient-to-br from-[#0EA885]/10 to-[#0EA885]/5 p-1 sm:p-1.5 md:p-2 backdrop-blur-sm border border-[#0EA885]/20">
                 <Image
@@ -75,8 +75,8 @@ export default function Header() {
                   href={item.link}
                   className={cn(
                     "relative rounded-[1rem] px-3.5 py-2 text-sm font-medium transition-all duration-300",
-                    "hover:text-[#0EA885] hover:bg-[#0EA885]/10 hover:scale-105 hover:shadow-md",
-                    "active:scale-95 backdrop-blur-sm border border-transparent hover:border-[#0EA885]/20"
+                    "hover:text-[#0EA885] hover:bg-[#0EA885]/10  hover:shadow-md",
+                    " backdrop-blur-sm border border-transparent hover:border-[#0EA885]/20"
                   )}
                 >
                   {item.name}
@@ -130,7 +130,7 @@ export default function Header() {
                       <Link
                         href={item.link}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="block rounded-[1rem] px-4 py-3 text-base font-medium transition-all duration-300 hover:bg-[#0EA885]/10 hover:text-[#0EA885] hover:translate-x-2 hover:shadow-md active:scale-95 border border-transparent hover:border-[#0EA885]/20 backdrop-blur-sm"
+                        className="block rounded-[1rem] px-4 py-3 text-base font-medium transition-all duration-300 hover:bg-[#0EA885]/10 hover:text-[#0EA885] hover:translate-x-2 hover:shadow-md  border border-transparent hover:border-[#0EA885]/20 backdrop-blur-sm"
                       >
                         {item.name}
                       </Link>

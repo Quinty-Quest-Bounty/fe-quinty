@@ -176,7 +176,7 @@ export default function FundingCard({ funding, viewMode = "grid" }: FundingCardP
   if (viewMode === "list") {
     return (
       <>
-        <Card className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5">
+        <Card className="group relative overflow-hidden transition-all duration-200 hover:bg-white/80">
           <div className="flex flex-row">
             <div className="flex-1 flex flex-col">
               <CardHeader className="pb-2">
@@ -364,7 +364,7 @@ export default function FundingCard({ funding, viewMode = "grid" }: FundingCardP
 
   return (
     <>
-      <Card className="group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:shadow-primary/5">
+      <Card className="group relative overflow-hidden transition-all duration-200 hover:bg-white/80">
         {/* Status Badge */}
         <div className="absolute top-2 right-2 z-10">
           <Badge variant={getStatusVariant()} className="text-xs">
