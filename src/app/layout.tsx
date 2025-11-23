@@ -5,10 +5,16 @@ import { Space_Grotesk, Plus_Jakarta_Sans } from "next/font/google";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
- title: "Quinty - Quest and Bounty Platform",
+ title: "Quinty - Web3 Quest and Bounty Platform",
  description:
  "A transparent quest-and-bounty platform where funds are held in smart-contract escrow, letting creators, solvers, and community interact directly without intermediaries.",
- keywords: "quinty, quinty io, quest, bounty, web3, crypto, quinty labs, quest platform, bounty platform",
+ keywords: `
+  quinty, quinty io, quinty web3, quinty crypto, quinty labs,
+  quest platform, bounty platform, web3 quest, web3 bounty,
+  crypto bounty platform, crypto quest platform,
+  quinty quest, quinty bounty
+`,
+
  icons: {
  icon: "/images/quinty-logo.png",
  shortcut: "/images/quinty-logo.png",
