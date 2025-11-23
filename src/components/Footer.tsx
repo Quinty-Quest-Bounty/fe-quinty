@@ -2,77 +2,154 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Github, X, Mail, BookOpen } from "lucide-react";
-import { Separator } from "./ui/separator";
+import { X } from "lucide-react";
+import { useState } from "react";
 
-const socialLinks = [
-  { name: "X", href: "https://x.com/quinty", icon: X },
-  { name: "GitHub", href: "https://github.com/quinty", icon: Github },
-  { name: "Email", href: "mailto:team@quinty.xyz", icon: Mail },
-];
+const footerLinks = {
+  resources: [
+    { name: "Documentation", href: "https://quinty.gitbook.io/quinty-docs/" },
+    { name: "GitHub", href: "https://github.com/Quinty-Quest-Bounty" },  
+    { name: "Blog", href: "https://blog.quinty.io" },
+  ],
+  socials: [
+    { name: "X.com", href: "https://x.com/QuintyLabs", icon: X },
+  ],
+};
 
 export function Footer() {
+  const [email, setEmail] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle newsletter signup
+    console.log("Newsletter signup:", email);
+    setEmail("");
+  };
+
   return (
     <footer className="relative mt-8 sm:mt-10 md:mt-16">
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-0">
-        <div className="rounded-[2rem] sm:rounded-[2.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg  transition-all duration-500 p-8 sm:p-12">
-          {/* Logo and Description */}
-          <div className="mb-8 sm:mb-10 flex flex-col items-center justify-between gap-6 md:flex-row md:items-start">
-            <div className="flex max-w-md flex-col items-center space-y-4 text-center md:items-start md:text-left">
-              <Link href="/" className="group flex items-center gap-3 transition-all duration-300  ">
-                <div className="relative h-10 w-10 sm:h-12 sm:w-12 rounded-[1rem] bg-gradient-to-br from-[#0EA885]/10 to-[#0EA885]/5 p-2 backdrop-blur-sm border border-[#0EA885]/20 group-hover:border-[#0EA885]/40 transition-all duration-300">
-                  <Image
-                    src="/images/quinty-logo.png"
-                    alt="Quinty Logo"
-                    fill
-                    className="object-contain brightness-0 dark:brightness-100"
-                  />
-                </div>
-                <span className="text-xl sm:text-2xl font-bold text-foreground bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
-                  Quinty
-                </span>
-              </Link>
-              <p className="text-sm sm:text-base leading-relaxed text-foreground/70">
-                The decentralized bounty studio built for serious ecosystems.
-                Escrow replaces trust with truth — funds don't lie.
-              </p>
-              <a
-                href="https://quinty.gitbook.io/quinty-docs/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#0EA885] to-[#0EA885]/90 text-white font-semibold text-sm transition-all duration-300  hover:shadow-[#0EA885]/20  "
-              >
-                <BookOpen className="h-4 w-4 transition-transform duration-300 group-" />
-                Read Documentation
-              </a>
-            </div>
+        <div className="rounded-[2rem] sm:rounded-[2.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-500 p-6 sm:p-8">
+          {/* Logo */}
+          <div className="mb-8">
+            <Link href="/" className="inline-block">
+              <div className="relative h-10 w-10 sm:h-12 sm:w-12">
+                <Image
+                  src="/images/quinty-logo.png"
+                  alt="Quinty Logo"
+                  fill
+                  className="object-contain brightness-0"
+                />
+              </div>
+            </Link>
+          </div>
 
-            {/* Social Links */}
-            <div className="flex items-center gap-3">
-              {socialLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-[1rem] border border-white/60 bg-white/50 backdrop-blur-sm text-foreground/70 transition-all duration-300 hover:-translate-y-2 hover:border-[#0EA885]/40 hover:bg-[#0EA885]/10 hover:text-[#0EA885]  "
+          {/* Newsletter Section */}
+          <div className="mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              {/* Title Left */}
+              <h3 className="text-xl sm:text-2xl font-medium text-foreground/80">
+                Stay updated
+              </h3>
+
+              {/* Email Input + Button Right on Desktop */}
+              <form
+                onSubmit={handleSubmit}
+                className="flex flex-col sm:flex-row gap-2 max-w-xl w-full sm:justify-end"
+              >
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Get the latest blog posts and updates from Quinty"
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-gray-100/80 border border-gray-200/60 text-foreground/70 placeholder:text-foreground/40 focus:outline-none focus:border-[#0EA885]/40 focus:bg-white/80 transition-all duration-300 text-sm"
+                />
+
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-lg bg-[#0EA885]/10 hover:bg-[#0EA885]/20 text-[#0EA885] font-medium transition-all duration-300 text-sm whitespace-nowrap"
                 >
-                  <link.icon className="h-5 w-5 transition-transform duration-300 group-" />
-                  <span className="sr-only">{link.name}</span>
-                </a>
-              ))}
+                  Subscribe
+                </button>
+              </form>
             </div>
           </div>
 
-          <Separator className="mb-8 sm:mb-10 bg-white/60" />
+
+          {/* Footer Links Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+            {/* Resources */}
+            <div>
+              <h4 className="text-sm font-medium text-foreground/50 mb-3">
+                Resources
+              </h4>
+              <ul className="space-y-2">
+                {footerLinks.resources.map((link) => (
+                  <li key={link.name}>
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-foreground/70 hover:text-[#0EA885] transition-colors duration-200"
+                    >
+                      {link.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Socials */}
+            <div>
+              <h4 className="text-sm font-medium text-foreground/50 mb-3">
+                Socials
+              </h4>
+              <ul className="space-y-2">
+                {footerLinks.socials.map((link) => (
+                  <li key={link.name}>
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-sm text-foreground/70 hover:text-[#0EA885] transition-colors duration-200"
+                    >
+                      <link.icon className="h-4 w-4" />
+                      {link.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Status Badge */}
+          <div className="mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-yellow-100/60 border border-yellow-300/60">
+              <div className="w-2 h-2 rounded-full bg-yellow-500" />
+              <span className="text-xs font-medium text-foreground/70">
+                Under Heavy Development
+              </span>
+            </div>
+          </div>
 
           {/* Bottom Bar */}
-          <div className="flex flex-col items-center justify-between gap-4 text-sm text-foreground/60 md:flex-row">
-            <p className="text-xs sm:text-sm">© {new Date().getFullYear()} Quinty. All rights reserved.</p>
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-              <span className="text-xs uppercase tracking-wider px-3 py-1.5 rounded-full bg-[#0EA885]/10 text-[#0EA885] border border-[#0EA885]/20 font-medium">Base Sepolia</span>
-              <Separator orientation="vertical" className="h-4 bg-white/60" />
-              <span className="text-xs uppercase tracking-wider px-3 py-1.5 rounded-full bg-foreground/5 border border-foreground/10 font-medium">Open source ethos</span>
+          <div className="pt-4 border-t border-white/60 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <p className="text-xs text-foreground/40">
+              © Quinty {new Date().getFullYear()}
+            </p>
+            <div className="flex items-center gap-6">
+              <Link
+                href="/terms"
+                className="text-xs text-foreground/40 hover:text-[#0EA885] transition-colors duration-200"
+              >
+                Terms
+              </Link>
+              <Link
+                href="/privacy"
+                className="text-xs text-foreground/40 hover:text-[#0EA885] transition-colors duration-200"
+              >
+                Privacy
+              </Link>
             </div>
           </div>
         </div>
