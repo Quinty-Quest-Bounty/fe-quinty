@@ -8,6 +8,7 @@ export const metadata: Metadata = {
  title: "Quinty - Quest and Bounty Platform",
  description:
  "A transparent quest-and-bounty platform where funds are held in smart-contract escrow, letting creators, solvers, and community interact directly without intermediaries.",
+ keywords: "quinty, quinty io, quest, bounty, web3, crypto, quinty labs, quest platform, bounty platform",
  icons: {
  icon: "/images/quinty-logo.png",
  shortcut: "/images/quinty-logo.png",
