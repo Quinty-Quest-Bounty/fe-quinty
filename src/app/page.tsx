@@ -283,10 +283,10 @@ export default function Home() {
 
                   <Button
                     size="lg"
-                    onClick={() => router.push("/bounties")}
+                    onClick={() => router.push("/dashboard")}
                     className="animate-slide-up animation-delay-300 transition-all duration-300 text-sm sm:text-base hover:brightness-110"
                   >
-                    Explore bounties
+                    Explore Dashboard
                   </Button>
                 </div>
               </div>
