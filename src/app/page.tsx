@@ -230,7 +230,7 @@ export default function Home() {
       <main className="relative px-4 pt-8">
         <div className="mx-auto w-full max-w-6xl">
           <section className="mx-auto mb-8 max-w-7xl px-4 sm:mb-10 sm:px-6 md:mb-20 xl:px-0">
-            <div className="relative flex flex-col items-center rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden shadow-lg hover:shadow-2xl min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] justify-center backdrop-blur-xl bg-white/70 border border-white/60 transition-all duration-500 hover:scale-[1.01]">
+            <div className="relative flex flex-col items-center rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden shadow-lg hover:shadow-2xl min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] justify-center backdrop-blur-xl bg-white/70 hover:bg-white/80 border border-white/60 hover:border-[#0EA885]/20 transition-all duration-500">
               {/* Dot Pattern Background */}
               <DotPattern width={10} height={10} className="fill-gray-400/40" />
 
@@ -268,26 +268,23 @@ export default function Home() {
 
                   <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl animate-slide-up px-2">
                     <span className="block text-foreground">
-                      Smart Contracts,
+                      If You Don't Lock It, 
                     </span>
                     <span className="block text-[#0EA885]">
-                      Smarter Collaboration.
+                      You Don't Mean It.
                     </span>
                   </h1>
 
                   <div className="mx-auto max-w-2xl text-base sm:text-lg md:text-xl space-y-1 sm:space-y-2 animate-slide-up animation-delay-200 px-4">
-                    <p className="font-bold text-foreground">
-                      "If You Don't Lock It, You Don't Mean It."
-                    </p>
-                    <p className="italic text-foreground/70">
-                      Escrow separates the committed from the curious.
+                    <p className="text-foreground">
+                      "Escrow separates the committed from the curious."
                     </p>
                   </div>
 
                   <Button
                     size="lg"
                     onClick={() => router.push("/bounties")}
-                    className="animate-slide-up animation-delay-300 hover:scale-105 transition-all duration-300 text-sm sm:text-base hover:shadow-xl"
+                    className="animate-slide-up animation-delay-300 transition-all duration-300 text-sm sm:text-base hover:brightness-110"
                   >
                     Explore bounties
                   </Button>
@@ -304,7 +301,7 @@ export default function Home() {
             >
               <Badge
                 variant="secondary"
-                className="rounded-full px-3 py-0.5 sm:px-4 sm:py-1 text-[10px] sm:text-xs uppercase tracking-[0.2em] border-gray-300 bg-gray-50 text-gray-600 hover:bg-gray-100 transition-all duration-300 hover:scale-105"
+                className="rounded-full px-3 py-0.5 sm:px-4 sm:py-1 text-[10px] sm:text-xs uppercase tracking-[0.2em] border-gray-300 bg-gray-50 text-gray-600 hover:bg-gray-100 hover:border-[#0EA885]/30 transition-all duration-300"
               >
                 Platform Preview
               </Badge>
@@ -314,7 +311,7 @@ export default function Home() {
             </div>
 
             <div
-              className="hover:scale-[1.01] transition-all duration-500"
+              className="transition-all duration-500"
               data-animation="zoom-in"
             >
               <Safari url="quinty.xyz" className="w-full">
@@ -345,9 +342,9 @@ export default function Home() {
                     index % 2 === 1 ? "lg:order-2" : "lg:order-1"
                   }`}
                 >
-                  <div className="relative w-full aspect-[16/10] rounded-[1.5rem] sm:rounded-[2rem] border-2 border-dashed border-gray-300 bg-gray-50 overflow-hidden hover:border-[#0EA885] hover:shadow-xl transition-all duration-500 hover:scale-[1.02]">
+                  <div className="relative w-full aspect-[16/10] rounded-[1.5rem] sm:rounded-[2rem] border-2 border-dashed border-gray-300 bg-gray-50 overflow-hidden hover:border-[#0EA885] hover:bg-[#0EA885]/5 transition-all duration-500">
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 sm:gap-3 md:gap-4 p-4 sm:p-6 md:p-8">
-                      <feature.icon className="h-10 w-10 sm:h-12 sm:w-12 md:h-16 md:w-16 text-gray-400 group-hover:text-[#0EA885] group-hover:scale-110 transition-all duration-500" />
+                      <feature.icon className="h-10 w-10 sm:h-12 sm:w-12 md:h-16 md:w-16 text-gray-400 group-hover:text-[#0EA885] transition-all duration-500" />
                       <div className="text-center space-y-1 sm:space-y-2">
                         <p className="text-xs sm:text-sm font-semibold text-gray-600 uppercase tracking-wider">
                           {feature.title} Preview
@@ -374,7 +371,7 @@ export default function Home() {
                   <div className="flex items-center gap-4">
                     <Badge
                       variant="outline"
-                      className="rounded-full border-gray-300 bg-gray-50 px-3 py-1 sm:px-4 sm:py-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-gray-600 hover:bg-gray-100 transition-all duration-300 hover:scale-105"
+                      className="rounded-full border-gray-300 bg-gray-50 px-3 py-1 sm:px-4 sm:py-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-gray-600 hover:bg-gray-100 hover:border-[#0EA885]/30 transition-all duration-300"
                     >
                       {feature.status}
                     </Badge>
@@ -392,7 +389,7 @@ export default function Home() {
 
           {/* Contracts */}
           <section className="mt-12 sm:mt-16 md:mt-24" data-animation="zoom-in">
-            <Card className="border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.01]">
+            <Card className="border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg hover:bg-white/80 hover:border-[#0EA885]/20 transition-all duration-500">
               <CardContent className="px-4 py-6 sm:px-6 sm:py-8">
                 <div className="space-y-4 sm:space-y-6">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
@@ -401,7 +398,7 @@ export default function Home() {
                         Deployed on Base Sepolia
                       </h3>
                       <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">
-                        9 contracts · 68 tests passing
+                        9 contracts
                       </p>
                     </div>
                     <Badge
