@@ -5,9 +5,9 @@ import { Space_Grotesk, Plus_Jakarta_Sans } from "next/font/google";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
- title: "Quinty - Decentralized Bounty System",
+ title: "Quinty - Quest and Bounty Platform",
  description:
- "A transparent bounty platform with governance, reputation NFTs, and dispute resolution on Base Sepolia",
+ "A transparent quest-and-bounty platform where funds are held in smart-contract escrow, letting creators, solvers, and community interact directly without intermediaries.",
  icons: {
  icon: "/images/quinty-logo.png",
  shortcut: "/images/quinty-logo.png",
