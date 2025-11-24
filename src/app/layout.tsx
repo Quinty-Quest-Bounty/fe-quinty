@@ -16,9 +16,24 @@ export const metadata: Metadata = {
 `,
 
  icons: {
- icon: "/images/quinty-logo.png",
- shortcut: "/images/quinty-logo.png",
- apple: "/images/quinty-logo.png",
+ icon: "/images/quinty-green.png",
+ shortcut: "/images/quinty-green.png",
+ apple: "/images/quinty-green.png",
+ },
+ openGraph: {
+ title: "Quinty - Web3 Quest and Bounty Platform",
+ description:
+ "A transparent quest-and-bounty platform where funds are held in smart-contract escrow, letting creators, solvers, and community interact directly without intermediaries.",
+ images: ["/images/quinty-green.png"],
+ siteName: "Quinty",
+ type: "website",
+ },
+ twitter: {
+ card: "summary_large_image",
+ title: "Quinty - Web3 Quest and Bounty Platform",
+ description:
+ "A transparent quest-and-bounty platform where funds are held in smart-contract escrow, letting creators, solvers, and community interact directly without intermediaries.",
+ images: ["/images/quinty-green.png"],
  },
 };
 
