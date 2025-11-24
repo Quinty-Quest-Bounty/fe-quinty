@@ -162,7 +162,7 @@ export default function DashboardPage() {
       }
       setBounties(loadedBounties);
     };
-    loadBounties();
+    loadBounties(); 
   }, [bountyCounter]);
 
   // Load airdrops
