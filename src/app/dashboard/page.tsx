@@ -14,24 +14,23 @@ import {
 } from "../../utils/contracts";
 import { readContract } from "@wagmi/core";
 import { wagmiConfig } from "../../utils/web3";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "../../components/ui/breadcrumb";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import {
-  ChevronRight,
   Target,
   Rocket,
   Coins,
-  ExternalLink,
+  Zap,
+  ArrowUpRight,
+  LayoutGrid,
   Clock,
+  Users,
+  ChevronRight,
+  TrendingUp,
+  Wallet
 } from "lucide-react";
+import { motion } from "framer-motion";
+import { Card, CardContent } from "../../components/ui/card";
 
 type DashboardSection = "all" | "bounties" | "airdrops" | "funding";
 
@@ -66,59 +65,84 @@ interface FundingItem {
   type: "looking-for-grant" | "grant-program" | "crowdfunding";
 }
 
+// Enhanced Stat Card Component
+const StatCard = ({ title, value, trend, label, icon: Icon, color }: { title: string, value: string, trend?: string, label?: string, icon: any, color: string }) => (
+  <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200">
+    <div className="flex items-center justify-between mb-4">
+      <div className={`p-2.5 rounded-lg ${color.split(' ')[0]} bg-opacity-10`}>
+        <Icon className={`w-5 h-5 ${color.split(' ')[1]}`} />
+      </div>
+      {trend && (
+        <Badge variant="secondary" className="bg-green-50 text-green-700 hover:bg-green-100 border-0 font-medium text-[10px] px-2">
+          <TrendingUp className="w-3 h-3 mr-1" /> {trend}
+        </Badge>
+      )}
+    </div>
+    <div className="space-y-1">
+      <h3 className="text-2xl font-bold text-gray-900 tracking-tight">{value}</h3>
+      <p className="text-sm font-medium text-gray-500">{title}</p>
+    </div>
+    {label && (
+       <div className="mt-4 pt-3 border-t border-gray-50 text-xs text-gray-400 flex items-center">
+         {label}
+       </div>
+    )}
+  </div>
+);
+
 export default function DashboardPage() {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<DashboardSection>("all");
   const [bounties, setBounties] = useState<Bounty[]>([]);
   const [airdrops, setAirdrops] = useState<Airdrop[]>([]);
   const [fundingItems, setFundingItems] = useState<FundingItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Read bounty counter
   const { data: bountyCounter } = useReadContract({
-    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]?.Quinty as `0x${string}`,
     abi: QUINTY_ABI,
     functionName: "bountyCounter",
   });
 
   // Read airdrop counter
   const { data: airdropCounter } = useReadContract({
-    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
+    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]?.AirdropBounty as `0x${string}`,
     abi: AIRDROP_ABI,
     functionName: "airdropCounter",
   });
 
   // Read grant counter
   const { data: grantCounter } = useReadContract({
-    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].GrantProgram as `0x${string}`,
+    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]?.GrantProgram as `0x${string}`,
     abi: GRANT_PROGRAM_ABI,
     functionName: "grantCounter",
   });
 
   // Read looking for grant counter
   const { data: requestCounter } = useReadContract({
-    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].LookingForGrant as `0x${string}`,
+    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]?.LookingForGrant as `0x${string}`,
     abi: LOOKING_FOR_GRANT_ABI,
     functionName: "requestCounter",
   });
 
   // Read crowdfunding counter
   const { data: campaignCounter } = useReadContract({
-    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Crowdfunding as `0x${string}`,
+    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]?.Crowdfunding as `0x${string}`,
     abi: CROWDFUNDING_ABI,
     functionName: "campaignCounter",
   });
 
-  // Load bounties (matching BountyManager logic)
+  // Load bounties
   useEffect(() => {
+    let isMounted = true;
     const loadBounties = async () => {
-      if (!bountyCounter) return;
+      if (!bountyCounter || !CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]) return;
       const count = Number(bountyCounter);
       const loadedBounties: Bounty[] = [];
 
-      // Start from 1, not 0
       for (let i = 1; i <= count; i++) {
         try {
-          // Use getBountyData like BountyManager
           const bountyData = await readContract(wagmiConfig, {
             address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
             abi: QUINTY_ABI,
@@ -126,8 +150,7 @@ export default function DashboardPage() {
             args: [BigInt(i)],
           });
 
-          if (bountyData) {
-            const bountyArray = bountyData as any[];
+          if (bountyData && Array.isArray(bountyData)) {
             const [
               creator,
               description,
@@ -141,15 +164,18 @@ export default function DashboardPage() {
               selectedSubmissionIds,
               hasOprec,
               oprecDeadline,
-            ] = bountyArray;
+            ] = bountyData as any[];
 
-            const metadataMatch = description.match(/Metadata: ipfs:\/\/([a-zA-Z0-9]+)/);
-            const metadataCid = metadataMatch ? metadataMatch[1] : undefined;
+            let metadataCid;
+            if (description && typeof description === 'string') {
+               const metadataMatch = description.match(/Metadata: ipfs:\/\/([a-zA-Z0-9]+)/);
+               metadataCid = metadataMatch ? metadataMatch[1] : undefined;
+            }
 
             loadedBounties.push({
               id: i,
               creator,
-              description,
+              description: description || "",
               amount,
               deadline,
               status,
@@ -160,15 +186,20 @@ export default function DashboardPage() {
           console.error(`Error loading bounty ${i}:`, err);
         }
       }
-      setBounties(loadedBounties);
+      if (isMounted) {
+        setBounties(loadedBounties.reverse());
+        setLoading(false);
+      }
     };
     loadBounties(); 
+    return () => { isMounted = false; };
   }, [bountyCounter]);
 
   // Load airdrops
   useEffect(() => {
+    let isMounted = true;
     const loadAirdrops = async () => {
-      if (!airdropCounter) return;
+      if (!airdropCounter || !CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]) return;
       const count = Number(airdropCounter);
       const loadedAirdrops: Airdrop[] = [];
 
@@ -181,8 +212,8 @@ export default function DashboardPage() {
             args: [BigInt(i)],
           });
 
-          if (airdropData) {
-            const [creator, title, description, totalAmount, perQualifier, maxQualifiers, qualifiersCount, deadline, createdAt, resolved, cancelled] = airdropData as any;
+          if (airdropData && Array.isArray(airdropData)) {
+            const [creator, title, description, totalAmount, perQualifier, maxQualifiers, qualifiersCount, deadline, createdAt, resolved, cancelled] = airdropData as any[];
             loadedAirdrops.push({
               id: i,
               creator,
@@ -198,355 +229,452 @@ export default function DashboardPage() {
           console.error(`Error loading airdrop ${i}:`, err);
         }
       }
-      setAirdrops(loadedAirdrops);
+      if (isMounted) setAirdrops(loadedAirdrops.reverse());
     };
     loadAirdrops();
+    return () => { isMounted = false; };
   }, [airdropCounter]);
 
-  // Load funding items (grants, requests, campaigns)
+  // Load funding items
   useEffect(() => {
+    let isMounted = true;
     const loadFunding = async () => {
+      if (!CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]) return;
       const items: FundingItem[] = [];
 
-      // Load grant programs
-      if (grantCounter) {
-        const count = Number(grantCounter);
-        for (let i = 1; i <= count; i++) {
-          try {
-            const info = await readContract(wagmiConfig, {
-              address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].GrantProgram as `0x${string}`,
-              abi: GRANT_PROGRAM_ABI,
-              functionName: "getGrantInfo",
-              args: [BigInt(i)],
-            });
-            const [giver, title, , totalFunds, , , , , , createdAt] = info as any;
-            items.push({
-              id: i,
-              creator: giver,
-              title,
-              fundingGoal: totalFunds,
-              totalRaised: totalFunds,
-              deadline: BigInt(createdAt),
-              type: "grant-program",
-            });
-          } catch (err) {
-            console.error(`Error loading grant ${i}:`, err);
+      try {
+        // Load grant programs
+        if (grantCounter) {
+          const count = Number(grantCounter);
+          for (let i = 1; i <= count; i++) {
+            try {
+              const info = await readContract(wagmiConfig, {
+                address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].GrantProgram as `0x${string}`,
+                abi: GRANT_PROGRAM_ABI,
+                functionName: "getGrantInfo",
+                args: [BigInt(i)],
+              });
+              if (info && Array.isArray(info)) {
+                 const [giver, title, , totalFunds, , , , , , createdAt] = info as any[];
+                 items.push({
+                   id: i,
+                   creator: giver,
+                   title,
+                   fundingGoal: totalFunds,
+                   totalRaised: totalFunds,
+                   deadline: BigInt(createdAt),
+                   type: "grant-program",
+                 });
+              }
+            } catch (err) {
+              console.error(`Error loading grant ${i}:`, err);
+            }
           }
         }
-      }
 
-      // Load looking for grant requests
-      if (requestCounter) {
-        const count = Number(requestCounter);
-        for (let i = 1; i <= count; i++) {
-          try {
-            const info = await readContract(wagmiConfig, {
-              address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].LookingForGrant as `0x${string}`,
-              abi: LOOKING_FOR_GRANT_ABI,
-              functionName: "getRequestInfo",
-              args: [BigInt(i)],
-            });
-            const [requester, title, , , , , fundingGoal, totalRaised, createdAt, deadline] = info as any;
-            items.push({
-              id: i,
-              creator: requester,
-              title,
-              fundingGoal,
-              totalRaised,
-              deadline: BigInt(deadline),
-              type: "looking-for-grant",
-            });
-          } catch (err) {
-            console.error(`Error loading request ${i}:`, err);
+        // Load requests
+        if (requestCounter) {
+          const count = Number(requestCounter);
+          for (let i = 1; i <= count; i++) {
+            try {
+              const info = await readContract(wagmiConfig, {
+                address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].LookingForGrant as `0x${string}`,
+                abi: LOOKING_FOR_GRANT_ABI,
+                functionName: "getRequestInfo",
+                args: [BigInt(i)],
+              });
+              if (info && Array.isArray(info)) {
+                 const [requester, title, , , , , fundingGoal, totalRaised, createdAt, deadline] = info as any[];
+                 items.push({
+                   id: i,
+                   creator: requester,
+                   title,
+                   fundingGoal,
+                   totalRaised,
+                   deadline: BigInt(deadline),
+                   type: "looking-for-grant",
+                 });
+              }
+            } catch (err) {
+              console.error(`Error loading request ${i}:`, err);
+            }
           }
         }
-      }
 
-      // Load crowdfunding campaigns
-      if (campaignCounter) {
-        const count = Number(campaignCounter);
-        for (let i = 1; i <= count; i++) {
-          try {
-            const info = await readContract(wagmiConfig, {
-              address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Crowdfunding as `0x${string}`,
-              abi: CROWDFUNDING_ABI,
-              functionName: "getCampaignInfo",
-              args: [BigInt(i)],
-            });
-            const [creator, title, , , fundingGoal, totalRaised, deadline, createdAt] = info as any;
-            items.push({
-              id: i,
-              creator,
-              title,
-              fundingGoal,
-              totalRaised,
-              deadline: BigInt(deadline),
-              type: "crowdfunding",
-            });
-          } catch (err) {
-            console.error(`Error loading campaign ${i}:`, err);
+        // Load crowdfunding
+        if (campaignCounter) {
+          const count = Number(campaignCounter);
+          for (let i = 1; i <= count; i++) {
+            try {
+              const info = await readContract(wagmiConfig, {
+                address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Crowdfunding as `0x${string}`,
+                abi: CROWDFUNDING_ABI,
+                functionName: "getCampaignInfo",
+                args: [BigInt(i)],
+              });
+              if (info && Array.isArray(info)) {
+                 const [creator, title, , , fundingGoal, totalRaised, deadline, createdAt] = info as any[];
+                 items.push({
+                   id: i,
+                   creator,
+                   title,
+                   fundingGoal,
+                   totalRaised,
+                   deadline: BigInt(deadline),
+                   type: "crowdfunding",
+                 });
+              }
+            } catch (err) {
+              console.error(`Error loading campaign ${i}:`, err);
+            }
           }
         }
+      } catch (e) {
+         console.error("Error loading funding items", e);
       }
 
-      setFundingItems(items);
+      if (isMounted) setFundingItems(items.reverse());
     };
     loadFunding();
+    return () => { isMounted = false; };
   }, [grantCounter, requestCounter, campaignCounter]);
 
   const sections = [
-    { id: "all" as const, label: "All", icon: Target },
+    { id: "all" as const, label: "Overview", icon: LayoutGrid },
     { id: "bounties" as const, label: "Bounties", icon: Target },
-    { id: "airdrops" as const, label: "Airdrops", icon: Coins },
+    { id: "airdrops" as const, label: "Airdrops", icon: Zap },
     { id: "funding" as const, label: "Funding", icon: Rocket },
   ];
 
   const getStatusBadge = (status: number) => {
     const statuses = ["OPREC", "OPEN", "REVEAL", "RESOLVED", "DISPUTED", "EXPIRED"];
-    const colors = ["bg-blue-500", "bg-green-500", "bg-yellow-500", "bg-gray-500", "bg-red-500", "bg-gray-400"];
+    const styles = [
+      "bg-blue-100 text-blue-700 border-blue-200", // OPREC
+      "bg-green-100 text-green-700 border-green-200", // OPEN
+      "bg-yellow-100 text-yellow-700 border-yellow-200", // REVEAL
+      "bg-gray-100 text-gray-700 border-gray-200", // RESOLVED
+      "bg-red-100 text-red-700 border-red-200", // DISPUTED
+      "bg-gray-100 text-gray-500 border-gray-200" // EXPIRED
+    ];
     return (
-      <Badge className={`${colors[status] || "bg-gray-500"} text-white text-xs`}>
+      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${styles[status] || styles[5]}`}>
         {statuses[status] || "UNKNOWN"}
-      </Badge>
+      </span>
     );
   };
 
   const getFundingTypeBadge = (type: string) => {
     const types = {
-      "looking-for-grant": { label: "LFG", color: "bg-blue-500" },
-      "grant-program": { label: "Grant", color: "bg-green-500" },
-      "crowdfunding": { label: "Crowd", color: "bg-pink-500" },
+      "looking-for-grant": { label: "Grant Request", style: "bg-indigo-100 text-indigo-700 border-indigo-200" },
+      "grant-program": { label: "Grant Program", style: "bg-emerald-100 text-emerald-700 border-emerald-200" },
+      "crowdfunding": { label: "Crowdfunding", style: "bg-pink-100 text-pink-700 border-pink-200" },
     };
-    const config = types[type as keyof typeof types] || { label: type, color: "bg-gray-500" };
+    const config = types[type as keyof typeof types] || { label: type, style: "bg-gray-100 text-gray-600" };
     return (
-      <Badge className={`${config.color} text-white text-xs`}>
+      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${config.style}`}>
         {config.label}
-      </Badge>
+      </span>
     );
   };
 
   const formatDeadline = (deadline: bigint | number) => {
-    const date = new Date(Number(deadline) * 1000);
-    const now = new Date();
-    const diff = date.getTime() - now.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    try {
+        const date = new Date(Number(deadline) * 1000);
+        const now = new Date();
+        const diff = date.getTime() - now.getTime();
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
-    if (days > 0) return `${days}d ${hours}h`;
-    if (hours > 0) return `${hours}h`;
-    return "Ended";
+        if (diff < 0) return "Ended";
+        if (days > 0) return `${days}d left`;
+        return `${hours}h left`;
+    } catch (e) {
+        return "Invalid Date";
+    }
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        {/* Breadcrumb */}
-        <div className="mb-4">
-          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-white/60 bg-white/70 backdrop-blur-xl shadow-sm">
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink
-                    onClick={() => router.push("/")}
-                    className="cursor-pointer hover:text-[#0EA885] transition-all text-xs sm:text-sm font-medium"
-                  >
-                    Home
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator>
-                  <ChevronRight className="h-3 w-3 text-foreground/40" />
-                </BreadcrumbSeparator>
-                <BreadcrumbItem>
-                  <BreadcrumbPage className="text-xs sm:text-sm font-semibold text-[#0EA885]">
-                    Dashboard
-                  </BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
+    <div className="min-h-screen bg-gray-50/50 pb-20 font-sans">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
+        
+        {/* Header Area */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
+            <p className="text-gray-500 mt-1 text-sm">Welcome back. Here's what's happening on Quinty.</p>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="outline" className="bg-white border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full px-5">
+               <Wallet className="w-4 h-4 mr-2" /> Connect Wallet
+            </Button>
+            <Button onClick={() => router.push("/bounties")} className="bg-[#0EA885] hover:bg-[#0b8a6c] text-white rounded-full px-6 shadow-lg shadow-[#0EA885]/20 transition-all hover:scale-105">
+              + Create New
+            </Button>
           </div>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="mb-4">
-          <div className="flex gap-2">
+        {/* Stats Overview - Improved compact cards with more info */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+           <StatCard 
+              title="Active Bounties" 
+              value={bountyCounter ? bountyCounter.toString() : "0"} 
+              trend="+12%" 
+              label="Volume: 2.4 ETH"
+              icon={Target} 
+              color="bg-blue-500 text-blue-600" 
+            />
+           <StatCard 
+              title="Grants Distributed" 
+              value={grantCounter ? grantCounter.toString() : "0"} 
+              trend="+5%" 
+              label="Active Programs: 4"
+              icon={Rocket} 
+              color="bg-emerald-500 text-emerald-600" 
+            />
+           <StatCard 
+              title="Airdrop Campaigns" 
+              value={airdropCounter ? airdropCounter.toString() : "0"} 
+              trend="+8%" 
+              label="Claimed: 450"
+              icon={Zap} 
+              color="bg-yellow-500 text-yellow-600" 
+            />
+           <StatCard 
+              title="Crowdfunding" 
+              value={campaignCounter ? campaignCounter.toString() : "0"} 
+              trend="+24%" 
+              label="Raised: 15.2 ETH"
+              icon={Users} 
+              color="bg-purple-500 text-purple-600" 
+            />
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="mb-8 border-b border-gray-200">
+          <div className="flex gap-8 overflow-x-auto pb-1 no-scrollbar">
             {sections.map((section) => {
               const Icon = section.icon;
               const isActive = activeSection === section.id;
 
               return (
-                <Button
+                <button
                   key={section.id}
                   onClick={() => setActiveSection(section.id)}
-                  variant={isActive ? "default" : "outline"}
-                  size="sm"
-                  className={`flex items-center gap-1.5 text-xs transition-all ${
-                    isActive ? "bg-[#0EA885] hover:bg-[#0EA885]/90" : ""
+                  className={`flex items-center gap-2 pb-3 px-1 text-sm font-medium transition-all whitespace-nowrap border-b-2 ${
+                    isActive 
+                      ? "border-[#0EA885] text-[#0EA885]" 
+                      : "border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300"
                   }`}
                 >
-                  <Icon className="h-3.5 w-3.5" />
+                  <Icon className={`h-4 w-4 ${isActive ? "text-[#0EA885]" : "text-gray-400"}`} />
                   {section.label}
-                </Button>
+                </button>
               );
             })}
           </div>
         </div>
 
         {/* Content Grid */}
-        <div className="space-y-4">
-          {/* Bounties */}
-          {(activeSection === "all" || activeSection === "bounties") && bounties.length > 0 && (
-            <div>
-              <h2 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                <Target className="h-4 w-4 text-orange-500" />
-                Bounties
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                {bounties.slice(0, activeSection === "all" ? 4 : undefined).map((bounty) => (
-                  <div
-                    key={bounty.id}
-                    onClick={() => router.push(`/bounties/${bounty.id}`)}
-                    className="group cursor-pointer rounded-xl border border-white/60 bg-white/70 backdrop-blur-xl shadow-sm hover:shadow-md transition-all p-3"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold truncate">
-                          Bounty #{bounty.id}
-                        </h3>
-                        <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                          {bounty.description.split('\n')[0]}
-                        </p>
-                      </div>
-                      <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2" />
-                    </div>
-                    <div className="flex items-center justify-between mt-3">
-                      <div className="flex items-center gap-1.5">
-                        {getStatusBadge(bounty.status)}
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          {formatDeadline(bounty.deadline)}
-                        </div>
-                      </div>
-                      <div className="text-sm font-bold text-[#0EA885]">
-                        {(Number(bounty.amount) / 1e18).toFixed(2)} ETH
-                      </div>
-                    </div>
-                  </div>
-                ))}
+        <div className="space-y-12">
+          
+          {/* Bounties Section */}
+          {(activeSection === "all" || activeSection === "bounties") && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <Target className="h-5 w-5 text-blue-500" />
+                  Latest Bounties
+                </h2>
+                {activeSection === "all" && (
+                  <Button variant="ghost" className="text-sm text-gray-500 hover:text-[#0EA885] hover:bg-transparent p-0 h-auto font-normal" onClick={() => setActiveSection("bounties")}>
+                    View all <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                )}
               </div>
-              {activeSection === "all" && bounties.length > 4 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setActiveSection("bounties")}
-                  className="w-full mt-2 text-xs"
-                >
-                  View all {bounties.length} bounties
-                </Button>
-              )}
-            </div>
-          )}
-
-          {/* Airdrops */}
-          {(activeSection === "all" || activeSection === "airdrops") && airdrops.length > 0 && (
-            <div>
-              <h2 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                <Coins className="h-4 w-4 text-yellow-500" />
-                Airdrops
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                {airdrops
-                  .filter((a) => !a.resolved && !a.cancelled)
-                  .slice(0, activeSection === "all" ? 4 : undefined)
-                  .map((airdrop) => (
+              
+              {bounties.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                  {bounties.slice(0, activeSection === "all" ? 4 : undefined).map((bounty) => (
                     <div
-                      key={airdrop.id}
-                      onClick={() => router.push(`/airdrops/${airdrop.id}`)}
-                      className="group cursor-pointer rounded-xl border border-white/60 bg-white/70 backdrop-blur-xl shadow-sm hover:shadow-md transition-all p-3"
+                      key={bounty.id}
+                      onClick={() => router.push(`/bounties/${bounty.id}`)}
+                      className="group cursor-pointer rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full"
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-semibold truncate">
-                            {airdrop.title || `Airdrop #${airdrop.id}`}
-                          </h3>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {Number(airdrop.totalRecipients)} recipients
-                          </p>
+                      <div className="p-5 flex flex-col h-full">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                             <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                                #{bounty.id}
+                             </div>
+                             <span className="text-xs text-gray-400 font-medium">Bounty</span>
+                          </div>
+                          {getStatusBadge(bounty.status)}
                         </div>
-                        <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2" />
-                      </div>
-                      <div className="flex items-center justify-between mt-3">
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          {formatDeadline(airdrop.deadline)}
-                        </div>
-                        <div className="text-sm font-bold text-[#0EA885]">
-                          {(Number(airdrop.amount) / 1e18).toFixed(2)} ETH
+                        
+                        <h3 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-2 leading-tight group-hover:text-[#0EA885] transition-colors">
+                          {bounty.description || "Untitled Bounty Task"}
+                        </h3>
+                        <p className="text-xs text-gray-400 mb-4 truncate">
+                           Creator: {bounty.creator.substring(0, 6)}...{bounty.creator.substring(38)}
+                        </p>
+                        
+                        <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
+                          <div className="flex items-center gap-1.5 text-gray-500 text-xs bg-gray-50 px-2 py-1 rounded-md">
+                            <Clock className="h-3 w-3" />
+                            {formatDeadline(bounty.deadline)}
+                          </div>
+                          <div className="text-sm font-bold text-gray-900">
+                            {(Number(bounty.amount) / 1e18).toFixed(3)} <span className="text-xs font-medium text-gray-500">ETH</span>
+                          </div>
                         </div>
                       </div>
                     </div>
                   ))}
-              </div>
-              {activeSection === "all" && airdrops.filter((a) => !a.resolved && !a.cancelled).length > 4 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setActiveSection("airdrops")}
-                  className="w-full mt-2 text-xs"
-                >
-                  View all {airdrops.filter((a) => !a.resolved && !a.cancelled).length} airdrops
-                </Button>
+                </div>
+              ) : (
+                <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-200">
+                  <Target className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500 font-medium">No active bounties found.</p>
+                  <p className="text-xs text-gray-400 mt-1">Check back later or create one yourself.</p>
+                </div>
               )}
-            </div>
+            </motion.div>
           )}
 
-          {/* Funding */}
-          {(activeSection === "all" || activeSection === "funding") && fundingItems.length > 0 && (
-            <div>
-              <h2 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                <Rocket className="h-4 w-4 text-blue-500" />
-                Funding
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                {fundingItems.slice(0, activeSection === "all" ? 4 : undefined).map((item) => (
-                  <div
-                    key={`${item.type}-${item.id}`}
-                    onClick={() => router.push(`/funding/${item.type}/${item.id}`)}
-                    className="group cursor-pointer rounded-xl border border-white/60 bg-white/70 backdrop-blur-xl shadow-sm hover:shadow-md transition-all p-3"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold truncate">
-                          {item.title}
-                        </h3>
-                        <div className="mt-1">
-                          {getFundingTypeBadge(item.type)}
+          {/* Airdrops Section */}
+          {(activeSection === "all" || activeSection === "airdrops") && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-yellow-500" />
+                  Active Airdrops
+                </h2>
+                {activeSection === "all" && (
+                  <Button variant="ghost" className="text-sm text-gray-500 hover:text-[#0EA885] hover:bg-transparent p-0 h-auto font-normal" onClick={() => setActiveSection("airdrops")}>
+                    View all <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                )}
+              </div>
+
+              {airdrops.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                  {airdrops
+                    .filter((a) => !a.resolved && !a.cancelled)
+                    .slice(0, activeSection === "all" ? 4 : undefined)
+                    .map((airdrop) => (
+                      <div
+                        key={airdrop.id}
+                        onClick={() => router.push(`/airdrops/${airdrop.id}`)}
+                        className="group cursor-pointer rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full"
+                      >
+                        <div className="p-5 flex flex-col h-full">
+                           <div className="flex items-start justify-between mb-3">
+                              <div className="h-8 w-8 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-600 border border-yellow-100">
+                                 <Zap className="h-4 w-4" />
+                              </div>
+                              <Badge variant="secondary" className="bg-gray-50 text-gray-600 border-0 font-normal text-[10px]">
+                                 {Number(airdrop.totalRecipients)} spots
+                              </Badge>
+                           </div>
+                           
+                           <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate group-hover:text-yellow-600 transition-colors">
+                              {airdrop.title || `Airdrop #${airdrop.id}`}
+                           </h3>
+                           <p className="text-xs text-gray-400 mb-4 truncate">
+                              Creator: {airdrop.creator.substring(0, 6)}...{airdrop.creator.substring(38)}
+                           </p>
+                           
+                           <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
+                              <div className="flex items-center gap-1.5 text-gray-500 text-xs">
+                                 <Clock className="h-3.5 w-3.5" />
+                                 {formatDeadline(airdrop.deadline)}
+                              </div>
+                              <div className="text-sm font-bold text-gray-900">
+                                 {(Number(airdrop.amount) / 1e18).toFixed(2)} <span className="text-xs font-medium text-gray-500">ETH</span>
+                              </div>
+                           </div>
                         </div>
                       </div>
-                      <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-2" />
-                    </div>
-                    <div className="flex items-center justify-between mt-3">
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        {formatDeadline(item.deadline)}
-                      </div>
-                      <div className="text-sm font-bold text-[#0EA885]">
-                        {(Number(item.fundingGoal) / 1e18).toFixed(2)} ETH
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {activeSection === "all" && fundingItems.length > 4 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setActiveSection("funding")}
-                  className="w-full mt-2 text-xs"
-                >
-                  View all {fundingItems.length} funding opportunities
-                </Button>
+                    ))}
+                </div>
+               ) : (
+                <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-200">
+                  <Zap className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500 font-medium">No active airdrops.</p>
+                </div>
               )}
-            </div>
+            </motion.div>
+          )}
+
+          {/* Funding Section */}
+          {(activeSection === "all" || activeSection === "funding") && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.2 }}>
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <Rocket className="h-5 w-5 text-purple-500" />
+                  Funding Opportunities
+                </h2>
+                {activeSection === "all" && (
+                  <Button variant="ghost" className="text-sm text-gray-500 hover:text-[#0EA885] hover:bg-transparent p-0 h-auto font-normal" onClick={() => setActiveSection("funding")}>
+                    View all <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
+                )}
+              </div>
+
+              {fundingItems.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                  {fundingItems.slice(0, activeSection === "all" ? 4 : undefined).map((item) => (
+                    <div
+                      key={`${item.type}-${item.id}`}
+                      onClick={() => router.push(`/funding/${item.type}/${item.id}`)}
+                      className="group cursor-pointer rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full"
+                    >
+                      <div className="p-5 flex flex-col h-full">
+                         <div className="flex items-start justify-between mb-3">
+                            {getFundingTypeBadge(item.type)}
+                            <ArrowUpRight className="h-4 w-4 text-gray-300 group-hover:text-[#0EA885] transition-colors" />
+                         </div>
+                         
+                         <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate group-hover:text-purple-600 transition-colors">
+                           {item.title}
+                         </h3>
+                         <p className="text-xs text-gray-400 mb-3 truncate">
+                           Creator: {item.creator.substring(0, 6)}...{item.creator.substring(38)}
+                         </p>
+                         
+                         <div className="space-y-1.5 mb-4">
+                           <div className="flex justify-between text-[10px] font-medium text-gray-500">
+                              <span>Progress</span>
+                              <span>{Math.min(Math.round((Number(item.totalRaised) / Number(item.fundingGoal)) * 100), 100)}%</span>
+                           </div>
+                           <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                             <div 
+                                className="bg-[#0EA885] h-full rounded-full transition-all duration-1000 ease-out" 
+                                style={{ width: `${Math.min((Number(item.totalRaised) / Number(item.fundingGoal)) * 100, 100)}%` }} 
+                             />
+                           </div>
+                         </div>
+                         
+                         <div className="mt-auto flex items-center justify-between border-t border-gray-50 pt-4">
+                           <div className="flex items-center gap-1.5 text-gray-500 text-xs">
+                             <Clock className="h-3.5 w-3.5" />
+                             {formatDeadline(item.deadline)}
+                           </div>
+                           <div className="text-sm font-bold text-[#0EA885]">
+                             Goal: {(Number(item.fundingGoal) / 1e18).toFixed(2)} ETH
+                           </div>
+                         </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-200">
+                  <Rocket className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500 font-medium">No funding items available.</p>
+                </div>
+              )}
+            </motion.div>
           )}
         </div>
       </div>

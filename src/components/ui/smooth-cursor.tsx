@@ -192,7 +192,7 @@ export function SmoothCursor({
       })
     }
 
-    // document.body.style.cursor = "none"
+    document.body.style.cursor = "none"
     window.addEventListener("mousemove", throttledMouseMove)
 
     return () => {

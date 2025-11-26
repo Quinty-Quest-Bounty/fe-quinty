@@ -2,159 +2,70 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { X } from "lucide-react";
-import { useState } from "react";
-
-const footerLinks = {
-  resources: [
-    { name: "Documentation", href: "https://quinty.gitbook.io/quinty-docs/" },
-    { name: "GitHub", href: "https://github.com/Quinty-Quest-Bounty" },  
-    { name: "Blog", href: "https://blog.quinty.io" },
-  ],
-  socials: [
-    { name: "X.com", href: "https://x.com/QuintyLabs", icon: X },
-  ],
-};
+import { X, Github, ArrowUpRight } from "lucide-react";
 
 export function Footer() {
-  const [email, setEmail] = useState("");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle newsletter signup
-    console.log("Newsletter signup:", email);
-    setEmail("");
-  };
-
   return (
-    <footer className="relative mt-8 sm:mt-10 md:mt-16">
-      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-0">
-        <div className="rounded-[2rem] sm:rounded-[2.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-500 p-6 sm:p-8">
-          {/* Logo */}
-          <div className="mb-8">
-            <Link href="/" className="inline-block">
-              <div className="relative h-10 w-10 sm:h-12 sm:w-12">
-                <Image
-                  src="/images/quinty-logo.png"
-                  alt="Quinty Logo"
-                  fill
-                  className="object-contain brightness-0"
+    <footer className="bg-white border-t border-gray-200 py-10">
+      <div className="container mx-auto px-4 md:px-6">
+        
+        <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+          
+          {/* Brand & Socials */}
+          <div className="flex flex-col sm:flex-row items-center gap-6">
+            <div className="flex items-center gap-2">
+              <div className="relative w-6 h-6">
+                <Image 
+                  src="/images/quinty-logo.png" 
+                  alt="Quinty" 
+                  fill 
+                  className="object-contain" 
+                  style={{ filter: 'brightness(0%)'}}
+
                 />
               </div>
-            </Link>
-          </div>
+              <span className="font-bold text-lg tracking-tight text-gray-900">Quinty</span>
+            </div>
 
-          {/* Newsletter Section */}
-          <div className="mb-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              {/* Title Left */}
-              <h3 className="text-xl sm:text-2xl font-medium text-foreground/80">
-                Stay updated
-              </h3>
+            <div className="hidden sm:block h-4 w-px bg-gray-200" />
 
-              {/* Email Input + Button Right on Desktop */}
-              <form
-                onSubmit={handleSubmit}
-                className="flex flex-col sm:flex-row gap-2 max-w-xl w-full sm:justify-end"
-              >
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Get the latest blog posts and updates from Quinty"
-                  className="flex-1 px-4 py-2.5 rounded-lg bg-gray-100/80 border border-gray-200/60 text-foreground/70 placeholder:text-foreground/40 focus:outline-none focus:border-[#0EA885]/40 focus:bg-white/80 transition-all duration-300 text-sm"
-                />
-
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 rounded-lg bg-[#0EA885]/10 hover:bg-[#0EA885]/20 text-[#0EA885] font-medium transition-all duration-300 text-sm whitespace-nowrap"
-                >
-                  Subscribe
-                </button>
-              </form>
+            <div className="flex items-center gap-3">
+               <a href="https://x.com/QuintyLabs" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-black transition-colors">
+                  <X className="w-4 h-4" />
+               </a>
+               <a href="https://github.com/Quinty-Quest-Bounty" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-black transition-colors">
+                  <Github className="w-4 h-4" />
+               </a>
             </div>
           </div>
 
-
-          {/* Footer Links Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-            {/* Resources */}
-            <div>
-              <h4 className="text-sm font-medium text-foreground/50 mb-3">
-                Resources
-              </h4>
-              <ul className="space-y-2">
-                {footerLinks.resources.map((link) => (
-                  <li key={link.name}>
-                    <a
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-foreground/70 hover:text-[#0EA885] transition-colors duration-200"
-                    >
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Socials */}
-            <div>
-              <h4 className="text-sm font-medium text-foreground/50 mb-3">
-                Socials
-              </h4>
-              <ul className="space-y-2">
-                {footerLinks.socials.map((link) => (
-                  <li key={link.name}>
-                    <a
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-foreground/70 hover:text-[#0EA885] transition-colors duration-200"
-                    >
-                      <link.icon className="h-4 w-4" />
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Status Badge */}
-          <div className="mb-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-yellow-100/60 border border-yellow-300/60">
-              <div className="w-2 h-2 rounded-full bg-yellow-500" />
-              <span className="text-xs font-medium text-foreground/70">
-                Under Heavy Development
-              </span>
-            </div>
-          </div>
-
-          {/* Bottom Bar */}
-          <div className="pt-4 border-t border-white/60 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <p className="text-xs text-foreground/40">
-              © Quinty {new Date().getFullYear()}
-            </p>
-            <div className="flex items-center gap-6">
-              <Link
-                href="/terms"
-                className="text-xs text-foreground/40 hover:text-[#0EA885] transition-colors duration-200"
-              >
-                Terms
-              </Link>
-              <Link
-                href="/privacy"
-                className="text-xs text-foreground/40 hover:text-[#0EA885] transition-colors duration-200"
-              >
-                Privacy
-              </Link>
-            </div>
-          </div>
+          {/* Resources Links - Horizontal */}
+          <nav className="flex flex-wrap justify-center gap-6 sm:gap-8">
+             <a href="https://quinty.gitbook.io/quinty-docs/" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-500 hover:text-[#0EA885] transition-colors">
+                Documentation
+             </a>
+             <Link href="/litepaper" className="text-sm font-medium text-gray-500 hover:text-[#0EA885] transition-colors">
+                Litepaper
+             </Link>
+          </nav>
         </div>
+
+        {/* Divider */}
+        <div className="h-px w-full bg-gray-100 my-8" />
+
+        {/* Bottom: Operational & Info */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-400">
+           <div className="flex items-center gap-2 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
+             <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></div>
+             <span className="font-medium text-gray-500">Operational on Base Sepolia</span>
+           </div>
+           
+           <div className="font-medium">
+              &copy; {new Date().getFullYear()} Quinty Labs
+           </div>
+        </div>
+
       </div>
-      <div className="h-8" />
     </footer>
   );
 }
