@@ -21,7 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Clock, Users, Trophy, Eye, Share2 } from "lucide-react";
+import { Clock, Users, Trophy, Eye, Share2, Target } from "lucide-react";
 import { useShare } from "@/hooks/useShare";
 
 // V2 Interfaces
@@ -148,41 +148,48 @@ export default function BountyCard({
           onClick={() => router.push(`/bounties/${bounty.id}`)}
         >
           <div className="flex flex-row">
-            {/* Image Section */}
-            {metadata?.images && metadata.images.length > 0 && (
-              <div className="relative w-64 h-40 overflow-hidden bg-muted flex-shrink-0">
+            {/* Image Section - with placeholder if no image */}
+            <div className="relative w-64 h-40 overflow-hidden flex-shrink-0">
+              {metadata?.images && metadata.images.length > 0 ? (
                 <img
                   src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
                   alt={metadata.title}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                 />
-                {/* Quick View and Share buttons overlay */}
-                <div className="absolute top-2 left-2 flex gap-1.5">
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setQuickView(true);
-                    }}
-                    className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white transition-all duration-300 border border-white/60"
-                  >
-                    <Eye className="h-4 w-4 text-[#0EA885]" />
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      shareLink(`/bounties/${bounty.id}`, "Share this bounty");
-                    }}
-                    className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white transition-all duration-300 border border-white/60"
-                  >
-                    <Share2 className="h-4 w-4 text-[#0EA885]" />
-                  </Button>
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+                  <div className="text-center">
+                    <Target className="h-12 w-12 text-blue-300 mx-auto mb-2" />
+                    <p className="text-xs text-blue-400 font-medium">Bounty #{bounty.id}</p>
+                  </div>
                 </div>
+              )}
+              {/* Quick View and Share buttons overlay */}
+              <div className="absolute top-2 left-2 flex gap-1.5">
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setQuickView(true);
+                  }}
+                  className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white transition-all duration-300 border border-white/60"
+                >
+                  <Eye className="h-4 w-4 text-[#0EA885]" />
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    shareLink(`/bounties/${bounty.id}`, "Share this bounty");
+                  }}
+                  className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white transition-all duration-300 border border-white/60"
+                >
+                  <Share2 className="h-4 w-4 text-[#0EA885]" />
+                </Button>
               </div>
-            )}
+            </div>
 
             <div className="flex-1 flex flex-col">
               <CardHeader className="pb-2">
@@ -366,41 +373,48 @@ export default function BountyCard({
           </Badge>
         </div>
 
-        {/* Image Section */}
-        {metadata?.images && metadata.images.length > 0 && (
-          <div className="relative w-full h-48 overflow-hidden bg-muted">
+        {/* Image Section - with placeholder if no image */}
+        <div className="relative w-full h-48 overflow-hidden">
+          {metadata?.images && metadata.images.length > 0 ? (
             <img
               src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
               alt={metadata.title}
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
             />
-            {/* Quick View and Share buttons overlay */}
-            <div className="absolute top-2 left-2 flex gap-1.5">
-              <Button
-                variant="secondary"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setQuickView(true);
-                }}
-                className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md transition-all duration-300 border border-white/60"
-              >
-                <Eye className="h-4 w-4 text-[#0EA885]" />
-              </Button>
-              <Button
-                variant="secondary"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  shareLink(`/bounties/${bounty.id}`, "Share this bounty");
-                }}
-                className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md transition-all duration-300 border border-white/60"
-              >
-                <Share2 className="h-4 w-4 text-[#0EA885]" />
-              </Button>
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+              <div className="text-center">
+                <Target className="h-16 w-16 text-blue-300 mx-auto mb-2" />
+                <p className="text-sm text-blue-400 font-medium">Bounty #{bounty.id}</p>
+              </div>
             </div>
+          )}
+          {/* Quick View and Share buttons overlay */}
+          <div className="absolute top-2 left-2 flex gap-1.5">
+            <Button
+              variant="secondary"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                setQuickView(true);
+              }}
+              className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md transition-all duration-300 border border-white/60"
+            >
+              <Eye className="h-4 w-4 text-[#0EA885]" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon"
+              onClick={(e) => {
+                e.stopPropagation();
+                shareLink(`/bounties/${bounty.id}`, "Share this bounty");
+              }}
+              className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md transition-all duration-300 border border-white/60"
+            >
+              <Share2 className="h-4 w-4 text-[#0EA885]" />
+            </Button>
           </div>
-        )}
+        </div>
 
         <CardHeader className="p-3 space-y-2">
           <div className="flex-1 min-w-0">
