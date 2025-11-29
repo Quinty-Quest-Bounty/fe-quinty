@@ -1,8 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { formatETH, formatAddress } from "../utils/web3";
+import {
+  getEthPriceInUSD,
+  convertEthToUSD,
+  formatUSD,
+} from "../utils/prices";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -82,6 +87,18 @@ export default function FundingCard({ funding, viewMode = "grid" }: FundingCardP
   const router = useRouter();
   const [quickView, setQuickView] = useState(false);
   const { shareLink } = useShare();
+  const [ethPrice, setEthPrice] = useState<number>(0);
+
+  // Fetch ETH price
+  useEffect(() => {
+    const fetchPrice = async () => {
+      const price = await getEthPriceInUSD();
+      setEthPrice(price);
+    };
+    fetchPrice();
+    const interval = setInterval(fetchPrice, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const isExpired = BigInt(Math.floor(Date.now() / 1000)) > funding.deadline;
 
@@ -203,12 +220,26 @@ export default function FundingCard({ funding, viewMode = "grid" }: FundingCardP
               <CardContent className="pt-0 pb-3 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1.5">
-                      <Coins className="h-3.5 w-3.5 text-primary" />
-                      <span className="text-lg font-bold text-primary">
-                        {getFundingAmount()}
-                      </span>
-                      <span className="text-xs font-medium text-primary">ETH</span>
+                    <div className="flex flex-col gap-0.5">
+                      <div className="flex items-center gap-1.5">
+                        <Coins className="h-3.5 w-3.5 text-primary" />
+                        <span className="text-lg font-bold text-primary">
+                          {getFundingAmount()}
+                        </span>
+                        <span className="text-xs font-medium text-primary">ETH</span>
+                      </div>
+                      {ethPrice > 0 && (
+                        <span className="text-[10px] text-primary/70 pl-[22px]">
+                          {formatUSD(convertEthToUSD(
+                            funding.type === "grant"
+                              ? Number(funding.totalFunds) / 1e18
+                              : funding.type === "crowdfunding"
+                              ? Number(funding.raisedAmount) / 1e18
+                              : Number(funding.raisedAmount) / 1e18,
+                            ethPrice
+                          ))}
+                        </span>
+                      )}
                     </div>
 
                     <Separator orientation="vertical" className="h-6" />
@@ -297,12 +328,34 @@ export default function FundingCard({ funding, viewMode = "grid" }: FundingCardP
                     {funding.type === "grant" ? "Total Budget" : "Raised"}
                   </p>
                   <p className="font-bold">{getFundingAmount()} ETH</p>
+                  {ethPrice > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      {formatUSD(convertEthToUSD(
+                        funding.type === "grant"
+                          ? Number(funding.totalFunds) / 1e18
+                          : funding.type === "crowdfunding"
+                          ? Number(funding.raisedAmount) / 1e18
+                          : Number(funding.raisedAmount) / 1e18,
+                        ethPrice
+                      ))}
+                    </p>
+                  )}
                 </div>
                 <div className="rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-sm shadow-sm p-2">
                   <p className="text-xs text-muted-foreground">
                     {funding.type === "grant" ? "Recipients" : "Goal"}
                   </p>
-                  <p className="font-bold">{getFundingGoal()}</p>
+                  <p className="font-bold">{getFundingGoal()}{funding.type !== "grant" && " ETH"}</p>
+                  {ethPrice > 0 && funding.type !== "grant" && (
+                    <p className="text-xs text-muted-foreground">
+                      {formatUSD(convertEthToUSD(
+                        funding.type === "crowdfunding"
+                          ? Number(funding.goal) / 1e18
+                          : Number(funding.fundingGoal) / 1e18,
+                        ethPrice
+                      ))}
+                    </p>
+                  )}
                 </div>
                 <div className="rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-sm shadow-sm p-2">
                   <p className="text-xs text-muted-foreground">Status</p>
@@ -422,10 +475,24 @@ export default function FundingCard({ funding, viewMode = "grid" }: FundingCardP
 
           {/* Amount Section */}
           <div className="flex items-center justify-between p-2 rounded-lg bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20">
-            <div className="flex items-center gap-1.5">
-              <Coins className="h-3.5 w-3.5 text-primary" />
-              <span className="text-base font-bold text-primary">{getFundingAmount()}</span>
-              <span className="text-xs font-medium text-primary">ETH</span>
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1.5">
+                <Coins className="h-3.5 w-3.5 text-primary" />
+                <span className="text-base font-bold text-primary">{getFundingAmount()}</span>
+                <span className="text-xs font-medium text-primary">ETH</span>
+              </div>
+              {ethPrice > 0 && (
+                <span className="text-[10px] text-primary/70 pl-[22px]">
+                  {formatUSD(convertEthToUSD(
+                    funding.type === "grant"
+                      ? Number(funding.totalFunds) / 1e18
+                      : funding.type === "crowdfunding"
+                      ? Number(funding.raisedAmount) / 1e18
+                      : Number(funding.raisedAmount) / 1e18,
+                    ethPrice
+                  ))}
+                </span>
+              )}
             </div>
             <Avatar className="h-5 w-5">
               <AvatarFallback className="text-[10px]">
@@ -488,12 +555,34 @@ export default function FundingCard({ funding, viewMode = "grid" }: FundingCardP
                   {funding.type === "grant" ? "Total Budget" : "Raised"}
                 </p>
                 <p className="font-bold">{getFundingAmount()} ETH</p>
+                {ethPrice > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {formatUSD(convertEthToUSD(
+                      funding.type === "grant"
+                        ? Number(funding.totalFunds) / 1e18
+                        : funding.type === "crowdfunding"
+                        ? Number(funding.raisedAmount) / 1e18
+                        : Number(funding.raisedAmount) / 1e18,
+                      ethPrice
+                    ))}
+                  </p>
+                )}
               </div>
               <div className="rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-sm shadow-sm p-2">
                 <p className="text-xs text-muted-foreground">
                   {funding.type === "grant" ? "Recipients" : "Goal"}
                 </p>
-                <p className="font-bold">{getFundingGoal()}</p>
+                <p className="font-bold">{getFundingGoal()}{funding.type !== "grant" && " ETH"}</p>
+                {ethPrice > 0 && funding.type !== "grant" && (
+                  <p className="text-xs text-muted-foreground">
+                    {formatUSD(convertEthToUSD(
+                      funding.type === "crowdfunding"
+                        ? Number(funding.goal) / 1e18
+                        : Number(funding.fundingGoal) / 1e18,
+                      ethPrice
+                    ))}
+                  </p>
+                )}
               </div>
               <div className="rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-sm shadow-sm p-2">
                 <p className="text-xs text-muted-foreground">Status</p>

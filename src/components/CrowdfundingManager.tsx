@@ -16,6 +16,11 @@ import {
   CampaignStatus,
 } from "../utils/contracts";
 import { parseETH, formatETH, wagmiConfig, formatAddress } from "../utils/web3";
+import {
+  getEthPriceInUSD,
+  convertEthToUSD,
+  formatUSD,
+} from "../utils/prices";
 import { useAlertDialog } from "@/hooks/useAlertDialog";
 import { useShare } from "@/hooks/useShare";
 import { uploadToIpfs } from "../utils/ipfs";
@@ -124,8 +129,22 @@ export default function CrowdfundingManager() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
+  // ETH price state
+  const [ethPrice, setEthPrice] = useState<number>(0);
+
   const contractAddress = CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Crowdfunding;
   const zkVerificationAddress = CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].ZKVerification;
+
+  // Fetch ETH price
+  useEffect(() => {
+    const fetchPrice = async () => {
+      const price = await getEthPriceInUSD();
+      setEthPrice(price);
+    };
+    fetchPrice();
+    const interval = setInterval(fetchPrice, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Check ZK verification
   useEffect(() => {
@@ -793,9 +812,16 @@ export default function CrowdfundingManager() {
             <div className="space-y-2">
               <div className="flex justify-between text-sm font-semibold">
                 <span>Funding Progress</span>
-                <span>
-                  {formatETH(selectedCampaign.totalRaised)} / {formatETH(selectedCampaign.fundingGoal)} ETH
-                </span>
+                <div className="text-right">
+                  <div>
+                    {formatETH(selectedCampaign.totalRaised)} / {formatETH(selectedCampaign.fundingGoal)} ETH
+                  </div>
+                  {ethPrice > 0 && (
+                    <div className="text-xs text-muted-foreground font-normal">
+                      {formatUSD(convertEthToUSD(Number(selectedCampaign.totalRaised) / 1e18, ethPrice))} / {formatUSD(convertEthToUSD(Number(selectedCampaign.fundingGoal) / 1e18, ethPrice))}
+                    </div>
+                  )}
+                </div>
               </div>
               <Progress value={Math.min(progress, 100)} />
               <div className="flex justify-between text-xs text-muted-foreground">
@@ -828,9 +854,16 @@ export default function CrowdfundingManager() {
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium text-sm">{milestone.description}</span>
-                        <Badge variant="outline" className="ml-2">
-                          {formatETH(milestone.amount)} ETH
-                        </Badge>
+                        <div className="text-right ml-2">
+                          <Badge variant="outline">
+                            {formatETH(milestone.amount)} ETH
+                          </Badge>
+                          {ethPrice > 0 && (
+                            <div className="text-xs text-muted-foreground mt-0.5">
+                              {formatUSD(convertEthToUSD(Number(milestone.amount) / 1e18, ethPrice))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div className="text-xs text-muted-foreground mb-2">
                         Status: {milestoneStatusLabels[milestone.status]}
