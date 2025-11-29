@@ -31,6 +31,10 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "../../components/ui/card";
+import {
+  fetchMetadataFromIpfs,
+  BountyMetadata,
+} from "../../utils/ipfs";
 
 type DashboardSection = "all" | "bounties" | "airdrops" | "funding";
 
@@ -97,6 +101,7 @@ export default function DashboardPage() {
   const [airdrops, setAirdrops] = useState<Airdrop[]>([]);
   const [fundingItems, setFundingItems] = useState<FundingItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [bountyMetadata, setBountyMetadata] = useState<Map<number, BountyMetadata>>(new Map());
 
   // Read bounty counter
   const { data: bountyCounter } = useReadContract({
@@ -191,9 +196,35 @@ export default function DashboardPage() {
         setLoading(false);
       }
     };
-    loadBounties(); 
+    loadBounties();
     return () => { isMounted = false; };
   }, [bountyCounter]);
+
+  // Load metadata for bounties
+  useEffect(() => {
+    const loadMetadata = async () => {
+      const newMetadata = new Map<number, BountyMetadata>();
+
+      for (const bounty of bounties) {
+        if (bounty.metadataCid && !bountyMetadata.has(bounty.id)) {
+          try {
+            const meta = await fetchMetadataFromIpfs(bounty.metadataCid);
+            newMetadata.set(bounty.id, meta);
+          } catch (error) {
+            console.error(`Failed to load metadata for bounty ${bounty.id}:`, error);
+          }
+        }
+      }
+
+      if (newMetadata.size > 0) {
+        setBountyMetadata(prev => new Map([...prev, ...newMetadata]));
+      }
+    };
+
+    if (bounties.length > 0) {
+      loadMetadata();
+    }
+  }, [bounties]);
 
   // Load airdrops
   useEffect(() => {
@@ -494,42 +525,65 @@ export default function DashboardPage() {
               
               {bounties.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                  {bounties.slice(0, activeSection === "all" ? 4 : undefined).map((bounty) => (
+                  {bounties.slice(0, activeSection === "all" ? 4 : undefined).map((bounty) => {
+                    const metadata = bountyMetadata.get(bounty.id);
+                    const title = metadata?.title || bounty.description.split("\n")[0] || "Untitled Bounty Task";
+
+                    return (
                     <div
                       key={bounty.id}
                       onClick={() => router.push(`/bounties/${bounty.id}`)}
-                      className="group cursor-pointer rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full"
+                      className="group cursor-pointer rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col"
                     >
-                      <div className="p-5 flex flex-col h-full">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                             <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                      {/* Image Section - with placeholder if no image */}
+                      <div className="relative w-full h-32 overflow-hidden">
+                        {metadata?.images && metadata.images.length > 0 ? (
+                          <img
+                            src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
+                            alt={title}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
+                            <div className="text-center">
+                              <Target className="h-10 w-10 text-blue-300 mx-auto mb-1.5" />
+                              <p className="text-[10px] text-blue-400 font-medium">Bounty #{bounty.id}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-3">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center gap-1.5">
+                             <div className="h-6 w-6 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-[10px] font-bold shadow-sm">
                                 #{bounty.id}
                              </div>
-                             <span className="text-xs text-gray-400 font-medium">Bounty</span>
+                             <span className="text-[10px] text-gray-400 font-medium">Bounty</span>
                           </div>
                           {getStatusBadge(bounty.status)}
                         </div>
-                        
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1 line-clamp-2 leading-tight group-hover:text-[#0EA885] transition-colors">
-                          {bounty.description || "Untitled Bounty Task"}
+
+                        <h3 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2 leading-tight group-hover:text-[#0EA885] transition-colors">
+                          {title}
                         </h3>
-                        <p className="text-xs text-gray-400 mb-4 truncate">
+                        <p className="text-[10px] text-gray-400 mb-3 truncate">
                            Creator: {bounty.creator.substring(0, 6)}...{bounty.creator.substring(38)}
                         </p>
-                        
-                        <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
-                          <div className="flex items-center gap-1.5 text-gray-500 text-xs bg-gray-50 px-2 py-1 rounded-md">
+
+                        <div className="pt-3 border-t border-gray-50 flex items-center justify-between">
+                          <div className="flex items-center gap-1 text-gray-500 text-[10px] bg-gray-50 px-1.5 py-1 rounded-md">
                             <Clock className="h-3 w-3" />
                             {formatDeadline(bounty.deadline)}
                           </div>
-                          <div className="text-sm font-bold text-gray-900">
-                            {(Number(bounty.amount) / 1e18).toFixed(3)} <span className="text-xs font-medium text-gray-500">ETH</span>
+                          <div className="text-xs font-bold text-gray-900">
+                            {(Number(bounty.amount) / 1e18).toFixed(3)} <span className="text-[10px] font-medium text-gray-500">ETH</span>
                           </div>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-200">
@@ -565,32 +619,42 @@ export default function DashboardPage() {
                       <div
                         key={airdrop.id}
                         onClick={() => router.push(`/airdrops/${airdrop.id}`)}
-                        className="group cursor-pointer rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full"
+                        className="group cursor-pointer rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col"
                       >
-                        <div className="p-5 flex flex-col h-full">
-                           <div className="flex items-start justify-between mb-3">
-                              <div className="h-8 w-8 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-600 border border-yellow-100">
-                                 <Zap className="h-4 w-4" />
+                        {/* Placeholder Image for Airdrops */}
+                        <div className="relative w-full h-32 overflow-hidden">
+                          <div className="w-full h-full bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 flex items-center justify-center">
+                            <div className="text-center">
+                              <Zap className="h-10 w-10 text-yellow-300 mx-auto mb-1.5" />
+                              <p className="text-[10px] text-yellow-400 font-medium">Airdrop #{airdrop.id}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-3">
+                           <div className="flex items-start justify-between mb-2">
+                              <div className="h-6 w-6 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-600 border border-yellow-100">
+                                 <Zap className="h-3.5 w-3.5" />
                               </div>
                               <Badge variant="secondary" className="bg-gray-50 text-gray-600 border-0 font-normal text-[10px]">
                                  {Number(airdrop.totalRecipients)} spots
                               </Badge>
                            </div>
-                           
-                           <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate group-hover:text-yellow-600 transition-colors">
+
+                           <h3 className="text-sm font-semibold text-gray-900 mb-1 truncate group-hover:text-yellow-600 transition-colors">
                               {airdrop.title || `Airdrop #${airdrop.id}`}
                            </h3>
-                           <p className="text-xs text-gray-400 mb-4 truncate">
+                           <p className="text-[10px] text-gray-400 mb-3 truncate">
                               Creator: {airdrop.creator.substring(0, 6)}...{airdrop.creator.substring(38)}
                            </p>
-                           
-                           <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
-                              <div className="flex items-center gap-1.5 text-gray-500 text-xs">
-                                 <Clock className="h-3.5 w-3.5" />
+
+                           <div className="pt-3 border-t border-gray-50 flex items-center justify-between">
+                              <div className="flex items-center gap-1 text-gray-500 text-[10px]">
+                                 <Clock className="h-3 w-3" />
                                  {formatDeadline(airdrop.deadline)}
                               </div>
-                              <div className="text-sm font-bold text-gray-900">
-                                 {(Number(airdrop.amount) / 1e18).toFixed(2)} <span className="text-xs font-medium text-gray-500">ETH</span>
+                              <div className="text-xs font-bold text-gray-900">
+                                 {(Number(airdrop.amount) / 1e18).toFixed(2)} <span className="text-[10px] font-medium text-gray-500">ETH</span>
                               </div>
                            </div>
                         </div>
@@ -627,41 +691,41 @@ export default function DashboardPage() {
                     <div
                       key={`${item.type}-${item.id}`}
                       onClick={() => router.push(`/funding/${item.type}/${item.id}`)}
-                      className="group cursor-pointer rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full"
+                      className="group cursor-pointer rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col"
                     >
-                      <div className="p-5 flex flex-col h-full">
-                         <div className="flex items-start justify-between mb-3">
+                      <div className="p-3">
+                         <div className="flex items-start justify-between mb-2">
                             {getFundingTypeBadge(item.type)}
-                            <ArrowUpRight className="h-4 w-4 text-gray-300 group-hover:text-[#0EA885] transition-colors" />
+                            <ArrowUpRight className="h-3.5 w-3.5 text-gray-300 group-hover:text-[#0EA885] transition-colors" />
                          </div>
-                         
-                         <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate group-hover:text-purple-600 transition-colors">
+
+                         <h3 className="text-sm font-semibold text-gray-900 mb-1 truncate group-hover:text-purple-600 transition-colors">
                            {item.title}
                          </h3>
-                         <p className="text-xs text-gray-400 mb-3 truncate">
+                         <p className="text-[10px] text-gray-400 mb-2 truncate">
                            Creator: {item.creator.substring(0, 6)}...{item.creator.substring(38)}
                          </p>
-                         
-                         <div className="space-y-1.5 mb-4">
+
+                         <div className="space-y-1 mb-3">
                            <div className="flex justify-between text-[10px] font-medium text-gray-500">
                               <span>Progress</span>
                               <span>{Math.min(Math.round((Number(item.totalRaised) / Number(item.fundingGoal)) * 100), 100)}%</span>
                            </div>
                            <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                             <div 
-                                className="bg-[#0EA885] h-full rounded-full transition-all duration-1000 ease-out" 
-                                style={{ width: `${Math.min((Number(item.totalRaised) / Number(item.fundingGoal)) * 100, 100)}%` }} 
+                             <div
+                                className="bg-[#0EA885] h-full rounded-full transition-all duration-1000 ease-out"
+                                style={{ width: `${Math.min((Number(item.totalRaised) / Number(item.fundingGoal)) * 100, 100)}%` }}
                              />
                            </div>
                          </div>
-                         
-                         <div className="mt-auto flex items-center justify-between border-t border-gray-50 pt-4">
-                           <div className="flex items-center gap-1.5 text-gray-500 text-xs">
-                             <Clock className="h-3.5 w-3.5" />
+
+                         <div className="flex items-center justify-between border-t border-gray-50 pt-3">
+                           <div className="flex items-center gap-1 text-gray-500 text-[10px]">
+                             <Clock className="h-3 w-3" />
                              {formatDeadline(item.deadline)}
                            </div>
-                           <div className="text-sm font-bold text-[#0EA885]">
-                             Goal: {(Number(item.fundingGoal) / 1e18).toFixed(2)} ETH
+                           <div className="text-xs font-bold text-[#0EA885]">
+                             {(Number(item.fundingGoal) / 1e18).toFixed(2)} ETH
                            </div>
                          </div>
                       </div>

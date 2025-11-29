@@ -129,12 +129,18 @@ export default function Home() {
       <main className="relative z-10">
         {/* --- Hero Section --- */}
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-          {/* Background Elements */}
-          <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
-             <div className="absolute -top-[30%] -right-[10%] w-[800px] h-[800px] bg-gradient-to-br from-[#0EA885]/20 to-blue-400/20 rounded-full blur-[120px] opacity-60 animate-blob mix-blend-multiply dark:from-[#0EA885]/10 dark:to-blue-400/10" />
-             <div className="absolute top-[20%] -left-[10%] w-[600px] h-[600px] bg-gradient-to-tr from-emerald-300/20 to-purple-400/20 rounded-full blur-[100px] opacity-60 animate-blob animation-delay-2000 mix-blend-multiply dark:from-emerald-300/10 dark:to-purple-400/10" />
-             <div className="absolute -bottom-[20%] left-[20%] w-[600px] h-[600px] bg-gradient-to-t from-blue-300/20 to-[#0EA885]/20 rounded-full blur-[120px] opacity-60 animate-blob animation-delay-4000 mix-blend-multiply dark:from-blue-300/10 dark:to-[#0EA885]/10" />
-             <DotPattern className="absolute inset-0 h-full w-full fill-gray-200/50 mask-radial-gradient dark:fill-white/5" />
+          {/* Sleek Minimal Background */}
+          <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+            {/* Single elegant gradient mesh */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,168,133,0.08),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(14,168,133,0.12),rgba(0,0,0,0))]" />
+
+            {/* Subtle noise texture for depth */}
+            <div className="absolute inset-0 opacity-[0.015] dark:opacity-[0.02]" style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' /%3E%3C/svg%3E")`
+            }} />
+
+            {/* Minimal grid - very subtle */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000003_1px,transparent_1px),linear-gradient(to_bottom,#00000003_1px,transparent_1px)] bg-[size:80px_80px] [mask-image:radial-gradient(ellipse_100%_80%_at_50%_50%,#000_40%,transparent_80%)] dark:bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)]" />
           </div>
 
           <div className="container px-4 mx-auto text-center relative z-10 py-20 lg:py-28">
@@ -173,8 +179,8 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-lg sm:text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto mb-12 leading-relaxed font-medium dark:text-gray-400"
             >
-              The trustless collaboration layer. 
-              Escrow payments, build on-chain reputation, and resolve disputes without intermediaries.
+               Escrow separates the committed from the curious. 
+               Quinty’s ensure funds are locked until work is verified—eliminating risk for both creators and funders.
             </motion.p>
 
             <motion.div
@@ -203,11 +209,11 @@ export default function Home() {
             </motion.div>
           </div>
 
-          {/* Floating Elements (Parallax) - Dark Mode */}
+          {/* Floating Elements (Parallax) - Sleek */}
           <motion.div style={{ y }} className="absolute top-40 left-[5%] lg:left-[15%] hidden lg:block pointer-events-none">
-            <div className="bg-white/80 backdrop-blur-xl p-5 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-white/40 rotate-[-6deg] hover:rotate-0 transition-transform duration-500 dark:bg-black/40 dark:border-white/10 dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+            <div className="bg-white/70 backdrop-blur-2xl p-5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.06)] border border-gray-200/60 rotate-[-6deg] hover:rotate-0 transition-transform duration-500 dark:bg-black/40 dark:border-white/10 dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
               <div className="flex items-center gap-3">
-                 <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center dark:bg-green-500/20 border border-green-100 dark:border-green-500/20">
+                 <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center dark:bg-green-500/10 border border-green-100/50 dark:border-green-500/20">
                     <Lock className="h-5 w-5 text-green-600 dark:text-green-400" />
                  </div>
                  <div>
@@ -217,11 +223,11 @@ export default function Home() {
               </div>
             </div>
           </motion.div>
-          
+
           <motion.div style={{ y: useTransform(y, val => val * -0.8) }} className="absolute bottom-40 right-[5%] lg:right-[12%] hidden lg:block pointer-events-none">
-            <div className="bg-white/80 backdrop-blur-xl p-5 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-white/40 rotate-[6deg] hover:rotate-0 transition-transform duration-500 dark:bg-black/40 dark:border-white/10 dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+            <div className="bg-white/70 backdrop-blur-2xl p-5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.06)] border border-gray-200/60 rotate-[6deg] hover:rotate-0 transition-transform duration-500 dark:bg-black/40 dark:border-white/10 dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
               <div className="flex items-center gap-3">
-                 <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center dark:bg-purple-500/20 border border-purple-100 dark:border-purple-500/20">
+                 <div className="h-10 w-10 rounded-full bg-purple-50 flex items-center justify-center dark:bg-purple-500/10 border border-purple-100/50 dark:border-purple-500/20">
                     <BadgeCheck className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                  </div>
                  <div>
@@ -234,13 +240,15 @@ export default function Home() {
         </section>
 
         {/* Platform Preview - Cinematic Section */}
-        <section className="min-h-screen flex flex-col items-center justify-center py-24 bg-gradient-to-b from-white via-slate-50 to-gray-100 relative overflow-hidden perspective-1000 dark:from-black dark:via-gray-950 dark:to-gray-900">
-          
-          {/* Ambient Background Effects */}
+        <section className="min-h-screen flex flex-col items-center justify-center py-24 bg-gradient-to-b from-gray-50/50 to-white relative overflow-hidden perspective-1000 dark:from-gray-950/50 dark:to-black">
+
+          {/* Minimal Elegant Background */}
           <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
-             {/* Dynamic gradient orbs */}
-             <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-b from-emerald-100/40 to-blue-100/40 rounded-full blur-[120px] animate-pulse-slow dark:from-emerald-500/10 dark:to-blue-500/10" />
-             <DotPattern className="absolute inset-0 h-full w-full fill-gray-200/40 mask-radial-gradient dark:fill-white/5" />
+             {/* Single soft gradient */}
+             <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_40%,rgba(14,168,133,0.04),transparent)] dark:bg-[radial-gradient(ellipse_60%_50%_at_50%_40%,rgba(14,168,133,0.06),transparent)]" />
+
+             {/* Minimal dot pattern */}
+             <DotPattern className="absolute inset-0 h-full w-full fill-gray-200/20 [mask-image:radial-gradient(600px_circle_at_center,white,transparent)] dark:fill-white/[0.02]" />
           </div>
 
           <div className="container px-4 mx-auto relative z-20">
@@ -256,11 +264,10 @@ export default function Home() {
                 </div>
                 
                 <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-gray-900 to-gray-600 mb-8 tracking-tight drop-shadow-sm dark:from-white dark:to-gray-400">
-                   The Future of Work <br /> is Trustless.
+                   The Future<br /> is Trustless.
                 </h2>
                 <p className="text-gray-600 max-w-2xl mx-auto text-lg md:text-xl leading-relaxed font-medium dark:text-gray-400">
-                   See how Quinty replaces intermediaries with smart contracts. 
-                   From bounty creation to dispute resolution.
+                   See how Quinty replaces intermediaries with smart contracts.   
                 </p>
              </motion.div>
 
@@ -284,7 +291,7 @@ export default function Home() {
                      <div className="flex-1 flex justify-center">
                         <div className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-white border border-gray-200 shadow-sm transition-shadow group-hover:shadow-md dark:bg-black/50 dark:border-gray-700">
                            <Lock className="w-2.5 h-2.5 text-gray-400 dark:text-gray-500" />
-                           <span className="text-[10px] font-medium text-gray-600 font-mono tracking-wide dark:text-gray-400">quinty.xyz</span>
+                           <span className="text-[10px] font-medium text-gray-600 font-mono tracking-wide dark:text-gray-400">quinty.io</span>
                         </div>
                      </div>
                      <div className="w-10" /> {/* Spacer */}
@@ -310,7 +317,16 @@ export default function Home() {
         </section>
 
         {/* --- Core Capabilities Section --- */}
-        <section id="features" className="py-24 bg-white dark:bg-[#050505] relative overflow-hidden">
+        <section id="features" className="py-24 bg-white dark:bg-black relative overflow-hidden">
+          {/* Clean Minimal Background */}
+          <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+            {/* Soft radial gradient */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_100%_at_50%_0%,rgba(14,168,133,0.03),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_100%_at_50%_0%,rgba(14,168,133,0.05),transparent_50%)]" />
+
+            {/* Ultra-minimal grid */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000002_1px,transparent_1px),linear-gradient(to_bottom,#00000002_1px,transparent_1px)] bg-[size:120px_120px] [mask-image:linear-gradient(to_bottom,black_20%,transparent_90%)] dark:bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)]" />
+          </div>
+
           <div className="container px-4 mx-auto relative z-10">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
@@ -386,7 +402,7 @@ export default function Home() {
                        <div className="h-10 w-10 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600 mb-3 border border-purple-100 dark:bg-purple-500/20 dark:text-purple-400 dark:border-purple-500/20">
                           <BadgeCheck className="h-5 w-5" />
                        </div>
-                       <h3 className="text-lg font-bold text-slate-900 mb-1 dark:text-white">Soulbound Rep</h3>
+                       <h3 className="text-lg font-bold text-slate-900 mb-1 dark:text-white">Soulbound Reputation</h3>
                        <p className="text-sm text-slate-500 dark:text-gray-400">Immutable work history.</p>
                     </div>
                     {/* Mini UI */}
@@ -411,8 +427,8 @@ export default function Home() {
                        <div className="h-10 w-10 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600 mb-3 border border-orange-100 dark:bg-orange-500/20 dark:text-orange-400 dark:border-orange-500/20">
                           <Vote className="h-5 w-5" />
                        </div>
-                       <h3 className="text-lg font-bold text-slate-900 mb-1 dark:text-white">Community Court</h3>
-                       <p className="text-sm text-slate-500 dark:text-gray-400">Stake-weighted resolution.</p>
+                       <h3 className="text-lg font-bold text-slate-900 mb-1 dark:text-white">Community Disputes</h3>
+                       <p className="text-sm text-slate-500 dark:text-gray-400">No biased moderators. Disputes are resolved by stake-weighted community votes.</p>
                     </div>
                     {/* Mini UI */}
                     <div className="bg-white rounded-lg border border-slate-100 p-3 shadow-sm flex justify-center gap-1 dark:bg-black/40 dark:border-white/5 dark:group-hover:border-orange-500/30">
@@ -423,7 +439,7 @@ export default function Home() {
                  </div>
               </motion.div>
 
-              {/* Feature 4: Grants (Large) */}
+              {/* Feature 4: Grants Without Friction (Large) */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -434,11 +450,11 @@ export default function Home() {
                 <div className="flex flex-col h-full justify-between">
                    <div className="flex items-start justify-between mb-4">
                       <div>
-                         <h3 className="text-lg font-bold text-slate-900 mb-1 dark:text-white">Milestone-Based Grants</h3>
-                         <p className="text-sm text-slate-500 max-w-md dark:text-gray-400">Automated payouts triggered by milestone completion. Capital efficiency.</p>
+                         <h3 className="text-lg font-bold text-slate-900 mb-1 dark:text-white">Grants Without Friction</h3>
+                         <p className="text-sm text-slate-500 max-w-md dark:text-gray-400">VCs and orgs can fund selected builders directly. Applicants claim verified grants with progress tracked on-chain.</p>
                       </div>
                       <div className="h-10 w-10 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-500/20">
-                         <Coins className="h-5 w-5" />
+                         <Landmark className="h-5 w-5" />
                       </div>
                    </div>
                    {/* Mini UI */}
@@ -448,15 +464,76 @@ export default function Home() {
                             <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
                             <span className="text-xs font-bold text-slate-700 dark:text-gray-300">Grant #402 Active</span>
                          </div>
-                         <span className="text-[10px] font-mono text-slate-400 dark:text-gray-500">2/3 Milestones</span>
+                         <span className="text-[10px] font-mono text-slate-400 dark:text-gray-500">Builder Verified</span>
                       </div>
                       <div className="flex gap-1 h-2">
                          <div className="flex-1 bg-emerald-500 rounded-l-full shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
                          <div className="flex-1 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
+                         <div className="flex-1 bg-emerald-500 rounded-r-full shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
+                      </div>
+                   </div>
+                </div>
+              </motion.div>
+
+              {/* Feature 5: Anti-Rug Crowdfunding (Large) */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4 }}
+                className="col-span-1 md:col-span-2 group relative overflow-hidden rounded-xl border border-slate-200 bg-white/50 p-6 hover:border-teal-200 transition-all duration-300 dark:border-white/10 dark:bg-white/5 dark:hover:border-teal-500/50 dark:hover:bg-white/[0.07]"
+              >
+                <div className="flex flex-col h-full justify-between">
+                   <div className="flex items-start justify-between mb-4">
+                      <div>
+                         <h3 className="text-lg font-bold text-slate-900 mb-1 dark:text-white">Anti-Rug Crowdfunding</h3>
+                         <p className="text-sm text-slate-500 max-w-md dark:text-gray-400">Milestone-based funding ensures accountability. If goals aren't met, contributors get their ETH back automatically.</p>
+                      </div>
+                      <div className="h-10 w-10 rounded-lg bg-teal-100 flex items-center justify-center text-teal-600 dark:bg-teal-500/20 dark:text-teal-400 border border-teal-100 dark:border-teal-500/20">
+                         <Shield className="h-5 w-5" />
+                      </div>
+                   </div>
+                   {/* Mini UI */}
+                   <div className="bg-white rounded-lg border border-slate-100 p-3 shadow-sm mt-4 group-hover:shadow-md transition-shadow dark:bg-black/40 dark:border-white/5 dark:group-hover:border-teal-500/30">
+                      <div className="flex justify-between items-center mb-2">
+                         <div className="flex items-center gap-2">
+                            <Shield className="h-3.5 w-3.5 text-teal-500" />
+                            <span className="text-xs font-bold text-slate-700 dark:text-gray-300">Refund Protection Active</span>
+                         </div>
+                         <span className="text-[10px] font-mono text-slate-400 dark:text-gray-500">1/3 Milestones</span>
+                      </div>
+                      <div className="flex gap-1 h-2">
+                         <div className="flex-1 bg-teal-500 rounded-l-full shadow-[0_0_8px_rgba(20,184,166,0.4)]" />
+                         <div className="flex-1 bg-slate-100 dark:bg-gray-800" />
                          <div className="flex-1 bg-slate-100 rounded-r-full dark:bg-gray-800" />
                       </div>
                    </div>
                 </div>
+              </motion.div>
+
+              {/* Feature 6: Airdrop Bounties & LFG Mode (Small) */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.5 }}
+                className="col-span-1 group relative overflow-hidden rounded-xl border border-slate-200 bg-white/50 p-6 hover:border-blue-200 transition-all duration-300 dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/50 dark:hover:bg-white/[0.07]"
+              >
+                 <div className="flex flex-col h-full justify-between">
+                    <div className="mb-4">
+                       <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 mb-3 border border-blue-100 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/20">
+                          <Rocket className="h-5 w-5" />
+                       </div>
+                       <h3 className="text-lg font-bold text-slate-900 mb-1 dark:text-white">Airdrop Bounties & LFG Mode</h3>
+                       <p className="text-sm text-slate-500 dark:text-gray-400">Launch your campaign, grow your movement, or raise flexible startup funds. Everything transparent.</p>
+                    </div>
+                    {/* Mini UI */}
+                    <div className="bg-white rounded-lg border border-slate-100 p-2 shadow-sm text-center dark:bg-black/40 dark:border-white/5 dark:group-hover:border-blue-500/30">
+                       <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-50 text-[10px] font-bold text-blue-600 border border-blue-100 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30">
+                          <Zap className="h-3 w-3" /> Campaign Live
+                       </span>
+                    </div>
+                 </div>
               </motion.div>
               
               {/* Social Verification - Full Width Panel */}
@@ -470,12 +547,12 @@ export default function Home() {
                   <div className="max-w-lg">
                      <div className="flex items-center gap-2 mb-3">
                        <Globe className="w-4 h-4 text-blue-500 dark:text-blue-400" />
-                       <span className="text-xs font-bold text-blue-500 uppercase tracking-wide dark:text-blue-400">ZK Identity</span>
+                       <span className="text-xs font-bold text-blue-500 uppercase tracking-wide dark:text-blue-400">Social Verification</span>
                      </div>
-                     <h3 className="text-xl font-bold text-slate-900 mb-2 dark:text-white">Connect your Socials. Privately.</h3>
+                     <h3 className="text-xl font-bold text-slate-900 mb-2 dark:text-white">Proof you’re really you.</h3>
                      <p className="text-sm text-slate-500 leading-relaxed dark:text-gray-400">
-                       Link your X (Twitter) account to your on-chain identity using Zero-Knowledge proofs. 
-                       Prove ownership without doxxing your wallet address history.
+                       Link your X (Twitter) account to your on-chain identity.
+                       Prove ownership without doxxing.
                      </p>
                   </div>
                   
@@ -483,15 +560,15 @@ export default function Home() {
                      <div className="flex items-center gap-3 bg-white pl-4 pr-6 py-3 rounded-full border border-slate-200 shadow-sm group-hover:border-blue-200 transition-colors dark:bg-black/40 dark:border-white/10 dark:group-hover:border-blue-500/30">
                         <div className="relative">
                            <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden dark:bg-gray-800">
-                              <Image src="/images/quinty-logo.png" alt="User" fill className="object-contain p-1.5" />
+                              <Image src="/images/quinty-logo.png" alt="User" fill className="object-contain p-1.5" style={{ filter: 'brightness(0%)'}} />
                            </div>
                            <div className="absolute -bottom-1 -right-1 bg-green-500 text-white p-0.5 rounded-full border-2 border-white dark:border-black">
                               <Check className="w-2.5 h-2.5" />
                            </div>
                         </div>
                         <div>
-                           <div className="text-sm font-bold text-slate-900 dark:text-white">@quinty_xyz</div>
-                           <div className="text-[10px] text-slate-400 font-mono dark:text-gray-500">Verified via ZK-Snark</div>
+                           <div className="text-sm font-bold text-slate-900 dark:text-white">@QuintyLabs</div>
+                           <div className="text-[10px] text-slate-400 font-mono dark:text-gray-500">Verified via X</div>
                         </div>
                         <div className="ml-4 h-8 w-px bg-slate-100 dark:bg-white/10" />
                         <Button size="sm" variant="ghost" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 text-xs h-auto py-1.5 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-500/10">
@@ -505,7 +582,16 @@ export default function Home() {
         </section>
 
         {/* --- Protocol Registry Section --- */}
-        <section className="py-16 border-t border-slate-100 bg-white relative dark:border-white/5 dark:bg-[#050505]">
+        <section className="py-16 border-t border-gray-100 bg-gradient-to-b from-gray-50/30 to-white relative dark:border-white/5 dark:from-gray-950/30 dark:to-black overflow-hidden">
+           {/* Minimal refined background */}
+           <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+             {/* Subtle centered gradient */}
+             <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_50%_50%,rgba(14,168,133,0.02),transparent)] dark:bg-[radial-gradient(ellipse_50%_50%_at_50%_50%,rgba(14,168,133,0.04),transparent)]" />
+
+             {/* Minimal dot pattern */}
+             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#00000002_1px,transparent_1px)] bg-[size:40px_40px] dark:bg-[radial-gradient(circle_at_center,#ffffff02_1px,transparent_1px)]" />
+           </div>
+
            <div className="container px-4 mx-auto max-w-6xl relative z-10">
               {/* Compact Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
