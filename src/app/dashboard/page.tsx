@@ -35,6 +35,11 @@ import {
   fetchMetadataFromIpfs,
   BountyMetadata,
 } from "../../utils/ipfs";
+import {
+  getEthPriceInUSD,
+  convertEthToUSD,
+  formatUSD,
+} from "../../utils/prices";
 
 type DashboardSection = "all" | "bounties" | "airdrops" | "funding";
 
@@ -94,6 +99,8 @@ const StatCard = ({ title, value, trend, label, icon: Icon, color }: { title: st
   </div>
 );
 
+const ITEMS_PER_PAGE = 20;
+
 export default function DashboardPage() {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<DashboardSection>("all");
@@ -102,6 +109,28 @@ export default function DashboardPage() {
   const [fundingItems, setFundingItems] = useState<FundingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [bountyMetadata, setBountyMetadata] = useState<Map<number, BountyMetadata>>(new Map());
+
+  // Pagination state
+  const [bountyPage, setBountyPage] = useState(1);
+  const [airdropPage, setAirdropPage] = useState(1);
+  const [fundingPage, setFundingPage] = useState(1);
+  const [loadingBounties, setLoadingBounties] = useState(false);
+  const [loadingAirdrops, setLoadingAirdrops] = useState(false);
+  const [loadingFunding, setLoadingFunding] = useState(false);
+
+  // ETH price state
+  const [ethPrice, setEthPrice] = useState<number>(0);
+
+  // Fetch ETH price on mount and refresh every minute
+  useEffect(() => {
+    const fetchPrice = async () => {
+      const price = await getEthPriceInUSD();
+      setEthPrice(price);
+    };
+    fetchPrice();
+    const interval = setInterval(fetchPrice, 60000); // Refresh every 60 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   // Read bounty counter
   const { data: bountyCounter } = useReadContract({
@@ -138,15 +167,23 @@ export default function DashboardPage() {
     functionName: "campaignCounter",
   });
 
-  // Load bounties
+  // Load bounties with pagination
   useEffect(() => {
     let isMounted = true;
     const loadBounties = async () => {
       if (!bountyCounter || !CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]) return;
+
+      setLoadingBounties(true);
       const count = Number(bountyCounter);
+
+      // Calculate range for current page (load from newest to oldest)
+      const startIndex = Math.max(1, count - (bountyPage * ITEMS_PER_PAGE) + 1);
+      const endIndex = Math.min(count, count - ((bountyPage - 1) * ITEMS_PER_PAGE));
+
       const loadedBounties: Bounty[] = [];
 
-      for (let i = 1; i <= count; i++) {
+      // Load bounties in reverse order (newest first)
+      for (let i = endIndex; i >= startIndex; i--) {
         try {
           const bountyData = await readContract(wagmiConfig, {
             address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
@@ -191,14 +228,16 @@ export default function DashboardPage() {
           console.error(`Error loading bounty ${i}:`, err);
         }
       }
+
       if (isMounted) {
-        setBounties(loadedBounties.reverse());
+        setBounties(loadedBounties);
+        setLoadingBounties(false);
         setLoading(false);
       }
     };
     loadBounties();
     return () => { isMounted = false; };
-  }, [bountyCounter]);
+  }, [bountyCounter, bountyPage]);
 
   // Load metadata for bounties
   useEffect(() => {
@@ -226,15 +265,23 @@ export default function DashboardPage() {
     }
   }, [bounties]);
 
-  // Load airdrops
+  // Load airdrops with pagination
   useEffect(() => {
     let isMounted = true;
     const loadAirdrops = async () => {
       if (!airdropCounter || !CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]) return;
+
+      setLoadingAirdrops(true);
       const count = Number(airdropCounter);
+
+      // Calculate range for current page (load from newest to oldest)
+      const startIndex = Math.max(1, count - (airdropPage * ITEMS_PER_PAGE) + 1);
+      const endIndex = Math.min(count, count - ((airdropPage - 1) * ITEMS_PER_PAGE));
+
       const loadedAirdrops: Airdrop[] = [];
 
-      for (let i = 1; i <= count; i++) {
+      // Load airdrops in reverse order (newest first)
+      for (let i = endIndex; i >= startIndex; i--) {
         try {
           const airdropData = await readContract(wagmiConfig, {
             address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
@@ -260,17 +307,23 @@ export default function DashboardPage() {
           console.error(`Error loading airdrop ${i}:`, err);
         }
       }
-      if (isMounted) setAirdrops(loadedAirdrops.reverse());
+
+      if (isMounted) {
+        setAirdrops(loadedAirdrops);
+        setLoadingAirdrops(false);
+      }
     };
     loadAirdrops();
     return () => { isMounted = false; };
-  }, [airdropCounter]);
+  }, [airdropCounter, airdropPage]);
 
-  // Load funding items
+  // Load funding items (loads all, pagination happens in display)
   useEffect(() => {
     let isMounted = true;
     const loadFunding = async () => {
       if (!CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]) return;
+
+      setLoadingFunding(true);
       const items: FundingItem[] = [];
 
       try {
@@ -364,7 +417,10 @@ export default function DashboardPage() {
          console.error("Error loading funding items", e);
       }
 
-      if (isMounted) setFundingItems(items.reverse());
+      if (isMounted) {
+        setFundingItems(items.reverse());
+        setLoadingFunding(false);
+      }
     };
     loadFunding();
     return () => { isMounted = false; };
@@ -426,22 +482,12 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50/50 pb-20 font-sans">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-8 max-w-7xl">
         
         {/* Header Area */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
-            <p className="text-gray-500 mt-1 text-sm">Welcome back. Here's what's happening on Quinty.</p>
-          </div>
-          <div className="flex gap-3">
-            <Button variant="outline" className="bg-white border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full px-5">
-               <Wallet className="w-4 h-4 mr-2" /> Connect Wallet
-            </Button>
-            <Button onClick={() => router.push("/bounties")} className="bg-[#0EA885] hover:bg-[#0b8a6c] text-white rounded-full px-6 shadow-lg shadow-[#0EA885]/20 transition-all hover:scale-105">
-              + Create New
-            </Button>
-          </div>
+        <div className="mb-10">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
+          <p className="text-gray-500 mt-1 text-sm">Welcome back. Here's what's happening on Quinty.</p>
         </div>
 
         {/* Stats Overview - Improved compact cards with more info */}
@@ -523,7 +569,12 @@ export default function DashboardPage() {
                 )}
               </div>
               
-              {bounties.length > 0 ? (
+              {loadingBounties ? (
+                <div className="flex items-center justify-center py-16">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0EA885]"></div>
+                </div>
+              ) : bounties.length > 0 ? (
+                <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                   {bounties.slice(0, activeSection === "all" ? 4 : undefined).map((bounty) => {
                     const metadata = bountyMetadata.get(bounty.id);
@@ -576,8 +627,15 @@ export default function DashboardPage() {
                             <Clock className="h-3 w-3" />
                             {formatDeadline(bounty.deadline)}
                           </div>
-                          <div className="text-xs font-bold text-gray-900">
-                            {(Number(bounty.amount) / 1e18).toFixed(3)} <span className="text-[10px] font-medium text-gray-500">ETH</span>
+                          <div className="text-right">
+                            <div className="text-xs font-bold text-gray-900">
+                              {(Number(bounty.amount) / 1e18).toFixed(3)} <span className="text-[10px] font-medium text-gray-500">ETH</span>
+                            </div>
+                            {ethPrice > 0 && (
+                              <div className="text-[10px] text-gray-400">
+                                {formatUSD(convertEthToUSD(Number(bounty.amount) / 1e18, ethPrice))}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -585,6 +643,34 @@ export default function DashboardPage() {
                   );
                   })}
                 </div>
+
+                {/* Pagination Controls for Bounties (only show when not in "all" view) */}
+                {activeSection === "bounties" && bountyCounter && Number(bountyCounter) > ITEMS_PER_PAGE && (
+                  <div className="flex items-center justify-center gap-2 mt-6">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setBountyPage(p => Math.max(1, p - 1))}
+                      disabled={bountyPage === 1}
+                      className="rounded-full"
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-sm text-gray-600 px-4">
+                      Page {bountyPage} of {Math.ceil(Number(bountyCounter) / ITEMS_PER_PAGE)}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setBountyPage(p => p + 1)}
+                      disabled={bountyPage >= Math.ceil(Number(bountyCounter) / ITEMS_PER_PAGE)}
+                      className="rounded-full"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+                </>
               ) : (
                 <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-200">
                   <Target className="h-10 w-10 text-gray-300 mx-auto mb-3" />
@@ -610,7 +696,12 @@ export default function DashboardPage() {
                 )}
               </div>
 
-              {airdrops.length > 0 ? (
+              {loadingAirdrops ? (
+                <div className="flex items-center justify-center py-16">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
+                </div>
+              ) : airdrops.length > 0 ? (
+                <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                   {airdrops
                     .filter((a) => !a.resolved && !a.cancelled)
@@ -653,14 +744,49 @@ export default function DashboardPage() {
                                  <Clock className="h-3 w-3" />
                                  {formatDeadline(airdrop.deadline)}
                               </div>
-                              <div className="text-xs font-bold text-gray-900">
-                                 {(Number(airdrop.amount) / 1e18).toFixed(2)} <span className="text-[10px] font-medium text-gray-500">ETH</span>
+                              <div className="text-right">
+                                <div className="text-xs font-bold text-gray-900">
+                                   {(Number(airdrop.amount) / 1e18).toFixed(2)} <span className="text-[10px] font-medium text-gray-500">ETH</span>
+                                </div>
+                                {ethPrice > 0 && (
+                                  <div className="text-[10px] text-gray-400">
+                                    {formatUSD(convertEthToUSD(Number(airdrop.amount) / 1e18, ethPrice))}
+                                  </div>
+                                )}
                               </div>
                            </div>
                         </div>
                       </div>
                     ))}
                 </div>
+
+                {/* Pagination Controls for Airdrops */}
+                {activeSection === "airdrops" && airdropCounter && Number(airdropCounter) > ITEMS_PER_PAGE && (
+                  <div className="flex items-center justify-center gap-2 mt-6">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setAirdropPage(p => Math.max(1, p - 1))}
+                      disabled={airdropPage === 1}
+                      className="rounded-full"
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-sm text-gray-600 px-4">
+                      Page {airdropPage} of {Math.ceil(Number(airdropCounter) / ITEMS_PER_PAGE)}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setAirdropPage(p => p + 1)}
+                      disabled={airdropPage >= Math.ceil(Number(airdropCounter) / ITEMS_PER_PAGE)}
+                      className="rounded-full"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+                </>
                ) : (
                 <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-200">
                   <Zap className="h-10 w-10 text-gray-300 mx-auto mb-3" />
@@ -685,9 +811,19 @@ export default function DashboardPage() {
                 )}
               </div>
 
-              {fundingItems.length > 0 ? (
+              {loadingFunding ? (
+                <div className="flex items-center justify-center py-16">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+                </div>
+              ) : fundingItems.length > 0 ? (
+                <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                  {fundingItems.slice(0, activeSection === "all" ? 4 : undefined).map((item) => (
+                  {fundingItems
+                    .slice(
+                      activeSection === "all" ? 0 : (fundingPage - 1) * ITEMS_PER_PAGE,
+                      activeSection === "all" ? 4 : fundingPage * ITEMS_PER_PAGE
+                    )
+                    .map((item) => (
                     <div
                       key={`${item.type}-${item.id}`}
                       onClick={() => router.push(`/funding/${item.type}/${item.id}`)}
@@ -724,14 +860,49 @@ export default function DashboardPage() {
                              <Clock className="h-3 w-3" />
                              {formatDeadline(item.deadline)}
                            </div>
-                           <div className="text-xs font-bold text-[#0EA885]">
-                             {(Number(item.fundingGoal) / 1e18).toFixed(2)} ETH
+                           <div className="text-right">
+                             <div className="text-xs font-bold text-[#0EA885]">
+                               {(Number(item.fundingGoal) / 1e18).toFixed(2)} ETH
+                             </div>
+                             {ethPrice > 0 && (
+                               <div className="text-[10px] text-gray-400">
+                                 {formatUSD(convertEthToUSD(Number(item.fundingGoal) / 1e18, ethPrice))}
+                               </div>
+                             )}
                            </div>
                          </div>
                       </div>
                     </div>
                   ))}
                 </div>
+
+                {/* Pagination Controls for Funding */}
+                {activeSection === "funding" && fundingItems.length > ITEMS_PER_PAGE && (
+                  <div className="flex items-center justify-center gap-2 mt-6">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFundingPage(p => Math.max(1, p - 1))}
+                      disabled={fundingPage === 1}
+                      className="rounded-full"
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-sm text-gray-600 px-4">
+                      Page {fundingPage} of {Math.ceil(fundingItems.length / ITEMS_PER_PAGE)}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFundingPage(p => p + 1)}
+                      disabled={fundingPage >= Math.ceil(fundingItems.length / ITEMS_PER_PAGE)}
+                      className="rounded-full"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+                </>
               ) : (
                 <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-200">
                   <Rocket className="h-10 w-10 text-gray-300 mx-auto mb-3" />

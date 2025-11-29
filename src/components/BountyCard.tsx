@@ -9,6 +9,11 @@ import {
   BountyMetadata,
   IpfsImage,
 } from "../utils/ipfs";
+import {
+  getEthPriceInUSD,
+  convertEthToUSD,
+  formatUSD,
+} from "../utils/prices";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -98,9 +103,21 @@ export default function BountyCard({
   const [, setIsLoadingMetadata] = useState(false);
   const [quickView, setQuickView] = useState(false);
   const { shareLink } = useShare();
+  const [ethPrice, setEthPrice] = useState<number>(0);
 
   const isCreator = address?.toLowerCase() === bounty.creator.toLowerCase();
   const isExpired = BigInt(Math.floor(Date.now() / 1000)) > bounty.deadline;
+
+  // Fetch ETH price
+  useEffect(() => {
+    const fetchPrice = async () => {
+      const price = await getEthPriceInUSD();
+      setEthPrice(price);
+    };
+    fetchPrice();
+    const interval = setInterval(fetchPrice, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const loadMetadata = async () => {
@@ -214,14 +231,21 @@ export default function BountyCard({
               <CardContent className="pt-0 pb-3 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#0EA885]/10 to-[#0EA885]/5 border border-[#0EA885]/20">
-                      <Trophy className="h-4 w-4 text-[#0EA885]" />
-                      <span className="text-lg font-bold text-[#0EA885]">
-                        {formatETH(bounty.amount)}
-                      </span>
-                      <span className="text-xs font-medium text-[#0EA885]">
-                        ETH
-                      </span>
+                    <div className="flex flex-col gap-0.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#0EA885]/10 to-[#0EA885]/5 border border-[#0EA885]/20">
+                      <div className="flex items-center gap-1.5">
+                        <Trophy className="h-4 w-4 text-[#0EA885]" />
+                        <span className="text-lg font-bold text-[#0EA885]">
+                          {formatETH(bounty.amount)}
+                        </span>
+                        <span className="text-xs font-medium text-[#0EA885]">
+                          ETH
+                        </span>
+                      </div>
+                      {ethPrice > 0 && (
+                        <span className="text-[10px] text-[#0EA885]/70 pl-[22px]">
+                          {formatUSD(convertEthToUSD(Number(bounty.amount) / 1e18, ethPrice))}
+                        </span>
+                      )}
                     </div>
 
                     <Separator orientation="vertical" className="h-6" />
@@ -444,14 +468,21 @@ export default function BountyCard({
         <CardContent className="p-3 pt-0">
           {/* Reward Section */}
           <div className="flex items-center justify-between p-2.5 rounded-[1rem] bg-gradient-to-r from-[#0EA885]/10 to-[#0EA885]/5 border border-[#0EA885]/20 shadow-sm transition-all duration-300 hover:brightness-95">
-            <div className="flex items-center gap-1.5">
-              <div className="p-1.5 rounded-lg bg-[#0EA885]/10">
-                <Trophy className="h-4 w-4 text-[#0EA885]" />
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1.5">
+                <div className="p-1.5 rounded-lg bg-[#0EA885]/10">
+                  <Trophy className="h-4 w-4 text-[#0EA885]" />
+                </div>
+                <span className="text-base font-bold text-[#0EA885]">
+                  {formatETH(bounty.amount)}
+                </span>
+                <span className="text-xs font-medium text-[#0EA885]">ETH</span>
               </div>
-              <span className="text-base font-bold text-[#0EA885]">
-                {formatETH(bounty.amount)}
-              </span>
-              <span className="text-xs font-medium text-[#0EA885]">ETH</span>
+              {ethPrice > 0 && (
+                <span className="text-[10px] text-[#0EA885]/70 pl-[34px]">
+                  {formatUSD(convertEthToUSD(Number(bounty.amount) / 1e18, ethPrice))}
+                </span>
+              )}
             </div>
             <Avatar className="h-5 w-5">
               <AvatarFallback className="text-[10px]">

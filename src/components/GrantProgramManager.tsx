@@ -16,6 +16,11 @@ import {
   GrantStatus,
 } from "../utils/contracts";
 import { parseETH, formatETH, wagmiConfig, formatAddress } from "../utils/web3";
+import {
+  getEthPriceInUSD,
+  convertEthToUSD,
+  formatUSD,
+} from "../utils/prices";
 import { useAlertDialog } from "@/hooks/useAlertDialog";
 import { useShare } from "@/hooks/useShare";
 import { uploadToIpfs } from "../utils/ipfs";
@@ -125,6 +130,20 @@ export default function GrantProgramManager() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+
+  // ETH price state
+  const [ethPrice, setEthPrice] = useState<number>(0);
+
+  // Fetch ETH price
+  useEffect(() => {
+    const fetchPrice = async () => {
+      const price = await getEthPriceInUSD();
+      setEthPrice(price);
+    };
+    fetchPrice();
+    const interval = setInterval(fetchPrice, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const [approvalForm, setApprovalForm] = useState<{
     applicationIds: number[];
@@ -848,6 +867,11 @@ export default function GrantProgramManager() {
               <div className="p-3 bg-muted rounded">
                 <div className="text-muted-foreground mb-1">Total Funds</div>
                 <div className="font-bold">{formatETH(selectedGrant.totalFunds)} ETH</div>
+                {ethPrice > 0 && (
+                  <div className="text-xs text-muted-foreground">
+                    {formatUSD(convertEthToUSD(Number(selectedGrant.totalFunds) / 1e18, ethPrice))}
+                  </div>
+                )}
               </div>
               <div className="p-3 bg-muted rounded">
                 <div className="text-muted-foreground mb-1">Applications</div>
@@ -875,6 +899,11 @@ export default function GrantProgramManager() {
                             <div className="font-semibold">{formatAddress(app.applicant)}</div>
                             <div className="text-sm text-muted-foreground mt-1">
                               Requested: {formatETH(app.requestedAmount)} ETH
+                              {ethPrice > 0 && (
+                                <span className="text-xs ml-1">
+                                  ({formatUSD(convertEthToUSD(Number(app.requestedAmount) / 1e18, ethPrice))})
+                                </span>
+                              )}
                             </div>
                           </div>
                           <Badge

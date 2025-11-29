@@ -15,6 +15,11 @@ import {
   ZK_VERIFICATION_ABI,
 } from "../utils/contracts";
 import { parseETH, formatETH, wagmiConfig } from "../utils/web3";
+import {
+  getEthPriceInUSD,
+  convertEthToUSD,
+  formatUSD,
+} from "../utils/prices";
 import { useAlertDialog } from "@/hooks/useAlertDialog";
 import { useShare } from "@/hooks/useShare";
 import { uploadToIpfs } from "../utils/ipfs";
@@ -130,6 +135,20 @@ export default function LookingForGrantManager() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+
+  // ETH price state
+  const [ethPrice, setEthPrice] = useState<number>(0);
+
+  // Fetch ETH price
+  useEffect(() => {
+    const fetchPrice = async () => {
+      const price = await getEthPriceInUSD();
+      setEthPrice(price);
+    };
+    fetchPrice();
+    const interval = setInterval(fetchPrice, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Contract address
   const contractAddress = CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].LookingForGrant;
@@ -817,7 +836,14 @@ export default function LookingForGrantManager() {
             <div className="space-y-2">
               <div className="flex justify-between text-sm font-semibold">
                 <span>Funding Progress</span>
-                <span>{formatETH(selectedRequest.totalRaised)} / {formatETH(selectedRequest.fundingGoal)} ETH</span>
+                <div className="text-right">
+                  <div>{formatETH(selectedRequest.totalRaised)} / {formatETH(selectedRequest.fundingGoal)} ETH</div>
+                  {ethPrice > 0 && (
+                    <div className="text-xs text-muted-foreground font-normal">
+                      {formatUSD(convertEthToUSD(Number(selectedRequest.totalRaised) / 1e18, ethPrice))} / {formatUSD(convertEthToUSD(Number(selectedRequest.fundingGoal) / 1e18, ethPrice))}
+                    </div>
+                  )}
+                </div>
               </div>
               <Progress value={Math.min(Number((selectedRequest.totalRaised * BigInt(100)) / selectedRequest.fundingGoal), 100)} />
             </div>
