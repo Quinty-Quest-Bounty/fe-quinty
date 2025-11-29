@@ -291,7 +291,7 @@ export default function AirdropDetailPage() {
  };
 
  return (
- <div className="min-h-screen relative">
+ <div className="min-h-screen relative pt-20 sm:pt-24">
  {/* Loading Overlay */}
  {(isPending || isConfirming) && (
   <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-50 flex items-center justify-center p-4">

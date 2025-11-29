@@ -482,22 +482,12 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50/50 pb-20 font-sans">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-8 max-w-7xl">
         
         {/* Header Area */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
-            <p className="text-gray-500 mt-1 text-sm">Welcome back. Here's what's happening on Quinty.</p>
-          </div>
-          <div className="flex gap-3">
-            <Button variant="outline" className="bg-white border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full px-5">
-               <Wallet className="w-4 h-4 mr-2" /> Connect Wallet
-            </Button>
-            <Button onClick={() => router.push("/bounties")} className="bg-[#0EA885] hover:bg-[#0b8a6c] text-white rounded-full px-6 shadow-lg shadow-[#0EA885]/20 transition-all hover:scale-105">
-              + Create New
-            </Button>
-          </div>
+        <div className="mb-10">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
+          <p className="text-gray-500 mt-1 text-sm">Welcome back. Here's what's happening on Quinty.</p>
         </div>
 
         {/* Stats Overview - Improved compact cards with more info */}

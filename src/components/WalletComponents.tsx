@@ -19,7 +19,7 @@ export default function WalletComponents() {
   return (
     <div className="flex justify-end">
       <Wallet>
-        <ConnectWallet>
+        <ConnectWallet className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-full px-5 h-10 font-medium transition-colors">
           <Avatar className="h-6 w-6" />
           <Name />
         </ConnectWallet>

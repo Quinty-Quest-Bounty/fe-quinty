@@ -330,7 +330,7 @@ export default function GrantProgramDetailPage() {
  const userApplication = applications.find((app) => app.applicant.toLowerCase() === address?.toLowerCase());
 
  return (
- <div className="min-h-screen relative">
+ <div className="min-h-screen relative pt-20 sm:pt-24">
  {/* Loading Overlay */}
  {(isPending || isConfirming) && (
   <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">

@@ -316,7 +316,7 @@ export default function LookingForGrantDetailPage() {
  const projectDescription = request.projectDetails.split("\n\nLinks:")[0];
 
  return (
- <div className="min-h-screen relative">
+ <div className="min-h-screen relative pt-20 sm:pt-24">
  {/* Loading Overlay */}
  {(isPending || isConfirming) && (
   <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
