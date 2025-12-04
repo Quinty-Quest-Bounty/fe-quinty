@@ -49,8 +49,8 @@ export default function Header() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6, type: "spring", bounce: 0.3 }}
           className={cn(
-            "pointer-events-auto mx-4 w-full max-w-5xl rounded-full border transition-all duration-500",
-            scrolled 
+            "pointer-events-auto mx-4 w-full max-w-5xl rounded-2xl lg:rounded-full border transition-all duration-500",
+            scrolled
               ? "bg-white/80 dark:bg-black/80 backdrop-blur-xl border-black/5 dark:border-white/10 shadow-lg shadow-black/5"
               : "bg-white/50 dark:bg-black/50 backdrop-blur-md border-white/20 dark:border-white/5 shadow-sm"
           )}
