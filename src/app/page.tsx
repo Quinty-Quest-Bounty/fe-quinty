@@ -318,72 +318,132 @@ export default function Home() {
 
         {/* --- Core Capabilities Section --- */}
         <section id="features" className="py-24 bg-white dark:bg-black relative overflow-hidden">
-          {/* Clean Minimal Background */}
+          {/* Enhanced Dramatic Background */}
           <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
-            {/* Soft radial gradient */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_100%_at_50%_0%,rgba(14,168,133,0.03),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_100%_at_50%_0%,rgba(14,168,133,0.05),transparent_50%)]" />
+            {/* Multi-layered gradient with animation */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_100%_at_50%_0%,rgba(14,168,133,0.08),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_100%_at_50%_0%,rgba(14,168,133,0.15),transparent_50%)] animate-pulse-slow" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(59,130,246,0.05),transparent_40%)] dark:bg-[radial-gradient(circle_at_80%_20%,rgba(59,130,246,0.08),transparent_40%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(168,85,247,0.04),transparent_40%)] dark:bg-[radial-gradient(circle_at_20%_80%,rgba(168,85,247,0.07),transparent_40%)]" />
 
-            {/* Ultra-minimal grid */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000002_1px,transparent_1px),linear-gradient(to_bottom,#00000002_1px,transparent_1px)] bg-[size:120px_120px] [mask-image:linear-gradient(to_bottom,black_20%,transparent_90%)] dark:bg-[linear-gradient(to_right,#ffffff02_1px,transparent_1px),linear-gradient(to_bottom,#ffffff02_1px,transparent_1px)]" />
+            {/* Animated grid */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000004_1px,transparent_1px),linear-gradient(to_bottom,#00000004_1px,transparent_1px)] bg-[size:80px_80px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,black_20%,transparent_100%)] dark:bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)]" />
+
+            {/* Floating orbs for depth */}
+            <motion.div
+              className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl"
+              animate={{
+                x: [0, 50, 0],
+                y: [0, 30, 0],
+                scale: [1, 1.1, 1]
+              }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"
+              animate={{
+                x: [0, -50, 0],
+                y: [0, -30, 0],
+                scale: [1, 1.2, 1]
+              }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            />
           </div>
 
           <div className="container px-4 mx-auto relative z-10">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
+              transition={{ duration: 0.8, ease: [0.2, 0.65, 0.3, 0.9] }}
               className="text-center max-w-3xl mx-auto mb-20"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-blue-100 bg-blue-50/50 text-blue-600 mb-8 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-400">
-                 <span className="relative flex h-2 w-2">
-                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                   <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                 </span>
-                 <span className="text-xs font-bold tracking-widest uppercase">Core Primitives</span>
-              </div>
-              
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-slate-900 via-slate-800 to-slate-500 mb-6 tracking-tight drop-shadow-sm dark:from-white dark:via-gray-200 dark:to-gray-500">
-                Complete Tooling for <br className="hidden md:block" /> the On-Chain Economy.
-              </h2>
-              <p className="text-gray-600 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto font-medium dark:text-gray-400">
-                Don't just transact—collaborate. Quinty provides the essential building blocks for DAOs, grants, and freelance work without intermediaries.
-              </p>
-            </motion.div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-              {/* Feature 1: Bounties (Large) */}
               <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                whileInView={{ scale: 1, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-blue-200/60 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-600 mb-8 shadow-lg shadow-blue-500/10 dark:border-blue-500/30 dark:from-blue-500/10 dark:to-purple-500/10 dark:text-blue-400 dark:shadow-blue-500/20"
+              >
+                 <span className="relative flex h-2.5 w-2.5">
+                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-75"></span>
+                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-600 dark:bg-blue-400 shadow-lg shadow-blue-500/50"></span>
+                 </span>
+                 <span className="text-xs font-bold tracking-widest uppercase bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">Core Primitives</span>
+              </motion.div>
+
+              <motion.h2
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="col-span-1 md:col-span-2 group relative overflow-hidden rounded-xl border border-slate-200 bg-white/50 p-6 hover:border-blue-200 transition-all duration-300 dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/50 dark:hover:bg-white/[0.07]"
+                transition={{ duration: 0.8, delay: 0.3 }}
+                className="text-4xl md:text-5xl lg:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-slate-900 via-slate-700 to-slate-900 mb-6 tracking-tight drop-shadow-lg dark:from-white dark:via-gray-100 dark:to-white leading-tight"
               >
-                <div className="flex flex-col h-full justify-between">
-                   <div className="flex items-start justify-between mb-4">
+                Complete Tooling for <br className="hidden md:block" /> the On-Chain Economy.
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="text-gray-600 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto font-medium dark:text-gray-300"
+              >
+                Don't just transact—<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 font-bold dark:from-blue-400 dark:to-purple-400">collaborate</span>. Quinty provides the essential building blocks for DAOs, grants, and freelance work without intermediaries.
+              </motion.p>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {/* Feature 1: Bounties (Large) */}
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                whileHover={{ y: -5, scale: 1.01 }}
+                className="col-span-1 md:col-span-2 group relative overflow-hidden rounded-2xl border border-blue-200/50 bg-gradient-to-br from-white to-blue-50/30 p-8 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-500 dark:border-blue-500/20 dark:from-white/5 dark:to-blue-500/5 dark:hover:border-blue-500/60 dark:hover:shadow-blue-500/30 backdrop-blur-sm"
+              >
+                {/* Animated gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-blue-500/5 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                {/* Glow effect on hover */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
+                <div className="flex flex-col h-full justify-between relative z-10">
+                   <div className="flex items-start justify-between mb-6">
                       <div>
-                         <h3 className="text-lg font-bold text-slate-900 mb-1 dark:text-white">Smart Escrow Bounties</h3>
-                         <p className="text-sm text-slate-500 max-w-md dark:text-gray-400">Funds are locked in contract. Released only upon verified delivery.</p>
+                         <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-blue-900 mb-2 dark:from-white dark:to-blue-300">Smart Escrow Bounties</h3>
+                         <p className="text-sm text-slate-600 max-w-md leading-relaxed dark:text-gray-300">Funds are locked in contract. Released only upon verified delivery.</p>
                       </div>
-                      <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 border border-blue-100 dark:border-blue-500/20">
-                         <Target className="h-5 w-5" />
-                      </div>
+                      <motion.div
+                        whileHover={{ rotate: 360, scale: 1.1 }}
+                        transition={{ duration: 0.6 }}
+                        className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/40 dark:shadow-blue-500/60 border-2 border-white/20"
+                      >
+                         <Target className="h-7 w-7" />
+                      </motion.div>
                    </div>
                    {/* Mini UI */}
-                   <div className="bg-white rounded-lg border border-slate-100 p-3 shadow-sm flex items-center gap-3 mt-4 group-hover:shadow-md transition-shadow dark:bg-black/40 dark:border-white/5 dark:group-hover:border-blue-500/30">
-                      <div className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center dark:bg-blue-500/20">
-                         <Lock className="h-4 w-4 text-blue-500 dark:text-blue-400" />
-                      </div>
+                   <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-blue-100 p-4 shadow-lg flex items-center gap-3 mt-4 group-hover:shadow-xl group-hover:border-blue-300 transition-all duration-300 dark:bg-black/60 dark:border-blue-500/30 dark:group-hover:border-blue-500/60">
+                      <motion.div
+                        whileHover={{ scale: 1.1, rotate: 5 }}
+                        className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/50"
+                      >
+                         <Lock className="h-5 w-5 text-white" />
+                      </motion.div>
                       <div className="flex-1">
-                         <div className="flex justify-between text-[10px] uppercase font-bold text-slate-400 mb-1 dark:text-gray-500">
+                         <div className="flex justify-between text-[10px] uppercase font-bold text-slate-500 mb-2 dark:text-gray-400">
                             <span>Status</span>
-                            <span className="text-blue-600 dark:text-blue-400">Escrow Locked</span>
+                            <span className="text-blue-600 dark:text-blue-400 animate-pulse">Escrow Locked</span>
                          </div>
-                         <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden dark:bg-gray-800">
-                            <div className="h-full w-full bg-blue-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+                         <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden dark:bg-gray-800 shadow-inner">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              whileInView={{ width: "100%" }}
+                              transition={{ duration: 1.5, delay: 0.5 }}
+                              className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full shadow-[0_0_12px_rgba(59,130,246,0.7)]"
+                            />
                          </div>
                       </div>
                       <div className="text-right">
-                         <div className="text-xs font-bold text-slate-900 dark:text-white">2.5 ETH</div>
+                         <div className="text-sm font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">2.5 ETH</div>
                       </div>
                    </div>
                 </div>
@@ -391,49 +451,79 @@ export default function Home() {
 
               {/* Feature 2: Reputation (Small) */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-                className="col-span-1 group relative overflow-hidden rounded-xl border border-slate-200 bg-white/50 p-6 hover:border-purple-200 transition-all duration-300 dark:border-white/10 dark:bg-white/5 dark:hover:border-purple-500/50 dark:hover:bg-white/[0.07]"
+                transition={{ duration: 0.6, delay: 0.2 }}
+                whileHover={{ y: -5, scale: 1.02 }}
+                className="col-span-1 group relative overflow-hidden rounded-2xl border border-purple-200/50 bg-gradient-to-br from-white to-purple-50/30 p-6 hover:border-purple-400/60 hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 dark:border-purple-500/20 dark:from-white/5 dark:to-purple-500/5 dark:hover:border-purple-500/60 dark:hover:shadow-purple-500/30 backdrop-blur-sm"
               >
-                 <div className="flex flex-col h-full justify-between">
+                {/* Animated gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 via-purple-500/5 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                {/* Glow effect on hover */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
+
+                 <div className="flex flex-col h-full justify-between relative z-10">
                     <div className="mb-4">
-                       <div className="h-10 w-10 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600 mb-3 border border-purple-100 dark:bg-purple-500/20 dark:text-purple-400 dark:border-purple-500/20">
-                          <BadgeCheck className="h-5 w-5" />
-                       </div>
-                       <h3 className="text-lg font-bold text-slate-900 mb-1 dark:text-white">Soulbound Reputation</h3>
-                       <p className="text-sm text-slate-500 dark:text-gray-400">Immutable work history.</p>
+                       <motion.div
+                         whileHover={{ rotate: 360, scale: 1.1 }}
+                         transition={{ duration: 0.6 }}
+                         className="h-14 w-14 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white mb-4 shadow-lg shadow-purple-500/40 dark:shadow-purple-500/60 border-2 border-white/20"
+                       >
+                          <BadgeCheck className="h-7 w-7" />
+                       </motion.div>
+                       <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-purple-900 mb-2 dark:from-white dark:to-purple-300">Soulbound Reputation</h3>
+                       <p className="text-sm text-slate-600 leading-relaxed dark:text-gray-300">Immutable work history.</p>
                     </div>
                     {/* Mini UI */}
-                    <div className="bg-white rounded-lg border border-slate-100 p-2 shadow-sm text-center dark:bg-black/40 dark:border-white/5 dark:group-hover:border-purple-500/30">
-                       <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-purple-50 text-[10px] font-bold text-purple-600 border border-purple-100 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30">
-                          <CheckCircle2 className="h-3 w-3" /> Level 5 Solver
-                       </span>
+                    <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-purple-100 p-3 shadow-lg text-center group-hover:shadow-xl group-hover:border-purple-300 transition-all duration-300 dark:bg-black/60 dark:border-purple-500/30 dark:group-hover:border-purple-500/60">
+                       <motion.span
+                         whileHover={{ scale: 1.05 }}
+                         className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-[11px] font-bold text-white shadow-lg shadow-purple-500/50 cursor-pointer"
+                       >
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Level 5 Solver
+                       </motion.span>
                     </div>
                  </div>
               </motion.div>
 
               {/* Feature 3: Disputes (Small) */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
-                className="col-span-1 group relative overflow-hidden rounded-xl border border-slate-200 bg-white/50 p-6 hover:border-orange-200 transition-all duration-300 dark:border-white/10 dark:bg-white/5 dark:hover:border-orange-500/50 dark:hover:bg-white/[0.07]"
+                transition={{ duration: 0.6, delay: 0.3 }}
+                whileHover={{ y: -5, scale: 1.02 }}
+                className="col-span-1 group relative overflow-hidden rounded-2xl border border-orange-200/50 bg-gradient-to-br from-white to-orange-50/30 p-6 hover:border-orange-400/60 hover:shadow-2xl hover:shadow-orange-500/20 transition-all duration-500 dark:border-orange-500/20 dark:from-white/5 dark:to-orange-500/5 dark:hover:border-orange-500/60 dark:hover:shadow-orange-500/30 backdrop-blur-sm"
               >
-                 <div className="flex flex-col h-full justify-between">
+                {/* Animated gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 via-orange-500/5 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                {/* Glow effect on hover */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-orange-500/20 to-amber-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
+
+                 <div className="flex flex-col h-full justify-between relative z-10">
                     <div className="mb-4">
-                       <div className="h-10 w-10 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600 mb-3 border border-orange-100 dark:bg-orange-500/20 dark:text-orange-400 dark:border-orange-500/20">
-                          <Vote className="h-5 w-5" />
-                       </div>
-                       <h3 className="text-lg font-bold text-slate-900 mb-1 dark:text-white">Community Disputes</h3>
-                       <p className="text-sm text-slate-500 dark:text-gray-400">No biased moderators. Disputes are resolved by stake-weighted community votes.</p>
+                       <motion.div
+                         whileHover={{ rotate: 360, scale: 1.1 }}
+                         transition={{ duration: 0.6 }}
+                         className="h-14 w-14 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white mb-4 shadow-lg shadow-orange-500/40 dark:shadow-orange-500/60 border-2 border-white/20"
+                       >
+                          <Vote className="h-7 w-7" />
+                       </motion.div>
+                       <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-orange-900 mb-2 dark:from-white dark:to-orange-300">Community Disputes</h3>
+                       <p className="text-sm text-slate-600 leading-relaxed dark:text-gray-300">No biased moderators. Disputes are resolved by stake-weighted community votes.</p>
                     </div>
                     {/* Mini UI */}
-                    <div className="bg-white rounded-lg border border-slate-100 p-3 shadow-sm flex justify-center gap-1 dark:bg-black/40 dark:border-white/5 dark:group-hover:border-orange-500/30">
+                    <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-orange-100 p-3 shadow-lg flex justify-center gap-1.5 group-hover:shadow-xl group-hover:border-orange-300 transition-all duration-300 dark:bg-black/60 dark:border-orange-500/30 dark:group-hover:border-orange-500/60">
                        {[1,2,3,4,5].map((i) => (
-                          <div key={i} className={`h-4 w-1 rounded-full ${i === 3 ? 'bg-orange-500 h-6 shadow-[0_0_8px_rgba(249,115,22,0.6)]' : 'bg-orange-200 dark:bg-orange-900/40'}`} />
+                          <motion.div
+                            key={i}
+                            initial={{ height: i === 3 ? 24 : 16 }}
+                            whileHover={{ height: i === 3 ? 28 : 20 }}
+                            className={`w-1.5 rounded-full transition-all ${i === 3 ? 'bg-gradient-to-t from-orange-500 to-amber-500 shadow-[0_0_10px_rgba(249,115,22,0.7)]' : 'bg-orange-200 dark:bg-orange-900/40 group-hover:bg-orange-300 dark:group-hover:bg-orange-800/60'}`}
+                          />
                        ))}
                     </div>
                  </div>
@@ -441,35 +531,65 @@ export default function Home() {
 
               {/* Feature 4: Grants Without Friction (Large) */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.3 }}
-                className="col-span-1 md:col-span-2 group relative overflow-hidden rounded-xl border border-slate-200 bg-white/50 p-6 hover:border-emerald-200 transition-all duration-300 dark:border-white/10 dark:bg-white/5 dark:hover:border-emerald-500/50 dark:hover:bg-white/[0.07]"
+                transition={{ duration: 0.6, delay: 0.4 }}
+                whileHover={{ y: -5, scale: 1.01 }}
+                className="col-span-1 md:col-span-2 group relative overflow-hidden rounded-2xl border border-emerald-200/50 bg-gradient-to-br from-white to-emerald-50/30 p-8 hover:border-emerald-400/60 hover:shadow-2xl hover:shadow-emerald-500/20 transition-all duration-500 dark:border-emerald-500/20 dark:from-white/5 dark:to-emerald-500/5 dark:hover:border-emerald-500/60 dark:hover:shadow-emerald-500/30 backdrop-blur-sm"
               >
-                <div className="flex flex-col h-full justify-between">
-                   <div className="flex items-start justify-between mb-4">
+                {/* Animated gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-emerald-500/5 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                {/* Glow effect on hover */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
+
+                <div className="flex flex-col h-full justify-between relative z-10">
+                   <div className="flex items-start justify-between mb-6">
                       <div>
-                         <h3 className="text-lg font-bold text-slate-900 mb-1 dark:text-white">Grants Without Friction</h3>
-                         <p className="text-sm text-slate-500 max-w-md dark:text-gray-400">VCs and orgs can fund selected builders directly. Applicants claim verified grants with progress tracked on-chain.</p>
+                         <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-emerald-900 mb-2 dark:from-white dark:to-emerald-300">Grants Without Friction</h3>
+                         <p className="text-sm text-slate-600 max-w-md leading-relaxed dark:text-gray-300">VCs and orgs can fund selected builders directly. Applicants claim verified grants with progress tracked on-chain.</p>
                       </div>
-                      <div className="h-10 w-10 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-500/20">
-                         <Landmark className="h-5 w-5" />
-                      </div>
+                      <motion.div
+                        whileHover={{ rotate: 360, scale: 1.1 }}
+                        transition={{ duration: 0.6 }}
+                        className="h-14 w-14 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/40 dark:shadow-emerald-500/60 border-2 border-white/20"
+                      >
+                         <Landmark className="h-7 w-7" />
+                      </motion.div>
                    </div>
                    {/* Mini UI */}
-                   <div className="bg-white rounded-lg border border-slate-100 p-3 shadow-sm mt-4 group-hover:shadow-md transition-shadow dark:bg-black/40 dark:border-white/5 dark:group-hover:border-emerald-500/30">
-                      <div className="flex justify-between items-center mb-2">
+                   <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-emerald-100 p-4 shadow-lg mt-4 group-hover:shadow-xl group-hover:border-emerald-300 transition-all duration-300 dark:bg-black/60 dark:border-emerald-500/30 dark:group-hover:border-emerald-500/60">
+                      <div className="flex justify-between items-center mb-3">
                          <div className="flex items-center gap-2">
-                            <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
-                            <span className="text-xs font-bold text-slate-700 dark:text-gray-300">Grant #402 Active</span>
+                            <motion.div
+                              animate={{ scale: [1, 1.2, 1] }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                              className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.7)]"
+                            />
+                            <span className="text-xs font-bold text-slate-700 dark:text-gray-200">Grant #402 Active</span>
                          </div>
-                         <span className="text-[10px] font-mono text-slate-400 dark:text-gray-500">Builder Verified</span>
+                         <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">Builder Verified ✓</span>
                       </div>
-                      <div className="flex gap-1 h-2">
-                         <div className="flex-1 bg-emerald-500 rounded-l-full shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
-                         <div className="flex-1 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
-                         <div className="flex-1 bg-emerald-500 rounded-r-full shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
+                      <div className="flex gap-1.5 h-2.5">
+                         <motion.div
+                           initial={{ scaleX: 0 }}
+                           whileInView={{ scaleX: 1 }}
+                           transition={{ duration: 0.5, delay: 0.6 }}
+                           className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-l-full shadow-[0_0_10px_rgba(16,185,129,0.5)] origin-left"
+                         />
+                         <motion.div
+                           initial={{ scaleX: 0 }}
+                           whileInView={{ scaleX: 1 }}
+                           transition={{ duration: 0.5, delay: 0.8 }}
+                           className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-[0_0_10px_rgba(16,185,129,0.5)] origin-left"
+                         />
+                         <motion.div
+                           initial={{ scaleX: 0 }}
+                           whileInView={{ scaleX: 1 }}
+                           transition={{ duration: 0.5, delay: 1 }}
+                           className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-r-full shadow-[0_0_10px_rgba(16,185,129,0.5)] origin-left"
+                         />
                       </div>
                    </div>
                 </div>
@@ -477,35 +597,64 @@ export default function Home() {
 
               {/* Feature 5: Anti-Rug Crowdfunding (Large) */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.4 }}
-                className="col-span-1 md:col-span-2 group relative overflow-hidden rounded-xl border border-slate-200 bg-white/50 p-6 hover:border-teal-200 transition-all duration-300 dark:border-white/10 dark:bg-white/5 dark:hover:border-teal-500/50 dark:hover:bg-white/[0.07]"
+                transition={{ duration: 0.6, delay: 0.5 }}
+                whileHover={{ y: -5, scale: 1.01 }}
+                className="col-span-1 md:col-span-2 group relative overflow-hidden rounded-2xl border border-teal-200/50 bg-gradient-to-br from-white to-teal-50/30 p-8 hover:border-teal-400/60 hover:shadow-2xl hover:shadow-teal-500/20 transition-all duration-500 dark:border-teal-500/20 dark:from-white/5 dark:to-teal-500/5 dark:hover:border-teal-500/60 dark:hover:shadow-teal-500/30 backdrop-blur-sm"
               >
-                <div className="flex flex-col h-full justify-between">
-                   <div className="flex items-start justify-between mb-4">
+                {/* Animated gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-teal-500/0 via-teal-500/5 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                {/* Glow effect on hover */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-teal-500/20 to-cyan-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
+
+                <div className="flex flex-col h-full justify-between relative z-10">
+                   <div className="flex items-start justify-between mb-6">
                       <div>
-                         <h3 className="text-lg font-bold text-slate-900 mb-1 dark:text-white">Anti-Rug Crowdfunding</h3>
-                         <p className="text-sm text-slate-500 max-w-md dark:text-gray-400">Milestone-based funding ensures accountability. If goals aren't met, contributors get their ETH back automatically.</p>
+                         <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-teal-900 mb-2 dark:from-white dark:to-teal-300">Anti-Rug Crowdfunding</h3>
+                         <p className="text-sm text-slate-600 max-w-md leading-relaxed dark:text-gray-300">Milestone-based funding ensures accountability. If goals aren't met, contributors get their ETH back automatically.</p>
                       </div>
-                      <div className="h-10 w-10 rounded-lg bg-teal-100 flex items-center justify-center text-teal-600 dark:bg-teal-500/20 dark:text-teal-400 border border-teal-100 dark:border-teal-500/20">
-                         <Shield className="h-5 w-5" />
-                      </div>
+                      <motion.div
+                        whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.1 }}
+                        transition={{ duration: 0.6 }}
+                        className="h-14 w-14 rounded-xl bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-teal-500/40 dark:shadow-teal-500/60 border-2 border-white/20"
+                      >
+                         <Shield className="h-7 w-7" />
+                      </motion.div>
                    </div>
                    {/* Mini UI */}
-                   <div className="bg-white rounded-lg border border-slate-100 p-3 shadow-sm mt-4 group-hover:shadow-md transition-shadow dark:bg-black/40 dark:border-white/5 dark:group-hover:border-teal-500/30">
-                      <div className="flex justify-between items-center mb-2">
+                   <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-teal-100 p-4 shadow-lg mt-4 group-hover:shadow-xl group-hover:border-teal-300 transition-all duration-300 dark:bg-black/60 dark:border-teal-500/30 dark:group-hover:border-teal-500/60">
+                      <div className="flex justify-between items-center mb-3">
                          <div className="flex items-center gap-2">
-                            <Shield className="h-3.5 w-3.5 text-teal-500" />
-                            <span className="text-xs font-bold text-slate-700 dark:text-gray-300">Refund Protection Active</span>
+                            <motion.div
+                              animate={{ rotate: [0, 5, -5, 0] }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                            >
+                              <Shield className="h-4 w-4 text-teal-500 drop-shadow-[0_0_6px_rgba(20,184,166,0.6)]" />
+                            </motion.div>
+                            <span className="text-xs font-bold text-slate-700 dark:text-gray-200">Refund Protection Active</span>
                          </div>
-                         <span className="text-[10px] font-mono text-slate-400 dark:text-gray-500">1/3 Milestones</span>
+                         <span className="text-[10px] font-mono text-teal-600 dark:text-teal-400 font-bold">1/3 Milestones</span>
                       </div>
-                      <div className="flex gap-1 h-2">
-                         <div className="flex-1 bg-teal-500 rounded-l-full shadow-[0_0_8px_rgba(20,184,166,0.4)]" />
-                         <div className="flex-1 bg-slate-100 dark:bg-gray-800" />
-                         <div className="flex-1 bg-slate-100 rounded-r-full dark:bg-gray-800" />
+                      <div className="flex gap-1.5 h-2.5">
+                         <motion.div
+                           initial={{ scaleX: 0 }}
+                           whileInView={{ scaleX: 1 }}
+                           transition={{ duration: 0.5, delay: 0.7 }}
+                           className="flex-1 bg-gradient-to-r from-teal-500 to-teal-600 rounded-l-full shadow-[0_0_10px_rgba(20,184,166,0.5)] origin-left"
+                         />
+                         <motion.div
+                           initial={{ opacity: 0.3 }}
+                           whileHover={{ opacity: 0.6 }}
+                           className="flex-1 bg-slate-200 dark:bg-gray-700"
+                         />
+                         <motion.div
+                           initial={{ opacity: 0.3 }}
+                           whileHover={{ opacity: 0.6 }}
+                           className="flex-1 bg-slate-200 rounded-r-full dark:bg-gray-700"
+                         />
                       </div>
                    </div>
                 </div>
@@ -513,68 +662,102 @@ export default function Home() {
 
               {/* Feature 6: Airdrop Bounties & LFG Mode (Small) */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.5 }}
-                className="col-span-1 group relative overflow-hidden rounded-xl border border-slate-200 bg-white/50 p-6 hover:border-blue-200 transition-all duration-300 dark:border-white/10 dark:bg-white/5 dark:hover:border-blue-500/50 dark:hover:bg-white/[0.07]"
+                transition={{ duration: 0.6, delay: 0.6 }}
+                whileHover={{ y: -5, scale: 1.02 }}
+                className="col-span-1 group relative overflow-hidden rounded-2xl border border-blue-200/50 bg-gradient-to-br from-white to-blue-50/30 p-6 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-500 dark:border-blue-500/20 dark:from-white/5 dark:to-blue-500/5 dark:hover:border-blue-500/60 dark:hover:shadow-blue-500/30 backdrop-blur-sm"
               >
-                 <div className="flex flex-col h-full justify-between">
+                {/* Animated gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-blue-500/5 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                {/* Glow effect on hover */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
+
+                 <div className="flex flex-col h-full justify-between relative z-10">
                     <div className="mb-4">
-                       <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 mb-3 border border-blue-100 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/20">
-                          <Rocket className="h-5 w-5" />
-                       </div>
-                       <h3 className="text-lg font-bold text-slate-900 mb-1 dark:text-white">Airdrop Bounties & LFG Mode</h3>
-                       <p className="text-sm text-slate-500 dark:text-gray-400">Launch your campaign, grow your movement, or raise flexible startup funds. Everything transparent.</p>
+                       <motion.div
+                         whileHover={{ y: -5, scale: 1.1 }}
+                         transition={{ duration: 0.4 }}
+                         className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white mb-4 shadow-lg shadow-blue-500/40 dark:shadow-blue-500/60 border-2 border-white/20"
+                       >
+                          <Rocket className="h-7 w-7" />
+                       </motion.div>
+                       <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-blue-900 mb-2 dark:from-white dark:to-blue-300">Airdrop Bounties & LFG Mode</h3>
+                       <p className="text-sm text-slate-600 leading-relaxed dark:text-gray-300">Launch your campaign, grow your movement, or raise flexible startup funds. Everything transparent.</p>
                     </div>
                     {/* Mini UI */}
-                    <div className="bg-white rounded-lg border border-slate-100 p-2 shadow-sm text-center dark:bg-black/40 dark:border-white/5 dark:group-hover:border-blue-500/30">
-                       <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-50 text-[10px] font-bold text-blue-600 border border-blue-100 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30">
-                          <Zap className="h-3 w-3" /> Campaign Live
-                       </span>
+                    <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-blue-100 p-3 shadow-lg text-center group-hover:shadow-xl group-hover:border-blue-300 transition-all duration-300 dark:bg-black/60 dark:border-blue-500/30 dark:group-hover:border-blue-500/60">
+                       <motion.span
+                         animate={{ scale: [1, 1.05, 1] }}
+                         transition={{ duration: 2, repeat: Infinity }}
+                         className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 text-[11px] font-bold text-white shadow-lg shadow-blue-500/50 cursor-pointer"
+                       >
+                          <Zap className="h-3.5 w-3.5" /> Campaign Live
+                       </motion.span>
                     </div>
                  </div>
               </motion.div>
               
               {/* Social Verification - Full Width Panel */}
                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: 0.4 }}
-                  className="col-span-1 md:col-span-3 rounded-xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-8 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-500 dark:border-white/10 dark:bg-gradient-to-br dark:from-white/5 dark:to-white/[0.02] dark:hover:border-blue-500/30 dark:hover:shadow-[0_0_30px_rgba(59,130,246,0.1)]"
+                  transition={{ duration: 0.6, delay: 0.7 }}
+                  whileHover={{ y: -3 }}
+                  className="col-span-1 md:col-span-3 rounded-2xl border border-blue-200/50 bg-gradient-to-br from-white via-blue-50/20 to-purple-50/20 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-8 hover:shadow-2xl hover:shadow-blue-500/10 hover:border-blue-400/60 transition-all duration-500 dark:border-blue-500/20 dark:bg-gradient-to-br dark:from-white/5 dark:via-blue-500/5 dark:to-purple-500/5 dark:hover:border-blue-500/40 dark:hover:shadow-[0_0_40px_rgba(59,130,246,0.15)] backdrop-blur-sm relative overflow-hidden"
                 >
-                  <div className="max-w-lg">
-                     <div className="flex items-center gap-2 mb-3">
-                       <Globe className="w-4 h-4 text-blue-500 dark:text-blue-400" />
-                       <span className="text-xs font-bold text-blue-500 uppercase tracking-wide dark:text-blue-400">Social Verification</span>
+                  {/* Animated background effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                  <div className="max-w-lg relative z-10">
+                     <div className="flex items-center gap-2 mb-4">
+                       <motion.div
+                         animate={{ rotate: 360 }}
+                         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                       >
+                         <Globe className="w-5 h-5 text-blue-500 dark:text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                       </motion.div>
+                       <span className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 uppercase tracking-wide dark:from-blue-400 dark:to-purple-400">Social Verification</span>
                      </div>
-                     <h3 className="text-xl font-bold text-slate-900 mb-2 dark:text-white">Proof you’re really you.</h3>
-                     <p className="text-sm text-slate-500 leading-relaxed dark:text-gray-400">
+                     <h3 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-blue-900 mb-3 dark:from-white dark:to-blue-300">Proof you're really you.</h3>
+                     <p className="text-sm text-slate-600 leading-relaxed dark:text-gray-300">
                        Link your X (Twitter) account to your on-chain identity.
                        Prove ownership without doxxing.
                      </p>
                   </div>
-                  
-                  <div className="flex-shrink-0">
-                     <div className="flex items-center gap-3 bg-white pl-4 pr-6 py-3 rounded-full border border-slate-200 shadow-sm group-hover:border-blue-200 transition-colors dark:bg-black/40 dark:border-white/10 dark:group-hover:border-blue-500/30">
+
+                  <div className="flex-shrink-0 relative z-10">
+                     <motion.div
+                       whileHover={{ scale: 1.02 }}
+                       className="flex items-center gap-3 bg-white/90 backdrop-blur-sm pl-4 pr-6 py-4 rounded-2xl border border-blue-200 shadow-lg hover:shadow-xl hover:border-blue-400 transition-all duration-300 dark:bg-black/60 dark:border-blue-500/30 dark:hover:border-blue-500/60 dark:shadow-blue-500/10"
+                     >
                         <div className="relative">
-                           <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden dark:bg-gray-800">
-                              <Image src="/images/quinty-logo.png" alt="User" fill className="object-contain p-1.5" style={{ filter: 'brightness(0%)'}} />
-                           </div>
-                           <div className="absolute -bottom-1 -right-1 bg-green-500 text-white p-0.5 rounded-full border-2 border-white dark:border-black">
-                              <Check className="w-2.5 h-2.5" />
-                           </div>
+                           <motion.div
+                             whileHover={{ scale: 1.1 }}
+                             className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden shadow-md dark:from-gray-800 dark:to-gray-700"
+                           >
+                              <Image src="/images/quinty-logo.png" alt="User" fill className="object-contain p-2" style={{ filter: 'brightness(0%)'}} />
+                           </motion.div>
+                           <motion.div
+                             animate={{ scale: [1, 1.2, 1] }}
+                             transition={{ duration: 2, repeat: Infinity }}
+                             className="absolute -bottom-1 -right-1 bg-gradient-to-br from-green-400 to-green-600 text-white p-1 rounded-full border-2 border-white shadow-lg shadow-green-500/50 dark:border-black"
+                           >
+                              <Check className="w-3 h-3" />
+                           </motion.div>
                         </div>
                         <div>
-                           <div className="text-sm font-bold text-slate-900 dark:text-white">@QuintyLabs</div>
-                           <div className="text-[10px] text-slate-400 font-mono dark:text-gray-500">Verified via X</div>
+                           <div className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-blue-900 dark:from-white dark:to-blue-300">@QuintyLabs</div>
+                           <div className="text-[10px] text-slate-500 font-mono dark:text-gray-400">Verified via X</div>
                         </div>
-                        <div className="ml-4 h-8 w-px bg-slate-100 dark:bg-white/10" />
-                        <Button size="sm" variant="ghost" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 text-xs h-auto py-1.5 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-500/10">
+                        <div className="ml-4 h-10 w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent dark:via-white/10" />
+                        <Button size="sm" variant="ghost" className="text-blue-600 hover:text-white hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-500 text-xs h-auto py-2 px-4 font-bold rounded-full transition-all duration-300 dark:text-blue-400 dark:hover:text-white shadow-sm hover:shadow-md">
                            Connect
                         </Button>
-                     </div>
+                     </motion.div>
                   </div>
                </motion.div>
             </div>
