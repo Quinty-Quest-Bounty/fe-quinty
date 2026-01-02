@@ -5,24 +5,24 @@ This guide will help you for using Quinty.
 ## Prerequisites
 
 - Web3 wallet (MetaMask, WalletConnect, etc.)
-- Base Sepolia testnet ETH (get from faucet)
+- Mantle Sepolia testnet MNT (get from faucet)
 - Basic understanding of blockchain transactions
 
-## Step 1: Get Testnet ETH
+## Step 1: Get Testnet MNT
 
-Visit the Base Sepolia faucet and get free testnet ETH:
+Visit the Mantle Sepolia faucet and get free testnet MNT:
 
-- **Faucet:** https://portal.cdp.coinbase.com/products/faucet
-- **Amount:** Request Base Sepolia ETH
+- **Faucet:** https://faucet.sepolia.mantle.xyz/
+- **Amount:** Request Mantle Sepolia MNT
 
 ## Step 2: Connect Your Wallet
 
 1. Visit https://quinty.vercel.app
 2. Click **"Connect Wallet"** in the top-right corner
 3. Select your wallet provider
-4. Approve the connection to **Base Sepolia** (Chain ID: 84532)
+4. Approve the connection to **Mantle Sepolia** (Chain ID: 5003)
 
-**If not on Base Sepolia:**
+**If not on Mantle Sepolia:**
 
 - Your wallet will prompt to add/switch networks
 - Approve the network addition

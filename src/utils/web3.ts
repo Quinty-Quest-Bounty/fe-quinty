@@ -1,23 +1,11 @@
-import { http, createConfig } from "wagmi";
-import { baseSepolia } from "wagmi/chains";
-import { coinbaseWallet, metaMask, walletConnect } from "wagmi/connectors";
+import { getDefaultConfig } from "@rainbow-me/rainbowkit";
+import { mantleSepoliaTestnet } from "wagmi/chains";
 
-export const wagmiConfig = createConfig({
-  chains: [baseSepolia],
-  connectors: [
-    coinbaseWallet({
-      appName: "Quinty",
-      preference: "smartWalletOnly",
-    }),
-    metaMask(),
-    walletConnect({
-      projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "",
-    }),
-  ],
+export const wagmiConfig = getDefaultConfig({
+  appName: "Quintle",
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "",
+  chains: [mantleSepoliaTestnet],
   ssr: true,
-  transports: {
-    [baseSepolia.id]: http(),
-  },
 });
 
 // Utility functions

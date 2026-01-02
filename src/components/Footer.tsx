@@ -1,68 +1,158 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { X, Github, ArrowUpRight } from "lucide-react";
+import { X, Github, ArrowUpRight, Code2, Shield, Zap } from "lucide-react";
+import { CONTRACT_ADDRESSES, MANTLE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
 
 export function Footer() {
-  return (
-    <footer className="bg-white border-t border-gray-200 py-10">
-      <div className="container mx-auto px-4 md:px-6">
-        
-        <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-          
-          {/* Brand & Socials */}
-          <div className="flex flex-col sm:flex-row items-center gap-6">
-            <div className="flex items-center gap-2">
-              <div className="relative w-6 h-6">
-                <Image 
-                  src="/images/quinty-logo.png" 
-                  alt="Quinty" 
-                  fill 
-                  className="object-contain" 
-                  style={{ filter: 'brightness(0%)'}}
+  const currentYear = new Date().getFullYear();
 
-                />
+  return (
+    <footer className="relative z-20 bg-black border-t border-white/10 py-16 mt-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Top Grid Section */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-12">
+
+          {/* Brand Column */}
+          <div className="md:col-span-4">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="relative h-10 w-10 border-2 border-blue-500 bg-black flex items-center justify-center">
+                <span className="text-white font-black text-xl">Q</span>
               </div>
-              <span className="font-bold text-lg tracking-tight text-gray-900">Quinty</span>
+              <div>
+                <div className="font-black text-white text-2xl tracking-tighter uppercase">
+                  QUINTLE
+                </div>
+                <div className="font-mono text-[9px] text-blue-400 uppercase tracking-widest -mt-1">
+                  Quest in Mantle
+                </div>
+              </div>
             </div>
 
-            <div className="hidden sm:block h-4 w-px bg-gray-200" />
+            <p className="text-gray-400 text-sm mb-6 font-mono leading-relaxed">
+              Trustless bounty platform with escrow protection and soulbound reputation on Mantle.
+            </p>
 
-            <div className="flex items-center gap-3">
-               <a href="https://x.com/QuintyLabs" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-black transition-colors">
-                  <X className="w-4 h-4" />
-               </a>
-               <a href="https://github.com/Quinty-Quest-Bounty" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-black transition-colors">
-                  <Github className="w-4 h-4" />
-               </a>
+            {/* Network Status */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 border border-white/10 bg-black/50">
+              <div className="w-2 h-2 bg-blue-500 animate-pulse" />
+              <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider">
+                Live on Mantle Sepolia
+              </span>
             </div>
           </div>
 
-          {/* Resources Links - Horizontal */}
-          <nav className="flex flex-wrap justify-center gap-6 sm:gap-8">
-             <a href="https://quinty.gitbook.io/quinty-docs/" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-500 hover:text-[#0EA885] transition-colors">
+          {/* Resources Column */}
+          <div className="md:col-span-3">
+            <h3 className="font-black text-white text-sm uppercase tracking-wider mb-6 border-l-2 border-blue-500 pl-3">
+              Resources
+            </h3>
+            <nav className="space-y-3">
+              <a
+                href="https://quinty.gitbook.io/quinty-docs/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-gray-400 hover:text-white font-mono text-xs uppercase transition-colors group"
+              >
+                <ArrowUpRight className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 Documentation
-             </a>
-             <Link href="/litepaper" className="text-sm font-medium text-gray-500 hover:text-[#0EA885] transition-colors">
+              </a>
+              <Link
+                href="/litepaper"
+                className="flex items-center gap-2 text-gray-400 hover:text-white font-mono text-xs uppercase transition-colors group"
+              >
+                <ArrowUpRight className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 Litepaper
-             </Link>
-          </nav>
+              </Link>
+              <a
+                href="https://sepolia.mantlescan.xyz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-gray-400 hover:text-white font-mono text-xs uppercase transition-colors group"
+              >
+                <ArrowUpRight className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                Explorer
+              </a>
+            </nav>
+          </div>
+
+          {/* Features Column */}
+          <div className="md:col-span-3">
+            <h3 className="font-black text-white text-sm uppercase tracking-wider mb-6 border-l-2 border-blue-500 pl-3">
+              Features
+            </h3>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-gray-400 font-mono text-xs">
+                <Shield className="w-3 h-3 text-blue-500" />
+                100% Escrow Protection
+              </div>
+              <div className="flex items-center gap-2 text-gray-400 font-mono text-xs">
+                <Zap className="w-3 h-3 text-blue-500" />
+                Soulbound Reputation
+              </div>
+              <div className="flex items-center gap-2 text-gray-400 font-mono text-xs">
+                <Code2 className="w-3 h-3 text-blue-500" />
+                Zero Platform Fees
+              </div>
+            </div>
+          </div>
+
+          {/* Social Column */}
+          <div className="md:col-span-2">
+            <h3 className="font-black text-white text-sm uppercase tracking-wider mb-6 border-l-2 border-blue-500 pl-3">
+              Connect
+            </h3>
+            <div className="flex flex-col gap-3">
+              <a
+                href="https://x.com/QuintyLabs"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
+              >
+                <div className="w-8 h-8 border border-white/10 flex items-center justify-center group-hover:border-blue-500 group-hover:bg-blue-500/10 transition-all">
+                  <X className="w-4 h-4" />
+                </div>
+                <span className="font-mono text-xs uppercase">Twitter</span>
+              </a>
+              <a
+                href="https://github.com/Quinty-Quest-Bounty"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
+              >
+                <div className="w-8 h-8 border border-white/10 flex items-center justify-center group-hover:border-blue-500 group-hover:bg-blue-500/10 transition-all">
+                  <Github className="w-4 h-4" />
+                </div>
+                <span className="font-mono text-xs uppercase">GitHub</span>
+              </a>
+            </div>
+          </div>
         </div>
 
-        {/* Divider */}
-        <div className="h-px w-full bg-gray-100 my-8" />
 
-        {/* Bottom: Operational & Info */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-400">
-           <div className="flex items-center gap-2 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
-             <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></div>
-             <span className="font-medium text-gray-500">Operational on Base Sepolia</span>
-           </div>
-           
-           <div className="font-medium">
-              &copy; {new Date().getFullYear()} Quinty Labs
-           </div>
+        {/* Divider */}
+        <div className="h-px w-full bg-white/10 mb-8" />
+
+        {/* Bottom Section */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="font-mono text-xs text-gray-500 uppercase tracking-wider">
+            &copy; {currentYear} Quintle Labs · MIT License
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="font-mono text-[10px] text-gray-500 uppercase tracking-wider">
+              Built on
+            </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 border border-blue-500/30 bg-blue-500/5">
+              <svg className="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" fill="none"/>
+              </svg>
+              <span className="font-mono text-xs text-blue-400 uppercase tracking-wider font-bold">
+                Mantle
+              </span>
+            </div>
+          </div>
         </div>
 
       </div>

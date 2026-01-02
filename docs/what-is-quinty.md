@@ -1,6 +1,6 @@
 # What is Quinty?
 
-Quinty is a **decentralized work and funding protocol** built on Base that fundamentally reimagines how value flows between creators and solvers. It's a trustless platform where bounties, grants, and crowdfunding merge with permanent on-chain reputation.
+Quinty is a **decentralized work and funding protocol** built on Mantle that fundamentally reimagines how value flows between creators and solvers. It's a trustless platform where bounties, grants, and crowdfunding merge with permanent on-chain reputation.
 
 ## The Core Concept
 
@@ -147,7 +147,7 @@ Your achievements are stored in soulbound NFTs that:
 
 - Can never be transferred or sold
 - Permanently prove your contribution history
-- Travel with you across all platforms that read Base
+- Travel with you across all platforms that read Mantle
 
 ### 4. **Zero Platform Tax**
 
@@ -165,7 +165,7 @@ Unlike Upwork (20% fee) or Gitcoin (platform fees), Quinty charges:
 
 ## Technical Architecture
 
-### Smart Contract Layer (Base Sepolia)
+### Smart Contract Layer (Mantle Sepolia)
 
 ```
 Quinty Core (0x7169...)
@@ -262,9 +262,9 @@ Only authorized addresses can:
 - Mint badges (authorized contracts only)
 - Resolve disputes (community stakers only)
 
-## Why Base?
+## Why Mantle?
 
-Quinty is built exclusively on **Base Sepolia** (testnet) and will deploy to **Base Mainnet** because:
+Quinty is built exclusively on **Mantle Sepolia** (testnet) and will deploy to **Mantle Mainnet** because:
 
 1. **Low Fees** - Gas costs are minimal ($0.01-$0.10 per transaction)
 2. **Fast Finality** - 2-second block times = instant confirmations
@@ -288,7 +288,7 @@ That's the world Quinty is building.
 
 ## Current Status
 
-- ✅ **All contracts deployed on Base Sepolia**
+- ✅ **All contracts deployed on Mantle Sepolia**
 - ✅ **Full frontend with 6 core features**
 - ✅ **Soulbound NFT badge system**
 - ✅ **Social verification (X account verification)**
@@ -327,7 +327,7 @@ To make trustless collaboration as easy as sending a transaction. No bosses. No 
 
 ### Infrastructure
 
-- **Blockchain:** Base Sepolia (testnet) → Base Mainnet (production)
+- **Blockchain:** Mantle Sepolia (testnet) → Mantle Mainnet (production)
 - **Storage:** IPFS for metadata, images, and submissions
 - **Deployment:** Vercel Edge
 - **Analytics:** On-chain events

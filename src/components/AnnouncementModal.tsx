@@ -59,17 +59,17 @@ export function AnnouncementModal({ isOpen, onClose }: AnnouncementModalProps) {
             {/* Main Heading */}
             <div className="space-y-2 sm:space-y-3 px-2">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight">
-                Base Batches 002 Finalists!
+                Now on Mantle Network!
               </h2>
               <div className="mx-auto max-w-md">
                 <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed">
                   We're thrilled to announce that{" "}
-                  <span className="font-semibold text-[#0EA885]">Quinty</span> has been
-                  selected as a{" "}
+                  <span className="font-semibold text-[#0EA885]">Quinty</span> is now
+                  deployed on{" "}
                   <span className="font-semibold text-foreground">
-                    Builder Track Finalist
+                    Mantle Network
                   </span>{" "}
-                  for Base Batches 002!
+                  for faster and cheaper transactions!
                 </p>
               </div>
             </div>

@@ -64,7 +64,7 @@ The traditional work economy is broken. Quinty fixes it with trustless infrastru
 **Quinty Charges:**
 
 - ✅ **0% Platform Fees**
-- ✅ **Only Gas Costs** (~$0.01-$0.10 on Base)
+- ✅ **Only Gas Costs** (~$0.01-$0.10 on Mantle)
 - ✅ **All Value to Creators/Solvers**
 - ✅ **No Hidden Charges**
 
@@ -98,7 +98,7 @@ The traditional work economy is broken. Quinty fixes it with trustless infrastru
 - ✅ **Crowdfunding** - Milestone-based accountability
 - ✅ **Looking for Grant** - Flexible VC funding without equity
 
-## Why Base Blockchain?
+## Why Mantle Blockchain?
 
 - **Low Cost:** $0.01-$0.10 per transaction
 - **Fast Finality:** 2-second block times

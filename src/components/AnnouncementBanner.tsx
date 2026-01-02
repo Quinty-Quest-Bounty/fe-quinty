@@ -25,7 +25,7 @@ export function AnnouncementBanner({ onClick }: AnnouncementBannerProps) {
         <div className="relative flex items-center gap-2 sm:gap-2.5">
           <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-white animate-pulse" />
           <span className="text-xs sm:text-sm font-semibold text-white tracking-wide">
-            🎉 Base Batches 002 Finalist
+            🎉 Now on Mantle Network
           </span>
           <span className="hidden sm:inline text-xs sm:text-sm text-white/90">
             — Click to learn more

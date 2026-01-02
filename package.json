@@ -1,5 +1,5 @@
 {
-  "name": "quinty-frontend",
+  "name": "quintle-frontend",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@coinbase/onchainkit": "^1.1.1",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-checkbox": "^1.3.3",
@@ -23,6 +22,8 @@
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@rainbow-me/rainbowkit": "^2.2.9",
+    "@reown/appkit": "^1.8.15",
+    "@reown/appkit-adapter-wagmi": "^1.8.15",
     "@tabler/icons-react": "^3.35.0",
     "@tanstack/react-query": "^5.51.0",
     "@wagmi/core": "^2.13.0",
@@ -37,7 +38,7 @@
     "lucide-react": "^0.544.0",
     "matter-js": "^0.20.0",
     "motion": "^12.23.24",
-    "next": "^15.5.6",
+    "next": "^15.5.9",
     "next-auth": "^4.24.11",
     "poly-decomp": "^0.3.0",
     "qr": "^0.5.1",

@@ -12,7 +12,7 @@ import { readContract } from "@wagmi/core";
 import {
   CONTRACT_ADDRESSES,
   QUINTY_ABI,
-  BASE_SEPOLIA_CHAIN_ID,
+  MANTLE_SEPOLIA_CHAIN_ID,
 } from "../utils/contracts";
 import { parseETH, wagmiConfig } from "../utils/web3";
 import BountyCard from "./BountyCard";
@@ -21,6 +21,7 @@ import {
   uploadToIpfs,
   BountyMetadata,
 } from "../utils/ipfs";
+import { mockBounties } from "../utils/mockBounties";
 import {
   Card,
   CardContent,
@@ -99,9 +100,8 @@ export default function BountyManager() {
 
   // State
   const [bounties, setBounties] = useState<Bounty[]>([]);
-  const [activeTab, setActiveTab] = useState<
-    "create" | "browse" | "my-bounties"
-  >("browse");
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showMyBounties, setShowMyBounties] = useState(false);
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
@@ -157,7 +157,7 @@ export default function BountyManager() {
 
   // Read bounty counter
   const { data: bountyCounter } = useReadContract({
-    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+    address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
     abi: QUINTY_ABI,
     functionName: "bountyCounter",
     query: { enabled: true, retry: false, refetchOnWindowFocus: false },
@@ -165,7 +165,7 @@ export default function BountyManager() {
 
   // Watch for bounty events
   useWatchContractEvent({
-    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+    address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
     abi: QUINTY_ABI,
     eventName: "BountyCreated",
     onLogs() {
@@ -174,7 +174,7 @@ export default function BountyManager() {
   });
 
   useWatchContractEvent({
-    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+    address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
     abi: QUINTY_ABI,
     eventName: "SubmissionCreated",
     onLogs(logs) {
@@ -269,7 +269,7 @@ export default function BountyManager() {
         try {
         // 1. Get all bounty metadata using the new robust function
         const bountyData = await readContract(wagmiConfig, {
-          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+          address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
             .Quinty as `0x${string}`,
           abi: QUINTY_ABI,
           functionName: "getBountyData",
@@ -295,7 +295,7 @@ export default function BountyManager() {
 
           // 2. Get submissions separately
           const submissionCount = await readContract(wagmiConfig, {
-            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+            address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
               .Quinty as `0x${string}`,
             abi: QUINTY_ABI,
             functionName: "getSubmissionCount",
@@ -305,7 +305,7 @@ export default function BountyManager() {
           const submissions: Submission[] = [];
           for (let i = 0; i < Number(submissionCount); i++) {
             const submissionData = await readContract(wagmiConfig, {
-              address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+              address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
                 .Quinty as `0x${string}`,
               abi: QUINTY_ABI,
               functionName: "getSubmissionStruct",
@@ -409,7 +409,7 @@ export default function BountyManager() {
           : 0;
 
       writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+        address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
           .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "createBounty",
@@ -456,8 +456,8 @@ export default function BountyManager() {
     if (isConfirmed) {
       // Reload bounties after confirmation
       loadBountiesAndSubmissions();
-      // Switch to browse tab to see the new bounty
-      setActiveTab("browse");
+      // Close create form to see the new bounty
+      setShowCreateForm(false);
       // Reset form
       setNewBounty({
         title: "",
@@ -497,7 +497,7 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+        address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
           .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "submitSolution",
@@ -522,7 +522,7 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+        address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
           .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "selectWinners",
@@ -540,7 +540,7 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+        address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
           .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "triggerSlash",
@@ -558,7 +558,7 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+        address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
           .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "addReply",
@@ -580,7 +580,7 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+        address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
           .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "revealSolution",
@@ -600,7 +600,10 @@ export default function BountyManager() {
 
   // Filter bounties based on selected filters
   const getFilteredBounties = () => {
-    return bounties.filter((bounty) => {
+    // Use mock bounties if no real bounties exist
+    const bounciesToFilter = bounties.length === 0 ? mockBounties : bounties;
+
+    return bounciesToFilter.filter((bounty) => {
       // Type filter
       if (typeFilter !== "all") {
         // Extract type from metadata if available
@@ -627,79 +630,99 @@ export default function BountyManager() {
   // Remove the wallet connection blocker - let users browse without connecting
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="flex justify-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-            <Target className="h-8 w-8 text-primary" />
-          </div>
-        </div>
-        <h1 className="text-4xl font-bold tracking-tight">Quinty Bounty</h1>
-        <p className="text-muted-foreground text-lg">
-          Post tasks with 100% ETH escrow and blinded submissions for secure,
-          transparent project completion.
-        </p>
-      </div>
-
-      {/* Wallet Connection Banner */}
-      {!isConnected && (
-        <Card className="border-blue-200 bg-blue-50/50">
-          <CardContent className="flex items-center gap-4 py-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-              <Target className="h-5 w-5 text-blue-600" />
-            </div>
-            <div className="flex-1">
-              <CardTitle className="text-sm font-semibold text-blue-900">
-                Connect Your Wallet to Get Started
-              </CardTitle>
-              <CardDescription className="text-xs text-blue-700">
-                Connect your wallet to create bounties, submit solutions, and participate in the ecosystem
-              </CardDescription>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Tab Navigation */}
-      <div className="flex justify-center px-4">
-        <div className="inline-flex h-9 sm:h-10 items-center justify-center rounded-md bg-muted p-0.5 sm:p-1 text-muted-foreground w-full sm:w-auto max-w-md">
-          {[
-            { id: "browse", label: "Browse", icon: Target },
-            { id: "my-bounties", label: "My Bounty", icon: Users },
-            { id: "create", label: "Create", icon: Plus },
-          ].map((tab) => (
-            <Button
-              key={tab.id}
-              variant={activeTab === tab.id ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setActiveTab(tab.id as any)}
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium ring-offset-background transition-all flex-1 sm:flex-none"
+    <div className="space-y-8">
+      {/* Header Actions */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h3 className="text-3xl font-black text-gray-900 uppercase tracking-tight">
+            {showMyBounties ? "MY BOUNTIES" : "ALL BOUNTIES"}{" "}
+            <span className="text-blue-600">
+              ({showMyBounties
+                ? bounties.filter(b => address && b.creator.toLowerCase() === address.toLowerCase()).length
+                : getFilteredBounties().length})
+            </span>
+          </h3>
+          {isConnected && !showCreateForm && (
+            <button
+              onClick={() => setShowMyBounties(!showMyBounties)}
+              className="mt-2 text-sm font-mono text-gray-600 hover:text-blue-600 transition-colors uppercase tracking-wider"
             >
-              <tab.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 md:mr-2" />
-              <span className="hidden md:inline">{tab.label}</span>
-            </Button>
-          ))}
+              {showMyBounties ? "← Show All Bounties" : "View My Bounties →"}
+            </button>
+          )}
+        </div>
+
+        <div className="flex gap-3 flex-wrap">
+          {!showCreateForm && (
+            <>
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-[140px] border-2 border-gray-900">
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="development">Development</SelectItem>
+                  <SelectItem value="design">Design</SelectItem>
+                  <SelectItem value="marketing">Marketing</SelectItem>
+                  <SelectItem value="research">Research</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[140px] border-2 border-gray-900">
+                  <SelectValue placeholder="All Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="resolved">Resolved</SelectItem>
+                  <SelectItem value="expired">Expired</SelectItem>
+                </SelectContent>
+              </Select>
+            </>
+          )}
+
+          <button
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            className={`px-6 py-2 border-2 transition-all font-mono text-xs uppercase tracking-wider font-bold inline-flex items-center gap-2 ${
+              showCreateForm
+                ? "border-gray-900 bg-white text-gray-900 hover:bg-gray-100"
+                : "border-blue-500 bg-blue-500 text-white hover:bg-blue-600"
+            }`}
+          >
+            {showCreateForm ? (
+              <>
+                <X className="w-4 h-4" />
+                CANCEL
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4" />
+                CREATE BOUNTY
+              </>
+            )}
+          </button>
         </div>
       </div>
 
-      {/* Create Bounty Tab */}
-      {activeTab === "create" && (
+      {/* Create Bounty Form */}
+      {showCreateForm && (
         <div className="max-w-5xl mx-auto">
-          <div className="bg-white border border-gray-200 rounded-lg">
-            <div className="text-center p-8 border-b border-gray-200">
-              <div className="flex justify-center mb-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100">
-                  <Target className="h-5 w-5 text-gray-600" />
+          <div className="bg-white border-2 border-gray-900">
+            <div className="p-8 border-b-2 border-gray-900 bg-gradient-to-r from-gray-50 to-white">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-blue-500 border-2 border-gray-900 flex items-center justify-center">
+                  <Target className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight">
+                    CREATE BOUNTY
+                  </h2>
+                  <p className="text-xs font-mono text-gray-600 mt-1 uppercase tracking-wider">
+                    IPFS METADATA + SMART CONTRACT ESCROW
+                  </p>
                 </div>
               </div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                Create New Bounty
-              </h2>
-              <p className="text-gray-600 max-w-2xl mx-auto">
-                Create a detailed bounty with IPFS metadata and smart contract
-                escrow
-              </p>
             </div>
 
             <div className="p-8">
@@ -709,17 +732,17 @@ export default function BountyManager() {
                   {/* Basic Information */}
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                      <div className="w-8 h-8 bg-gray-900 text-white border-2 border-gray-900 flex items-center justify-center text-sm font-black">
                         1
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900">
-                        Basic Information
+                      <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">
+                        BASIC INFO
                       </h3>
                     </div>
 
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">
+                        <label className="text-xs font-bold text-gray-900 uppercase tracking-wider">
                           Title *
                         </label>
                         <Input
@@ -737,7 +760,7 @@ export default function BountyManager() {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">
+                        <label className="text-xs font-bold text-gray-900 uppercase tracking-wider">
                           Bounty Type
                         </label>
                         <Select
@@ -765,7 +788,7 @@ export default function BountyManager() {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-gray-700">
+                        <label className="text-xs font-bold text-gray-900 uppercase tracking-wider">
                           Description *
                         </label>
                         <textarea
@@ -787,20 +810,20 @@ export default function BountyManager() {
                   {/* Bounty Details */}
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                      <div className="w-8 h-8 bg-gray-900 text-white border-2 border-gray-900 flex items-center justify-center text-sm font-black">
                         2
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900">
-                        Bounty Details
+                      <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">
+                        BOUNTY DETAILS
                       </h3>
                     </div>
 
                     <div className="space-y-4">
                       <div className="space-y-4">
                         <div className="space-y-2">
-                          <label className="text-sm font-medium flex items-center gap-1">
+                          <label className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1">
                             <DollarSign className="w-3 h-3" />
-                            Amount (ETH) *
+                            Amount (MNT) *
                           </label>
                           <Input
                             type="number"
@@ -817,7 +840,7 @@ export default function BountyManager() {
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-sm font-medium flex items-center gap-1">
+                          <label className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-1">
                             <CalendarIcon className="w-3 h-3" />
                             Deadline *
                           </label>
@@ -863,7 +886,7 @@ export default function BountyManager() {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">
+                        <label className="text-xs font-bold text-gray-900 uppercase tracking-wider">
                           Slash Percentage: {newBounty.slashPercent}%
                         </label>
                         <input
@@ -1059,18 +1082,18 @@ export default function BountyManager() {
                   {/* Requirements & Skills */}
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                      <div className="w-8 h-8 bg-gray-900 text-white border-2 border-gray-900 flex items-center justify-center text-sm font-black">
                         3
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900">
-                        Requirements & Skills
+                      <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">
+                        REQUIREMENTS
                       </h3>
                     </div>
 
                     <div className="space-y-4">
                       {/* Requirements */}
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">
+                        <label className="text-xs font-bold text-gray-900 uppercase tracking-wider">
                           Requirements
                         </label>
                         <div className="space-y-2">
@@ -1128,7 +1151,7 @@ export default function BountyManager() {
 
                       {/* Deliverables */}
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">
+                        <label className="text-xs font-bold text-gray-900 uppercase tracking-wider">
                           Deliverables
                         </label>
                         <div className="space-y-2">
@@ -1186,7 +1209,7 @@ export default function BountyManager() {
 
                       {/* Skills */}
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">
+                        <label className="text-xs font-bold text-gray-900 uppercase tracking-wider">
                           Required Skills
                         </label>
                         <div className="space-y-2">
@@ -1247,16 +1270,16 @@ export default function BountyManager() {
                   {/* Media Upload */}
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                      <div className="w-8 h-8 bg-gray-900 text-white border-2 border-gray-900 flex items-center justify-center text-sm font-black">
                         4
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900">
-                        Media & Assets
+                      <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">
+                        MEDIA
                       </h3>
                     </div>
 
                     <div className="space-y-3">
-                      <label className="text-sm font-medium">
+                      <label className="text-xs font-bold text-gray-900 uppercase tracking-wider">
                         Images (Optional)
                       </label>
 
@@ -1336,11 +1359,11 @@ export default function BountyManager() {
                   {/* Submit Section */}
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="w-6 h-6 bg-gray-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                      <div className="w-8 h-8 bg-blue-500 text-white border-2 border-gray-900 flex items-center justify-center text-sm font-black">
                         5
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900">
-                        Create Bounty
+                      <h3 className="text-xl font-black text-gray-900 uppercase tracking-tight">
+                        SUBMIT
                       </h3>
                     </div>
 
@@ -1427,128 +1450,65 @@ export default function BountyManager() {
         </div>
       )}
 
-      {/* Browse Bounties Tab */}
-      {activeTab === "browse" && (
+      {/* Browse Bounties View - Shows when not creating */}
+      {!showCreateForm && (
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h3 className="text-2xl font-bold text-gray-900">
-              All Bounties ({getFilteredBounties().length})
-            </h3>
-            <div className="flex gap-2">
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="All Types" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="development">Development</SelectItem>
-                  <SelectItem value="design">Design</SelectItem>
-                  <SelectItem value="marketing">Marketing</SelectItem>
-                  <SelectItem value="research">Research</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="resolved">Resolved</SelectItem>
-                  <SelectItem value="expired">Expired</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {getFilteredBounties().length === 0 ? (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                <span className="text-2xl">🎯</span>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                No bounties found
-              </h3>
-              <p className="text-gray-600 mb-4">
-                Be the first to create a bounty!
-              </p>
-              <Button onClick={() => setActiveTab("create")}>
-                <Target className="w-4 h-4 mr-2" />
-                Create Bounty
-              </Button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {getFilteredBounties().map((bounty) => (
-                <BountyCard
-                  key={bounty.id}
-                  bounty={bounty}
-                  onSubmitSolution={submitSolution}
-                  onSelectWinners={selectWinners}
-                  onTriggerSlash={triggerSlash}
-                  onAddReply={addReply}
-                  onRevealSolution={revealSolution}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* My Bounties Tab - Creator's bounties management */}
-      {activeTab === "my-bounties" && (
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h3 className="text-2xl font-bold text-gray-900">My Bounties</h3>
-            <div className="text-sm text-muted-foreground">
-              {
-                bounties.filter(
-                  (b) =>
-                    address && b.creator.toLowerCase() === address.toLowerCase()
-                ).length
-              }{" "}
-              bounty
-              {bounties.filter(
-                (b) =>
-                  address && b.creator.toLowerCase() === address.toLowerCase()
-              ).length !== 1
-                ? "ies"
-                : ""}
-            </div>
-          </div>
-
-          {!isConnected ? (
-            <div className="text-center py-12 bg-muted/30 rounded-lg border border-dashed">
-              <Users className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-              <p className="text-lg font-medium mb-2">Connect Your Wallet</p>
-              <p className="text-sm text-muted-foreground">
-                Please connect your wallet to view your bounties
-              </p>
-            </div>
-          ) : bounties.filter(
-              (b) =>
-                address && b.creator.toLowerCase() === address.toLowerCase()
-            ).length === 0 ? (
-            <div className="text-center py-12 bg-muted/30 rounded-lg border border-dashed">
-              <Target className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-              <p className="text-lg font-medium mb-2">No Bounties Created</p>
-              <p className="text-sm text-muted-foreground mb-4">
-                You haven't created any bounties yet
-              </p>
-              <Button onClick={() => setActiveTab("create")}>
-                <Plus className="w-4 h-4 mr-2" />
-                Create Your First Bounty
-              </Button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {bounties
-                .filter(
+          {/* Get bounties to display based on showMyBounties toggle */}
+          {(() => {
+            const bounciesToShow = showMyBounties
+              ? bounties.filter(
                   (b) =>
                     address && b.creator.toLowerCase() === address.toLowerCase()
                 )
-                .map((bounty) => (
+              : getFilteredBounties();
+
+            // Show connect wallet message for My Bounties view
+            if (showMyBounties && !isConnected) {
+              return (
+                <div className="text-center py-16 border-2 border-dashed border-gray-300 bg-gray-50">
+                  <div className="w-20 h-20 mx-auto mb-4 bg-white border-2 border-gray-900 flex items-center justify-center">
+                    <Users className="w-10 h-10 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-black text-gray-900 mb-2 uppercase tracking-tight">
+                    CONNECT WALLET
+                  </h3>
+                  <p className="text-sm text-gray-600 font-mono uppercase tracking-wider">
+                    Connect to view your bounties
+                  </p>
+                </div>
+              );
+            }
+
+            // Show no bounties message
+            if (bounciesToShow.length === 0) {
+              return (
+                <div className="text-center py-16 border-2 border-dashed border-gray-300 bg-gray-50">
+                  <div className="w-20 h-20 mx-auto mb-4 bg-white border-2 border-gray-900 flex items-center justify-center">
+                    <Target className="w-10 h-10 text-gray-400" />
+                  </div>
+                  <h3 className="text-xl font-black text-gray-900 mb-2 uppercase tracking-tight">
+                    {showMyBounties ? "NO BOUNTIES CREATED" : "NO BOUNTIES FOUND"}
+                  </h3>
+                  <p className="text-sm text-gray-600 font-mono mb-6 uppercase tracking-wider">
+                    {showMyBounties
+                      ? "Create your first bounty"
+                      : "Be the first to create one"}
+                  </p>
+                  <button
+                    onClick={() => setShowCreateForm(true)}
+                    className="px-6 py-3 border-2 border-blue-500 bg-blue-500 text-white hover:bg-blue-600 transition-all font-mono text-xs uppercase tracking-wider font-bold inline-flex items-center gap-2"
+                  >
+                    <Target className="w-4 h-4" />
+                    CREATE BOUNTY
+                  </button>
+                </div>
+              );
+            }
+
+            // Show bounties grid
+            return (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {bounciesToShow.map((bounty) => (
                   <BountyCard
                     key={bounty.id}
                     bounty={bounty}
@@ -1559,8 +1519,9 @@ export default function BountyManager() {
                     onRevealSolution={revealSolution}
                   />
                 ))}
-            </div>
-          )}
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>

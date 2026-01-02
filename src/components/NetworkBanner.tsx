@@ -1,67 +1,45 @@
 "use client";
 
 import { useChainId } from "wagmi";
-import { BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
-import { ensureBaseSepoliaNetwork } from "../utils/network";
+import { MANTLE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
+import { ensureMantleSepoliaNetwork } from "../utils/network";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 
 export default function NetworkBanner() {
   const chainId = useChainId();
-  const isOnBaseSepolia = chainId === BASE_SEPOLIA_CHAIN_ID;
+  const isOnMantleSepolia = chainId === MANTLE_SEPOLIA_CHAIN_ID;
 
   const handleSwitchNetwork = async () => {
-    const success = await ensureBaseSepoliaNetwork();
+    const success = await ensureMantleSepoliaNetwork();
     if (success) {
-      // Force page refresh to update chain state
       window.location.reload();
     }
   };
 
-  if (isOnBaseSepolia) {
-    return (
-      <Alert variant="success" className="py-2">
-        {/* <CheckCircle className="h-3 w-3 mt-0.5" /> */}
-        <AlertDescription className="flex items-center justify-between min-h-[20px]">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium leading-5">
-              Base Sepolia
-            </span>
-            <Badge
-              variant="outline"
-              className="text-xs h-5 px-2 flex items-center bg-green-100 text-green-700 border-green-300"
-            >
-              ETH
-            </Badge>
-          </div>
-          <span className="text-xs text-green-600 leading-5">
-            Chain {chainId}
-          </span>
-        </AlertDescription>
-      </Alert>
-    );
+  if (isOnMantleSepolia) {
+    return null;
   }
 
   return (
-    <Alert variant="warning" className="py-2">
-      {/* <AlertTriangle className="h-3 w-3 mt-0.5" /> */}
-      <AlertDescription className="flex items-center justify-between min-h-[20px]">
+    <Alert className="rounded-none border-x-0 border-t-0 bg-yellow-50 border-yellow-200">
+      <AlertDescription className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium leading-5">Wrong Network</span>
-          <Badge
-            variant="outline"
-            className="text-xs h-5 px-2 flex items-center bg-yellow-100 text-yellow-700 border-yellow-300"
-          >
-            {chainId}
+          <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+            Wrong Network
           </Badge>
+          <span className="text-yellow-800 text-sm">
+            Please switch to Mantle Sepolia to use Quintle
+          </span>
         </div>
         <Button
-          onClick={handleSwitchNetwork}
           size="sm"
-          className="h-6 px-2 text-xs flex items-center"
+          variant="outline"
+          onClick={handleSwitchNetwork}
+          className="bg-yellow-100 border-yellow-300 text-yellow-800 hover:bg-yellow-200"
         >
-          Switch to Base Sepolia
+          Switch Network
         </Button>
       </AlertDescription>
     </Alert>

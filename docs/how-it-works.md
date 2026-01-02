@@ -46,15 +46,6 @@ Traditional platforms use intermediaries for trust. Quinty uses:
 - Portable across all platforms
 - Can never be deleted or taken away
 
-### 4. Community Is Judge (soon)
-
-**When disputes arise, the community decides.**
-
-- Stake-weighted voting
-- Economic alignment (lose stake if wrong)
-- Proportional rewards from slashed funds
-- Transparent, on-chain outcomes
-
 ## Workflow 1: Bounty System
 
 ### Step 1: Creator Posts Bounty

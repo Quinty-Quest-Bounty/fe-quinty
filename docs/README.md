@@ -1,6 +1,6 @@
 # Quinty Documentation
 
-Welcome to Quinty - a decentralized work and funding protocol built on Base Sepolia.
+Welcome to Quinty - a decentralized work and funding protocol built on Mantle Sepolia.
 
 ## What is Quinty?
 
@@ -13,7 +13,7 @@ Quinty is a trustless collaboration platform that eliminates intermediaries from
 - **X Social Verification** - Verify identity via OAuth
 - **Democratic Disputes** - Community-powered resolution with stake-weighted voting (soon)
 - **Zero Platform Fees** - No middleman cuts
-- **Full Transparency** - All transactions visible on Base blockchain
+- **Full Transparency** - All transactions visible on Mantle blockchain
 
 ## Core Products
 
@@ -58,4 +58,4 @@ MIT - Open source and free to use.
 
 ---
 
-**Built with ❤️ for Base and the onchain economy.**
+**Built with ❤️ for Mantle and the onchain economy.**

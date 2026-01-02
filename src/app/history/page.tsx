@@ -7,44 +7,22 @@ import { readContract } from "@wagmi/core";
 import {
  CONTRACT_ADDRESSES,
  QUINTY_ABI,
- GRANT_PROGRAM_ABI,
- CROWDFUNDING_ABI,
- LOOKING_FOR_GRANT_ABI,
- AIRDROP_ABI,
- BASE_SEPOLIA_CHAIN_ID,
+ MANTLE_SEPOLIA_CHAIN_ID,
 } from "../../utils/contracts";
-import { formatETH, formatAddress, wagmiConfig } from "../../utils/web3";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import {
- Select,
- SelectContent,
- SelectItem,
- SelectTrigger,
- SelectValue,
-} from "@/components/ui/select";
+import { formatETH, wagmiConfig } from "../../utils/web3";
 import {
  Target,
- Gift,
- TrendingUp,
- Users,
- Coins,
  Calendar,
+ Coins,
  ExternalLink,
- ArrowRight,
- CheckCircle,
- XCircle,
  Clock,
- Filter,
  Loader2,
+ Trophy,
 } from "lucide-react";
 
 interface Transaction {
  id: string;
- type: "bounty_created" | "bounty_submitted" | "bounty_won" | "bounty_revealed" | "bounty_replied" | "grant_created" | "grant_applied" | "grant_received" | "crowdfunding_created" | "crowdfunding_contributed" | "lfg_created" | "lfg_supported" | "airdrop_created" | "airdrop_submitted";
- contractType: "Quinty" | "GrantProgram" | "Crowdfunding" | "LookingForGrant" | "Airdrop";
+ type: "bounty_created" | "bounty_submitted" | "bounty_won" | "bounty_revealed" | "bounty_replied";
  itemId: number;
  amount?: bigint;
  timestamp: bigint;
@@ -57,7 +35,6 @@ export default function HistoryPage() {
  const { address } = useAccount();
  const [transactions, setTransactions] = useState<Transaction[]>([]);
  const [isLoading, setIsLoading] = useState(true);
- const [filter, setFilter] = useState<string>("all");
 
  useEffect(() => {
  if (address) {
@@ -72,23 +49,19 @@ export default function HistoryPage() {
  setIsLoading(true);
  const allTransactions: Transaction[] = [];
 
- console.log("Loading transaction history for address:", address);
-
  // Load Bounty transactions
  try {
-  console.log("Loading bounties...");
   const bountyCounter = await readContract(wagmiConfig, {
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+  address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
   abi: QUINTY_ABI,
   functionName: "bountyCounter",
   });
-  console.log("Bounty counter:", bountyCounter);
   const bountyCount = Number(bountyCounter);
 
   for (let i = 1; i <= bountyCount; i++) {
   try {
   const bountyData = await readContract(wagmiConfig, {
-   address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+   address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
    abi: QUINTY_ABI,
    functionName: "getBountyData",
    args: [BigInt(i)],
@@ -102,20 +75,13 @@ export default function HistoryPage() {
    allowMultipleWinners,
    winnerShares,
    status,
-   slashPercent,
-   selectedWinners,
-   selectedSubmissionIds,
-   hasOprec,
-   oprecDeadline,
   ] = bountyData as any;
 
   // Check if user created this bounty
   if (creator.toLowerCase() === address.toLowerCase()) {
-   console.log(`User created bounty ${i}`);
    allTransactions.push({
    id: `bounty-created-${i}`,
    type: "bounty_created",
-   contractType: "Quinty",
    itemId: i,
    amount: amount,
    timestamp: deadline,
@@ -126,7 +92,7 @@ export default function HistoryPage() {
 
   // Get submissions
   const submissionCount = await readContract(wagmiConfig, {
-   address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+   address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
    abi: QUINTY_ABI,
    functionName: "getSubmissionCount",
    args: [BigInt(i)],
@@ -135,7 +101,7 @@ export default function HistoryPage() {
   for (let subIdx = 0; subIdx < Number(submissionCount); subIdx++) {
    try {
    const submissionData = await readContract(wagmiConfig, {
-   address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+   address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
    abi: QUINTY_ABI,
    functionName: "getSubmissionStruct",
    args: [BigInt(i), BigInt(subIdx)],
@@ -143,12 +109,10 @@ export default function HistoryPage() {
 
    const sub = submissionData as any;
 
-   // Check if user submitted to this bounty
    if (sub.solver.toLowerCase() === address.toLowerCase()) {
    allTransactions.push({
     id: `bounty-submitted-${i}-${subIdx}`,
     type: "bounty_submitted",
-    contractType: "Quinty",
     itemId: i,
     amount: sub.deposit,
     timestamp: sub.submittedAt || deadline,
@@ -156,12 +120,10 @@ export default function HistoryPage() {
     description: description.split("\n")[0] || `Bounty #${i}`,
    });
 
-   // Add won transaction if user is selected as winner
    if (sub.selected) {
     allTransactions.push({
     id: `bounty-won-${i}-${subIdx}`,
     type: "bounty_won",
-    contractType: "Quinty",
     itemId: i,
     amount: amount,
     timestamp: sub.submittedAt || deadline,
@@ -170,35 +132,15 @@ export default function HistoryPage() {
     });
    }
 
-   // Add revealed transaction if solution was revealed
    if (sub.revealed) {
     allTransactions.push({
     id: `bounty-revealed-${i}-${subIdx}`,
     type: "bounty_revealed",
-    contractType: "Quinty",
     itemId: i,
     timestamp: sub.revealedAt || sub.submittedAt || deadline,
     status: "Revealed",
     description: description.split("\n")[0] || `Bounty #${i}`,
     });
-   }
-   }
-
-   // Check for replies by user on any submission
-   if (sub.replies && Array.isArray(sub.replies)) {
-   for (let replyIdx = 0; replyIdx < sub.replies.length; replyIdx++) {
-    const reply = sub.replies[replyIdx];
-    if (reply.replier.toLowerCase() === address.toLowerCase()) {
-    allTransactions.push({
-    id: `bounty-replied-${i}-${subIdx}-${replyIdx}`,
-    type: "bounty_replied",
-    contractType: "Quinty",
-    itemId: i,
-    timestamp: reply.timestamp || deadline,
-    status: "Replied",
-    description: description.split("\n")[0] || `Bounty #${i}`,
-    });
-    }
    }
    }
    } catch (subError) {
@@ -213,330 +155,7 @@ export default function HistoryPage() {
   console.error("Error loading bounty transactions:", error);
  }
 
- // Load Grant Program transactions
- try {
-  console.log("Loading grants...");
-  const grantCounter = await readContract(wagmiConfig, {
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].GrantProgram as `0x${string}`,
-  abi: GRANT_PROGRAM_ABI,
-  functionName: "grantCounter",
-  });
-  console.log("Grant counter:", grantCounter);
-  const grantCount = Number(grantCounter);
-
-  for (let i = 1; i <= grantCount; i++) {
-  try {
-  const grant = await readContract(wagmiConfig, {
-   address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].GrantProgram as `0x${string}`,
-   abi: GRANT_PROGRAM_ABI,
-   functionName: "getGrantInfo",
-   args: [BigInt(i)],
-  });
-
-  const [giver, title, , totalFunds, , , , status, , createdAt] = grant as any;
-
-  // Check if user created this grant
-  if (giver.toLowerCase() === address.toLowerCase()) {
-   allTransactions.push({
-   id: `grant-created-${i}`,
-   type: "grant_created",
-   contractType: "GrantProgram",
-   itemId: i,
-   amount: totalFunds,
-   timestamp: createdAt,
-   status: status === 2 ? "Active" : "Open",
-   description: title || `Grant #${i}`,
-   });
-  }
-
-  // Check if user applied
-  const appCount = await readContract(wagmiConfig, {
-   address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].GrantProgram as `0x${string}`,
-   abi: GRANT_PROGRAM_ABI,
-   functionName: "getApplicationCount",
-   args: [BigInt(i)],
-  });
-
-  for (let j = 0; j < Number(appCount); j++) {
-   try {
-   const app = await readContract(wagmiConfig, {
-   address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].GrantProgram as `0x${string}`,
-   abi: GRANT_PROGRAM_ABI,
-   functionName: "getApplication",
-   args: [BigInt(i), BigInt(j)],
-   });
-
-   const [applicant, , , requestedAmount, appliedAt, appStatus] = app as any;
-
-   if (applicant.toLowerCase() === address.toLowerCase()) {
-   allTransactions.push({
-    id: `grant-applied-${i}-${j}`,
-    type: "grant_applied",
-    contractType: "GrantProgram",
-    itemId: i,
-    amount: requestedAmount,
-    timestamp: appliedAt,
-    status: appStatus === 1 ? "Approved" : appStatus === 2 ? "Rejected" : "Pending",
-    description: title || `Grant #${i}`,
-   });
-   }
-   } catch (appError) {
-   console.error(`Error loading application ${j} for grant ${i}:`, appError);
-   }
-  }
-  } catch (grantError) {
-  console.error(`Error loading grant ${i}:`, grantError);
-  }
-  }
- } catch (error) {
-  console.error("Error loading grant transactions:", error);
- }
-
- // Load Crowdfunding transactions
- try {
-  console.log("Loading crowdfunding...");
-  const campaignCounter = await readContract(wagmiConfig, {
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Crowdfunding as `0x${string}`,
-  abi: CROWDFUNDING_ABI,
-  functionName: "campaignCounter",
-  });
-  console.log("Campaign counter:", campaignCounter);
-  const crowdfundingCount = Number(campaignCounter);
-
-  for (let i = 1; i <= crowdfundingCount; i++) {
-  try {
-  const campaign = await readContract(wagmiConfig, {
-   address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Crowdfunding as `0x${string}`,
-   abi: CROWDFUNDING_ABI,
-   functionName: "getCampaignInfo",
-   args: [BigInt(i)],
-  });
-
-  const [
-   creator,
-   title,
-   projectDetails,
-   socialAccounts,
-   fundingGoal,
-   totalRaised,
-   deadline,
-   createdAt,
-   status,
-   totalWithdrawn,
-  ] = campaign as any;
-
-  // Check if user created this campaign
-  if (creator.toLowerCase() === address.toLowerCase()) {
-   allTransactions.push({
-   id: `crowdfunding-created-${i}`,
-   type: "crowdfunding_created",
-   contractType: "Crowdfunding",
-   itemId: i,
-   timestamp: createdAt,
-   status: status === 1 ? "Successful" : status === 0 ? "Active" : "Failed",
-   description: title || `Campaign #${i}`,
-   });
-  }
-
-  // Check if user contributed
-  const contributorCount = await readContract(wagmiConfig, {
-   address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Crowdfunding as `0x${string}`,
-   abi: CROWDFUNDING_ABI,
-   functionName: "getContributorCount",
-   args: [BigInt(i)],
-  });
-
-  for (let j = 0; j < Number(contributorCount); j++) {
-   try {
-   const contributor = await readContract(wagmiConfig, {
-   address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Crowdfunding as `0x${string}`,
-   abi: CROWDFUNDING_ABI,
-   functionName: "getContributor",
-   args: [BigInt(i), BigInt(j)],
-   });
-
-   const [contributorAddr, amount, refunded] = contributor as any;
-
-   if (contributorAddr.toLowerCase() === address.toLowerCase()) {
-   allTransactions.push({
-    id: `crowdfunding-contributed-${i}-${j}`,
-    type: "crowdfunding_contributed",
-    contractType: "Crowdfunding",
-    itemId: i,
-    amount: amount,
-    timestamp: createdAt,
-    status: refunded ? "Refunded" : "Contributed",
-    description: title || `Campaign #${i}`,
-   });
-   }
-   } catch (contributorError) {
-   console.error(`Error loading contributor ${j} for campaign ${i}:`, contributorError);
-   }
-  }
-  } catch (campaignError) {
-  console.error(`Error loading campaign ${i}:`, campaignError);
-  }
-  }
- } catch (error) {
-  console.error("Error loading crowdfunding transactions:", error);
- }
-
- // Load Looking for Grant transactions
- try {
-  console.log("Loading LFG requests...");
-  const requestCounter = await readContract(wagmiConfig, {
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].LookingForGrant as `0x${string}`,
-  abi: LOOKING_FOR_GRANT_ABI,
-  functionName: "requestCounter",
-  });
-  console.log("Request counter:", requestCounter);
-  const lfgCount = Number(requestCounter);
-
-  for (let i = 1; i <= lfgCount; i++) {
-  try {
-  const request = await readContract(wagmiConfig, {
-   address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].LookingForGrant as `0x${string}`,
-   abi: LOOKING_FOR_GRANT_ABI,
-   functionName: "getRequestInfo",
-   args: [BigInt(i)],
-  });
-
-  const [creator, title, , , , , , , , status, createdAt] = request as any;
-
-  // Check if user created this request
-  if (creator.toLowerCase() === address.toLowerCase()) {
-   allTransactions.push({
-   id: `lfg-created-${i}`,
-   type: "lfg_created",
-   contractType: "LookingForGrant",
-   itemId: i,
-   timestamp: createdAt,
-   status: status === 1 ? "Funded" : status === 0 ? "Active" : "Cancelled",
-   description: title || `LFG Request #${i}`,
-   });
-  }
-
-  // Check if user supported
-  const supporterCount = await readContract(wagmiConfig, {
-   address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].LookingForGrant as `0x${string}`,
-   abi: LOOKING_FOR_GRANT_ABI,
-   functionName: "getSupporterCount",
-   args: [BigInt(i)],
-  });
-
-  for (let j = 0; j < Number(supporterCount); j++) {
-   try {
-   const supporter = await readContract(wagmiConfig, {
-   address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].LookingForGrant as `0x${string}`,
-   abi: LOOKING_FOR_GRANT_ABI,
-   functionName: "getSupporter",
-   args: [BigInt(i), BigInt(j)],
-   });
-
-   const [supporterAddr, amount, timestamp] = supporter as any;
-
-   if (supporterAddr.toLowerCase() === address.toLowerCase()) {
-   allTransactions.push({
-    id: `lfg-supported-${i}-${j}`,
-    type: "lfg_supported",
-    contractType: "LookingForGrant",
-    itemId: i,
-    amount: amount,
-    timestamp: timestamp,
-    status: "Supported",
-    description: title || `LFG Request #${i}`,
-   });
-   }
-   } catch (supporterError) {
-   console.error(`Error loading supporter ${j} for LFG ${i}:`, supporterError);
-   }
-  }
-  } catch (lfgError) {
-  console.error(`Error loading LFG request ${i}:`, lfgError);
-  }
-  }
- } catch (error) {
-  console.error("Error loading LFG transactions:", error);
- }
-
- // Load Airdrop transactions
- try {
-  const airdropCounter = await readContract(wagmiConfig, {
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-  abi: AIRDROP_ABI,
-  functionName: "airdropCounter",
-  });
-
-  for (let i = 1; i <= Number(airdropCounter); i++) {
-  try {
-  const airdrop = await readContract(wagmiConfig, {
-   address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-   abi: AIRDROP_ABI,
-   functionName: "getAirdrop",
-   args: [BigInt(i)],
-  });
-
-  const [creator, title, , totalReward, , deadline, , createdAt] = airdrop as any;
-
-  // Check if user created this airdrop
-  if (creator.toLowerCase() === address.toLowerCase()) {
-   allTransactions.push({
-   id: `airdrop-created-${i}`,
-   type: "airdrop_created",
-   contractType: "Airdrop",
-   itemId: i,
-   amount: totalReward,
-   timestamp: createdAt,
-   status: "Created",
-   description: title || `Airdrop #${i}`,
-   });
-  }
-
-  // Check if user submitted to this airdrop
-  try {
-   const hasSubmitted = await readContract(wagmiConfig, {
-   address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-   abi: AIRDROP_ABI,
-   functionName: "hasSubmitted",
-   args: [BigInt(i), address],
-   });
-
-   if (hasSubmitted) {
-   const submission = await readContract(wagmiConfig, {
-   address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-   abi: AIRDROP_ABI,
-   functionName: "getUserSubmission",
-   args: [BigInt(i), address],
-   });
-
-   const [, submittedAt, status] = submission as any;
-
-   allTransactions.push({
-   id: `airdrop-submitted-${i}`,
-   type: "airdrop_submitted",
-   contractType: "Airdrop",
-   itemId: i,
-   timestamp: submittedAt,
-   status: status === 1 ? "Approved" : status === 2 ? "Rejected" : "Pending",
-   description: title || `Airdrop #${i}`,
-   });
-   }
-  } catch (submissionError) {
-   // User hasn't submitted to this airdrop
-  }
-  } catch (airdropError) {
-  console.error(`Error loading airdrop ${i}:`, airdropError);
-  }
-  }
- } catch (error) {
-  console.error("Error loading airdrop transactions:", error);
- }
-
- // Sort by timestamp descending
  allTransactions.sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
-
- console.log("Total transactions loaded:", allTransactions.length);
- console.log("Transactions:", allTransactions);
  setTransactions(allTransactions);
  } catch (error) {
  console.error("Error loading transaction history:", error);
@@ -545,40 +164,22 @@ export default function HistoryPage() {
  }
  };
 
- const getTransactionIcon = (type: Transaction["type"]) => {
- switch (type) {
- case "bounty_created":
- case "bounty_submitted":
- case "bounty_won":
- case "bounty_revealed":
- case "bounty_replied":
-  return Target;
- case "grant_created":
- case "grant_applied":
- case "grant_received":
-  return Gift;
- case "crowdfunding_created":
- case "crowdfunding_contributed":
-  return Users;
- case "lfg_created":
- case "lfg_supported":
-  return TrendingUp;
- case "airdrop_created":
- case "airdrop_submitted":
-  return Coins;
- default:
-  return ArrowRight;
- }
+ const getTransactionColor = (type: Transaction["type"]) => {
+ if (type.includes("created")) return "bg-blue-500";
+ if (type.includes("submitted")) return "bg-purple-500";
+ if (type.includes("won")) return "bg-green-500";
+ if (type.includes("revealed")) return "bg-emerald-500";
+ if (type.includes("replied")) return "bg-cyan-500";
+ return "bg-gray-500";
  };
 
- const getTransactionColor = (type: Transaction["type"]) => {
- if (type.includes("created")) return "text-blue-600 bg-blue-50 border-blue-200";
- if (type.includes("submitted") || type.includes("applied")) return "text-purple-600 bg-purple-50 border-purple-200";
- if (type.includes("won") || type.includes("received")) return "text-green-600 bg-green-50 border-green-200";
- if (type.includes("revealed")) return "text-emerald-600 bg-emerald-50 border-emerald-200";
- if (type.includes("replied")) return "text-cyan-600 bg-cyan-50 border-cyan-200";
- if (type.includes("contributed") || type.includes("supported")) return "text-orange-600 bg-orange-50 border-orange-200";
- return "text-gray-600 bg-gray-50 border-gray-200";
+ const getTransactionBg = (type: Transaction["type"]) => {
+ if (type.includes("created")) return "bg-blue-50";
+ if (type.includes("submitted")) return "bg-purple-50";
+ if (type.includes("won")) return "bg-green-50";
+ if (type.includes("revealed")) return "bg-emerald-50";
+ if (type.includes("replied")) return "bg-cyan-50";
+ return "bg-gray-50";
  };
 
  const getTransactionLabel = (type: Transaction["type"]) => {
@@ -588,53 +189,20 @@ export default function HistoryPage() {
  bounty_won: "Won Bounty",
  bounty_revealed: "Revealed Solution",
  bounty_replied: "Replied to Submission",
- grant_created: "Created Grant Program",
- grant_applied: "Applied for Grant",
- grant_received: "Received Grant",
- crowdfunding_created: "Created Campaign",
- crowdfunding_contributed: "Contributed to Campaign",
- lfg_created: "Created LFG Request",
- lfg_supported: "Supported LFG",
- airdrop_created: "Created Airdrop",
- airdrop_submitted: "Submitted to Airdrop",
  };
  return labels[type];
  };
 
- const getRouteForTransaction = (tx: Transaction) => {
- switch (tx.contractType) {
- case "Quinty":
-  return `/bounties/${tx.itemId}`;
- case "GrantProgram":
-  return `/funding/grant-program/${tx.itemId}`;
- case "Crowdfunding":
-  return `/funding/crowdfunding/${tx.itemId}`;
- case "LookingForGrant":
-  return `/funding/looking-for-grant/${tx.itemId}`;
- case "Airdrop":
-  return `/airdrops/${tx.itemId}`;
- default:
-  return "#";
- }
- };
-
- const filteredTransactions = filter === "all"
- ? transactions
- : transactions.filter((tx) => {
-  if (filter === "bounties") return tx.contractType === "Quinty";
-  if (filter === "grants") return tx.contractType === "GrantProgram";
-  if (filter === "crowdfunding") return tx.contractType === "Crowdfunding";
-  if (filter === "lfg") return tx.contractType === "LookingForGrant";
-  if (filter === "airdrops") return tx.contractType === "Airdrop";
-  return true;
- });
-
  if (!address) {
  return (
- <div className="min-h-screen flex items-center justify-center p-4">
-  <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
-  <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Connect Your Wallet</h2>
-  <p className="text-muted-foreground text-sm sm:text-base">
+ <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white relative flex items-center justify-center p-4">
+  <div className="fixed inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-40 pointer-events-none" />
+  <div className="text-center border-2 border-gray-900 bg-white p-12 max-w-md relative z-10">
+  <div className="w-20 h-20 mx-auto mb-4 bg-blue-500 border-2 border-gray-900 flex items-center justify-center">
+   <Clock className="w-10 h-10 text-white" />
+  </div>
+  <h2 className="text-2xl font-black mb-3 uppercase tracking-tight">CONNECT YOUR WALLET</h2>
+  <p className="text-sm font-mono text-gray-600 uppercase tracking-wider">
   Please connect your wallet to view transaction history
   </p>
   </div>
@@ -644,181 +212,153 @@ export default function HistoryPage() {
 
  if (isLoading) {
  return (
- <div className="min-h-screen flex items-center justify-center p-4">
-  <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
-  <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto text-[#0EA885]" />
-  <p className="text-muted-foreground mt-6 text-sm sm:text-base">Loading transaction history...</p>
+ <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white relative flex items-center justify-center p-4">
+  <div className="fixed inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-40 pointer-events-none" />
+  <div className="text-center border-2 border-gray-900 bg-white p-12 max-w-md relative z-10">
+  <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-500" />
+  <p className="text-sm font-mono text-gray-600 mt-6 uppercase tracking-wider">Loading transaction history...</p>
   </div>
  </div>
  );
  }
 
  return (
- <div className="min-h-screen ">
- <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-6 sm:pb-8">
-  {/* Header */}
-  <div className="mb-8 sm:mb-10 rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-6 sm:p-8 transition-all duration-500">
-  <h1 className="text-3xl sm:text-4xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Transaction History</h1>
-  <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-  View all your interactions with Quinty smart contracts
-  </p>
+ <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white relative">
+ {/* Grid Background */}
+ <div className="fixed inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-40 pointer-events-none" />
+
+ <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-6 sm:pb-8 relative z-10">
+  {/* Page Header - Brutalist */}
+  <div className="mb-8">
+  <div className="flex items-center gap-4 mb-6">
+   <div className="w-12 h-12 bg-blue-500 border-2 border-gray-900 flex items-center justify-center">
+   <Clock className="w-6 h-6 text-white" />
+   </div>
+   <div>
+   <h1 className="text-4xl md:text-6xl font-black text-gray-900 uppercase tracking-tight leading-none">
+    HISTORY
+   </h1>
+   <p className="text-sm font-mono text-gray-600 mt-1 uppercase tracking-wider">
+    ALL YOUR BOUNTY TRANSACTIONS
+   </p>
+   </div>
+  </div>
+  {/* Horizontal accent line */}
+  <div className="h-1 w-32 bg-blue-500" />
   </div>
 
-  {/* Stats Overview */}
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-  <Card className="rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-300 group">
-  <CardContent className="p-4 sm:p-5">
-   <div className="flex items-center gap-2 mb-2">
-   <div className="p-1.5 rounded-lg bg-blue-100 group- transition-transform duration-300">
+  {/* Stats Grid - Brutalist */}
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+  {/* Total Transactions */}
+  <div className="border-2 border-gray-900 bg-white p-4">
+   <div className="flex items-center gap-2 mb-3">
    <Target className="h-4 w-4 text-blue-600" />
-   </div>
-   <p className="text-xs text-muted-foreground font-medium">Bounties</p>
-   </div>
-   <p className="text-2xl sm:text-3xl font-bold">
-   {transactions.filter((tx) => tx.contractType === "Quinty").length}
+   <p className="text-[10px] font-mono text-gray-600 uppercase tracking-wider font-bold">
+    Total Transactions
    </p>
-  </CardContent>
-  </Card>
-
-  <Card className="rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-300 group">
-  <CardContent className="p-4 sm:p-5">
-   <div className="flex items-center gap-2 mb-2">
-   <div className="p-1.5 rounded-lg bg-green-100 group- transition-transform duration-300">
-   <Gift className="h-4 w-4 text-green-600" />
    </div>
-   <p className="text-xs text-muted-foreground font-medium">Grants</p>
-   </div>
-   <p className="text-2xl sm:text-3xl font-bold">
-   {transactions.filter((tx) => tx.contractType === "GrantProgram").length}
-   </p>
-  </CardContent>
-  </Card>
-
-  <Card className="rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-300 group">
-  <CardContent className="p-4 sm:p-5">
-   <div className="flex items-center gap-2 mb-2">
-   <div className="p-1.5 rounded-lg bg-purple-100 group- transition-transform duration-300">
-   <Users className="h-4 w-4 text-purple-600" />
-   </div>
-   <p className="text-xs text-muted-foreground font-medium">Crowdfunding</p>
-   </div>
-   <p className="text-2xl sm:text-3xl font-bold">
-   {transactions.filter((tx) => tx.contractType === "Crowdfunding").length}
-   </p>
-  </CardContent>
-  </Card>
-
-  <Card className="rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-300 group">
-  <CardContent className="p-4 sm:p-5">
-   <div className="flex items-center gap-2 mb-2">
-   <div className="p-1.5 rounded-lg bg-orange-100 group- transition-transform duration-300">
-   <TrendingUp className="h-4 w-4 text-orange-600" />
-   </div>
-   <p className="text-xs text-muted-foreground font-medium">LFG</p>
-   </div>
-   <p className="text-2xl sm:text-3xl font-bold">
-   {transactions.filter((tx) => tx.contractType === "LookingForGrant").length}
-   </p>
-  </CardContent>
-  </Card>
+   <p className="text-3xl font-black text-gray-900">{transactions.length}</p>
   </div>
 
-  {/* Filter */}
-  <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6 p-4 rounded-[1.25rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md">
-  <div className="p-2 rounded-lg bg-[#0EA885]/10">
-  <Filter className="h-4 w-4 sm:h-5 sm:w-5 text-[#0EA885]" />
-  </div>
-  <Select value={filter} onValueChange={setFilter}>
-  <SelectTrigger className="w-full sm:w-48 rounded-[0.75rem] border-white/60">
-   <SelectValue placeholder="Filter by type" />
-  </SelectTrigger>
-  <SelectContent className="rounded-[0.75rem]">
-   <SelectItem value="all">All Transactions</SelectItem>
-   <SelectItem value="bounties">Bounties</SelectItem>
-   <SelectItem value="grants">Grants</SelectItem>
-   <SelectItem value="crowdfunding">Crowdfunding</SelectItem>
-   <SelectItem value="lfg">Looking for Grant</SelectItem>
-   <SelectItem value="airdrops">Airdrops</SelectItem>
-  </SelectContent>
-  </Select>
-  <span className="text-xs sm:text-sm text-muted-foreground font-medium px-3 py-1.5 rounded-full bg-[#0EA885]/10">
-  {filteredTransactions.length} transaction{filteredTransactions.length !== 1 ? "s" : ""}
-  </span>
+  {/* Bounties Won */}
+  <div className="border-2 border-gray-900 bg-green-50 p-4">
+   <div className="flex items-center gap-2 mb-3">
+   <Trophy className="h-4 w-4 text-green-600" />
+   <p className="text-[10px] font-mono text-gray-600 uppercase tracking-wider font-bold">
+    Bounties Won
+   </p>
+   </div>
+   <p className="text-3xl font-black text-green-600">
+   {transactions.filter((tx) => tx.type === "bounty_won").length}
+   </p>
   </div>
 
-  {/* Transactions List */}
-  {filteredTransactions.length === 0 ? (
-  <Card className="rounded-[1.5rem] sm:rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg">
-  <CardContent className="py-12 sm:py-16 text-center">
-   <div className="p-4 rounded-[1.25rem] bg-[#0EA885]/10 inline-flex mb-6">
-   <Clock className="h-10 w-10 sm:h-12 sm:w-12 text-[#0EA885]" />
-   </div>
-   <h3 className="text-lg sm:text-xl font-bold mb-2">No transactions found</h3>
-   <p className="text-muted-foreground mb-6 text-sm sm:text-base">
-   {filter === "all"
-   ? "You haven't made any transactions yet"
-   : `No ${filter} transactions found`}
+  {/* Bounties Created */}
+  <div className="border-2 border-gray-900 bg-blue-50 p-4">
+   <div className="flex items-center gap-2 mb-3">
+   <Target className="h-4 w-4 text-blue-600" />
+   <p className="text-[10px] font-mono text-gray-600 uppercase tracking-wider font-bold">
+    Bounties Created
    </p>
-   <Button
+   </div>
+   <p className="text-3xl font-black text-blue-600">
+   {transactions.filter((tx) => tx.type === "bounty_created").length}
+   </p>
+  </div>
+  </div>
+
+  {transactions.length === 0 ? (
+  <div className="text-center py-16 border-2 border-dashed border-gray-300 bg-gray-50">
+   <div className="w-20 h-20 mx-auto mb-4 bg-white border-2 border-gray-900 flex items-center justify-center">
+   <Clock className="w-10 h-10 text-gray-400" />
+   </div>
+   <h3 className="text-xl font-black text-gray-900 mb-2 uppercase tracking-tight">
+   NO TRANSACTIONS FOUND
+   </h3>
+   <p className="text-sm text-gray-600 font-mono mb-6 uppercase tracking-wider">
+   You haven't made any transactions yet
+   </p>
+   <button
    onClick={() => router.push("/bounties")}
-   className="rounded-[0.75rem] transition-all duration-300"
+   className="px-6 py-3 border-2 border-blue-500 bg-blue-500 text-white hover:bg-blue-600 transition-all font-mono text-xs uppercase tracking-wider font-bold inline-flex items-center gap-2"
    >
-   Explore Bounties
-   </Button>
-  </CardContent>
-  </Card>
+   <Target className="w-4 h-4" />
+   EXPLORE BOUNTIES
+   </button>
+  </div>
   ) : (
   <div className="space-y-3">
-  {filteredTransactions.map((tx) => {
-   const Icon = getTransactionIcon(tx.type);
+  {transactions.map((tx) => {
    const colorClass = getTransactionColor(tx.type);
+   const bgClass = getTransactionBg(tx.type);
 
    return (
-   <Card
+   <div
    key={tx.id}
-   className="rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-300 cursor-pointer "
-   onClick={() => router.push(getRouteForTransaction(tx))}
+   onClick={() => router.push(`/bounties/${tx.itemId}`)}
+   className="group border-2 border-gray-900 bg-white hover:border-blue-500 transition-all cursor-pointer"
    >
-   <CardContent className="p-4 sm:p-5">
-    <div className="flex items-center justify-between gap-3 sm:gap-4">
-    <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-    <div className={`flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-[0.75rem] sm:rounded-[1rem] border ${colorClass} group- transition-transform duration-300`}>
-     <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
-    </div>
+    <div className="p-4 flex items-center justify-between gap-4">
+    <div className="flex items-center gap-4 flex-1 min-w-0">
+     {/* Icon Box */}
+     <div className={`w-12 h-12 border-2 border-gray-900 ${colorClass} flex items-center justify-center`}>
+     <Target className="h-5 w-5 text-white" />
+     </div>
 
-    <div className="flex-1 min-w-0">
+     {/* Content */}
+     <div className="flex-1 min-w-0">
      <div className="flex items-center gap-2 mb-1">
-     <h3 className="font-semibold text-sm truncate">
-     {getTransactionLabel(tx.type)}
-     </h3>
-     <Badge variant="outline" className="text-xs">
-     {tx.status}
-     </Badge>
+      <h3 className="font-black text-sm uppercase tracking-tight truncate">
+      {getTransactionLabel(tx.type)}
+      </h3>
+      <div className={`px-2 py-0.5 border border-gray-900 ${bgClass} font-mono text-[10px] uppercase tracking-wider font-bold`}>
+      {tx.status}
+      </div>
      </div>
-     <p className="text-sm text-muted-foreground truncate">
-     {tx.description}
+     <p className="text-xs text-gray-600 truncate font-mono">
+      {tx.description}
      </p>
-     <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-     <span className="flex items-center gap-1">
-     <Calendar className="h-3 w-3" />
-     {new Date(Number(tx.timestamp) * 1000).toLocaleDateString()}
-     </span>
-     {tx.amount && (
-     <span className="flex items-center gap-1">
-      <Coins className="h-3 w-3" />
-      {formatETH(tx.amount)} ETH
-     </span>
-     )}
+     <div className="flex items-center gap-3 mt-2 text-[10px] font-mono text-gray-500 uppercase">
+      <span className="flex items-center gap-1">
+      <Calendar className="h-3 w-3" />
+      {new Date(Number(tx.timestamp) * 1000).toLocaleDateString()}
+      </span>
+      {tx.amount && (
+      <span className="flex items-center gap-1">
+       <Coins className="h-3 w-3" />
+       {formatETH(tx.amount)} MNT
+      </span>
+      )}
      </div>
-    </div>
+     </div>
     </div>
 
-    <Button variant="ghost" size="sm" className="rounded-[0.75rem] hover:bg-[#0EA885]/10 transition-all duration-300">
-    <ExternalLink className="h-4 w-4 text-[#0EA885]" />
-    </Button>
+    {/* Arrow Icon */}
+    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+     <ExternalLink className="h-5 w-5 text-blue-500" />
     </div>
-   </CardContent>
-   </Card>
+    </div>
+   </div>
    );
   })}
   </div>

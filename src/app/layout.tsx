@@ -5,35 +5,35 @@ import { Space_Grotesk, Plus_Jakarta_Sans } from "next/font/google";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
- title: "Quinty - Web3 Quest and Bounty Platform",
+ title: "Quintle - Quest in Mantle",
  description:
- "A transparent quest-and-bounty platform where funds are held in smart-contract escrow, letting creators, solvers, and community interact directly without intermediaries.",
+ "A transparent quest-and-bounty platform on Mantle where funds are held in smart-contract escrow, letting creators, solvers, and community interact directly without intermediaries.",
  keywords: `
-  quinty, quinty io, quinty web3, quinty crypto, quinty labs,
+  quintle, quintle io, quintle web3, quintle mantle,
   quest platform, bounty platform, web3 quest, web3 bounty,
-  crypto bounty platform, crypto quest platform,
-  quinty quest, quinty bounty
+  mantle bounty, mantle quest, crypto bounty platform,
+  quintle quest, quintle bounty
 `,
 
  icons: {
- icon: "/images/quinty-green.png",
- shortcut: "/images/quinty-green.png",
- apple: "/images/quinty-green.png",
+ icon: "/images/quintle-logo.png",
+ shortcut: "/images/quintle-logo.png",
+ apple: "/images/quintle-logo.png",
  },
  openGraph: {
- title: "Quinty - Web3 Quest and Bounty Platform",
+ title: "Quintle - Quest in Mantle",
  description:
- "A transparent quest-and-bounty platform where funds are held in smart-contract escrow, letting creators, solvers, and community interact directly without intermediaries.",
- images: ["/images/quinty-green.png"],
- siteName: "Quinty",
+ "A transparent quest-and-bounty platform on Mantle where funds are held in smart-contract escrow, letting creators, solvers, and community interact directly without intermediaries.",
+ images: ["/images/quintle-logo.png"],
+ siteName: "Quintle",
  type: "website",
  },
  twitter: {
  card: "summary_large_image",
- title: "Quinty - Web3 Quest and Bounty Platform",
+ title: "Quintle - Quest in Mantle",
  description:
- "A transparent quest-and-bounty platform where funds are held in smart-contract escrow, letting creators, solvers, and community interact directly without intermediaries.",
- images: ["/images/quinty-green.png"],
+ "A transparent quest-and-bounty platform on Mantle where funds are held in smart-contract escrow, letting creators, solvers, and community interact directly without intermediaries.",
+ images: ["/images/quintle-logo.png"],
  },
 };
 
@@ -59,10 +59,6 @@ export default function RootLayout({
  return (
  <html lang="en" className={`${spaceGrotesk.variable} ${jakartaSans.variable}`}>
  <head>
-  <link
-  rel="stylesheet"
-  href="https://unpkg.com/@coinbase/onchainkit@1.1.1/dist/assets/style.css"
-  />
  </head>
  <body className={`${jakartaSans.className} antialiased bg-gradient-to-br from-green-50/50 via-teal-50/30 to-emerald-50/50 relative`}>
   {/* Animated Background Blobs */}

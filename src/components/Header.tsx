@@ -4,13 +4,8 @@ import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import Image from "next/image";
-import { useAccount } from "wagmi";
-import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Menu, X, ChevronRight } from "lucide-react";
-import ZKVerificationModal from "./ZKVerificationModal";
+import { Menu, X } from "lucide-react";
 
 const WalletComponents = dynamic(
   () => import("./WalletComponents"),
@@ -18,160 +13,175 @@ const WalletComponents = dynamic(
 );
 
 const navItems = [
-  { name: "Dashboard", link: "/dashboard" },
   { name: "Bounties", link: "/bounties" },
-  { name: "Disputes", link: "/disputes" },
   { name: "Reputation", link: "/reputation" },
-  { name: "Funding", link: "/funding" },
+  { name: "History", link: "/history" },
 ];
 
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
-  const { isConnected } = useAccount();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [hoveredPath, setHoveredPath] = useState<string | null>(pathname);
-  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const isActive = (path: string) => pathname === path;
 
   return (
     <>
-      <div className="fixed inset-x-0 top-0 z-[100] flex justify-center pt-4 sm:pt-6 pointer-events-none">
-        <motion.header
-          initial={{ y: -100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.6, type: "spring", bounce: 0.3 }}
-          className={cn(
-            "pointer-events-auto mx-4 w-full max-w-5xl rounded-2xl lg:rounded-full border transition-all duration-500",
-            scrolled
-              ? "bg-white/80 dark:bg-black/80 backdrop-blur-xl border-black/5 dark:border-white/10 shadow-lg shadow-black/5"
-              : "bg-white/50 dark:bg-black/50 backdrop-blur-md border-white/20 dark:border-white/5 shadow-sm"
-          )}
-        >
-          <div className="flex h-14 items-center justify-between px-2 pl-4 pr-2">
-            {/* Logo */}
+      <motion.header
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/10"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo - Brutalist Style */}
             <button
               type="button"
               onClick={() => router.push("/")}
-              className="flex items-center gap-2 group mr-4"
+              className="flex items-center gap-3 group"
             >
-              <div className="relative h-8 w-8 overflow-hidden rounded-full shadow-sm group-hover:scale-105 transition-transform duration-300">
-                <Image
-                  src="/images/quinty-logo.png"
-                  alt="Quinty Logo"
-                  fill
-                  className="object-contain brightness-0 dark:brightness-100"
-                  priority
-                />
+              <div className="relative h-8 w-8 border-2 border-blue-500 bg-black flex items-center justify-center overflow-hidden group-hover:bg-blue-500 transition-colors">
+                <span className="text-white font-black text-lg group-hover:scale-110 transition-transform">Q</span>
               </div>
-              <span className="font-bold text-lg tracking-tight text-gray-900 dark:text-white hidden sm:block">
-                Quinty
-              </span>
+              <div className="hidden sm:block">
+                <div className="font-black text-white text-xl tracking-tighter uppercase">
+                  QUINTLE
+                </div>
+                <div className="font-mono text-[9px] text-blue-400 uppercase tracking-widest -mt-1">
+                  Quest in Mantle
+                </div>
+              </div>
             </button>
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-1">
-              {navItems.map((item) => {
-                const isActive = item.link === pathname;
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.link}
-                    onMouseEnter={() => setHoveredPath(item.link)}
-                    onMouseLeave={() => setHoveredPath(pathname)}
-                    className={cn(
-                      "relative px-4 py-2 text-sm font-medium transition-colors duration-200 z-10",
-                      isActive ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                    )}
-                  >
-                    {item.link === hoveredPath && (
-                      <motion.div
-                        layoutId="navbar-hover"
-                        className="absolute inset-0 bg-black/5 dark:bg-white/10 rounded-full -z-10"
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                      />
-                    )}
-                    {item.name}
-                  </Link>
-                );
-              })}
+              {navItems.map((item) => (
+                <Link
+                  key={item.link}
+                  href={item.link}
+                  className={`
+                    relative px-4 py-2 font-mono text-sm uppercase tracking-wider transition-all
+                    ${isActive(item.link)
+                      ? "text-white"
+                      : "text-gray-400 hover:text-white"
+                    }
+                  `}
+                >
+                  {item.name}
+                  {isActive(item.link) && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                </Link>
+              ))}
             </nav>
 
             {/* Desktop Actions */}
-            <div className="hidden items-center gap-2 lg:flex">
-              {isConnected && (
-                 <ZKVerificationModal />
-              )}
+            <div className="hidden lg:flex items-center gap-4">
+              {/* Network Indicator */}
+              <div className="flex items-center gap-2 px-3 py-1.5 border border-white/10 bg-black">
+                <div className="w-1.5 h-1.5 bg-blue-500 animate-pulse" />
+                <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider">
+                  Mantle
+                </span>
+              </div>
+
+              {/* Wallet */}
               {isMounted && <WalletComponents />}
             </div>
 
-            {/* Mobile Menu Toggle */}
-            <div className="flex items-center gap-2 lg:hidden ml-auto">
-               {isConnected && <div className="scale-90"><ZKVerificationModal /></div>}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="rounded-full h-10 w-10 hover:bg-black/5"
-              >
-                {isMobileMenuOpen ? (
-                  <X className="h-5 w-5" />
-                ) : (
-                  <Menu className="h-5 w-5" />
-                )}
-              </Button>
-            </div>
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2 border border-white/20 bg-black hover:border-blue-500 transition-colors"
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-5 w-5 text-white" />
+              ) : (
+                <Menu className="h-5 w-5 text-white" />
+              )}
+            </button>
           </div>
+        </div>
+      </motion.header>
 
-          {/* Mobile Menu */}
-          <AnimatePresence>
-            {isMobileMenuOpen && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="overflow-hidden lg:hidden border-t border-black/5 dark:border-white/10 mx-4"
-              >
-                <nav className="flex flex-col gap-1 py-4">
-                  {navItems.map((item, idx) => (
-                    <motion.div
-                      key={item.name}
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: idx * 0.05 }}
-                    >
+      {/* Mobile Menu - Fullscreen Overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 lg:hidden"
+          >
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/95 backdrop-blur-xl"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+
+            {/* Menu Content */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "tween", duration: 0.3 }}
+              className="absolute top-16 right-0 bottom-0 w-full max-w-sm bg-black border-l border-white/10 p-6 overflow-y-auto"
+            >
+              {/* Navigation Links */}
+              <nav className="space-y-2 mb-8">
+                {navItems.map((item, index) => (
+                  <motion.div
+                    key={item.link}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
                     <Link
                       href={item.link}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition-all"
+                      className={`
+                        block px-4 py-3 font-mono text-lg uppercase tracking-wider border-l-2 transition-all
+                        ${isActive(item.link)
+                          ? "border-blue-500 text-white bg-blue-500/10"
+                          : "border-transparent text-gray-400 hover:border-white/20 hover:text-white"
+                        }
+                      `}
                     >
                       {item.name}
-                      <ChevronRight className="h-4 w-4 opacity-30" />
                     </Link>
-                    </motion.div>
-                  ))}
-                  {isMounted && (
-                    <div className="mt-3 pt-3 border-t border-black/5 dark:border-white/10 flex flex-col gap-2 px-2">
-                      <WalletComponents />
-                    </div>
-                  )}
-                </nav>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.header>
-      </div>
-      
-      {/* Spacer to prevent content from being hidden behind fixed header */}
-      {/* We don't strictly need a spacer if the hero has enough padding, but it's safe */}
+                  </motion.div>
+                ))}
+              </nav>
+
+              {/* Mobile Network & Wallet */}
+              <div className="space-y-4 pt-6 border-t border-white/10">
+                <div className="flex items-center justify-between px-4 py-3 border border-white/10 bg-black">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 animate-pulse" />
+                    <span className="text-xs font-mono text-gray-400 uppercase">Mantle Sepolia</span>
+                  </div>
+                  <span className="text-xs font-mono text-blue-400">5003</span>
+                </div>
+
+                {isMounted && (
+                  <div className="px-4">
+                    <WalletComponents />
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

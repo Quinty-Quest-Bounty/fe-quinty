@@ -11,7 +11,7 @@ import { readContract } from "@wagmi/core";
 import {
  CONTRACT_ADDRESSES,
  QUINTY_ABI,
- BASE_SEPOLIA_CHAIN_ID,
+ MANTLE_SEPOLIA_CHAIN_ID,
 } from "../../../utils/contracts";
 import {
  formatETH,
@@ -20,7 +20,13 @@ import {
  wagmiConfig,
 } from "../../../utils/web3";
 import { fetchMetadataFromIpfs, BountyMetadata, uploadToIpfs } from "../../../utils/ipfs";
+import { getMockMetadata, getExampleBounty } from "../../../utils/mockBounties";
 import { useAlert } from "../../../hooks/useAlert";
+import {
+  getEthPriceInUSD,
+  convertEthToUSD,
+  formatUSD,
+} from "../../../utils/prices";
 import {
  Breadcrumb,
  BreadcrumbItem,
@@ -151,6 +157,8 @@ export default function BountyDetailPage() {
  const [viewingTitle, setViewingTitle] = useState<string>("");
  const [uploadedSolutionImage, setUploadedSolutionImage] = useState<File | null>(null);
  const [isUploadingSolution, setIsUploadingSolution] = useState(false);
+ const [currentTime, setCurrentTime] = useState(Math.floor(Date.now() / 1000));
+ const [ethPrice, setEthPrice] = useState<number>(0);
 
  // OPREC related state
  const [oprecApplications, setOprecApplications] = useState<OprecApplication[]>([]);
@@ -171,101 +179,138 @@ export default function BountyDetailPage() {
  const loadBounty = async () => {
  try {
  setIsLoading(true);
- const bountyData = await readContract(wagmiConfig, {
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+
+ // Check if this is the example bounty
+ if (bountyId === "example") {
+  const exampleBounty = getExampleBounty();
+  setBounty(exampleBounty);
+
+  // Load example metadata
+  if (exampleBounty.metadataCid) {
+  const mockMeta = getMockMetadata(exampleBounty.metadataCid);
+  if (mockMeta) {
+   setMetadata(mockMeta);
+  }
+  }
+  setIsLoading(false);
+  return;
+ }
+
+ // Try to load from blockchain first
+ let bountyLoaded = false;
+
+ try {
+  const bountyData = await readContract(wagmiConfig, {
+  address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
   abi: QUINTY_ABI,
   functionName: "getBountyData",
   args: [BigInt(bountyId)],
- });
+  });
 
- if (bountyData) {
+  if (bountyData) {
   const bountyArray = bountyData as any[];
   const [
-  creator,
-  description,
-  amount,
-  deadline,
-  allowMultipleWinners,
-  winnerShares,
-  status,
-  slashPercent,
-  selectedWinners,
-  selectedSubmissionIds,
-  hasOprec,
-  oprecDeadline,
+   creator,
+   description,
+   amount,
+   deadline,
+   allowMultipleWinners,
+   winnerShares,
+   status,
+   slashPercent,
+   selectedWinners,
+   selectedSubmissionIds,
+   hasOprec,
+   oprecDeadline,
   ] = bountyArray;
 
   // Get submissions
   const submissionCount = await readContract(wagmiConfig, {
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
-  .Quinty as `0x${string}`,
-  abi: QUINTY_ABI,
-  functionName: "getSubmissionCount",
-  args: [BigInt(bountyId)],
+   address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
+   .Quinty as `0x${string}`,
+   abi: QUINTY_ABI,
+   functionName: "getSubmissionCount",
+   args: [BigInt(bountyId)],
   });
 
   const submissions: Submission[] = [];
   for (let i = 0; i < Number(submissionCount); i++) {
-  const submissionData = await readContract(wagmiConfig, {
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
-   .Quinty as `0x${string}`,
-  abi: QUINTY_ABI,
-  functionName: "getSubmissionStruct",
-  args: [BigInt(bountyId), BigInt(i)],
-  });
-  if (submissionData) {
-  submissions.push(submissionData as unknown as Submission);
-  }
+   const submissionData = await readContract(wagmiConfig, {
+   address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
+    .Quinty as `0x${string}`,
+   abi: QUINTY_ABI,
+   functionName: "getSubmissionStruct",
+   args: [BigInt(bountyId), BigInt(i)],
+   });
+   if (submissionData) {
+   submissions.push(submissionData as unknown as Submission);
+   }
   }
 
   const metadataMatch = description.match(
-  /Metadata: ipfs:\/\/([a-zA-Z0-9]+)/
+   /Metadata: ipfs:\/\/([a-zA-Z0-9]+)/
   );
   const metadataCid = metadataMatch ? metadataMatch[1] : undefined;
 
   setBounty({
-  id: parseInt(bountyId),
-  creator,
-  description,
-  amount,
-  deadline,
-  allowMultipleWinners,
-  winnerShares,
-  status,
-  slashPercent,
-  submissions,
-  selectedWinners,
-  selectedSubmissionIds,
-  metadataCid,
-  hasOprec,
-  oprecDeadline,
+   id: parseInt(bountyId),
+   creator,
+   description,
+   amount,
+   deadline,
+   allowMultipleWinners,
+   winnerShares,
+   status,
+   slashPercent,
+   submissions,
+   selectedWinners,
+   selectedSubmissionIds,
+   metadataCid,
+   hasOprec,
+   oprecDeadline,
   });
 
   // Load OPREC applications if hasOprec
   if (hasOprec) {
-  await loadOprecApplications();
+   await loadOprecApplications();
   }
 
   // Check if current user is approved participant
   if (address && hasOprec) {
-  const isApproved = await readContract(wagmiConfig, {
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-  abi: QUINTY_ABI,
-  functionName: "approvedParticipants",
-  args: [BigInt(bountyId), address],
-  });
-  setIsApprovedParticipant(isApproved as boolean);
+   const isApproved = await readContract(wagmiConfig, {
+   address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+   abi: QUINTY_ABI,
+   functionName: "approvedParticipants",
+   args: [BigInt(bountyId), address],
+   });
+   setIsApprovedParticipant(isApproved as boolean);
   }
 
   // Load metadata
   if (metadataCid) {
-  try {
-  const meta = await fetchMetadataFromIpfs(metadataCid);
-  setMetadata(meta);
-  } catch (error) {
-  console.error("Failed to load metadata:", error);
+   // Try mock metadata first
+   const mockMeta = getMockMetadata(metadataCid);
+   if (mockMeta) {
+   setMetadata(mockMeta);
+   } else {
+   try {
+    const meta = await fetchMetadataFromIpfs(metadataCid);
+    setMetadata(meta);
+   } catch (error) {
+    console.error("Failed to load metadata:", error);
+   }
+   }
   }
+
+  bountyLoaded = true;
   }
+ } catch (contractError) {
+  console.log("Contract error, bounty not found on chain");
+ }
+
+ // If blockchain load failed, bounty doesn't exist
+ if (!bountyLoaded) {
+  console.error("Bounty not found");
  }
  } catch (error) {
  console.error("Error loading bounty:", error);
@@ -286,6 +331,26 @@ export default function BountyDetailPage() {
  }
  }, [isConfirmed]);
 
+ // Update current time every second for countdown
+ useEffect(() => {
+ const interval = setInterval(() => {
+ setCurrentTime(Math.floor(Date.now() / 1000));
+ }, 1000);
+
+ return () => clearInterval(interval);
+ }, []);
+
+ // Fetch ETH price for USD conversion
+ useEffect(() => {
+ const fetchPrice = async () => {
+ const price = await getEthPriceInUSD();
+ setEthPrice(price);
+ };
+ fetchPrice();
+ const interval = setInterval(fetchPrice, 60000);
+ return () => clearInterval(interval);
+ }, []);
+
  const copyLink = () => {
  const url = window.location.href;
  navigator.clipboard.writeText(url);
@@ -293,11 +358,34 @@ export default function BountyDetailPage() {
  setTimeout(() => setCopied(false), 2000);
  };
 
+ // Calculate countdown with live updates
+ const getCountdown = (deadline: bigint) => {
+ const now = BigInt(currentTime);
+ const timeLeft = Number(deadline - now);
+
+ if (timeLeft <= 0) {
+ return { days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true, urgency: 'expired' };
+ }
+
+ const days = Math.floor(timeLeft / 86400);
+ const hours = Math.floor((timeLeft % 86400) / 3600);
+ const minutes = Math.floor((timeLeft % 3600) / 60);
+ const seconds = timeLeft % 60;
+
+ // Determine urgency level
+ let urgency: 'safe' | 'warning' | 'critical' | 'expired' = 'safe';
+ if (timeLeft < 3600) urgency = 'critical'; // Less than 1 hour
+ else if (timeLeft < 86400) urgency = 'warning'; // Less than 1 day
+ else urgency = 'safe';
+
+ return { days, hours, minutes, seconds, isExpired: false, urgency };
+ };
+
  // Load OPREC applications
  const loadOprecApplications = async () => {
  try {
  const appCount = await readContract(wagmiConfig, {
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+  address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
   abi: QUINTY_ABI,
   functionName: "getOprecApplicationCount",
   args: [BigInt(bountyId)],
@@ -306,7 +394,7 @@ export default function BountyDetailPage() {
  const apps: OprecApplication[] = [];
  for (let i = 0; i < Number(appCount); i++) {
   const appData = await readContract(wagmiConfig, {
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+  address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
   abi: QUINTY_ABI,
   functionName: "getOprecApplication",
   args: [BigInt(bountyId), BigInt(i)],
@@ -350,7 +438,7 @@ export default function BountyDetailPage() {
   .filter(addr => /^0x[a-fA-F0-9]{40}$/.test(addr.trim()));
 
  writeContract({
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+  address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
   abi: QUINTY_ABI,
   functionName: "applyToOprec",
   args: [
@@ -377,7 +465,7 @@ export default function BountyDetailPage() {
 
  try {
  writeContract({
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+  address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
   abi: QUINTY_ABI,
   functionName: "approveOprecApplications",
   args: [BigInt(bountyId), selectedApplicationIds.map(id => BigInt(id))],
@@ -394,7 +482,7 @@ export default function BountyDetailPage() {
 
  try {
  writeContract({
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+  address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
   abi: QUINTY_ABI,
   functionName: "rejectOprecApplications",
   args: [BigInt(bountyId), selectedApplicationIds.map(id => BigInt(id))],
@@ -409,7 +497,7 @@ export default function BountyDetailPage() {
  const endOprecPhase = async () => {
  try {
  writeContract({
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+  address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
   abi: QUINTY_ABI,
   functionName: "endOprecPhase",
   args: [BigInt(bountyId)],
@@ -469,7 +557,7 @@ export default function BountyDetailPage() {
   .filter(addr => /^0x[a-fA-F0-9]{40}$/.test(addr.trim()));
 
  writeContract({
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+  address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
   abi: QUINTY_ABI,
   functionName: "submitSolution",
   args: [BigInt(bountyId), solutionCid, validTeamMembers as `0x${string}`[]],
@@ -499,7 +587,7 @@ export default function BountyDetailPage() {
 
  try {
  writeContract({
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+  address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
   abi: QUINTY_ABI,
   functionName: "selectWinners",
   args: [
@@ -518,7 +606,7 @@ export default function BountyDetailPage() {
 
  try {
  writeContract({
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+  address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
   abi: QUINTY_ABI,
   functionName: "addReply",
   args: [BigInt(bountyId), BigInt(subId), replyContent[subId]],
@@ -534,7 +622,7 @@ export default function BountyDetailPage() {
 
  try {
  writeContract({
-  address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+  address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
   abi: QUINTY_ABI,
   functionName: "revealSolution",
   args: [BigInt(bountyId), BigInt(subId), revealCid[subId]],
@@ -569,10 +657,10 @@ export default function BountyDetailPage() {
 
  if (isLoading) {
  return (
- <div className="min-h-screen flex items-center justify-center p-4">
-  <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
-  <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto text-[#0EA885]" />
-  <p className="text-muted-foreground mt-6 text-sm sm:text-base">Loading bounty...</p>
+ <div className="min-h-screen bg-gradient-to-b from-gray-50/50 via-white to-gray-50/30 flex items-center justify-center p-4">
+  <div className="text-center rounded-xl border border-gray-200/60 bg-white shadow-md p-8 sm:p-12 max-w-md">
+  <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto text-blue-600" />
+  <p className="text-gray-600 mt-6 text-sm sm:text-base font-medium">Loading bounty...</p>
   </div>
  </div>
  );
@@ -580,15 +668,15 @@ export default function BountyDetailPage() {
 
  if (!bounty) {
  return (
- <div className="min-h-screen flex items-center justify-center p-4">
-  <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
-  <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Bounty not found</h2>
-  <p className="text-muted-foreground mb-6 text-sm sm:text-base">
+ <div className="min-h-screen bg-gradient-to-b from-gray-50/50 via-white to-gray-50/30 flex items-center justify-center p-4">
+  <div className="text-center rounded-xl border border-gray-200/60 bg-white shadow-md p-8 sm:p-12 max-w-md">
+  <h2 className="text-2xl sm:text-3xl font-bold mb-3 text-gray-900">Bounty not found</h2>
+  <p className="text-gray-600 mb-6 text-sm sm:text-base">
   The bounty you're looking for doesn't exist.
   </p>
   <Button
   onClick={() => router.push("/bounties")}
-  className="rounded-[0.75rem] transition-all duration-300"
+  className="rounded-lg transition-all duration-300"
   >
   Back to Bounties
   </Button>
@@ -605,20 +693,22 @@ export default function BountyDetailPage() {
  : 1;
 
  return (
- <div className="min-h-screen relative pt-20 sm:pt-24">
+ <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white relative pt-20 sm:pt-24">
+ {/* Grid Background */}
+ <div className="fixed inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-40 pointer-events-none" />
  {/* Loading Overlay */}
  {(isPending || isConfirming) && (
-  <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-50 flex items-center justify-center p-4">
-  <div className="p-8 sm:p-10 rounded-[2rem] shadow-2xl border border-white/60 bg-white/90 backdrop-blur-xl max-w-sm animate-in fade-in zoom-in duration-300">
+  <div className="fixed inset-0 bg-black/30 backdrop-blur-md z-50 flex items-center justify-center p-4">
+  <div className="p-8 sm:p-10 rounded-xl shadow-2xl border border-gray-200 bg-white max-w-sm animate-in fade-in zoom-in duration-300">
   <div className="flex flex-col items-center gap-6">
-   <div className="p-4 rounded-[1.25rem] bg-[#0EA885]/10">
-   <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-[#0EA885]" />
+   <div className="p-4 rounded-lg bg-blue-50">
+   <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-blue-600" />
    </div>
    <div className="text-center">
-   <p className="font-bold text-lg sm:text-xl mb-2">
+   <p className="font-bold text-lg sm:text-xl mb-2 text-gray-900">
    {isPending ? "Waiting for approval..." : "Confirming transaction..."}
    </p>
-   <p className="text-sm text-muted-foreground">
+   <p className="text-sm text-gray-600">
    Please don't close this page
    </p>
    </div>
@@ -627,88 +717,77 @@ export default function BountyDetailPage() {
   </div>
  )}
 
- <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-  {/* Breadcrumb */}
-  <div className="mb-6 sm:mb-8">
-  <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md transition-all duration-300">
-  <Breadcrumb>
-   <BreadcrumbList>
-   <BreadcrumbItem>
-   <BreadcrumbLink
-    onClick={() => router.push("/")}
-    className="cursor-pointer hover:text-[#0EA885] transition-all duration-300 text-sm font-medium "
-   >
-    Home
-   </BreadcrumbLink>
-   </BreadcrumbItem>
-   <BreadcrumbSeparator>
-   <ChevronRight className="h-4 w-4 text-foreground/40" />
-   </BreadcrumbSeparator>
-   <BreadcrumbItem>
-   <BreadcrumbLink
-    onClick={() => router.push("/bounties")}
-    className="cursor-pointer hover:text-[#0EA885] transition-all duration-300 text-sm font-medium "
-   >
-    Bounties
-   </BreadcrumbLink>
-   </BreadcrumbItem>
-   <BreadcrumbSeparator>
-   <ChevronRight className="h-4 w-4 text-foreground/40" />
-   </BreadcrumbSeparator>
-   <BreadcrumbItem>
-   <BreadcrumbPage className="text-sm font-semibold text-[#0EA885]">Bounty #{bountyId}</BreadcrumbPage>
-   </BreadcrumbItem>
-   </BreadcrumbList>
-  </Breadcrumb>
+ <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10">
+  {/* Breadcrumb - Brutalist */}
+  <div className="mb-8">
+  <div className="inline-flex items-center gap-2 px-4 py-3 bg-white border-2 border-gray-900">
+  <button
+   onClick={() => router.push("/")}
+   className="flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-gray-600 hover:text-blue-600 transition-colors"
+  >
+   <ChevronRight className="h-3 w-3 rotate-180" />
+   Home
+  </button>
+  <ChevronRight className="h-3 w-3 text-gray-400" />
+  <button
+   onClick={() => router.push("/bounties")}
+   className="font-mono text-xs uppercase tracking-wider text-gray-600 hover:text-blue-600 transition-colors"
+  >
+   Bounties
+  </button>
+  <ChevronRight className="h-3 w-3 text-gray-400" />
+  <span className="font-mono text-xs uppercase tracking-wider font-bold text-blue-600">
+   {bountyId === "example" ? "EXAMPLE" : `BOUNTY #${bountyId}`}
+  </span>
   </div>
   </div>
 
   {/* Main Content */}
-  <div className="space-y-4 sm:space-y-6">
-  {/* Header Card */}
-  <Card className="rounded-[1.5rem] sm:rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-500 ">
-  <CardHeader className="pb-3 sm:pb-4">
-   <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4">
+  <div className="space-y-6">
+  {/* Header Card - Brutalist */}
+  <div className="border-2 border-gray-900 bg-white">
+  <div className="p-6 border-b-2 border-gray-900 bg-gradient-to-r from-blue-50 to-white">
+   <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
    <div className="flex-1 w-full">
-   <div className="flex items-start gap-3 mb-2">
-    <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-[1rem] bg-gradient-to-br from-[#0EA885]/10 to-[#0EA885]/5 border border-[#0EA885]/20">
-    <Target className="h-5 w-5 sm:h-6 sm:w-6 text-[#0EA885]" />
+   <div className="flex items-start gap-4 mb-3">
+    <div className="w-12 h-12 bg-blue-500 border-2 border-gray-900 flex items-center justify-center flex-shrink-0">
+    <Target className="h-6 w-6 text-white" />
     </div>
-    <div className="flex-1">
-    <CardTitle className="text-lg sm:text-xl font-bold">
-    {metadata?.title || bounty.description.split("\n")[0]}
-    </CardTitle>
-    <div className="flex items-center gap-2 mt-1.5">
-    <span className="text-xs text-muted-foreground font-medium">
-     Created by
+    <div className="flex-1 min-w-0">
+    <h1 className="text-2xl sm:text-3xl font-black text-gray-900 uppercase tracking-tight leading-tight mb-2">
+     {metadata?.title || bounty.description.split("\n")[0]}
+    </h1>
+    <div className="flex items-center gap-2 flex-wrap">
+    <span className="text-xs font-mono text-gray-600 uppercase tracking-wider">
+     Creator:
     </span>
-    <Badge variant="outline" className="text-xs py-0.5 h-auto px-2 rounded-full border-white/60 bg-white/50">
+    <div className="px-2 py-1 border border-gray-900 bg-gray-100 font-mono text-xs">
      {formatAddress(bounty.creator)}
-    </Badge>
+    </div>
     </div>
     </div>
    </div>
    </div>
-   <div className="flex gap-2 w-full sm:w-auto">
-   <Badge variant="default" className="text-xs rounded-full px-3 py-1 bg-[#0EA885] hover:bg-[#0EA885]/90">{statusLabel}</Badge>
-   <Button
-    variant="outline"
-    size="sm"
+   <div className="flex gap-2 flex-wrap">
+   <div className={`px-4 py-2 font-mono text-xs uppercase tracking-wider font-bold ${bounty.status === 1 ? 'bg-green-500 text-white' : bounty.status === 0 ? 'bg-blue-500 text-white' : 'bg-gray-500 text-white'}`}>
+    {statusLabel}
+   </div>
+   <button
     onClick={copyLink}
-    className="gap-1.5 h-auto px-3 py-1.5 rounded-full border-white/60 bg-white/50 hover:bg-white/70 transition-all duration-300"
+    className="px-4 py-2 border-2 border-gray-900 bg-white hover:bg-gray-100 transition-all font-mono text-xs uppercase tracking-wider font-bold flex items-center gap-2"
    >
     {copied ? (
     <>
     <Check className="w-3 h-3" />
-    <span className="text-xs font-medium">Copied!</span>
+    COPIED
     </>
     ) : (
     <>
     <Copy className="w-3 h-3" />
-    <span className="text-xs font-medium">Share</span>
+    SHARE
     </>
     )}
-   </Button>
+   </button>
    </div>
    </div>
 
@@ -717,7 +796,7 @@ export default function BountyDetailPage() {
    <div className="mt-3 flex justify-center">
    <div className="w-full max-w-2xl">
     <img
-    src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
+    src={metadata.images[0].startsWith('/') ? metadata.images[0] : `https://ipfs.io/ipfs/${metadata.images[0]}`}
     alt={metadata.title}
     className="w-full h-auto rounded-xl shadow-sm"
     />
@@ -725,64 +804,132 @@ export default function BountyDetailPage() {
    </div>
    )}
 
-   {/* Stats Grid */}
-   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">
-   <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-[1.25rem] p-3 border border-primary/20 transition-all duration-300 ">
-   <div className="flex items-center gap-1 mb-1">
-    <DollarSign className="w-3 h-3 text-primary" />
-    <span className="text-xs font-medium text-muted-foreground">
-    Bounty Reward
+   {/* Stats Grid - Brutalist */}
+   <div className="grid grid-cols-1 md:grid-cols-6 gap-3 mt-4">
+   {/* Reward */}
+   <div className="border-2 border-blue-500 bg-blue-50 p-3">
+   <div className="flex items-center gap-1 mb-2">
+    <DollarSign className="w-3 h-3 text-blue-600" />
+    <span className="text-[10px] font-mono uppercase tracking-wider text-gray-600 font-bold">
+    Reward
     </span>
    </div>
-   <p className="text-base font-bold text-primary">
-    {formatETH(bounty.amount)} ETH
+   <p className="text-base font-black text-blue-600 leading-tight">
+    {formatETH(bounty.amount)} MNT
+   </p>
+   {ethPrice > 0 && (
+    <div className="text-[10px] text-gray-600 font-mono mt-0.5">
+    {formatUSD(convertEthToUSD(Number(bounty.amount) / 1e18, ethPrice))}
+    </div>
+   )}
+   </div>
+
+   {/* Slash */}
+   <div className="border-2 border-gray-900 bg-white p-3">
+   <div className="flex items-center gap-1 mb-2">
+    <Shield className="w-3 h-3 text-gray-900" />
+    <span className="text-[10px] font-mono uppercase tracking-wider text-gray-600 font-bold">
+    Slash
+    </span>
+   </div>
+   <p className="text-base font-black text-gray-900 leading-tight">
+    {Number(bounty.slashPercent) / 100}%
    </p>
    </div>
 
-   <div className="bg-muted/50 rounded-[1.25rem] p-3 transition-all duration-300 ">
-   <div className="flex items-center gap-1 mb-1">
-    <Clock className="w-3 h-3 text-muted-foreground" />
-    <span className="text-xs font-medium text-muted-foreground">
-    Deadline
+   {/* Subs */}
+   <div className="border-2 border-gray-900 bg-white p-3">
+   <div className="flex items-center gap-1 mb-2">
+    <Users className="w-3 h-3 text-gray-900" />
+    <span className="text-[10px] font-mono uppercase tracking-wider text-gray-600 font-bold">
+    Subs
     </span>
    </div>
-   <p className="text-sm font-semibold">
-    {formatTimeLeft(bounty.deadline)}
-   </p>
-   </div>
-
-   <div className="bg-muted/50 rounded-[1.25rem] p-3 transition-all duration-300 ">
-   <div className="flex items-center gap-1 mb-1">
-    <Users className="w-3 h-3 text-muted-foreground" />
-    <span className="text-xs font-medium text-muted-foreground">
-    Submissions
-    </span>
-   </div>
-   <p className="text-sm font-semibold">
+   <p className="text-base font-black text-gray-900 leading-tight">
     {bounty.submissions.length}
    </p>
    </div>
 
-   <div className="bg-muted/50 rounded-[1.25rem] p-3 transition-all duration-300 ">
-   <div className="flex items-center gap-1 mb-1">
-    <Shield className="w-3 h-3 text-muted-foreground" />
-    <span className="text-xs font-medium text-muted-foreground">
-    Slash %
+   {/* Time Remaining */}
+   <div className="border-2 border-gray-900 bg-white p-3 md:col-span-3">
+   <div className="flex items-center gap-1 mb-2">
+    <Clock className="w-3 h-3 text-gray-900" />
+    <span className="text-[10px] font-mono uppercase tracking-wider text-gray-600 font-bold">
+    Time Remaining
     </span>
    </div>
-   <p className="text-sm font-semibold">
-    {Number(bounty.slashPercent) / 100}%
-   </p>
-   </div>
-   </div>
-  </CardHeader>
+   {(() => {
+    const countdown = getCountdown(bounty.deadline);
+    const urgencyColors = {
+    safe: 'text-gray-900',
+    warning: 'text-orange-600',
+    critical: 'text-red-600',
+    expired: 'text-gray-400'
+    };
+    const urgencyBg = {
+    safe: 'bg-gray-100',
+    warning: 'bg-orange-50',
+    critical: 'bg-red-50',
+    expired: 'bg-gray-50'
+    };
 
-  <CardContent className="pt-3">
+    if (countdown.isExpired) {
+    return (
+     <div className="text-center">
+     <p className="text-base font-black text-gray-400 uppercase tracking-tight">
+      EXPIRED
+     </p>
+     </div>
+    );
+    }
+
+    return (
+    <div className="grid grid-cols-4 gap-1.5">
+     <div className={`${urgencyBg[countdown.urgency]} border border-gray-900 p-1.5 text-center`}>
+     <div className={`text-base font-black ${urgencyColors[countdown.urgency]} leading-none`}>
+      {countdown.days.toString().padStart(2, '0')}
+     </div>
+     <div className="text-[10px] font-mono text-gray-600 uppercase mt-0.5">
+      DAYS
+     </div>
+     </div>
+     <div className={`${urgencyBg[countdown.urgency]} border border-gray-900 p-1.5 text-center`}>
+     <div className={`text-base font-black ${urgencyColors[countdown.urgency]} leading-none`}>
+      {countdown.hours.toString().padStart(2, '0')}
+     </div>
+     <div className="text-[10px] font-mono text-gray-600 uppercase mt-0.5">
+      HRS
+     </div>
+     </div>
+     <div className={`${urgencyBg[countdown.urgency]} border border-gray-900 p-1.5 text-center`}>
+     <div className={`text-base font-black ${urgencyColors[countdown.urgency]} leading-none`}>
+      {countdown.minutes.toString().padStart(2, '0')}
+     </div>
+     <div className="text-[10px] font-mono text-gray-600 uppercase mt-0.5">
+      MIN
+     </div>
+     </div>
+     <div className={`${urgencyBg[countdown.urgency]} border border-gray-900 p-1.5 text-center`}>
+     <div className={`text-base font-black ${urgencyColors[countdown.urgency]} leading-none`}>
+      {countdown.seconds.toString().padStart(2, '0')}
+     </div>
+     <div className="text-[10px] font-mono text-gray-600 uppercase mt-0.5">
+      SEC
+     </div>
+     </div>
+    </div>
+    );
+   })()}
+   </div>
+   </div>
+  </div>
+
+  <div className="p-6">
    {/* Description */}
    {metadata?.description && (
-   <div className="mb-3">
-   <h3 className="text-sm font-semibold mb-1.5">Description</h3>
-   <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
+   <div className="mb-6">
+   <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-2">Description</h3>
+   <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
     {metadata.description}
    </p>
    </div>
@@ -790,11 +937,12 @@ export default function BountyDetailPage() {
 
    {/* Requirements */}
    {metadata?.requirements && metadata.requirements.length > 0 && (
-   <div className="mb-3">
-   <h3 className="text-sm font-semibold mb-1.5">Requirements</h3>
-   <ul className="list-disc list-inside space-y-0.5">
+   <div className="mb-6">
+   <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-2">Requirements</h3>
+   <ul className="space-y-2">
     {metadata.requirements.map((req, index) => (
-    <li key={index} className="text-sm text-muted-foreground">
+    <li key={index} className="text-sm text-gray-700 flex items-start gap-2">
+    <span className="text-blue-500 font-bold mt-0.5">▸</span>
     {req}
     </li>
     ))}
@@ -804,11 +952,12 @@ export default function BountyDetailPage() {
 
    {/* Deliverables */}
    {metadata?.deliverables && metadata.deliverables.length > 0 && (
-   <div className="mb-3">
-   <h3 className="text-sm font-semibold mb-1.5">Deliverables</h3>
-   <ul className="list-disc list-inside space-y-0.5">
+   <div className="mb-6">
+   <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-2">Deliverables</h3>
+   <ul className="space-y-2">
     {metadata.deliverables.map((del, index) => (
-    <li key={index} className="text-sm text-muted-foreground">
+    <li key={index} className="text-sm text-gray-700 flex items-start gap-2">
+    <span className="text-blue-500 font-bold mt-0.5">▸</span>
     {del}
     </li>
     ))}
@@ -818,19 +967,19 @@ export default function BountyDetailPage() {
 
    {/* Skills */}
    {metadata?.skills && metadata.skills.length > 0 && (
-   <div className="mb-3">
-   <h3 className="text-sm font-semibold mb-1.5">Required Skills</h3>
-   <div className="flex flex-wrap gap-1.5">
+   <div className="mb-6">
+   <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-2">Required Skills</h3>
+   <div className="flex flex-wrap gap-2">
     {metadata.skills.map((skill, index) => (
-    <Badge key={index} variant="outline" className="text-xs py-0 h-5">
-    {skill}
-    </Badge>
+    <div key={index} className="px-3 py-1 border border-gray-900 bg-gray-100 font-mono text-xs uppercase">
+     {skill}
+    </div>
     ))}
    </div>
    </div>
    )}
 
-   <Separator className="my-4" />
+   <div className="h-px bg-gray-900 my-6" />
 
    {/* Winners Display - Show on PENDING_REVEAL and after */}
    {bounty.status >= 2 && bounty.selectedWinners.length > 0 && (
@@ -904,12 +1053,12 @@ export default function BountyDetailPage() {
    <div className="mb-4">
    {userOprecApplication ? (
     // User already applied
-    <Card className={`rounded-[1.5rem] shadow-md transition-all duration-300 ${
+    <Card className={`rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 ${
     userOprecApplication.approved
-    ? "border-green-200 bg-green-50 dark:bg-green-950"
+    ? "border-green-300 bg-green-50"
     : userOprecApplication.rejected
-    ? "border-red-200 bg-red-50 dark:bg-red-950"
-    : "border-yellow-200 bg-yellow-50 dark:bg-yellow-950"
+    ? "border-red-300 bg-red-50"
+    : "border-yellow-300 bg-yellow-50"
     }`}>
     <CardHeader className="pb-3">
     <CardTitle className="text-base flex items-center gap-2">
@@ -943,10 +1092,10 @@ export default function BountyDetailPage() {
     </Card>
    ) : (
     // User hasn't applied yet
-    <Card className="rounded-[1.5rem] border-blue-200 bg-blue-50 dark:bg-blue-950 shadow-md transition-all duration-300">
+    <Card className="rounded-xl border-blue-200 bg-blue-50 shadow-sm hover:shadow-md transition-shadow duration-200">
     <CardHeader className="pb-3">
-    <CardTitle className="text-base flex items-center gap-2">
-     <Users className="w-4 h-4" />
+    <CardTitle className="text-base flex items-center gap-2 text-gray-900">
+     <Users className="w-4 h-4 text-blue-600" />
      Apply to OPREC (Open Recruitment)
     </CardTitle>
     </CardHeader>
@@ -1023,11 +1172,11 @@ export default function BountyDetailPage() {
    {/* OPREC Applications Management (Creator Only) */}
    {bounty.hasOprec && bounty.status === 0 && isCreator && (
    <div className="mb-4">
-   <Card className="rounded-[1.5rem] shadow-md transition-all duration-300">
+   <Card className="rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 border-gray-200">
     <CardHeader className="pb-3">
     <div className="flex items-center justify-between">
-    <CardTitle className="text-base flex items-center gap-2">
-     <Users className="w-4 h-4" />
+    <CardTitle className="text-base flex items-center gap-2 text-gray-900">
+     <Users className="w-4 h-4 text-blue-600" />
      OPREC Applications ({oprecApplications.length})
     </CardTitle>
     <Button
@@ -1049,7 +1198,7 @@ export default function BountyDetailPage() {
     ) : (
      <>
      {oprecApplications.map((app, idx) => (
-     <Card key={idx} className={`rounded-[1.25rem] transition-all duration-300 ${app.approved ? "bg-green-50 dark:bg-green-950" : app.rejected ? "bg-red-50 dark:bg-red-950" : ""}`}>
+     <Card key={idx} className={`rounded-lg transition-all duration-200 hover:shadow-sm ${app.approved ? "bg-green-50 border-green-300" : app.rejected ? "bg-red-50 border-red-300" : "border-gray-200"}`}>
       <CardContent className="pt-3 pb-3">
       <div className="flex items-start justify-between gap-3">
       <div className="flex-1 space-y-2">
@@ -1120,10 +1269,10 @@ export default function BountyDetailPage() {
    {/* Submit Solution Section - Only OPEN (1) status allows submissions */}
    {bounty.status === 1 && !isCreator && !isExpired && (
    <div className="mb-4">
-   <Card className="rounded-[1.5rem] border-primary/20 bg-primary/5 shadow-md transition-all duration-300">
+   <Card className="rounded-xl border-blue-200 bg-blue-50 shadow-sm hover:shadow-md transition-shadow duration-200">
     <CardHeader className="pb-3">
-    <CardTitle className="text-base flex items-center gap-2">
-    <Send className="w-4 h-4" />
+    <CardTitle className="text-base flex items-center gap-2 text-gray-900">
+    <Send className="w-4 h-4 text-blue-600" />
     Submit Your Solution
     </CardTitle>
     </CardHeader>
@@ -1269,8 +1418,8 @@ export default function BountyDetailPage() {
    {/* Submissions */}
    {bounty.submissions.length > 0 && (
    <div>
-   <h3 className="text-sm font-semibold mb-2">
-    All Submissions ({bounty.submissions.length})
+   <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider mb-3">
+    Submissions
    </h3>
    <div className="space-y-2">
    {bounty.submissions.map((sub, index) => {
@@ -1284,10 +1433,10 @@ export default function BountyDetailPage() {
     return (
     <Card
     key={index}
-    className={`rounded-[1.25rem] transition-all duration-300 ${
+    className={`rounded-lg transition-all duration-200 hover:shadow-sm ${
      isWinner
-     ? "bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200"
-     : ""
+     ? "bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-300"
+     : "border-gray-200"
     }`}
     >
     <CardContent className="py-3 px-4">
@@ -1507,14 +1656,14 @@ export default function BountyDetailPage() {
    {isCreator &&
     bounty.status === 1 &&
     selectedSubmissions.length > 0 && (
-    <Card className="rounded-[1.5rem] mt-4 bg-gradient-to-r from-green-50 to-blue-50 border-green-200 shadow-md transition-all duration-300">
+    <Card className="rounded-lg mt-4 bg-gradient-to-r from-green-50 to-blue-50 border-green-300 shadow-sm hover:shadow-md transition-shadow duration-200">
     <CardContent className="py-3 px-4">
      <div className="flex justify-between items-center">
      <div>
-     <h4 className="text-sm font-bold mb-0.5">
+     <h4 className="text-sm font-bold mb-0.5 text-gray-900">
       Ready to Select Winners?
      </h4>
-     <p className="text-xs text-muted-foreground">
+     <p className="text-xs text-gray-600">
       {selectedSubmissions.length} submission(s)
       selected
      </p>
@@ -1573,17 +1722,17 @@ export default function BountyDetailPage() {
    </div>
    </div>
    )}
-  </CardContent>
-  </Card>
+  </div>
+  </div>
   </div>
  </div>
 
  {/* IPFS Content Viewer Dialog */}
  <Dialog open={!!viewingCid} onOpenChange={() => setViewingCid(null)}>
-  <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto rounded-[2rem]">
+  <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto rounded-xl">
   <DialogHeader>
-  <DialogTitle>{viewingTitle}</DialogTitle>
-  <DialogDescription className="text-xs">
+  <DialogTitle className="text-gray-900">{viewingTitle}</DialogTitle>
+  <DialogDescription className="text-xs text-gray-600">
    IPFS CID: {viewingCid}
   </DialogDescription>
   </DialogHeader>
