@@ -8,6 +8,7 @@ import {
  useWaitForTransactionReceipt,
 } from "wagmi";
 import { readContract } from "@wagmi/core";
+import { BountySidebar } from "../../../components/BountySidebar";
 import {
  CONTRACT_ADDRESSES,
  QUINTY_ABI,
@@ -15,7 +16,6 @@ import {
 } from "../../../utils/contracts";
 import {
  formatETH,
- formatTimeLeft,
  formatAddress,
  wagmiConfig,
 } from "../../../utils/web3";
@@ -28,14 +28,6 @@ import {
   formatUSD,
 } from "../../../utils/prices";
 import {
- Breadcrumb,
- BreadcrumbItem,
- BreadcrumbLink,
- BreadcrumbList,
- BreadcrumbPage,
- BreadcrumbSeparator,
-} from "../../../components/ui/breadcrumb";
-import {
  Card,
  CardContent,
  CardHeader,
@@ -44,7 +36,6 @@ import {
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
-import { Separator } from "../../../components/ui/separator";
 import { Checkbox } from "../../../components/ui/checkbox";
 import { Alert, AlertDescription } from "../../../components/ui/alert";
 import {
@@ -78,6 +69,8 @@ import {
  Loader2,
  Upload,
  X,
+ Menu,
+ ChevronLeft,
 } from "lucide-react";
 
 interface Reply {
@@ -159,6 +152,7 @@ export default function BountyDetailPage() {
  const [isUploadingSolution, setIsUploadingSolution] = useState(false);
  const [currentTime, setCurrentTime] = useState(Math.floor(Date.now() / 1000));
  const [ethPrice, setEthPrice] = useState<number>(0);
+ const [sidebarOpen, setSidebarOpen] = useState(true);
 
  // OPREC related state
  const [oprecApplications, setOprecApplications] = useState<OprecApplication[]>([]);
@@ -693,7 +687,7 @@ export default function BountyDetailPage() {
  : 1;
 
  return (
- <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white relative pt-20 sm:pt-24">
+ <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white relative">
  {/* Grid Background */}
  <div className="fixed inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-40 pointer-events-none" />
  {/* Loading Overlay */}
@@ -717,7 +711,28 @@ export default function BountyDetailPage() {
   </div>
  )}
 
- <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10">
+ {/* Sidebar Component */}
+ <BountySidebar
+  currentBountyId={bountyId}
+  isOpen={sidebarOpen}
+  onClose={() => setSidebarOpen(false)}
+ />
+
+ {/* Sidebar Toggle Button - Hidden on mobile to avoid distraction */}
+ {!sidebarOpen && (
+  <button
+  onClick={() => setSidebarOpen(true)}
+  className="hidden lg:flex fixed top-20 left-4 z-40 p-2 border-2 border-gray-900 bg-white hover:bg-blue-50 hover:border-blue-500 transition-all shadow-lg"
+  title="Open sidebar"
+  >
+  <Menu className="w-5 h-5" />
+  </button>
+ )}
+
+ {/* Main Content - Add left padding for sidebar */}
+ <div className={`${sidebarOpen ? 'lg:ml-80' : ''} transition-all duration-300 relative z-10 min-h-screen pt-16`}>
+
+  <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
   {/* Breadcrumb - Brutalist */}
   <div className="mb-8">
   <div className="inline-flex items-center gap-2 px-4 py-3 bg-white border-2 border-gray-900">
@@ -860,13 +875,13 @@ export default function BountyDetailPage() {
    </div>
    {(() => {
     const countdown = getCountdown(bounty.deadline);
-    const urgencyColors = {
+    const urgencyColors: Record<'safe' | 'warning' | 'critical' | 'expired', string> = {
     safe: 'text-gray-900',
     warning: 'text-orange-600',
     critical: 'text-red-600',
     expired: 'text-gray-400'
     };
-    const urgencyBg = {
+    const urgencyBg: Record<'safe' | 'warning' | 'critical' | 'expired', string> = {
     safe: 'bg-gray-100',
     warning: 'bg-orange-50',
     critical: 'bg-red-50',
@@ -883,34 +898,36 @@ export default function BountyDetailPage() {
     );
     }
 
+    const urgency = countdown.urgency as 'safe' | 'warning' | 'critical' | 'expired';
+
     return (
     <div className="grid grid-cols-4 gap-1.5">
-     <div className={`${urgencyBg[countdown.urgency]} border border-gray-900 p-1.5 text-center`}>
-     <div className={`text-base font-black ${urgencyColors[countdown.urgency]} leading-none`}>
+     <div className={`${urgencyBg[urgency]} border border-gray-900 p-1.5 text-center`}>
+     <div className={`text-base font-black ${urgencyColors[urgency]} leading-none`}>
       {countdown.days.toString().padStart(2, '0')}
      </div>
      <div className="text-[10px] font-mono text-gray-600 uppercase mt-0.5">
       DAYS
      </div>
      </div>
-     <div className={`${urgencyBg[countdown.urgency]} border border-gray-900 p-1.5 text-center`}>
-     <div className={`text-base font-black ${urgencyColors[countdown.urgency]} leading-none`}>
+     <div className={`${urgencyBg[urgency]} border border-gray-900 p-1.5 text-center`}>
+     <div className={`text-base font-black ${urgencyColors[urgency]} leading-none`}>
       {countdown.hours.toString().padStart(2, '0')}
      </div>
      <div className="text-[10px] font-mono text-gray-600 uppercase mt-0.5">
       HRS
      </div>
      </div>
-     <div className={`${urgencyBg[countdown.urgency]} border border-gray-900 p-1.5 text-center`}>
-     <div className={`text-base font-black ${urgencyColors[countdown.urgency]} leading-none`}>
+     <div className={`${urgencyBg[urgency]} border border-gray-900 p-1.5 text-center`}>
+     <div className={`text-base font-black ${urgencyColors[urgency]} leading-none`}>
       {countdown.minutes.toString().padStart(2, '0')}
      </div>
      <div className="text-[10px] font-mono text-gray-600 uppercase mt-0.5">
       MIN
      </div>
      </div>
-     <div className={`${urgencyBg[countdown.urgency]} border border-gray-900 p-1.5 text-center`}>
-     <div className={`text-base font-black ${urgencyColors[countdown.urgency]} leading-none`}>
+     <div className={`${urgencyBg[urgency]} border border-gray-900 p-1.5 text-center`}>
+     <div className={`text-base font-black ${urgencyColors[urgency]} leading-none`}>
       {countdown.seconds.toString().padStart(2, '0')}
      </div>
      <div className="text-[10px] font-mono text-gray-600 uppercase mt-0.5">
@@ -1804,6 +1821,7 @@ export default function BountyDetailPage() {
   </div>
   </DialogContent>
  </Dialog>
+ </div>
  </div>
  );
 }
