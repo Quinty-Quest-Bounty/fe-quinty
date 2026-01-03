@@ -531,11 +531,11 @@ export default function Home() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleCopy(contract.address);
+                            handleCopy(contract.address, idx);
                           }}
                           className="flex-1 px-3 py-1.5 border border-white/10 hover:border-white/30 transition-all text-xs font-mono flex items-center justify-center gap-2"
                         >
-                          {copiedAddress === contract.address ? (
+                          {copiedIndex === idx ? (
                             <>
                               <Check className="w-3 h-3" /> COPIED
                             </>
