@@ -856,13 +856,13 @@ export default function BountyDetailPage() {
                     </div>
                     {(() => {
                       const countdown = getCountdown(bounty.deadline);
-                      const urgencyColors: Record<'safe' | 'warning' | 'critical' | 'expired', string> = {
+                      const urgencyColors: Record<string, string> = {
                         safe: 'text-gray-900',
                         warning: 'text-orange-600',
                         critical: 'text-red-600',
                         expired: 'text-gray-400'
                       };
-                      const urgencyBg: Record<'safe' | 'warning' | 'critical' | 'expired', string> = {
+                      const urgencyBg: Record<string, string> = {
                         safe: 'bg-gray-100',
                         warning: 'bg-orange-50',
                         critical: 'bg-red-50',
