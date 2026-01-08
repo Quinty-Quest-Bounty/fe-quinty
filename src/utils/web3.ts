@@ -9,7 +9,8 @@ if (typeof window === 'undefined') {
 
 export const wagmiConfig = getDefaultConfig({
   appName: "Quintle",
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "",
+  // Fallback to a dummy ID to prevent build failure if env var is missing
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "3fcc6b4468bd933c2341d716d471ac0a",
   chains: [mantleSepoliaTestnet, baseSepolia],
   ssr: true,
 });
