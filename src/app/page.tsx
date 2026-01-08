@@ -19,15 +19,22 @@ import {
   Code2,
   Cpu,
 } from "lucide-react";
-
-const contractReferences = [
-  { label: "Quintle Core", address: "0x0000000000000000000000000000000000000000" },
-  { label: "Reputation", address: "0x0000000000000000000000000000000000000000" },
-  { label: "Soulbound NFT", address: "0x0000000000000000000000000000000000000000" },
-];
+import { useChainId } from "wagmi";
+import { CONTRACT_ADDRESSES, MANTLE_SEPOLIA_CHAIN_ID, BASE_SEPOLIA_CHAIN_ID, EXPLORERS } from "../utils/contracts";
 
 export default function Home() {
   const router = useRouter();
+  const chainId = useChainId();
+  const isBase = chainId === BASE_SEPOLIA_CHAIN_ID;
+  const networkName = isBase ? "Base Sepolia" : "Mantle Sepolia";
+  const networkLabel = isBase ? "Base" : "Mantle";
+  const explorerUrl = EXPLORERS[chainId] || EXPLORERS[MANTLE_SEPOLIA_CHAIN_ID];
+
+  const contractReferences = [
+    { label: "Quintle Core", address: CONTRACT_ADDRESSES[chainId]?.Quinty || CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty },
+    { label: "Reputation", address: CONTRACT_ADDRESSES[chainId]?.QuintyReputation || CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].QuintyReputation },
+    { label: "Soulbound NFT", address: CONTRACT_ADDRESSES[chainId]?.QuintyNFT || CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].QuintyNFT },
+  ];
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const containerRef = useRef(null);
@@ -100,10 +107,10 @@ export default function Home() {
                 <div className="absolute inset-0 w-2 h-2 bg-blue-500 animate-ping" />
               </div>
               <span className="text-xs font-mono uppercase tracking-widest text-blue-400">
-                Live on Mantle Sepolia
+                Live on {networkName}
               </span>
               <div className="w-px h-4 bg-blue-500/30" />
-              <span className="text-xs font-mono text-gray-400">5003</span>
+              <span className="text-xs font-mono text-gray-400">{chainId}</span>
             </motion.div>
 
             {/* Title - Brutalist Typography */}
@@ -115,8 +122,8 @@ export default function Home() {
                 className="text-7xl md:text-9xl font-black leading-[0.85] tracking-tighter"
               >
                 <span className="block text-white">QUEST</span>
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500 bg-[length:200%_auto] animate-gradient">
-                  IN MANTLE
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-500 bg-[length:200%_auto] animate-gradient">
+                  QUEST IN {networkLabel.toUpperCase()}
                 </span>
               </motion.h1>
 
@@ -208,7 +215,7 @@ export default function Home() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="space-y-1">
                     <div className="text-xs text-gray-400 font-mono uppercase">Live Bounty Example</div>
-                    <div className="text-3xl font-black text-white">{formatETH(featuredBounty.amount)} MNT</div>
+                    <div className="text-3xl font-black text-white">{formatETH(featuredBounty.amount)} {isBase ? "ETH" : "MNT"}</div>
                   </div>
                   <div className="w-12 h-12 bg-blue-500 flex items-center justify-center">
                     <Lock className="w-6 h-6 text-white" />
@@ -316,7 +323,7 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-black text-white">2.5 MNT</div>
+                        <div className="text-2xl font-black text-white">2.5 {isBase ? "ETH" : "MNT"}</div>
                         <div className="text-xs text-gray-400">≈ $4,250</div>
                       </div>
                     </div>
@@ -484,9 +491,9 @@ export default function Home() {
               </div>
 
               <div className="flex items-center gap-2 px-4 py-2 border border-white/20 bg-black/50">
-                <span className="text-xs font-mono text-gray-400">MANTLE SEPOLIA</span>
+                <span className="text-xs font-mono text-gray-400 uppercase">{networkName}</span>
                 <div className="w-px h-4 bg-white/20" />
-                <span className="text-xs font-mono text-blue-400">5003</span>
+                <span className="text-xs font-mono text-blue-400">{chainId}</span>
               </div>
             </div>
 
@@ -549,7 +556,7 @@ export default function Home() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            window.open(`https://sepolia.mantlescan.xyz/address/${contract.address}`, '_blank');
+                            window.open(`${explorerUrl}/address/${contract.address}`, '_blank');
                           }}
                           className="px-3 py-1.5 border border-white/10 hover:border-blue-500 hover:bg-blue-500/10 transition-all"
                         >

@@ -2,10 +2,16 @@
 
 import Link from "next/link";
 import { X, Github, ArrowUpRight, Code2, Shield, Zap } from "lucide-react";
-import { CONTRACT_ADDRESSES, MANTLE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
+import { useChainId } from "wagmi";
+import { CONTRACT_ADDRESSES, MANTLE_SEPOLIA_CHAIN_ID, BASE_SEPOLIA_CHAIN_ID, EXPLORERS } from "../utils/contracts";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const chainId = useChainId();
+  const isBase = chainId === BASE_SEPOLIA_CHAIN_ID;
+  const networkName = isBase ? "Base Sepolia" : "Mantle Sepolia";
+  const networkLabel = isBase ? "Base" : "Mantle";
+  const explorerUrl = EXPLORERS[chainId] || EXPLORERS[MANTLE_SEPOLIA_CHAIN_ID];
 
   return (
     <footer className="relative z-20 bg-black border-t border-white/10 py-16 mt-20">
@@ -31,14 +37,14 @@ export function Footer() {
             </div>
 
             <p className="text-gray-400 text-sm mb-6 font-mono leading-relaxed">
-              Trustless bounty platform with escrow protection and soulbound reputation on Mantle.
+              Trustless bounty platform with escrow protection and soulbound reputation on {networkLabel}.
             </p>
 
             {/* Network Status */}
             <div className="inline-flex items-center gap-2 px-4 py-2 border border-white/10 bg-black/50">
               <div className="w-2 h-2 bg-blue-500 animate-pulse" />
               <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider">
-                Live on Mantle Sepolia
+                Live on {networkName}
               </span>
             </div>
           </div>
@@ -66,7 +72,7 @@ export function Footer() {
                 Litepaper
               </Link>
               <a
-                href="https://sepolia.mantlescan.xyz"
+                href={explorerUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-gray-400 hover:text-white font-mono text-xs uppercase transition-colors group"
@@ -146,10 +152,10 @@ export function Footer() {
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 border border-blue-500/30 bg-blue-500/5">
               <svg className="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" fill="none"/>
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" fill="none" />
               </svg>
               <span className="font-mono text-xs text-blue-400 uppercase tracking-wider font-bold">
-                Mantle
+                {networkLabel}
               </span>
             </div>
           </div>

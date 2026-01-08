@@ -1,4 +1,4 @@
-// Network switching and adding utilities for Mantle Sepolia
+// Network switching and adding utilities
 export const MANTLE_SEPOLIA_PARAMS = {
   chainId: '0x138b', // 5003 in hex
   chainName: 'Mantle Sepolia Testnet',
@@ -11,57 +11,69 @@ export const MANTLE_SEPOLIA_PARAMS = {
   blockExplorerUrls: ['https://sepolia.mantlescan.xyz'],
 };
 
-export const addMantleSepoliaNetwork = async () => {
+export const BASE_SEPOLIA_PARAMS = {
+  chainId: '0x14a34', // 84532 in hex
+  chainName: 'Base Sepolia',
+  nativeCurrency: {
+    name: 'Ether',
+    symbol: 'ETH',
+    decimals: 18,
+  },
+  rpcUrls: ['https://sepolia.base.org'],
+  blockExplorerUrls: ['https://sepolia.basescan.org'],
+};
+
+export const addNetwork = async (params: any) => {
   try {
     await window.ethereum?.request({
       method: 'wallet_addEthereumChain',
-      params: [MANTLE_SEPOLIA_PARAMS],
+      params: [params],
     });
-    console.log('Mantle Sepolia added to wallet');
     return true;
   } catch (error) {
-    console.error('Failed to add Mantle Sepolia:', error);
+    console.error('Failed to add network:', error);
     return false;
   }
 };
 
-export const switchToMantleSepolia = async () => {
+export const switchNetwork = async (chainIdHex: string) => {
   try {
     await window.ethereum?.request({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: MANTLE_SEPOLIA_PARAMS.chainId }],
+      params: [{ chainId: chainIdHex }],
     });
-    console.log('Switched to Mantle Sepolia');
     return true;
   } catch (error: any) {
-    // This error code indicates that the chain has not been added to MetaMask
     if (error.code === 4902) {
-      console.log('Mantle Sepolia not found, adding it...');
-      return await addMantleSepoliaNetwork();
+      if (chainIdHex === MANTLE_SEPOLIA_PARAMS.chainId) return await addNetwork(MANTLE_SEPOLIA_PARAMS);
+      if (chainIdHex === BASE_SEPOLIA_PARAMS.chainId) return await addNetwork(BASE_SEPOLIA_PARAMS);
     }
-    console.error('Failed to switch to Mantle Sepolia:', error);
+    console.error('Failed to switch network:', error);
     return false;
   }
 };
 
-export const ensureMantleSepoliaNetwork = async () => {
+export const ensureNetwork = async (chainIdHex: string) => {
   if (!window.ethereum) {
     alert('Please install MetaMask or another Web3 wallet');
     return false;
   }
 
   try {
-    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+    const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
 
-    if (chainId !== MANTLE_SEPOLIA_PARAMS.chainId) {
-      console.log('Not on Mantle Sepolia, switching...');
-      return await switchToMantleSepolia();
+    if (currentChainId !== chainIdHex) {
+      return await switchNetwork(chainIdHex);
     }
 
-    console.log('Already on Mantle Sepolia');
     return true;
   } catch (error) {
     console.error('Error checking network:', error);
     return false;
   }
 };
+
+// Legacy exports for compatibility
+export const ensureMantleSepoliaNetwork = () => ensureNetwork(MANTLE_SEPOLIA_PARAMS.chainId);
+export const ensureBaseSepoliaNetwork = () => ensureNetwork(BASE_SEPOLIA_PARAMS.chainId);
+

@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
+import { BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
 import { formatETH, formatTimeLeft, formatAddress } from "../utils/web3";
 import {
   fetchMetadataFromIpfs,
@@ -73,6 +74,9 @@ export default function BountyCard({
   viewMode = "grid",
 }: BountyCardProps) {
   const router = useRouter();
+  const chainId = useChainId();
+  const isBase = chainId === BASE_SEPOLIA_CHAIN_ID;
+  const currencyLabel = isBase ? "ETH" : "MNT";
   const [metadata, setMetadata] = useState<BountyMetadata | null>(null);
   const [quickView, setQuickView] = useState(false);
   const { shareLink } = useShare();
@@ -177,7 +181,7 @@ export default function BountyCard({
                     <Trophy className="w-4 h-4 text-blue-600" />
                     <div>
                       <div className="text-lg font-black text-blue-600">
-                        {formatETH(bounty.amount)} <span className="text-xs">MNT</span>
+                        {formatETH(bounty.amount)} <span className="text-xs">{currencyLabel}</span>
                       </div>
                       {ethPrice > 0 && (
                         <div className="text-[10px] text-gray-500 font-mono">
@@ -310,7 +314,7 @@ export default function BountyCard({
                 </div>
                 <div>
                   <div className="text-xl font-black text-blue-600">
-                    {formatETH(bounty.amount)} <span className="text-xs">MNT</span>
+                    {formatETH(bounty.amount)} <span className="text-xs">{currencyLabel}</span>
                   </div>
                   {ethPrice > 0 && (
                     <div className="text-[10px] text-gray-600 font-mono">
@@ -340,7 +344,7 @@ export default function BountyCard({
                 {metadata?.title || bounty.description.split("\n")[0]}
               </DialogTitle>
               <DialogDescription className="font-mono text-sm">
-                {bounty.id === 999 ? 'EXAMPLE' : `BOUNTY #${bounty.id}`} • {formatETH(bounty.amount)} MNT
+                {bounty.id === 999 ? 'EXAMPLE' : `BOUNTY #${bounty.id}`} • {formatETH(bounty.amount)} {currencyLabel}
               </DialogDescription>
             </DialogHeader>
 
@@ -360,7 +364,7 @@ export default function BountyCard({
               <div className="grid grid-cols-3 gap-2">
                 <div className="border-2 border-gray-900 p-3 bg-gray-50">
                   <p className="text-xs font-mono text-gray-600 uppercase">Reward</p>
-                  <p className="font-black text-lg">{formatETH(bounty.amount)} MNT</p>
+                  <p className="font-black text-lg">{formatETH(bounty.amount)} {currencyLabel}</p>
                 </div>
                 <div className="border-2 border-gray-900 p-3">
                   <p className="text-xs font-mono text-gray-600 uppercase">Submissions</p>

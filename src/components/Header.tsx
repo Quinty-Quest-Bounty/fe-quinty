@@ -6,6 +6,8 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { useChainId } from "wagmi";
+import { BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
 
 const WalletComponents = dynamic(
   () => import("./WalletComponents"),
@@ -21,6 +23,10 @@ const navItems = [
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
+  const chainId = useChainId();
+  const isBase = chainId === BASE_SEPOLIA_CHAIN_ID;
+  const networkName = isBase ? "Base Sepolia" : "Mantle Sepolia";
+  const networkLabel = isBase ? "Base" : "Mantle";
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -53,7 +59,7 @@ export default function Header() {
                   QUINTLE
                 </div>
                 <div className="font-mono text-[9px] text-blue-400 uppercase tracking-widest -mt-1">
-                  Quest in Mantle
+                  Quest in {networkLabel}
                 </div>
               </div>
             </button>
@@ -90,7 +96,7 @@ export default function Header() {
               <div className="flex items-center gap-2 px-3 py-1.5 border border-white/10 bg-black">
                 <div className="w-1.5 h-1.5 bg-blue-500 animate-pulse" />
                 <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider">
-                  Mantle
+                  {networkLabel}
                 </span>
               </div>
 
@@ -167,9 +173,9 @@ export default function Header() {
                 <div className="flex items-center justify-between px-4 py-3 border border-white/10 bg-black">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-blue-500 animate-pulse" />
-                    <span className="text-xs font-mono text-gray-400 uppercase">Mantle Sepolia</span>
+                    <span className="text-xs font-mono text-gray-400 uppercase">{networkName}</span>
                   </div>
-                  <span className="text-xs font-mono text-blue-400">5003</span>
+                  <span className="text-xs font-mono text-blue-400">{chainId}</span>
                 </div>
 
                 {isMounted && (

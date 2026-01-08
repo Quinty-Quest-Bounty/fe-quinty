@@ -4,14 +4,19 @@ import QuintyNFTABI from "../../contracts/QuintyNFT.json";
 import QuintyReputationABI from "../../contracts/QuintyReputation.json";
 
 export const MANTLE_SEPOLIA_CHAIN_ID = 5003;
+export const BASE_SEPOLIA_CHAIN_ID = 84532;
 
-// Contract addresses on Mantle Sepolia
-// TODO: Update these addresses after deploying contracts to Mantle Sepolia
-export const CONTRACT_ADDRESSES = {
+// Contract addresses on different networks
+export const CONTRACT_ADDRESSES: Record<number, { Quinty: string; QuintyNFT: string; QuintyReputation: string }> = {
   [MANTLE_SEPOLIA_CHAIN_ID]: {
     Quinty: "0x0000000000000000000000000000000000000000",
     QuintyNFT: "0x0000000000000000000000000000000000000000",
     QuintyReputation: "0x0000000000000000000000000000000000000000",
+  },
+  [BASE_SEPOLIA_CHAIN_ID]: {
+    Quinty: "0xdB5e489C756D4D2028CCb3515c04DaD134AB03c7",
+    QuintyNFT: "0xAFbe103C60cE8317a1244d5cb374a065A7550F34",
+    QuintyReputation: "0xD4c6d0fBe9A1F11e7b6A23E5F857C020B89f0763",
   },
 };
 
@@ -35,15 +40,19 @@ export enum BadgeType {
   TeamMember = 2,
 }
 
-// Constants
-export const MANTLE_SEPOLIA_EXPLORER = "https://sepolia.mantlescan.xyz";
+// Explorer URLs
+export const EXPLORERS: Record<number, string> = {
+  [MANTLE_SEPOLIA_CHAIN_ID]: "https://sepolia.mantlescan.xyz",
+  [BASE_SEPOLIA_CHAIN_ID]: "https://sepolia.basescan.org",
+};
 
 // Helper function to get contract address
-export function getContractAddress(contractName: keyof typeof CONTRACT_ADDRESSES[typeof MANTLE_SEPOLIA_CHAIN_ID]): string {
-  return CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID][contractName];
+export function getContractAddress(contractName: "Quinty" | "QuintyNFT" | "QuintyReputation", chainId: number = MANTLE_SEPOLIA_CHAIN_ID): string {
+  return CONTRACT_ADDRESSES[chainId]?.[contractName] || CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID][contractName];
 }
 
 // Helper to get explorer URL
-export function getExplorerUrl(addressOrTx: string, type: 'address' | 'tx' = 'address'): string {
-  return `${MANTLE_SEPOLIA_EXPLORER}/${type}/${addressOrTx}`;
+export function getExplorerUrl(addressOrTx: string, chainId: number = MANTLE_SEPOLIA_CHAIN_ID, type: 'address' | 'tx' = 'address'): string {
+  const explorer = EXPLORERS[chainId] || EXPLORERS[MANTLE_SEPOLIA_CHAIN_ID];
+  return `${explorer}/${type}/${addressOrTx}`;
 }

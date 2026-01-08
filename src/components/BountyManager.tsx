@@ -7,6 +7,7 @@ import {
   useReadContract,
   useWatchContractEvent,
   useWaitForTransactionReceipt,
+  useChainId,
 } from "wagmi";
 import { readContract } from "@wagmi/core";
 import {
@@ -92,6 +93,7 @@ interface Bounty {
 
 export default function BountyManager() {
   const { isConnected, address } = useAccount();
+  const chainId = useChainId();
   const { writeContract, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
@@ -157,7 +159,7 @@ export default function BountyManager() {
 
   // Read bounty counter
   const { data: bountyCounter } = useReadContract({
-    address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+    address: CONTRACT_ADDRESSES[chainId].Quinty as `0x${string}`,
     abi: QUINTY_ABI,
     functionName: "bountyCounter",
     query: { enabled: true, retry: false, refetchOnWindowFocus: false },
@@ -165,7 +167,7 @@ export default function BountyManager() {
 
   // Watch for bounty events
   useWatchContractEvent({
-    address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+    address: CONTRACT_ADDRESSES[chainId].Quinty as `0x${string}`,
     abi: QUINTY_ABI,
     eventName: "BountyCreated",
     onLogs() {
@@ -174,7 +176,7 @@ export default function BountyManager() {
   });
 
   useWatchContractEvent({
-    address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+    address: CONTRACT_ADDRESSES[chainId].Quinty as `0x${string}`,
     abi: QUINTY_ABI,
     eventName: "SubmissionCreated",
     onLogs(logs) {
@@ -267,79 +269,79 @@ export default function BountyManager() {
 
       for (const id of bountyIds) {
         try {
-        // 1. Get all bounty metadata using the new robust function
-        const bountyData = await readContract(wagmiConfig, {
-          address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
-            .Quinty as `0x${string}`,
-          abi: QUINTY_ABI,
-          functionName: "getBountyData",
-          args: [BigInt(id)],
-        });
-
-        if (bountyData) {
-          const bountyArray = bountyData as any[];
-          const [
-            creator,
-            description,
-            amount,
-            deadline,
-            allowMultipleWinners,
-            winnerShares,
-            status,
-            slashPercent,
-            selectedWinners,
-            selectedSubmissionIds,
-            hasOprec,
-            oprecDeadline,
-          ] = bountyArray;
-
-          // 2. Get submissions separately
-          const submissionCount = await readContract(wagmiConfig, {
-            address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
+          // 1. Get all bounty metadata using the new robust function
+          const bountyData = await readContract(wagmiConfig, {
+            address: CONTRACT_ADDRESSES[chainId]
               .Quinty as `0x${string}`,
             abi: QUINTY_ABI,
-            functionName: "getSubmissionCount",
+            functionName: "getBountyData",
             args: [BigInt(id)],
           });
 
-          const submissions: Submission[] = [];
-          for (let i = 0; i < Number(submissionCount); i++) {
-            const submissionData = await readContract(wagmiConfig, {
-              address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
+          if (bountyData) {
+            const bountyArray = bountyData as any[];
+            const [
+              creator,
+              description,
+              amount,
+              deadline,
+              allowMultipleWinners,
+              winnerShares,
+              status,
+              slashPercent,
+              selectedWinners,
+              selectedSubmissionIds,
+              hasOprec,
+              oprecDeadline,
+            ] = bountyArray;
+
+            // 2. Get submissions separately
+            const submissionCount = await readContract(wagmiConfig, {
+              address: CONTRACT_ADDRESSES[chainId]
                 .Quinty as `0x${string}`,
               abi: QUINTY_ABI,
-              functionName: "getSubmissionStruct",
-              args: [BigInt(id), BigInt(i)],
+              functionName: "getSubmissionCount",
+              args: [BigInt(id)],
             });
-            if (submissionData) {
-              submissions.push(submissionData as unknown as Submission);
+
+            const submissions: Submission[] = [];
+            for (let i = 0; i < Number(submissionCount); i++) {
+              const submissionData = await readContract(wagmiConfig, {
+                address: CONTRACT_ADDRESSES[chainId]
+                  .Quinty as `0x${string}`,
+                abi: QUINTY_ABI,
+                functionName: "getSubmissionStruct",
+                args: [BigInt(id), BigInt(i)],
+              });
+              if (submissionData) {
+                submissions.push(submissionData as unknown as Submission);
+              }
             }
+
+            const metadataMatch = description.match(
+              /Metadata: ipfs:\/\/([a-zA-Z0-9]+)/
+            );
+            const metadataCid = metadataMatch ? metadataMatch[1] : undefined;
+
+            // 3. Assemble the full bounty object
+            loadedBounties.push({
+              id,
+              creator,
+              description,
+              amount,
+              deadline,
+              allowMultipleWinners,
+              winnerShares,
+              status,
+              slashPercent,
+              submissions,
+              selectedWinners,
+              selectedSubmissionIds,
+              metadataCid,
+              hasOprec,
+              oprecDeadline,
+            });
           }
-
-          const metadataMatch = description.match(
-            /Metadata: ipfs:\/\/([a-zA-Z0-9]+)/
-          );
-          const metadataCid = metadataMatch ? metadataMatch[1] : undefined;
-
-          // 3. Assemble the full bounty object
-          loadedBounties.push({
-            id,
-            creator,
-            description,
-            amount,
-            deadline,
-            allowMultipleWinners,
-            winnerShares,
-            status,
-            slashPercent,
-            submissions,
-            selectedWinners,
-            selectedSubmissionIds,
-            metadataCid,
-            hasOprec,
-            oprecDeadline,
-          });
-        }
         } catch (error) {
           console.error(`Error loading bounty data for ID ${id}:`, error);
         }
@@ -409,7 +411,7 @@ export default function BountyManager() {
           : 0;
 
       writeContract({
-        address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
+        address: CONTRACT_ADDRESSES[chainId]
           .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "createBounty",
@@ -497,7 +499,7 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
+        address: CONTRACT_ADDRESSES[chainId]
           .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "submitSolution",
@@ -522,7 +524,7 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
+        address: CONTRACT_ADDRESSES[chainId]
           .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "selectWinners",
@@ -540,7 +542,7 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
+        address: CONTRACT_ADDRESSES[chainId]
           .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "triggerSlash",
@@ -558,7 +560,7 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
+        address: CONTRACT_ADDRESSES[chainId]
           .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "addReply",
@@ -580,7 +582,7 @@ export default function BountyManager() {
 
     try {
       writeContract({
-        address: CONTRACT_ADDRESSES[MANTLE_SEPOLIA_CHAIN_ID]
+        address: CONTRACT_ADDRESSES[chainId]
           .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "revealSolution",
@@ -684,11 +686,10 @@ export default function BountyManager() {
 
           <button
             onClick={() => setShowCreateForm(!showCreateForm)}
-            className={`px-6 py-2 border-2 transition-all font-mono text-xs uppercase tracking-wider font-bold inline-flex items-center gap-2 ${
-              showCreateForm
-                ? "border-gray-900 bg-white text-gray-900 hover:bg-gray-100"
-                : "border-blue-500 bg-blue-500 text-white hover:bg-blue-600"
-            }`}
+            className={`px-6 py-2 border-2 transition-all font-mono text-xs uppercase tracking-wider font-bold inline-flex items-center gap-2 ${showCreateForm
+              ? "border-gray-900 bg-white text-gray-900 hover:bg-gray-100"
+              : "border-blue-500 bg-blue-500 text-white hover:bg-blue-600"
+              }`}
           >
             {showCreateForm ? (
               <>
@@ -1284,11 +1285,10 @@ export default function BountyManager() {
                       </label>
 
                       <div
-                        className={`border-2 border-dashed rounded-lg p-6 transition-colors ${
-                          isDragOver
-                            ? "border-primary bg-primary/5"
-                            : "border-muted-foreground/25 hover:border-muted-foreground/50"
-                        }`}
+                        className={`border-2 border-dashed rounded-lg p-6 transition-colors ${isDragOver
+                          ? "border-primary bg-primary/5"
+                          : "border-muted-foreground/25 hover:border-muted-foreground/50"
+                          }`}
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
@@ -1457,9 +1457,9 @@ export default function BountyManager() {
           {(() => {
             const bounciesToShow = showMyBounties
               ? bounties.filter(
-                  (b) =>
-                    address && b.creator.toLowerCase() === address.toLowerCase()
-                )
+                (b) =>
+                  address && b.creator.toLowerCase() === address.toLowerCase()
+              )
               : getFilteredBounties();
 
             // Show connect wallet message for My Bounties view

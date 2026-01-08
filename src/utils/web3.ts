@@ -1,10 +1,10 @@
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import { mantleSepoliaTestnet } from "wagmi/chains";
+import { mantleSepoliaTestnet, baseSepolia } from "wagmi/chains";
 
 export const wagmiConfig = getDefaultConfig({
   appName: "Quintle",
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "",
-  chains: [mantleSepoliaTestnet],
+  chains: [mantleSepoliaTestnet, baseSepolia],
   ssr: true,
 });
 

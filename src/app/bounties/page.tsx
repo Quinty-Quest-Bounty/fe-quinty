@@ -10,9 +10,6 @@ export default function BountiesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white relative">
-      {/* Grid Background */}
-      <div className="fixed inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-40" />
-
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-8 relative z-10">
         {/* Page Header - Brutalist Style */}
         <div className="mb-12">
