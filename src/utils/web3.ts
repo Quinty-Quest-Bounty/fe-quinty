@@ -1,6 +1,12 @@
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { mantleSepoliaTestnet, baseSepolia } from "wagmi/chains";
 
+// Fix for "indexedDB is not defined" during SSR
+if (typeof window === 'undefined') {
+  // @ts-ignore
+  global.indexedDB = global.indexedDB || {};
+}
+
 export const wagmiConfig = getDefaultConfig({
   appName: "Quintle",
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "",
