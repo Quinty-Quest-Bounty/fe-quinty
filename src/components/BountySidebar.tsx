@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CONTRACT_ADDRESSES, QUINTY_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
 import { mockBounties, getMockMetadata, getExampleBounty } from "../utils/mockBounties";
 import { formatETH, wagmiConfig } from "../utils/web3";
+import { useIndexerBounties } from "../hooks/useIndexer";
 
 interface BountySidebarProps {
   currentBountyId: string;
@@ -22,55 +23,81 @@ export function BountySidebar({ currentBountyId, isOpen, onClose }: BountySideba
   const isBase = chainId === BASE_SEPOLIA_CHAIN_ID;
   const currencyLabel = isBase ? "ETH" : "MNT";
 
-  const { data: realBounties = [], isLoading } = useQuery({
-    queryKey: ["sidebar-bounties", chainId],
-    queryFn: async () => {
-      const bountyCounter = await readContract(wagmiConfig, {
-        address: CONTRACT_ADDRESSES[chainId].Quinty as `0x${string}`,
-        abi: QUINTY_ABI,
-        functionName: "bountyCounter",
-      });
+  const { data: indexerBounties = [], isLoading: isIndexerLoading } = useIndexerBounties();
+  const [fallbackBounties, setFallbackBounties] = React.useState<any[]>([]);
+  const [isFallbackLoading, setIsFallbackLoading] = React.useState(false);
 
-      const count = Number(bountyCounter);
-      const loadedBounties = [];
-
-      // Always add the example bounty first
-      loadedBounties.push(getExampleBounty());
-
-      for (let i = 1; i <= count; i++) {
+  // Fallback logic if indexer is empty
+  React.useEffect(() => {
+    const loadFallback = async () => {
+      if (!isIndexerLoading && indexerBounties.length === 0 && !isFallbackLoading) {
+        setIsFallbackLoading(true);
         try {
-          const data = await readContract(wagmiConfig, {
-            address: CONTRACT_ADDRESSES[chainId].Quinty as `0x${string}`,
+          const counter = await readContract(wagmiConfig, {
+            address: CONTRACT_ADDRESSES[chainId]?.Quinty as `0x${string}`,
             abi: QUINTY_ABI,
-            functionName: "getBountyData",
-            args: [BigInt(i)],
+            functionName: "bountyCounter",
           });
 
-          if (data) {
-            const bountyArray = data as any[];
-            const description = bountyArray[1];
-            const metadataMatch = description.match(/Metadata: ipfs:\/\/([a-zA-Z0-9]+)/);
-            const metadataCid = metadataMatch ? metadataMatch[1] : undefined;
-
-            loadedBounties.push({
-              id: i,
-              description: bountyArray[1],
-              amount: bountyArray[2],
-              status: bountyArray[6],
-              metadataCid,
-              submissions: { length: 0 }, // Simplified for sidebar
+          const loaded = [];
+          for (let i = 1; i <= Number(counter); i++) {
+            const data = await readContract(wagmiConfig, {
+              address: CONTRACT_ADDRESSES[chainId]?.Quinty as `0x${string}`,
+              abi: QUINTY_ABI,
+              functionName: "getBountyData",
+              args: [BigInt(i)],
             });
+            if (data) {
+              const d = data as any[];
+              loaded.push({
+                id: i,
+                description: d[1],
+                amount: d[2],
+                status: Number(d[6]),
+                title: d[1].split("\n")[0],
+              });
+            }
           }
+          setFallbackBounties(loaded);
         } catch (e) {
-          console.error(`Error loading bounty ${i}:`, e);
+          console.error("Sidebar fallback error:", e);
+        } finally {
+          setIsFallbackLoading(false);
         }
       }
+    };
+    loadFallback();
+  }, [indexerBounties, isIndexerLoading, chainId]);
 
-      return loadedBounties.reverse();
-    },
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    gcTime: 10 * 60 * 1000, // Keep in garbage collection for 10 minutes
-  });
+  // Map data to the format expected by the sidebar
+  const realBounties = React.useMemo(() => {
+    const loadedBounties = [];
+
+    // Always add the example bounty first
+    loadedBounties.push(getExampleBounty());
+
+    const sourceData = indexerBounties.length > 0 ? indexerBounties : fallbackBounties;
+
+    sourceData.forEach((b: any) => {
+      const id = typeof b.id === 'string' ? parseInt(b.id.split("-").pop()) : b.id;
+      loadedBounties.push({
+        id,
+        description: b.description,
+        amount: BigInt(b.amount),
+        status: typeof b.status === 'string'
+          ? (b.status === "OPREC" ? 0 : b.status === "OPEN" ? 1 : b.status === "RESOLVED" ? 3 : 2)
+          : b.status,
+        title: b.title || b.description?.split("\n")[0],
+        metadataCid: b.metadataCid || b.description,
+        submissions: { length: b.submissions?.items?.length || 0 },
+      });
+    });
+
+    // Sort by ID descending (newest first)
+    return loadedBounties.sort((a, b) => b.id - a.id);
+  }, [indexerBounties, fallbackBounties]);
+
+  const isLoading = isIndexerLoading || isFallbackLoading;
 
   return (
     <>

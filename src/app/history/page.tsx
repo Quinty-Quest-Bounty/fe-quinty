@@ -10,6 +10,7 @@ import {
     MANTLE_SEPOLIA_CHAIN_ID,
 } from "../../utils/contracts";
 import { formatETH, wagmiConfig } from "../../utils/web3";
+import { useIndexerUserHistory } from "../../hooks/useIndexer";
 import {
     Target,
     Calendar,
@@ -43,139 +44,110 @@ export default function HistoryPage() {
         }
     }, [address, chainId]);
 
-    const loadTransactionHistory = async () => {
-        if (!address) return;
+    const { data: historyData, isLoading: isIndexerLoading } = useIndexerUserHistory(address || "");
 
-        try {
-            setIsLoading(true);
-            const allTransactions: Transaction[] = [];
+    const [isFallbackLoading, setIsFallbackLoading] = useState(false);
 
-            const currentQuintyAddress = CONTRACT_ADDRESSES[chainId]?.Quinty as `0x${string}`;
-            if (!currentQuintyAddress) {
-                setTransactions([]);
-                return;
-            }
+    useEffect(() => {
+        const loadFallback = async () => {
+            if (address && !isIndexerLoading && historyData?.bounties.length === 0 && historyData?.submissions.length === 0 && !isFallbackLoading) {
+                setIsFallbackLoading(true);
+                try {
+                    const counter = await readContract(wagmiConfig, {
+                        address: CONTRACT_ADDRESSES[chainId]?.Quinty as `0x${string}`,
+                        abi: QUINTY_ABI,
+                        functionName: "bountyCounter",
+                    });
 
-            // Load Bounty transactions
-            try {
-                const bountyCounter = await readContract(wagmiConfig, {
-                    address: currentQuintyAddress,
-                    abi: QUINTY_ABI,
-                    functionName: "bountyCounter",
-                });
-                const bountyCount = Number(bountyCounter);
-
-                for (let i = 1; i <= bountyCount; i++) {
-                    try {
-                        const bountyData = await readContract(wagmiConfig, {
-                            address: currentQuintyAddress,
+                    const userTransactions: Transaction[] = [];
+                    for (let i = 1; i <= Number(counter); i++) {
+                        const data = await readContract(wagmiConfig, {
+                            address: CONTRACT_ADDRESSES[chainId]?.Quinty as `0x${string}`,
                             abi: QUINTY_ABI,
                             functionName: "getBountyData",
                             args: [BigInt(i)],
                         });
-
-                        const [
-                            creator,
-                            description,
-                            amount,
-                            deadline,
-                            allowMultipleWinners,
-                            winnerShares,
-                            status,
-                        ] = bountyData as any;
-
-                        // Check if user created this bounty
-                        if (creator.toLowerCase() === address.toLowerCase()) {
-                            allTransactions.push({
-                                id: `bounty-created-${i}`,
-                                type: "bounty_created",
-                                itemId: i,
-                                amount: amount,
-                                timestamp: deadline,
-                                status: status === 3 ? "Resolved" : status === 1 ? "Open" : status === 0 ? "OPREC" : status === 2 ? "Pending Reveal" : "Active",
-                                description: description.split("\n")[0] || `Bounty #${i}`,
-                            });
-                        }
-
-                        // Get submissions
-                        const submissionCount = await readContract(wagmiConfig, {
-                            address: currentQuintyAddress,
-                            abi: QUINTY_ABI,
-                            functionName: "getSubmissionCount",
-                            args: [BigInt(i)],
-                        });
-
-                        for (let subIdx = 0; subIdx < Number(submissionCount); subIdx++) {
-                            try {
-                                const submissionData = await readContract(wagmiConfig, {
-                                    address: currentQuintyAddress,
-                                    abi: QUINTY_ABI,
-                                    functionName: "getSubmission",
-                                    args: [BigInt(i), BigInt(subIdx)],
+                        if (data) {
+                            const d = data as any[];
+                            const creator = d[0];
+                            if (creator.toLowerCase() === address.toLowerCase()) {
+                                userTransactions.push({
+                                    id: `fallback-created-${i}`,
+                                    type: "bounty_created",
+                                    itemId: i,
+                                    amount: d[2],
+                                    timestamp: BigInt(Math.floor(Date.now() / 1000)), // Fallback timestamp
+                                    status: Number(d[6]) === 1 ? "Open" : "Resolved",
+                                    description: d[1].split("\n")[0],
                                 });
-
-                                const sub = submissionData as any;
-                                // sub is [bountyId, solver, blindedIpfsCid, deposit, replies, revealIpfsCid, timestamp]
-                                const solver = sub[1];
-                                const deposit = sub[3];
-                                const revealIpfsCid = sub[5];
-                                const subTimestamp = sub[6];
-
-                                if (solver.toLowerCase() === address.toLowerCase()) {
-                                    allTransactions.push({
-                                        id: `bounty-submitted-${i}-${subIdx}`,
-                                        type: "bounty_submitted",
-                                        itemId: i,
-                                        amount: deposit,
-                                        timestamp: subTimestamp || deadline,
-                                        status: revealIpfsCid ? "Revealed" : "Submitted",
-                                        description: description.split("\n")[0] || `Bounty #${i}`,
-                                    });
-
-                                    // Check if selected winner
-                                    const isWinner = (bountyData as any)[8]?.some((w: string) => w.toLowerCase() === address.toLowerCase());
-                                    if (isWinner) {
-                                        allTransactions.push({
-                                            id: `bounty-won-${i}-${subIdx}`,
-                                            type: "bounty_won",
-                                            itemId: i,
-                                            amount: amount,
-                                            timestamp: subTimestamp || deadline,
-                                            status: "Won",
-                                            description: description.split("\n")[0] || `Bounty #${i}`,
-                                        });
-                                    }
-
-                                    if (revealIpfsCid) {
-                                        allTransactions.push({
-                                            id: `bounty-revealed-${i}-${subIdx}`,
-                                            type: "bounty_revealed",
-                                            itemId: i,
-                                            timestamp: subTimestamp || deadline,
-                                            status: "Revealed",
-                                            description: description.split("\n")[0] || `Bounty #${i}`,
-                                        });
-                                    }
-                                }
-                            } catch (subError) {
-                                console.error(`Error loading submission ${subIdx} for bounty ${i}:`, subError);
                             }
                         }
-                    } catch (bountyError) {
-                        console.error(`Error loading bounty ${i}:`, bountyError);
                     }
+                    setTransactions(userTransactions);
+                } catch (e) {
+                    console.error("History fallback error:", e);
+                } finally {
+                    setIsFallbackLoading(false);
                 }
-            } catch (error) {
-                console.error("Error loading bounty transactions:", error);
             }
+        };
+        loadFallback();
+    }, [address, historyData, isIndexerLoading, chainId]);
+
+    useEffect(() => {
+        if (address && historyData && (historyData.bounties.length > 0 || historyData.submissions.length > 0)) {
+            const allTransactions: Transaction[] = [];
+
+            // Add bounties created
+            historyData.bounties.forEach((b: any) => {
+                allTransactions.push({
+                    id: `bounty-created-${b.id}`,
+                    type: "bounty_created",
+                    itemId: parseInt(b.id.split("-").pop()),
+                    amount: BigInt(b.amount),
+                    timestamp: BigInt(b.timestamp),
+                    status: b.status,
+                    description: b.title || b.description.split("\n")[0] || `Bounty #${b.id}`,
+                });
+            });
+
+            // Add submissions
+            historyData.submissions.forEach((s: any) => {
+                const bountyId = parseInt(s.bountyId.split("-").pop());
+
+                allTransactions.push({
+                    id: `bounty-submitted-${s.id}`,
+                    type: "bounty_submitted",
+                    itemId: bountyId,
+                    amount: 0n, // Deposit info not in event currently
+                    timestamp: BigInt(s.timestamp),
+                    status: s.isRevealed ? "Revealed" : "Submitted",
+                    description: s.bounty?.title || s.bounty?.description?.split("\n")[0] || `Bounty #${bountyId}`,
+                });
+
+                if (s.isWinner) {
+                    allTransactions.push({
+                        id: `bounty-won-${s.id}`,
+                        type: "bounty_won",
+                        itemId: bountyId,
+                        amount: BigInt(s.bounty?.amount || 0),
+                        timestamp: BigInt(s.timestamp),
+                        status: "Won",
+                        description: s.bounty?.title || s.bounty?.description?.split("\n")[0] || `Bounty #${bountyId}`,
+                    });
+                }
+            });
 
             allTransactions.sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
             setTransactions(allTransactions);
-        } catch (error) {
-            console.error("Error loading transaction history:", error);
-        } finally {
+            setIsLoading(false);
+        } else if (!isIndexerLoading && !isFallbackLoading) {
             setIsLoading(false);
         }
+    }, [address, historyData, isIndexerLoading, isFallbackLoading]);
+
+    const loadTransactionHistory = async () => {
+        // Kept for compatibility or fallback, but primarily using the useEffect above
     };
 
     const getTransactionColor = (type: Transaction["type"]) => {

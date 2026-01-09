@@ -1,17 +1,19 @@
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import { mantleSepoliaTestnet, baseSepolia } from "wagmi/chains";
+import { mantleSepoliaTestnet, baseSepolia, arbitrumSepolia } from "wagmi/chains";
 
 // Fix for "indexedDB is not defined" during SSR
 if (typeof window === 'undefined') {
   // @ts-ignore
-  global.indexedDB = global.indexedDB || {};
+  global.indexedDB = {
+    open: () => ({ onupgradeneeded: null, onsuccess: null, onerror: null } as any),
+  } as any;
 }
 
 export const wagmiConfig = getDefaultConfig({
   appName: "Quintle",
   // Fallback to a dummy ID to prevent build failure if env var is missing
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "3fcc6b4468bd933c2341d716d471ac0a",
-  chains: [mantleSepoliaTestnet, baseSepolia],
+  chains: [mantleSepoliaTestnet, baseSepolia, arbitrumSepolia],
   ssr: true,
 });
 

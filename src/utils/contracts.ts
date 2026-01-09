@@ -5,6 +5,7 @@ import QuintyReputationABI from "../../contracts/QuintyReputation.json";
 
 export const MANTLE_SEPOLIA_CHAIN_ID = 5003;
 export const BASE_SEPOLIA_CHAIN_ID = 84532;
+export const ARBITRUM_SEPOLIA_CHAIN_ID = 421614;
 
 // Contract addresses on different networks
 export const CONTRACT_ADDRESSES: Record<number, { Quinty: string; QuintyNFT: string; QuintyReputation: string }> = {
@@ -17,6 +18,11 @@ export const CONTRACT_ADDRESSES: Record<number, { Quinty: string; QuintyNFT: str
     Quinty: "0xdB5e489C756D4D2028CCb3515c04DaD134AB03c7",
     QuintyNFT: "0xAFbe103C60cE8317a1244d5cb374a065A7550F34",
     QuintyReputation: "0xD4c6d0fBe9A1F11e7b6A23E5F857C020B89f0763",
+  },
+  [ARBITRUM_SEPOLIA_CHAIN_ID]: {
+    Quinty: "0x0000000000000000000000000000000000000000",
+    QuintyNFT: "0x0000000000000000000000000000000000000000",
+    QuintyReputation: "0x0000000000000000000000000000000000000000",
   },
 };
 
@@ -44,6 +50,7 @@ export enum BadgeType {
 export const EXPLORERS: Record<number, string> = {
   [MANTLE_SEPOLIA_CHAIN_ID]: "https://sepolia.mantlescan.xyz",
   [BASE_SEPOLIA_CHAIN_ID]: "https://sepolia.basescan.org",
+  [ARBITRUM_SEPOLIA_CHAIN_ID]: "https://sepolia.arbiscan.io",
 };
 
 // Helper function to get contract address

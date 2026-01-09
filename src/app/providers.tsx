@@ -13,7 +13,9 @@ import { useState } from 'react';
 // Fix for "indexedDB is not defined" during SSR
 if (typeof window === 'undefined') {
     // @ts-ignore
-    global.indexedDB = global.indexedDB || {};
+    global.indexedDB = {
+        open: () => ({ onupgradeneeded: null, onsuccess: null, onerror: null } as any),
+    } as any;
 }
 
 export default function Providers({ children }: { children: React.ReactNode }) {

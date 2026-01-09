@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   useAccount,
   useWriteContract,
@@ -17,11 +17,8 @@ import {
 } from "../utils/contracts";
 import { parseETH, wagmiConfig } from "../utils/web3";
 import BountyCard from "./BountyCard";
-import {
-  uploadMetadataToIpfs,
-  uploadToIpfs,
-  BountyMetadata,
-} from "../utils/ipfs";
+import { uploadMetadataToIpfs, uploadToIpfs, BountyMetadata } from "../utils/ipfs";
+import { useIndexerBounties } from "../hooks/useIndexer";
 import { mockBounties } from "../utils/mockBounties";
 import {
   Card,
@@ -164,6 +161,44 @@ export default function BountyManager() {
     functionName: "bountyCounter",
     query: { enabled: true, retry: false, refetchOnWindowFocus: false },
   });
+
+  const { data: indexerBounties, isLoading: isIndexerLoading } = useIndexerBounties();
+
+  const hasLoadedRef = useRef(false);
+
+  // Sync indexer data to local state
+  useEffect(() => {
+    if (indexerBounties && indexerBounties.length > 0) {
+      const mappedBounties = indexerBounties.map((b: any) => ({
+        id: parseInt(b.id.split("-").pop()),
+        creator: b.creator,
+        description: b.description,
+        amount: BigInt(b.amount),
+        deadline: BigInt(b.deadline),
+        status: b.status === "OPREC" ? 0 : b.status === "OPEN" ? 1 : b.status === "RESOLVED" ? 3 : 2,
+        allowMultipleWinners: true, // Default or fetch from metadata
+        winnerShares: [100n],
+        slashPercent: 30n,
+        selectedWinners: [],
+        selectedSubmissionIds: [],
+        hasOprec: b.hasOprec,
+        oprecDeadline: 0n,
+        metadataCid: b.description,
+        submissions: b.submissions?.items?.map((s: any) => ({
+          id: s.id,
+          solver: s.solver,
+          isWinner: s.isWinner,
+          isRevealed: s.isRevealed,
+        })) || [],
+      }));
+      setBounties(mappedBounties);
+      hasLoadedRef.current = true;
+    } else if (!isIndexerLoading && bountyCounter && !hasLoadedRef.current) {
+      // Fallback to manual load if indexer is empty/fails, but only once
+      hasLoadedRef.current = true;
+      loadBountiesAndSubmissions();
+    }
+  }, [indexerBounties, isIndexerLoading, bountyCounter]);
 
   // Watch for bounty events
   useWatchContractEvent({

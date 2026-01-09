@@ -10,8 +10,8 @@ export default function BountiesLayout({ children }: { children: React.ReactNode
     const bountyId = params.id as string;
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
-    // Only show sidebar if we are on a detail page
-    const isDetailPage = !!bountyId;
+    // Always show sidebar in the bounties section
+    const isDetailPage = true;
 
     return (
         <div className="min-h-screen relative">
