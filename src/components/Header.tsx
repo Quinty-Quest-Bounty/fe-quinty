@@ -20,9 +20,9 @@ const WalletComponents = dynamic(
 const navItems = [
   { name: "Dashboard", link: "/dashboard" },
   { name: "Bounties", link: "/bounties" },
-  { name: "Disputes", link: "/disputes" },
   { name: "Reputation", link: "/reputation" },
-  { name: "Funding", link: "/funding" },
+  { name: "History", link: "/history" },
+  { name: "Airdrops", link: "/airdrops" },
 ];
 
 export default function Header() {

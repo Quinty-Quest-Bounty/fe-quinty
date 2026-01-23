@@ -57,30 +57,19 @@ const features = [
     colSpan: "col-span-1 md:col-span-1 lg:col-span-1",
   },
   {
-    title: "Community Disputes",
-    description: "Disagreements are resolved by a decentralized court. Stakers vote on fair outcomes, enforcing justice in code.",
-    icon: Vote,
-    color: "text-orange-600",
-    bg: "bg-orange-50",
+    title: "Airdrop Bounties",
+    description: "Launch your campaign, grow your movement, or raise flexible startup funds. Everything transparent.",
+    icon: Rocket,
+    color: "text-indigo-600",
+    bg: "bg-indigo-50",
     colSpan: "col-span-1 md:col-span-1 lg:col-span-1",
-  },
-  {
-    title: "Frictionless Grants",
-    description: "Streamlined funding for builders. Milestone-based payouts ensure capital efficiency and accountability.",
-    icon: Coins,
-    color: "text-emerald-600",
-    bg: "bg-emerald-50",
-    colSpan: "col-span-1 md:col-span-2 lg:col-span-2",
   },
 ];
 
 const contractReferences = [
   { label: "Quinty Core", address: "0x574bC7953bf4eD7Dd20987F4752C560f606Ebf1D" },
   { label: "Reputation", address: "0x7EbC0c18CF9B37076d326342Dba20e98A1F20c7e" },
-  { label: "Dispute Resolver", address: "0x961659d12E9dE91dC543A75911b3b0D269769E82" },
   { label: "Soulbound NFT", address: "0xD49a54aFb982c0b76554e34f1A76851ed725405F" },
-  { label: "Grant Program", address: "0x8b0B50732CCfB6308d5A63C1F9D70166DF63b661" },
-  { label: "Crowdfunding", address: "0x0bf8d6EB00b3C4cA6a9F1CFa6Cd40b4cE486F885" },
 ];
 
 export default function Home() {
@@ -88,12 +77,12 @@ export default function Home() {
   const [isAnnouncementModalOpen, setIsAnnouncementModalOpen] = useState(false);
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const containerRef = useRef(null);
-  
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"]
   });
-  
+
   const y = useSpring(useTransform(scrollYProgress, [0, 1], [0, -100]), {
     stiffness: 100,
     damping: 30,
@@ -179,8 +168,8 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="text-lg sm:text-xl md:text-2xl text-gray-600 max-w-2xl mx-auto mb-12 leading-relaxed font-medium dark:text-gray-400"
             >
-               Escrow separates the committed from the curious. 
-               Quinty’s ensure funds are locked until work is verified—eliminating risk for both creators and funders.
+              Escrow separates the committed from the curious.
+              Quinty’s ensure funds are locked until work is verified—eliminating risk for both creators and funders.
             </motion.p>
 
             <motion.div
@@ -213,13 +202,13 @@ export default function Home() {
           <motion.div style={{ y }} className="absolute top-40 left-[5%] lg:left-[15%] hidden lg:block pointer-events-none">
             <div className="bg-white/70 backdrop-blur-2xl p-5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.06)] border border-gray-200/60 rotate-[-6deg] hover:rotate-0 transition-transform duration-500 dark:bg-black/40 dark:border-white/10 dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
               <div className="flex items-center gap-3">
-                 <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center dark:bg-green-500/10 border border-green-100/50 dark:border-green-500/20">
-                    <Lock className="h-5 w-5 text-green-600 dark:text-green-400" />
-                 </div>
-                 <div>
-                    <div className="text-xs text-gray-500 font-medium dark:text-gray-400">Escrow Locked</div>
-                    <div className="text-sm font-bold text-gray-900 dark:text-white">12.5 ETH</div>
-                 </div>
+                <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center dark:bg-green-500/10 border border-green-100/50 dark:border-green-500/20">
+                  <Lock className="h-5 w-5 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500 font-medium dark:text-gray-400">Escrow Locked</div>
+                  <div className="text-sm font-bold text-gray-900 dark:text-white">12.5 ETH</div>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -227,13 +216,13 @@ export default function Home() {
           <motion.div style={{ y: useTransform(y, val => val * -0.8) }} className="absolute bottom-40 right-[5%] lg:right-[12%] hidden lg:block pointer-events-none">
             <div className="bg-white/70 backdrop-blur-2xl p-5 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.06)] border border-gray-200/60 rotate-[6deg] hover:rotate-0 transition-transform duration-500 dark:bg-black/40 dark:border-white/10 dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
               <div className="flex items-center gap-3">
-                 <div className="h-10 w-10 rounded-full bg-purple-50 flex items-center justify-center dark:bg-purple-500/10 border border-purple-100/50 dark:border-purple-500/20">
-                    <BadgeCheck className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                 </div>
-                 <div>
-                    <div className="text-xs text-gray-500 font-medium dark:text-gray-400">Reputation Minted</div>
-                    <div className="text-sm font-bold text-gray-900 dark:text-white">Level 5 Solver</div>
-                 </div>
+                <div className="h-10 w-10 rounded-full bg-purple-50 flex items-center justify-center dark:bg-purple-500/10 border border-purple-100/50 dark:border-purple-500/20">
+                  <BadgeCheck className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <div className="text-xs text-gray-500 font-medium dark:text-gray-400">Reputation Minted</div>
+                  <div className="text-sm font-bold text-gray-900 dark:text-white">Level 5 Solver</div>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -244,74 +233,74 @@ export default function Home() {
 
           {/* Minimal Elegant Background */}
           <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
-             {/* Single soft gradient */}
-             <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_40%,rgba(14,168,133,0.04),transparent)] dark:bg-[radial-gradient(ellipse_60%_50%_at_50%_40%,rgba(14,168,133,0.06),transparent)]" />
+            {/* Single soft gradient */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_40%,rgba(14,168,133,0.04),transparent)] dark:bg-[radial-gradient(ellipse_60%_50%_at_50%_40%,rgba(14,168,133,0.06),transparent)]" />
 
-             {/* Minimal dot pattern */}
-             <DotPattern className="absolute inset-0 h-full w-full fill-gray-200/20 [mask-image:radial-gradient(600px_circle_at_center,white,transparent)] dark:fill-white/[0.02]" />
+            {/* Minimal dot pattern */}
+            <DotPattern className="absolute inset-0 h-full w-full fill-gray-200/20 [mask-image:radial-gradient(600px_circle_at_center,white,transparent)] dark:fill-white/[0.02]" />
           </div>
 
           <div className="container px-4 mx-auto relative z-20">
-             <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="text-center mb-16"
-             >
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-100 bg-emerald-50/50 backdrop-blur-md mb-8 shadow-sm dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
-                   <div className="w-2 h-2 rounded-full bg-[#0EA885] animate-pulse" />
-                   <span className="text-xs font-bold text-emerald-600 tracking-wider uppercase">Platform Walkthrough</span>
-                </div>
-                
-                <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-gray-900 to-gray-600 mb-8 tracking-tight drop-shadow-sm dark:from-white dark:to-gray-400">
-                   The Future<br /> is Trustless.
-                </h2>
-                <p className="text-gray-600 max-w-2xl mx-auto text-lg md:text-xl leading-relaxed font-medium dark:text-gray-400">
-                   See how Quinty replaces intermediaries with smart contracts.   
-                </p>
-             </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-100 bg-emerald-50/50 backdrop-blur-md mb-8 shadow-sm dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
+                <div className="w-2 h-2 rounded-full bg-[#0EA885] animate-pulse" />
+                <span className="text-xs font-bold text-emerald-600 tracking-wider uppercase">Platform Walkthrough</span>
+              </div>
+
+              <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-gray-900 to-gray-600 mb-8 tracking-tight drop-shadow-sm dark:from-white dark:to-gray-400">
+                The Future<br /> is Trustless.
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto text-lg md:text-xl leading-relaxed font-medium dark:text-gray-400">
+                See how Quinty replaces intermediaries with smart contracts.
+              </p>
+            </motion.div>
 
             <motion.div
-               initial={{ opacity: 0, y: 40, rotateX: 10 }}
-               whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-               viewport={{ once: true }}
-               transition={{ duration: 1, type: "spring", bounce: 0.2 }}
-               className="max-w-5xl mx-auto relative"
+              initial={{ opacity: 0, y: 40, rotateX: 10 }}
+              whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 1, type: "spring", bounce: 0.2 }}
+              className="max-w-5xl mx-auto relative"
             >
-               {/* The "Glass" Window Frame - Fits Video Perfectly */}
-               <div className="relative rounded-xl border border-gray-200 bg-white shadow-2xl overflow-hidden ring-1 ring-black/5 group dark:border-white/10 dark:bg-black/40 dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] dark:ring-white/5">
-                  
-                  {/* Window Header - Compact Light */}
-                  <div className="flex items-center gap-4 px-4 py-3 border-b border-gray-100 bg-gray-50/80 backdrop-blur-sm dark:border-white/5 dark:bg-black/40">
-                     <div className="flex gap-1.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57] border border-black/5 dark:border-white/10" />
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E] border border-black/5 dark:border-white/10" />
-                        <div className="w-2.5 h-2.5 rounded-full bg-[#28C840] border border-black/5 dark:border-white/10" />
-                     </div>
-                     <div className="flex-1 flex justify-center">
-                        <div className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-white border border-gray-200 shadow-sm transition-shadow group-hover:shadow-md dark:bg-black/50 dark:border-gray-700">
-                           <Lock className="w-2.5 h-2.5 text-gray-400 dark:text-gray-500" />
-                           <span className="text-[10px] font-medium text-gray-600 font-mono tracking-wide dark:text-gray-400">quinty.io</span>
-                        </div>
-                     </div>
-                     <div className="w-10" /> {/* Spacer */}
-                  </div>
+              {/* The "Glass" Window Frame - Fits Video Perfectly */}
+              <div className="relative rounded-xl border border-gray-200 bg-white shadow-2xl overflow-hidden ring-1 ring-black/5 group dark:border-white/10 dark:bg-black/40 dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] dark:ring-white/5">
 
-                  {/* Video Container */}
-                  <div className="relative aspect-video w-full bg-gray-50 dark:bg-black">
-                     <iframe
-                        className="w-full h-full absolute inset-0"
-                        src="https://www.youtube.com/embed/vTZMOdl3WVM?si=PegUg2l_zLAOeva3&autoplay=1&mute=1&loop=1&playlist=vTZMOdl3WVM&controls=0&showinfo=0&modestbranding=1"
-                        title="Quinty Platform Demo"
-                        style={{ border: 0 }}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                     />
+                {/* Window Header - Compact Light */}
+                <div className="flex items-center gap-4 px-4 py-3 border-b border-gray-100 bg-gray-50/80 backdrop-blur-sm dark:border-white/5 dark:bg-black/40">
+                  <div className="flex gap-1.5">
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57] border border-black/5 dark:border-white/10" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#FEBC2E] border border-black/5 dark:border-white/10" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#28C840] border border-black/5 dark:border-white/10" />
                   </div>
-               </div>
+                  <div className="flex-1 flex justify-center">
+                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-white border border-gray-200 shadow-sm transition-shadow group-hover:shadow-md dark:bg-black/50 dark:border-gray-700">
+                      <Lock className="w-2.5 h-2.5 text-gray-400 dark:text-gray-500" />
+                      <span className="text-[10px] font-medium text-gray-600 font-mono tracking-wide dark:text-gray-400">quinty.io</span>
+                    </div>
+                  </div>
+                  <div className="w-10" /> {/* Spacer */}
+                </div>
 
-               {/* Subtle Glow Reflection */}
-               <div className="absolute -inset-4 -z-10 bg-gradient-to-b from-emerald-500/20 to-transparent blur-2xl opacity-40 rounded-[2rem] dark:from-emerald-500/10" />
+                {/* Video Container */}
+                <div className="relative aspect-video w-full bg-gray-50 dark:bg-black">
+                  <iframe
+                    className="w-full h-full absolute inset-0"
+                    src="https://www.youtube.com/embed/vTZMOdl3WVM?si=PegUg2l_zLAOeva3&autoplay=1&mute=1&loop=1&playlist=vTZMOdl3WVM&controls=0&showinfo=0&modestbranding=1"
+                    title="Quinty Platform Demo"
+                    style={{ border: 0 }}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                </div>
+              </div>
+
+              {/* Subtle Glow Reflection */}
+              <div className="absolute -inset-4 -z-10 bg-gradient-to-b from-emerald-500/20 to-transparent blur-2xl opacity-40 rounded-[2rem] dark:from-emerald-500/10" />
             </motion.div>
           </div>
         </section>
@@ -364,11 +353,11 @@ export default function Home() {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-blue-200/60 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-600 mb-8 shadow-lg shadow-blue-500/10 dark:border-blue-500/30 dark:from-blue-500/10 dark:to-purple-500/10 dark:text-blue-400 dark:shadow-blue-500/20"
               >
-                 <span className="relative flex h-2.5 w-2.5">
-                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-75"></span>
-                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-600 dark:bg-blue-400 shadow-lg shadow-blue-500/50"></span>
-                 </span>
-                 <span className="text-xs font-bold tracking-widest uppercase bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">Core Primitives</span>
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-600 dark:bg-blue-400 shadow-lg shadow-blue-500/50"></span>
+                </span>
+                <span className="text-xs font-bold tracking-widest uppercase bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">Core Primitives</span>
               </motion.div>
 
               <motion.h2
@@ -407,45 +396,45 @@ export default function Home() {
                 {/* Glow effect on hover */}
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
                 <div className="flex flex-col h-full justify-between relative z-10">
-                   <div className="flex items-start justify-between mb-6">
-                      <div>
-                         <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-blue-900 mb-2 dark:from-white dark:to-blue-300">Smart Escrow Bounties</h3>
-                         <p className="text-sm text-slate-600 max-w-md leading-relaxed dark:text-gray-300">Funds are locked in contract. Released only upon verified delivery.</p>
+                  <div className="flex items-start justify-between mb-6">
+                    <div>
+                      <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-blue-900 mb-2 dark:from-white dark:to-blue-300">Smart Escrow Bounties</h3>
+                      <p className="text-sm text-slate-600 max-w-md leading-relaxed dark:text-gray-300">Funds are locked in contract. Released only upon verified delivery.</p>
+                    </div>
+                    <motion.div
+                      whileHover={{ rotate: 360, scale: 1.1 }}
+                      transition={{ duration: 0.6 }}
+                      className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/40 dark:shadow-blue-500/60 border-2 border-white/20"
+                    >
+                      <Target className="h-7 w-7" />
+                    </motion.div>
+                  </div>
+                  {/* Mini UI */}
+                  <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-blue-100 p-4 shadow-lg flex items-center gap-3 mt-4 group-hover:shadow-xl group-hover:border-blue-300 transition-all duration-300 dark:bg-black/60 dark:border-blue-500/30 dark:group-hover:border-blue-500/60">
+                    <motion.div
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/50"
+                    >
+                      <Lock className="h-5 w-5 text-white" />
+                    </motion.div>
+                    <div className="flex-1">
+                      <div className="flex justify-between text-[10px] uppercase font-bold text-slate-500 mb-2 dark:text-gray-400">
+                        <span>Status</span>
+                        <span className="text-blue-600 dark:text-blue-400 animate-pulse">Escrow Locked</span>
                       </div>
-                      <motion.div
-                        whileHover={{ rotate: 360, scale: 1.1 }}
-                        transition={{ duration: 0.6 }}
-                        className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/40 dark:shadow-blue-500/60 border-2 border-white/20"
-                      >
-                         <Target className="h-7 w-7" />
-                      </motion.div>
-                   </div>
-                   {/* Mini UI */}
-                   <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-blue-100 p-4 shadow-lg flex items-center gap-3 mt-4 group-hover:shadow-xl group-hover:border-blue-300 transition-all duration-300 dark:bg-black/60 dark:border-blue-500/30 dark:group-hover:border-blue-500/60">
-                      <motion.div
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                        className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/50"
-                      >
-                         <Lock className="h-5 w-5 text-white" />
-                      </motion.div>
-                      <div className="flex-1">
-                         <div className="flex justify-between text-[10px] uppercase font-bold text-slate-500 mb-2 dark:text-gray-400">
-                            <span>Status</span>
-                            <span className="text-blue-600 dark:text-blue-400 animate-pulse">Escrow Locked</span>
-                         </div>
-                         <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden dark:bg-gray-800 shadow-inner">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              whileInView={{ width: "100%" }}
-                              transition={{ duration: 1.5, delay: 0.5 }}
-                              className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full shadow-[0_0_12px_rgba(59,130,246,0.7)]"
-                            />
-                         </div>
+                      <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden dark:bg-gray-800 shadow-inner">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          whileInView={{ width: "100%" }}
+                          transition={{ duration: 1.5, delay: 0.5 }}
+                          className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full shadow-[0_0_12px_rgba(59,130,246,0.7)]"
+                        />
                       </div>
-                      <div className="text-right">
-                         <div className="text-sm font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">2.5 ETH</div>
-                      </div>
-                   </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">2.5 ETH</div>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
 
@@ -464,210 +453,44 @@ export default function Home() {
                 {/* Glow effect on hover */}
                 <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
 
-                 <div className="flex flex-col h-full justify-between relative z-10">
-                    <div className="mb-4">
-                       <motion.div
-                         whileHover={{ rotate: 360, scale: 1.1 }}
-                         transition={{ duration: 0.6 }}
-                         className="h-14 w-14 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white mb-4 shadow-lg shadow-purple-500/40 dark:shadow-purple-500/60 border-2 border-white/20"
-                       >
-                          <BadgeCheck className="h-7 w-7" />
-                       </motion.div>
-                       <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-purple-900 mb-2 dark:from-white dark:to-purple-300">Soulbound Reputation</h3>
-                       <p className="text-sm text-slate-600 leading-relaxed dark:text-gray-300">Immutable work history.</p>
-                    </div>
-                    {/* Mini UI */}
-                    <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-purple-100 p-3 shadow-lg text-center group-hover:shadow-xl group-hover:border-purple-300 transition-all duration-300 dark:bg-black/60 dark:border-purple-500/30 dark:group-hover:border-purple-500/60">
-                       <motion.span
-                         whileHover={{ scale: 1.05 }}
-                         className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-[11px] font-bold text-white shadow-lg shadow-purple-500/50 cursor-pointer"
-                       >
-                          <CheckCircle2 className="h-3.5 w-3.5" /> Level 5 Solver
-                       </motion.span>
-                    </div>
-                 </div>
-              </motion.div>
-
-              {/* Feature 3: Disputes (Small) */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                whileHover={{ y: -5, scale: 1.02 }}
-                className="col-span-1 group relative overflow-hidden rounded-2xl border border-orange-200/50 bg-gradient-to-br from-white to-orange-50/30 p-6 hover:border-orange-400/60 hover:shadow-2xl hover:shadow-orange-500/20 transition-all duration-500 dark:border-orange-500/20 dark:from-white/5 dark:to-orange-500/5 dark:hover:border-orange-500/60 dark:hover:shadow-orange-500/30 backdrop-blur-sm"
-              >
-                {/* Animated gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 via-orange-500/5 to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                {/* Glow effect on hover */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-orange-500/20 to-amber-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
-
-                 <div className="flex flex-col h-full justify-between relative z-10">
-                    <div className="mb-4">
-                       <motion.div
-                         whileHover={{ rotate: 360, scale: 1.1 }}
-                         transition={{ duration: 0.6 }}
-                         className="h-14 w-14 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white mb-4 shadow-lg shadow-orange-500/40 dark:shadow-orange-500/60 border-2 border-white/20"
-                       >
-                          <Vote className="h-7 w-7" />
-                       </motion.div>
-                       <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-orange-900 mb-2 dark:from-white dark:to-orange-300">Community Disputes</h3>
-                       <p className="text-sm text-slate-600 leading-relaxed dark:text-gray-300">No biased moderators. Disputes are resolved by stake-weighted community votes.</p>
-                    </div>
-                    {/* Mini UI */}
-                    <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-orange-100 p-3 shadow-lg flex justify-center gap-1.5 group-hover:shadow-xl group-hover:border-orange-300 transition-all duration-300 dark:bg-black/60 dark:border-orange-500/30 dark:group-hover:border-orange-500/60">
-                       {[1,2,3,4,5].map((i) => (
-                          <motion.div
-                            key={i}
-                            initial={{ height: i === 3 ? 24 : 16 }}
-                            whileHover={{ height: i === 3 ? 28 : 20 }}
-                            className={`w-1.5 rounded-full transition-all ${i === 3 ? 'bg-gradient-to-t from-orange-500 to-amber-500 shadow-[0_0_10px_rgba(249,115,22,0.7)]' : 'bg-orange-200 dark:bg-orange-900/40 group-hover:bg-orange-300 dark:group-hover:bg-orange-800/60'}`}
-                          />
-                       ))}
-                    </div>
-                 </div>
-              </motion.div>
-
-              {/* Feature 4: Grants Without Friction (Large) */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                whileHover={{ y: -5, scale: 1.01 }}
-                className="col-span-1 md:col-span-2 group relative overflow-hidden rounded-2xl border border-emerald-200/50 bg-gradient-to-br from-white to-emerald-50/30 p-8 hover:border-emerald-400/60 hover:shadow-2xl hover:shadow-emerald-500/20 transition-all duration-500 dark:border-emerald-500/20 dark:from-white/5 dark:to-emerald-500/5 dark:hover:border-emerald-500/60 dark:hover:shadow-emerald-500/30 backdrop-blur-sm"
-              >
-                {/* Animated gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-emerald-500/5 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                {/* Glow effect on hover */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
-
                 <div className="flex flex-col h-full justify-between relative z-10">
-                   <div className="flex items-start justify-between mb-6">
-                      <div>
-                         <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-emerald-900 mb-2 dark:from-white dark:to-emerald-300">Grants Without Friction</h3>
-                         <p className="text-sm text-slate-600 max-w-md leading-relaxed dark:text-gray-300">VCs and orgs can fund selected builders directly. Applicants claim verified grants with progress tracked on-chain.</p>
-                      </div>
-                      <motion.div
-                        whileHover={{ rotate: 360, scale: 1.1 }}
-                        transition={{ duration: 0.6 }}
-                        className="h-14 w-14 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/40 dark:shadow-emerald-500/60 border-2 border-white/20"
-                      >
-                         <Landmark className="h-7 w-7" />
-                      </motion.div>
-                   </div>
-                   {/* Mini UI */}
-                   <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-emerald-100 p-4 shadow-lg mt-4 group-hover:shadow-xl group-hover:border-emerald-300 transition-all duration-300 dark:bg-black/60 dark:border-emerald-500/30 dark:group-hover:border-emerald-500/60">
-                      <div className="flex justify-between items-center mb-3">
-                         <div className="flex items-center gap-2">
-                            <motion.div
-                              animate={{ scale: [1, 1.2, 1] }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                              className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.7)]"
-                            />
-                            <span className="text-xs font-bold text-slate-700 dark:text-gray-200">Grant #402 Active</span>
-                         </div>
-                         <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">Builder Verified ✓</span>
-                      </div>
-                      <div className="flex gap-1.5 h-2.5">
-                         <motion.div
-                           initial={{ scaleX: 0 }}
-                           whileInView={{ scaleX: 1 }}
-                           transition={{ duration: 0.5, delay: 0.6 }}
-                           className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-l-full shadow-[0_0_10px_rgba(16,185,129,0.5)] origin-left"
-                         />
-                         <motion.div
-                           initial={{ scaleX: 0 }}
-                           whileInView={{ scaleX: 1 }}
-                           transition={{ duration: 0.5, delay: 0.8 }}
-                           className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-[0_0_10px_rgba(16,185,129,0.5)] origin-left"
-                         />
-                         <motion.div
-                           initial={{ scaleX: 0 }}
-                           whileInView={{ scaleX: 1 }}
-                           transition={{ duration: 0.5, delay: 1 }}
-                           className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-r-full shadow-[0_0_10px_rgba(16,185,129,0.5)] origin-left"
-                         />
-                      </div>
-                   </div>
+                  <div className="mb-4">
+                    <motion.div
+                      whileHover={{ rotate: 360, scale: 1.1 }}
+                      transition={{ duration: 0.6 }}
+                      className="h-14 w-14 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white mb-4 shadow-lg shadow-purple-500/40 dark:shadow-purple-500/60 border-2 border-white/20"
+                    >
+                      <BadgeCheck className="h-7 w-7" />
+                    </motion.div>
+                    <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-purple-900 mb-2 dark:from-white dark:to-purple-300">Soulbound Reputation</h3>
+                    <p className="text-sm text-slate-600 leading-relaxed dark:text-gray-300">Immutable work history.</p>
+                  </div>
+                  {/* Mini UI */}
+                  <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-purple-100 p-3 shadow-lg text-center group-hover:shadow-xl group-hover:border-purple-300 transition-all duration-300 dark:bg-black/60 dark:border-purple-500/30 dark:group-hover:border-purple-500/60">
+                    <motion.span
+                      whileHover={{ scale: 1.05 }}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-[11px] font-bold text-white shadow-lg shadow-purple-500/50 cursor-pointer"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" /> Level 5 Solver
+                    </motion.span>
+                  </div>
                 </div>
               </motion.div>
 
-              {/* Feature 5: Anti-Rug Crowdfunding (Large) */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-                whileHover={{ y: -5, scale: 1.01 }}
-                className="col-span-1 md:col-span-2 group relative overflow-hidden rounded-2xl border border-teal-200/50 bg-gradient-to-br from-white to-teal-50/30 p-8 hover:border-teal-400/60 hover:shadow-2xl hover:shadow-teal-500/20 transition-all duration-500 dark:border-teal-500/20 dark:from-white/5 dark:to-teal-500/5 dark:hover:border-teal-500/60 dark:hover:shadow-teal-500/30 backdrop-blur-sm"
-              >
-                {/* Animated gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-teal-500/0 via-teal-500/5 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                {/* Glow effect on hover */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-teal-500/20 to-cyan-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
 
-                <div className="flex flex-col h-full justify-between relative z-10">
-                   <div className="flex items-start justify-between mb-6">
-                      <div>
-                         <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-teal-900 mb-2 dark:from-white dark:to-teal-300">Anti-Rug Crowdfunding</h3>
-                         <p className="text-sm text-slate-600 max-w-md leading-relaxed dark:text-gray-300">Milestone-based funding ensures accountability. If goals aren't met, contributors get their ETH back automatically.</p>
-                      </div>
-                      <motion.div
-                        whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.1 }}
-                        transition={{ duration: 0.6 }}
-                        className="h-14 w-14 rounded-xl bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-teal-500/40 dark:shadow-teal-500/60 border-2 border-white/20"
-                      >
-                         <Shield className="h-7 w-7" />
-                      </motion.div>
-                   </div>
-                   {/* Mini UI */}
-                   <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-teal-100 p-4 shadow-lg mt-4 group-hover:shadow-xl group-hover:border-teal-300 transition-all duration-300 dark:bg-black/60 dark:border-teal-500/30 dark:group-hover:border-teal-500/60">
-                      <div className="flex justify-between items-center mb-3">
-                         <div className="flex items-center gap-2">
-                            <motion.div
-                              animate={{ rotate: [0, 5, -5, 0] }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                            >
-                              <Shield className="h-4 w-4 text-teal-500 drop-shadow-[0_0_6px_rgba(20,184,166,0.6)]" />
-                            </motion.div>
-                            <span className="text-xs font-bold text-slate-700 dark:text-gray-200">Refund Protection Active</span>
-                         </div>
-                         <span className="text-[10px] font-mono text-teal-600 dark:text-teal-400 font-bold">1/3 Milestones</span>
-                      </div>
-                      <div className="flex gap-1.5 h-2.5">
-                         <motion.div
-                           initial={{ scaleX: 0 }}
-                           whileInView={{ scaleX: 1 }}
-                           transition={{ duration: 0.5, delay: 0.7 }}
-                           className="flex-1 bg-gradient-to-r from-teal-500 to-teal-600 rounded-l-full shadow-[0_0_10px_rgba(20,184,166,0.5)] origin-left"
-                         />
-                         <motion.div
-                           initial={{ opacity: 0.3 }}
-                           whileHover={{ opacity: 0.6 }}
-                           className="flex-1 bg-slate-200 dark:bg-gray-700"
-                         />
-                         <motion.div
-                           initial={{ opacity: 0.3 }}
-                           whileHover={{ opacity: 0.6 }}
-                           className="flex-1 bg-slate-200 rounded-r-full dark:bg-gray-700"
-                         />
-                      </div>
-                   </div>
-                </div>
-              </motion.div>
 
-              {/* Feature 6: Airdrop Bounties & LFG Mode (Small) */}
+
+
+
+              {/* Feature 3: Airdrop Bounties (Large) */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.6 }}
                 whileHover={{ y: -5, scale: 1.02 }}
-                className="col-span-1 group relative overflow-hidden rounded-2xl border border-blue-200/50 bg-gradient-to-br from-white to-blue-50/30 p-6 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-500 dark:border-blue-500/20 dark:from-white/5 dark:to-blue-500/5 dark:hover:border-blue-500/60 dark:hover:shadow-blue-500/30 backdrop-blur-sm"
+                className="col-span-1 md:col-span-3 group relative overflow-hidden rounded-2xl border border-blue-200/50 bg-gradient-to-br from-white to-blue-50/30 p-8 hover:border-blue-400/60 hover:shadow-2xl hover:shadow-blue-500/20 transition-all duration-500 dark:border-blue-500/20 dark:from-white/5 dark:to-blue-500/5 dark:hover:border-blue-500/60 dark:hover:shadow-blue-500/30 backdrop-blur-sm"
               >
                 {/* Animated gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-blue-500/5 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -675,185 +498,185 @@ export default function Home() {
                 {/* Glow effect on hover */}
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10" />
 
-                 <div className="flex flex-col h-full justify-between relative z-10">
-                    <div className="mb-4">
-                       <motion.div
-                         whileHover={{ y: -5, scale: 1.1 }}
-                         transition={{ duration: 0.4 }}
-                         className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white mb-4 shadow-lg shadow-blue-500/40 dark:shadow-blue-500/60 border-2 border-white/20"
-                       >
-                          <Rocket className="h-7 w-7" />
-                       </motion.div>
-                       <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-blue-900 mb-2 dark:from-white dark:to-blue-300">Airdrop Bounties & LFG Mode</h3>
-                       <p className="text-sm text-slate-600 leading-relaxed dark:text-gray-300">Launch your campaign, grow your movement, or raise flexible startup funds. Everything transparent.</p>
-                    </div>
-                    {/* Mini UI */}
-                    <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-blue-100 p-3 shadow-lg text-center group-hover:shadow-xl group-hover:border-blue-300 transition-all duration-300 dark:bg-black/60 dark:border-blue-500/30 dark:group-hover:border-blue-500/60">
-                       <motion.span
-                         animate={{ scale: [1, 1.05, 1] }}
-                         transition={{ duration: 2, repeat: Infinity }}
-                         className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 text-[11px] font-bold text-white shadow-lg shadow-blue-500/50 cursor-pointer"
-                       >
-                          <Zap className="h-3.5 w-3.5" /> Campaign Live
-                       </motion.span>
-                    </div>
-                 </div>
+                <div className="flex flex-col h-full justify-between relative z-10">
+                  <div className="mb-4">
+                    <motion.div
+                      whileHover={{ y: -5, scale: 1.1 }}
+                      transition={{ duration: 0.4 }}
+                      className="h-14 w-14 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white mb-4 shadow-lg shadow-blue-500/40 dark:shadow-blue-500/60 border-2 border-white/20"
+                    >
+                      <Rocket className="h-7 w-7" />
+                    </motion.div>
+                    <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-blue-900 mb-2 dark:from-white dark:to-blue-300">Airdrop Bounties</h3>
+                    <p className="text-sm text-slate-600 leading-relaxed dark:text-gray-300">Launch your campaign, grow your movement, or raise flexible startup funds. Everything transparent and on-chain.</p>
+                  </div>
+                  {/* Mini UI */}
+                  <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-blue-100 p-4 shadow-lg text-center group-hover:shadow-xl group-hover:border-blue-300 transition-all duration-300 dark:bg-black/60 dark:border-blue-500/30 dark:group-hover:border-blue-500/60">
+                    <motion.span
+                      animate={{ scale: [1, 1.05, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 text-xs font-bold text-white shadow-lg shadow-blue-500/50 cursor-pointer"
+                    >
+                      <Zap className="h-4 w-4" /> Campaign Live & Verified
+                    </motion.span>
+                  </div>
+                </div>
               </motion.div>
-              
+
               {/* Social Verification - Full Width Panel */}
-               <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.7 }}
-                  whileHover={{ y: -3 }}
-                  className="col-span-1 md:col-span-3 rounded-2xl border border-blue-200/50 bg-gradient-to-br from-white via-blue-50/20 to-purple-50/20 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-8 hover:shadow-2xl hover:shadow-blue-500/10 hover:border-blue-400/60 transition-all duration-500 dark:border-blue-500/20 dark:bg-gradient-to-br dark:from-white/5 dark:via-blue-500/5 dark:to-purple-500/5 dark:hover:border-blue-500/40 dark:hover:shadow-[0_0_40px_rgba(59,130,246,0.15)] backdrop-blur-sm relative overflow-hidden"
-                >
-                  {/* Animated background effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.7 }}
+                whileHover={{ y: -3 }}
+                className="col-span-1 md:col-span-3 rounded-2xl border border-blue-200/50 bg-gradient-to-br from-white via-blue-50/20 to-purple-50/20 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-8 hover:shadow-2xl hover:shadow-blue-500/10 hover:border-blue-400/60 transition-all duration-500 dark:border-blue-500/20 dark:bg-gradient-to-br dark:from-white/5 dark:via-blue-500/5 dark:to-purple-500/5 dark:hover:border-blue-500/40 dark:hover:shadow-[0_0_40px_rgba(59,130,246,0.15)] backdrop-blur-sm relative overflow-hidden"
+              >
+                {/* Animated background effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                  <div className="max-w-lg relative z-10">
-                     <div className="flex items-center gap-2 mb-4">
-                       <motion.div
-                         animate={{ rotate: 360 }}
-                         transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                       >
-                         <Globe className="w-5 h-5 text-blue-500 dark:text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-                       </motion.div>
-                       <span className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 uppercase tracking-wide dark:from-blue-400 dark:to-purple-400">Social Verification</span>
-                     </div>
-                     <h3 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-blue-900 mb-3 dark:from-white dark:to-blue-300">Proof you're really you.</h3>
-                     <p className="text-sm text-slate-600 leading-relaxed dark:text-gray-300">
-                       Link your X (Twitter) account to your on-chain identity.
-                       Prove ownership without doxxing.
-                     </p>
+                <div className="max-w-lg relative z-10">
+                  <div className="flex items-center gap-2 mb-4">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                    >
+                      <Globe className="w-5 h-5 text-blue-500 dark:text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                    </motion.div>
+                    <span className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 uppercase tracking-wide dark:from-blue-400 dark:to-purple-400">Social Verification</span>
                   </div>
+                  <h3 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-blue-900 mb-3 dark:from-white dark:to-blue-300">Proof you're really you.</h3>
+                  <p className="text-sm text-slate-600 leading-relaxed dark:text-gray-300">
+                    Link your X (Twitter) account to your on-chain identity.
+                    Prove ownership without doxxing.
+                  </p>
+                </div>
 
-                  <div className="flex-shrink-0 relative z-10">
-                     <motion.div
-                       whileHover={{ scale: 1.02 }}
-                       className="flex items-center gap-3 bg-white/90 backdrop-blur-sm pl-4 pr-6 py-4 rounded-2xl border border-blue-200 shadow-lg hover:shadow-xl hover:border-blue-400 transition-all duration-300 dark:bg-black/60 dark:border-blue-500/30 dark:hover:border-blue-500/60 dark:shadow-blue-500/10"
-                     >
-                        <div className="relative">
-                           <motion.div
-                             whileHover={{ scale: 1.1 }}
-                             className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden shadow-md dark:from-gray-800 dark:to-gray-700"
-                           >
-                              <Image src="/images/quinty-logo.png" alt="User" fill className="object-contain p-2" style={{ filter: 'brightness(0%)'}} />
-                           </motion.div>
-                           <motion.div
-                             animate={{ scale: [1, 1.2, 1] }}
-                             transition={{ duration: 2, repeat: Infinity }}
-                             className="absolute -bottom-1 -right-1 bg-gradient-to-br from-green-400 to-green-600 text-white p-1 rounded-full border-2 border-white shadow-lg shadow-green-500/50 dark:border-black"
-                           >
-                              <Check className="w-3 h-3" />
-                           </motion.div>
-                        </div>
-                        <div>
-                           <div className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-blue-900 dark:from-white dark:to-blue-300">@QuintyLabs</div>
-                           <div className="text-[10px] text-slate-500 font-mono dark:text-gray-400">Verified via X</div>
-                        </div>
-                        <div className="ml-4 h-10 w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent dark:via-white/10" />
-                        <Button size="sm" variant="ghost" className="text-blue-600 hover:text-white hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-500 text-xs h-auto py-2 px-4 font-bold rounded-full transition-all duration-300 dark:text-blue-400 dark:hover:text-white shadow-sm hover:shadow-md">
-                           Connect
-                        </Button>
-                     </motion.div>
-                  </div>
-               </motion.div>
+                <div className="flex-shrink-0 relative z-10">
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    className="flex items-center gap-3 bg-white/90 backdrop-blur-sm pl-4 pr-6 py-4 rounded-2xl border border-blue-200 shadow-lg hover:shadow-xl hover:border-blue-400 transition-all duration-300 dark:bg-black/60 dark:border-blue-500/30 dark:hover:border-blue-500/60 dark:shadow-blue-500/10"
+                  >
+                    <div className="relative">
+                      <motion.div
+                        whileHover={{ scale: 1.1 }}
+                        className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden shadow-md dark:from-gray-800 dark:to-gray-700"
+                      >
+                        <Image src="/images/quinty-logo.png" alt="User" fill className="object-contain p-2" style={{ filter: 'brightness(0%)' }} />
+                      </motion.div>
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="absolute -bottom-1 -right-1 bg-gradient-to-br from-green-400 to-green-600 text-white p-1 rounded-full border-2 border-white shadow-lg shadow-green-500/50 dark:border-black"
+                      >
+                        <Check className="w-3 h-3" />
+                      </motion.div>
+                    </div>
+                    <div>
+                      <div className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-blue-900 dark:from-white dark:to-blue-300">@QuintyLabs</div>
+                      <div className="text-[10px] text-slate-500 font-mono dark:text-gray-400">Verified via X</div>
+                    </div>
+                    <div className="ml-4 h-10 w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent dark:via-white/10" />
+                    <Button size="sm" variant="ghost" className="text-blue-600 hover:text-white hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-500 text-xs h-auto py-2 px-4 font-bold rounded-full transition-all duration-300 dark:text-blue-400 dark:hover:text-white shadow-sm hover:shadow-md">
+                      Connect
+                    </Button>
+                  </motion.div>
+                </div>
+              </motion.div>
             </div>
           </div>
         </section>
 
         {/* --- Protocol Registry Section --- */}
         <section className="py-16 border-t border-gray-100 bg-gradient-to-b from-gray-50/30 to-white relative dark:border-white/5 dark:from-gray-950/30 dark:to-black overflow-hidden">
-           {/* Minimal refined background */}
-           <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
-             {/* Subtle centered gradient */}
-             <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_50%_50%,rgba(14,168,133,0.02),transparent)] dark:bg-[radial-gradient(ellipse_50%_50%_at_50%_50%,rgba(14,168,133,0.04),transparent)]" />
+          {/* Minimal refined background */}
+          <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
+            {/* Subtle centered gradient */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_50%_50%,rgba(14,168,133,0.02),transparent)] dark:bg-[radial-gradient(ellipse_50%_50%_at_50%_50%,rgba(14,168,133,0.04),transparent)]" />
 
-             {/* Minimal dot pattern */}
-             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#00000002_1px,transparent_1px)] bg-[size:40px_40px] dark:bg-[radial-gradient(circle_at_center,#ffffff02_1px,transparent_1px)]" />
-           </div>
+            {/* Minimal dot pattern */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#00000002_1px,transparent_1px)] bg-[size:40px_40px] dark:bg-[radial-gradient(circle_at_center,#ffffff02_1px,transparent_1px)]" />
+          </div>
 
-           <div className="container px-4 mx-auto max-w-6xl relative z-10">
-              {/* Compact Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                 <div className="flex items-center gap-3">
-                    <div className="h-2 w-2 rounded-full bg-[#0EA885] animate-pulse" />
-                    <h2 className="text-sm font-bold text-slate-900 uppercase tracking-widest dark:text-white">
-                       Smart Contract
-                    </h2>
-                    <span className="hidden sm:inline-block w-px h-4 bg-slate-200 mx-2 dark:bg-white/10" />
-                    <span className="text-xs text-slate-400 font-mono hidden sm:inline-block dark:text-gray-500">v0.0.1</span>
-                 </div>
-                 
-                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100 dark:bg-white/5 dark:border-white/10">
-                    <div className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+          <div className="container px-4 mx-auto max-w-6xl relative z-10">
+            {/* Compact Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-2 rounded-full bg-[#0EA885] animate-pulse" />
+                <h2 className="text-sm font-bold text-slate-900 uppercase tracking-widest dark:text-white">
+                  Smart Contract
+                </h2>
+                <span className="hidden sm:inline-block w-px h-4 bg-slate-200 mx-2 dark:bg-white/10" />
+                <span className="text-xs text-slate-400 font-mono hidden sm:inline-block dark:text-gray-500">v0.0.1</span>
+              </div>
+
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100 dark:bg-white/5 dark:border-white/10">
+                <div className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                </div>
+                <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wide dark:text-gray-300">Base Sepolia</span>
+                <span className="text-[10px] font-mono text-slate-400 border-l border-slate-200 pl-2 ml-1 dark:border-white/10 dark:text-gray-500">84532</span>
+              </div>
+            </div>
+
+            {/* High-Density Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {contractReferences.map((contract, idx) => {
+                let Icon = Code2;
+                if (contract.label.includes("Reputation")) Icon = BadgeCheck;
+                if (contract.label.includes("Dispute")) Icon = Shield;
+                if (contract.label.includes("NFT")) Icon = Coins;
+                if (contract.label.includes("Grant")) Icon = Rocket;
+                if (contract.label.includes("Crowd")) Icon = Users;
+                if (contract.label.includes("Core")) Icon = Cpu;
+
+                return (
+                  <motion.div
+                    key={contract.address}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.3, delay: idx * 0.05 }}
+                    className="group flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 hover:border-[#0EA885]/30 hover:shadow-lg hover:shadow-[#0EA885]/5 transition-all duration-300 cursor-default dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex-shrink-0 h-9 w-9 rounded-md bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-[#0EA885] group-hover:bg-[#0EA885]/5 transition-colors dark:bg-black/40 dark:border-white/5">
+                        <Icon className="h-4.5 w-4.5" />
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-semibold text-slate-700 truncate group-hover:text-slate-900 transition-colors dark:text-gray-300 dark:group-hover:text-white">
+                          {contract.label}
+                        </span>
+                        <span className="text-[10px] font-mono text-slate-400 truncate group-hover:text-[#0EA885]/70 transition-colors dark:text-gray-600">
+                          {contract.address.substring(0, 6)}...{contract.address.substring(38)}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wide dark:text-gray-300">Base Sepolia</span>
-                    <span className="text-[10px] font-mono text-slate-400 border-l border-slate-200 pl-2 ml-1 dark:border-white/10 dark:text-gray-500">84532</span>
-                 </div>
-              </div>
 
-              {/* High-Density Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                 {contractReferences.map((contract, idx) => {
-                    let Icon = Code2;
-                    if (contract.label.includes("Reputation")) Icon = BadgeCheck;
-                    if (contract.label.includes("Dispute")) Icon = Shield;
-                    if (contract.label.includes("NFT")) Icon = Coins;
-                    if (contract.label.includes("Grant")) Icon = Rocket;
-                    if (contract.label.includes("Crowd")) Icon = Users;
-                    if (contract.label.includes("Core")) Icon = Cpu;
-
-                    return (
-                      <motion.div
-                         key={contract.address}
-                         initial={{ opacity: 0, y: 10 }}
-                         whileInView={{ opacity: 1, y: 0 }}
-                         viewport={{ once: true }}
-                         transition={{ duration: 0.3, delay: idx * 0.05 }}
-                         className="group flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200 hover:border-[#0EA885]/30 hover:shadow-lg hover:shadow-[#0EA885]/5 transition-all duration-300 cursor-default dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10"
+                    <div className="flex items-center gap-1 pl-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleCopy(contract.address)}
+                        className="h-7 w-7 text-slate-400 hover:text-[#0EA885] hover:bg-[#0EA885]/10 rounded dark:text-gray-500 dark:hover:text-[#0EA885] dark:hover:bg-[#0EA885]/10"
                       >
-                         <div className="flex items-center gap-3 min-w-0">
-                            <div className="flex-shrink-0 h-9 w-9 rounded-md bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-[#0EA885] group-hover:bg-[#0EA885]/5 transition-colors dark:bg-black/40 dark:border-white/5">
-                              <Icon className="h-4.5 w-4.5" />
-                            </div>
-                            <div className="flex flex-col min-w-0">
-                               <span className="text-sm font-semibold text-slate-700 truncate group-hover:text-slate-900 transition-colors dark:text-gray-300 dark:group-hover:text-white">
-                                  {contract.label}
-                               </span>
-                               <span className="text-[10px] font-mono text-slate-400 truncate group-hover:text-[#0EA885]/70 transition-colors dark:text-gray-600">
-                                  {contract.address.substring(0, 6)}...{contract.address.substring(38)}
-                               </span>
-                            </div>
-                         </div>
-
-                         <div className="flex items-center gap-1 pl-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <Button
-                               variant="ghost"
-                               size="icon"
-                               onClick={() => handleCopy(contract.address)}
-                               className="h-7 w-7 text-slate-400 hover:text-[#0EA885] hover:bg-[#0EA885]/10 rounded dark:text-gray-500 dark:hover:text-[#0EA885] dark:hover:bg-[#0EA885]/10"
-                            >
-                               {copiedAddress === contract.address ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                            </Button>
-                            <Button
-                               variant="ghost"
-                               size="icon"
-                               onClick={() => window.open(`https://sepolia.basescan.org/address/${contract.address}`, '_blank')}
-                               className="h-7 w-7 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded dark:text-gray-500 dark:hover:text-blue-400 dark:hover:bg-blue-500/10"
-                            >
-                               <ExternalLink className="h-3.5 w-3.5" />
-                            </Button>
-                         </div>
-                      </motion.div>
-                    );
-                 })}
-              </div>
-           </div>
+                        {copiedAddress === contract.address ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => window.open(`https://sepolia.basescan.org/address/${contract.address}`, '_blank')}
+                        className="h-7 w-7 text-slate-400 hover:text-blue-500 hover:bg-blue-50 rounded dark:text-gray-500 dark:hover:text-blue-400 dark:hover:bg-blue-500/10"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
         </section>
       </main>
       <Footer />
