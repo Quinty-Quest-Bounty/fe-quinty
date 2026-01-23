@@ -12,7 +12,6 @@ import { Safari } from "../components/ui/safari";
 import DotPattern from "../components/ui/dot-pattern";
 import { AnnouncementModal } from "../components/AnnouncementModal";
 import { AnnouncementBanner } from "../components/AnnouncementBanner";
-import { SmoothCursor } from "../components/ui/smooth-cursor";
 import {
   Target,
   Users,
@@ -102,7 +101,6 @@ export default function Home() {
 
   return (
     <div ref={containerRef} className="min-h-screen bg-white dark:bg-black text-foreground relative selection:bg-[#0EA885]/20 overflow-x-hidden font-sans">
-      <SmoothCursor />
       <AnnouncementModal
         isOpen={isAnnouncementModalOpen}
         onClose={() => {
