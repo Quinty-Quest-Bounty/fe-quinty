@@ -7,9 +7,6 @@ import {
   CONTRACT_ADDRESSES,
   QUINTY_ABI,
   AIRDROP_ABI,
-  GRANT_PROGRAM_ABI,
-  LOOKING_FOR_GRANT_ABI,
-  CROWDFUNDING_ABI,
   BASE_SEPOLIA_CHAIN_ID,
 } from "../../utils/contracts";
 import { readContract } from "@wagmi/core";
@@ -18,7 +15,6 @@ import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import {
   Target,
-  Rocket,
   Coins,
   Zap,
   ArrowUpRight,
@@ -41,7 +37,7 @@ import {
   formatUSD,
 } from "../../utils/prices";
 
-type DashboardSection = "all" | "bounties" | "airdrops";
+type DashboardSection = "all" | "bounties" | "quests";
 
 interface Bounty {
   id: number;
@@ -53,7 +49,7 @@ interface Bounty {
   metadataCid?: string;
 }
 
-interface Airdrop {
+interface Quest {
   id: number;
   creator: string;
   title: string;
@@ -64,15 +60,7 @@ interface Airdrop {
   cancelled: boolean;
 }
 
-interface FundingItem {
-  id: number;
-  creator: string;
-  title: string;
-  fundingGoal: bigint;
-  totalRaised: bigint;
-  deadline: bigint;
-  type: "looking-for-grant" | "grant-program" | "crowdfunding";
-}
+
 
 // Enhanced Stat Card Component
 const StatCard = ({ title, value, trend, label, icon: Icon, color }: { title: string, value: string, trend?: string, label?: string, icon: any, color: string }) => (
@@ -105,7 +93,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<DashboardSection>("all");
   const [bounties, setBounties] = useState<Bounty[]>([]);
-  const [airdrops, setAirdrops] = useState<Airdrop[]>([]);
+  const [quests, setQuests] = useState<Quest[]>([]);
   const [loading, setLoading] = useState(true);
   const [bountyMetadata, setBountyMetadata] = useState<Map<number, BountyMetadata>>(new Map());
 
@@ -113,7 +101,7 @@ export default function DashboardPage() {
   const [bountyPage, setBountyPage] = useState(1);
   const [airdropPage, setAirdropPage] = useState(1);
   const [loadingBounties, setLoadingBounties] = useState(false);
-  const [loadingAirdrops, setLoadingAirdrops] = useState(false);
+  const [loadingQuests, setLoadingQuests] = useState(false);
 
   // ETH price state
   const [ethPrice, setEthPrice] = useState<number>(0);
@@ -241,22 +229,22 @@ export default function DashboardPage() {
     }
   }, [bounties]);
 
-  // Load airdrops with pagination
+  // Load quests with pagination
   useEffect(() => {
     let isMounted = true;
-    const loadAirdrops = async () => {
+    const loadQuests = async () => {
       if (!airdropCounter || !CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]) return;
 
-      setLoadingAirdrops(true);
+      setLoadingQuests(true);
       const count = Number(airdropCounter);
 
       // Calculate range for current page (load from newest to oldest)
       const startIndex = Math.max(1, count - (airdropPage * ITEMS_PER_PAGE) + 1);
       const endIndex = Math.min(count, count - ((airdropPage - 1) * ITEMS_PER_PAGE));
 
-      const loadedAirdrops: Airdrop[] = [];
+      const loadedQuests: Quest[] = [];
 
-      // Load airdrops in reverse order (newest first)
+      // Load quests in reverse order (newest first)
       for (let i = endIndex; i >= startIndex; i--) {
         try {
           const airdropData = await readContract(wagmiConfig, {
@@ -268,7 +256,7 @@ export default function DashboardPage() {
 
           if (airdropData && Array.isArray(airdropData)) {
             const [creator, title, description, totalAmount, perQualifier, maxQualifiers, qualifiersCount, deadline, createdAt, resolved, cancelled] = airdropData as any[];
-            loadedAirdrops.push({
+            loadedQuests.push({
               id: i,
               creator,
               title,
@@ -280,16 +268,16 @@ export default function DashboardPage() {
             });
           }
         } catch (err) {
-          console.error(`Error loading airdrop ${i}:`, err);
+          console.error(`Error loading quest ${i}:`, err);
         }
       }
 
       if (isMounted) {
-        setAirdrops(loadedAirdrops);
-        setLoadingAirdrops(false);
+        setQuests(loadedQuests);
+        setLoadingQuests(false);
       }
     };
-    loadAirdrops();
+    loadQuests();
     return () => { isMounted = false; };
   }, [airdropCounter, airdropPage]);
 
@@ -298,7 +286,7 @@ export default function DashboardPage() {
   const sections = [
     { id: "all" as const, label: "Overview", icon: LayoutGrid },
     { id: "bounties" as const, label: "Bounties", icon: Target },
-    { id: "airdrops" as const, label: "Airdrops", icon: Zap },
+    { id: "quests" as const, label: "Quests", icon: Zap },
   ];
 
   const getStatusBadge = (status: number) => {
@@ -536,43 +524,43 @@ export default function DashboardPage() {
             </motion.div>
           )}
 
-          {/* Airdrops Section */}
-          {(activeSection === "all" || activeSection === "airdrops") && (
+          {/* Quests Section */}
+          {(activeSection === "all" || activeSection === "quests") && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                   <Zap className="h-5 w-5 text-yellow-500" />
-                  Active Airdrops
+                  Active Quests
                 </h2>
                 {activeSection === "all" && (
-                  <Button variant="ghost" className="text-sm text-gray-500 hover:text-[#0EA885] hover:bg-transparent p-0 h-auto font-normal" onClick={() => setActiveSection("airdrops")}>
+                  <Button variant="ghost" className="text-sm text-gray-500 hover:text-[#0EA885] hover:bg-transparent p-0 h-auto font-normal" onClick={() => setActiveSection("quests")}>
                     View all <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
                 )}
               </div>
 
-              {loadingAirdrops ? (
+              {loadingQuests ? (
                 <div className="flex items-center justify-center py-16">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
                 </div>
-              ) : airdrops.length > 0 ? (
+              ) : quests.length > 0 ? (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                    {airdrops
-                      .filter((a) => !a.resolved && !a.cancelled)
+                    {quests
+                      .filter((q) => !q.resolved && !q.cancelled)
                       .slice(0, activeSection === "all" ? 4 : undefined)
-                      .map((airdrop) => (
+                      .map((quest) => (
                         <div
-                          key={airdrop.id}
-                          onClick={() => router.push(`/airdrops/${airdrop.id}`)}
+                          key={quest.id}
+                          onClick={() => router.push(`/airdrops/${quest.id}`)}
                           className="group cursor-pointer rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col"
                         >
-                          {/* Placeholder Image for Airdrops */}
+                          {/* Placeholder Image for Quests */}
                           <div className="relative w-full h-32 overflow-hidden">
                             <div className="w-full h-full bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 flex items-center justify-center">
                               <div className="text-center">
                                 <Zap className="h-10 w-10 text-yellow-300 mx-auto mb-1.5" />
-                                <p className="text-[10px] text-yellow-400 font-medium">Airdrop #{airdrop.id}</p>
+                                <p className="text-[10px] text-yellow-400 font-medium">Quest #{quest.id}</p>
                               </div>
                             </div>
                           </div>
@@ -583,29 +571,29 @@ export default function DashboardPage() {
                                 <Zap className="h-3.5 w-3.5" />
                               </div>
                               <Badge variant="secondary" className="bg-gray-50 text-gray-600 border-0 font-normal text-[10px]">
-                                {Number(airdrop.totalRecipients)} spots
+                                {Number(quest.totalRecipients)} spots
                               </Badge>
                             </div>
 
                             <h3 className="text-sm font-semibold text-gray-900 mb-1 truncate group-hover:text-yellow-600 transition-colors">
-                              {airdrop.title || `Airdrop #${airdrop.id}`}
+                              {quest.title || `Quest #${quest.id}`}
                             </h3>
                             <p className="text-[10px] text-gray-400 mb-3 truncate">
-                              Creator: {airdrop.creator.substring(0, 6)}...{airdrop.creator.substring(38)}
+                              Creator: {quest.creator.substring(0, 6)}...{quest.creator.substring(38)}
                             </p>
 
                             <div className="pt-3 border-t border-gray-50 flex items-center justify-between">
                               <div className="flex items-center gap-1 text-gray-500 text-[10px]">
                                 <Clock className="h-3 w-3" />
-                                {formatDeadline(airdrop.deadline)}
+                                {formatDeadline(quest.deadline)}
                               </div>
                               <div className="text-right">
                                 <div className="text-xs font-bold text-gray-900">
-                                  {(Number(airdrop.amount) / 1e18).toFixed(2)} <span className="text-[10px] font-medium text-gray-500">ETH</span>
+                                  {(Number(quest.amount) / 1e18).toFixed(2)} <span className="text-[10px] font-medium text-gray-500">ETH</span>
                                 </div>
                                 {ethPrice > 0 && (
                                   <div className="text-[10px] text-gray-400">
-                                    {formatUSD(convertEthToUSD(Number(airdrop.amount) / 1e18, ethPrice))}
+                                    {formatUSD(convertEthToUSD(Number(quest.amount) / 1e18, ethPrice))}
                                   </div>
                                 )}
                               </div>
@@ -615,8 +603,8 @@ export default function DashboardPage() {
                       ))}
                   </div>
 
-                  {/* Pagination Controls for Airdrops */}
-                  {activeSection === "airdrops" && airdropCounter && Number(airdropCounter) > ITEMS_PER_PAGE && (
+                  {/* Pagination Controls for Quests */}
+                  {activeSection === "quests" && airdropCounter && Number(airdropCounter) > ITEMS_PER_PAGE && (
                     <div className="flex items-center justify-center gap-2 mt-6">
                       <Button
                         variant="outline"
@@ -645,7 +633,7 @@ export default function DashboardPage() {
               ) : (
                 <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-200">
                   <Zap className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500 font-medium">No active airdrops.</p>
+                  <p className="text-gray-500 font-medium">No active quests.</p>
                 </div>
               )}
             </motion.div>

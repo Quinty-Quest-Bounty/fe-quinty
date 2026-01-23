@@ -40,8 +40,8 @@ import {
 
 interface Transaction {
     id: string;
-    type: "bounty_created" | "bounty_submitted" | "bounty_won" | "bounty_revealed" | "bounty_replied" | "airdrop_created" | "airdrop_submitted";
-    contractType: "Quinty" | "Airdrop";
+    type: "bounty_created" | "bounty_submitted" | "bounty_won" | "bounty_revealed" | "bounty_replied" | "quest_created" | "quest_submitted";
+    contractType: "Quinty" | "Quest";
     itemId: number;
     amount?: bigint;
     timestamp: bigint;
@@ -234,18 +234,18 @@ export default function HistoryPage() {
                         // Check if user created this airdrop
                         if (creator.toLowerCase() === address.toLowerCase()) {
                             allTransactions.push({
-                                id: `airdrop-created-${i}`,
-                                type: "airdrop_created",
-                                contractType: "Airdrop",
+                                id: `quest-created-${i}`,
+                                type: "quest_created",
+                                contractType: "Quest",
                                 itemId: i,
                                 amount: totalReward,
                                 timestamp: createdAt,
                                 status: "Created",
-                                description: title || `Airdrop #${i}`,
+                                description: title || `Quest #${i}`,
                             });
                         }
 
-                        // Check if user submitted to this airdrop
+                        // Check if user submitted to this quest
                         try {
                             const hasSubmitted = await readContract(wagmiConfig, {
                                 address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
@@ -265,24 +265,24 @@ export default function HistoryPage() {
                                 const [, submittedAt, status] = submission as any;
 
                                 allTransactions.push({
-                                    id: `airdrop-submitted-${i}`,
-                                    type: "airdrop_submitted",
-                                    contractType: "Airdrop",
+                                    id: `quest-submitted-${i}`,
+                                    type: "quest_submitted",
+                                    contractType: "Quest",
                                     itemId: i,
                                     timestamp: submittedAt,
                                     status: status === 1 ? "Approved" : status === 2 ? "Rejected" : "Pending",
-                                    description: title || `Airdrop #${i}`,
+                                    description: title || `Quest #${i}`,
                                 });
                             }
                         } catch (submissionError) {
-                            // User hasn't submitted to this airdrop
+                            // User hasn't submitted to this quest
                         }
                     } catch (airdropError) {
-                        console.error(`Error loading airdrop ${i}:`, airdropError);
+                        console.error(`Error loading quest ${i}:`, airdropError);
                     }
                 }
             } catch (error) {
-                console.error("Error loading airdrop transactions:", error);
+                console.error("Error loading quest transactions:", error);
             }
 
             // Sort by timestamp descending
@@ -307,8 +307,8 @@ export default function HistoryPage() {
             case "bounty_replied":
                 return Target;
 
-            case "airdrop_created":
-            case "airdrop_submitted":
+            case "quest_created":
+            case "quest_submitted":
                 return Coins;
             default:
                 return ArrowRight;
@@ -332,8 +332,8 @@ export default function HistoryPage() {
             bounty_revealed: "Revealed Solution",
             bounty_replied: "Replied to Submission",
 
-            airdrop_created: "Created Airdrop",
-            airdrop_submitted: "Submitted to Airdrop",
+            quest_created: "Created Quest",
+            quest_submitted: "Submitted to Quest",
         };
         return labels[type];
     };
@@ -343,7 +343,7 @@ export default function HistoryPage() {
             case "Quinty":
                 return `/bounties/${tx.itemId}`;
 
-            case "Airdrop":
+            case "Quest":
                 return `/airdrops/${tx.itemId}`;
             default:
                 return "#";
@@ -355,7 +355,7 @@ export default function HistoryPage() {
         : transactions.filter((tx) => {
             if (filter === "bounties") return tx.contractType === "Quinty";
 
-            if (filter === "airdrops") return tx.contractType === "Airdrop";
+            if (filter === "quests") return tx.contractType === "Quest";
             return true;
         });
 
@@ -416,10 +416,10 @@ export default function HistoryPage() {
                                 <div className="p-1.5 rounded-lg bg-yellow-100 group- transition-transform duration-300">
                                     <Coins className="h-4 w-4 text-yellow-600" />
                                 </div>
-                                <p className="text-xs text-muted-foreground font-medium">Airdrops</p>
+                                <p className="text-xs text-muted-foreground font-medium">Quests</p>
                             </div>
                             <p className="text-2xl sm:text-3xl font-bold">
-                                {transactions.filter((tx) => tx.contractType === "Airdrop").length}
+                                {transactions.filter((tx) => tx.contractType === "Quest").length}
                             </p>
                         </CardContent>
                     </Card>
@@ -452,7 +452,7 @@ export default function HistoryPage() {
                             <SelectItem value="all">All Transactions</SelectItem>
                             <SelectItem value="bounties">Bounties</SelectItem>
 
-                            <SelectItem value="airdrops">Airdrops</SelectItem>
+                            <SelectItem value="quests">Quests</SelectItem>
                         </SelectContent>
                     </Select>
                     <span className="text-xs sm:text-sm text-muted-foreground font-medium px-3 py-1.5 rounded-full bg-[#0EA885]/10">

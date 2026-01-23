@@ -19,10 +19,7 @@ import {
   Coins,
   Network,
   BadgeCheck,
-  Vote,
-  Landmark,
   ArrowRight,
-  Shield,
   Zap,
   Globe,
   CheckCircle2,
@@ -57,8 +54,8 @@ const features = [
     colSpan: "col-span-1 md:col-span-1 lg:col-span-1",
   },
   {
-    title: "Airdrop Bounties",
-    description: "Launch your campaign, grow your movement, or raise flexible startup funds. Everything transparent.",
+    title: "Quests",
+    description: "Launch your campaign, grow your movement, or complete tasks for rewards. Everything transparent.",
     icon: Rocket,
     color: "text-indigo-600",
     bg: "bg-indigo-50",
@@ -507,8 +504,8 @@ export default function Home() {
                     >
                       <Rocket className="h-7 w-7" />
                     </motion.div>
-                    <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-blue-900 mb-2 dark:from-white dark:to-blue-300">Airdrop Bounties</h3>
-                    <p className="text-sm text-slate-600 leading-relaxed dark:text-gray-300">Launch your campaign, grow your movement, or raise flexible startup funds. Everything transparent and on-chain.</p>
+                    <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-blue-900 mb-2 dark:from-white dark:to-blue-300">Quests</h3>
+                    <p className="text-sm text-slate-600 leading-relaxed dark:text-gray-300">Launch your campaign, grow your movement, or complete tasks for rewards. Everything transparent and on-chain.</p>
                   </div>
                   {/* Mini UI */}
                   <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-blue-100 p-4 shadow-lg text-center group-hover:shadow-xl group-hover:border-blue-300 transition-all duration-300 dark:bg-black/60 dark:border-blue-500/30 dark:group-hover:border-blue-500/60">
@@ -517,7 +514,7 @@ export default function Home() {
                       transition={{ duration: 2, repeat: Infinity }}
                       className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 text-xs font-bold text-white shadow-lg shadow-blue-500/50 cursor-pointer"
                     >
-                      <Zap className="h-4 w-4" /> Campaign Live & Verified
+                      <Zap className="h-4 w-4" /> Quest Live & Verified
                     </motion.span>
                   </div>
                 </div>
@@ -625,10 +622,7 @@ export default function Home() {
               {contractReferences.map((contract, idx) => {
                 let Icon = Code2;
                 if (contract.label.includes("Reputation")) Icon = BadgeCheck;
-                if (contract.label.includes("Dispute")) Icon = Shield;
                 if (contract.label.includes("NFT")) Icon = Coins;
-                if (contract.label.includes("Grant")) Icon = Rocket;
-                if (contract.label.includes("Crowd")) Icon = Users;
                 if (contract.label.includes("Core")) Icon = Cpu;
 
                 return (

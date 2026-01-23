@@ -23,7 +23,7 @@ import {
 } from "../utils/web3";
 import { uploadToIpfs, formatIpfsUrl, IpfsImage } from "../utils/ipfs";
 import { ensureBaseSepoliaNetwork } from "../utils/network";
-import AirdropCard from "./AirdropCard";
+import QuestCard from "./AirdropCard";
 import {
   Card,
   CardContent,
@@ -67,6 +67,7 @@ import {
   Trash2,
   FileText,
   ExternalLink,
+  Zap,
 } from "lucide-react";
 
 interface Airdrop {
@@ -190,20 +191,20 @@ export default function AirdropManager() {
 
       for (let i = 1; i <= Number(airdropCounter); i++) {
         try {
-        const airdrop = await readAirdrop(i);
-        if (airdrop) {
-          loadedAirdrops.push(airdrop);
+          const airdrop = await readAirdrop(i);
+          if (airdrop) {
+            loadedAirdrops.push(airdrop);
 
-          // Load entry count for this airdrop
-          const entryCount = await readContract(wagmiConfig, {
-            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
-              .AirdropBounty as `0x${string}`,
-            abi: AIRDROP_ABI,
-            functionName: "getEntryCount",
-            args: [BigInt(i)],
-          });
-          counts[i] = Number(entryCount);
-        }
+            // Load entry count for this airdrop
+            const entryCount = await readContract(wagmiConfig, {
+              address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+                .AirdropBounty as `0x${string}`,
+              abi: AIRDROP_ABI,
+              functionName: "getEntryCount",
+              args: [BigInt(i)],
+            });
+            counts[i] = Number(entryCount);
+          }
         } catch (error) {
           console.error(`Error loading airdrop ${i}:`, error);
         }
@@ -783,10 +784,10 @@ export default function AirdropManager() {
         </div>
         <div className="space-y-2">
           <h1 className="text-4xl font-bold tracking-tight">
-            Airdrop Bounties
+            Quests
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Create transparent promotion tasks with verifiable social proofs and
+            Create transparent tasks with verifiable proofs and
             distribute rewards fairly
           </p>
         </div>
@@ -797,7 +798,7 @@ export default function AirdropManager() {
         <Card className="border-purple-200 bg-purple-50/50 max-w-3xl mx-auto">
           <CardContent className="flex items-center gap-4 py-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
-              <Gift className="h-5 w-5 text-purple-600" />
+              <Zap className="h-5 w-5 text-purple-600" />
             </div>
             <div className="flex-1">
               <CardTitle className="text-sm font-semibold text-purple-900">
@@ -820,11 +821,10 @@ export default function AirdropManager() {
               variant="ghost"
               size="sm"
               onClick={() => setActiveTab(item.id as any)}
-              className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors flex-1 sm:flex-none ${
-                activeTab === item.id
-                  ? "bg-white text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-              }`}
+              className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors flex-1 sm:flex-none ${activeTab === item.id
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                }`}
             >
               <item.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 sm:mr-2" />
               <span className="hidden xs:inline sm:inline">{item.label}</span>
@@ -844,11 +844,11 @@ export default function AirdropManager() {
                 </div>
               </div>
               <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                Create Promotion Campaign
+                Create New Quest
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Launch transparent promotional campaigns with fixed ETH rewards
-                for verified social media engagement
+                Launch transparent quests with fixed ETH rewards
+                for verified engagement
               </p>
             </div>
 
@@ -863,7 +863,7 @@ export default function AirdropManager() {
                         1
                       </div>
                       <h3 className="text-lg font-medium text-gray-900">
-                        Campaign Details
+                        Quest Details
                       </h3>
                     </div>
 
@@ -873,7 +873,7 @@ export default function AirdropManager() {
                           htmlFor="title"
                           className="text-sm font-medium text-gray-700"
                         >
-                          Campaign Title *
+                          Quest Title *
                         </Label>
                         <Input
                           id="title"
@@ -884,7 +884,7 @@ export default function AirdropManager() {
                               title: e.target.value,
                             })
                           }
-                          placeholder="Enter campaign title..."
+                          placeholder="Enter quest title..."
                           className="border-gray-300 focus:border-gray-500 focus:ring-gray-500/20"
                           required
                         />
@@ -895,7 +895,7 @@ export default function AirdropManager() {
                           htmlFor="description"
                           className="text-sm font-medium text-gray-700"
                         >
-                          Campaign Description
+                          Quest Description
                         </Label>
                         <Textarea
                           id="description"
@@ -907,7 +907,7 @@ export default function AirdropManager() {
                             })
                           }
                           rows={3}
-                          placeholder="Describe your promotional campaign..."
+                          placeholder="Describe your quest..."
                           className="border-gray-300 focus:border-gray-500 focus:ring-gray-500/20 resize-none"
                         />
                       </div>
@@ -944,7 +944,7 @@ export default function AirdropManager() {
                         2
                       </div>
                       <h3 className="text-lg font-medium text-gray-900">
-                        Campaign Image
+                        Quest Image
                       </h3>
                     </div>
 
@@ -953,7 +953,7 @@ export default function AirdropManager() {
                         <div className="relative">
                           <img
                             src={imagePreview}
-                            alt="Campaign preview"
+                            alt="Quest preview"
                             className="w-full h-40 object-cover rounded-lg border border-gray-200"
                           />
                           <Button
@@ -968,11 +968,10 @@ export default function AirdropManager() {
                         </div>
                       ) : (
                         <div
-                          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
-                            isDragOver
-                              ? "border-gray-400 bg-gray-50"
-                              : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
-                          }`}
+                          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${isDragOver
+                            ? "border-gray-400 bg-gray-50"
+                            : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                            }`}
                           onDragOver={handleDragOver}
                           onDragLeave={handleDragLeave}
                           onDrop={handleDrop}
@@ -1107,7 +1106,7 @@ export default function AirdropManager() {
                     </div>
                   </div>
 
-                  {/* Campaign Summary */}
+                  {/* Quest Summary */}
                   {newAirdrop.perQualifier && newAirdrop.maxQualifiers && (
                     <div className="space-y-4">
                       <div className="flex items-center gap-3 mb-6">
@@ -1115,7 +1114,7 @@ export default function AirdropManager() {
                           4
                         </div>
                         <h3 className="text-lg font-medium text-gray-900">
-                          Campaign Summary
+                          Quest Summary
                         </h3>
                       </div>
 
@@ -1170,7 +1169,7 @@ export default function AirdropManager() {
                     <Button
                       onClick={() => {
                         if (!isConnected) {
-                          alert("Please connect your wallet to create an airdrop campaign");
+                          alert("Please connect your wallet to create a quest campaign");
                           return;
                         }
                         createAirdrop();
@@ -1194,7 +1193,7 @@ export default function AirdropManager() {
                       ) : (
                         <>
                           <Plus className="w-4 h-4 mr-2" />
-                          Create Campaign
+                          Create Quest
                           {newAirdrop.perQualifier &&
                             newAirdrop.maxQualifiers && (
                               <span className="ml-2 opacity-80">
@@ -1222,9 +1221,9 @@ export default function AirdropManager() {
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold">Active Campaigns</h2>
+              <h2 className="text-2xl font-bold">Active Quests</h2>
               <p className="text-muted-foreground">
-                Discover and participate in promotion campaigns
+                Discover and participate in quests
               </p>
             </div>
             <Badge variant="secondary" className="px-4 py-2">
@@ -1239,13 +1238,13 @@ export default function AirdropManager() {
                 <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10 mb-4">
                   <Target className="h-10 w-10 text-primary" />
                 </div>
-                <CardTitle className="mb-2">No Campaigns Yet</CardTitle>
+                <CardTitle className="mb-2">No Quests Yet</CardTitle>
                 <CardDescription className="text-center mb-6">
-                  Be the first to create an airdrop campaign!
+                  Be the first to create a quest!
                 </CardDescription>
                 <Button onClick={() => setActiveTab("create")}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Create First Campaign
+                  Create First Quest
                 </Button>
               </CardContent>
             </Card>
@@ -1254,7 +1253,7 @@ export default function AirdropManager() {
               {airdrops
                 .filter((a) => !a.resolved && !a.cancelled)
                 .map((airdrop) => (
-                  <AirdropCard
+                  <QuestCard
                     key={airdrop.id}
                     airdrop={airdrop}
                     entryCount={entryCounts[airdrop.id] || 0}
@@ -1383,7 +1382,7 @@ export default function AirdropManager() {
               <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto mx-4">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-xl font-bold text-gray-900">
-                    Campaign Entries
+                    Quest Entries
                   </h3>
                   <button
                     onClick={() => setSelectedAirdrop(null)}
@@ -1404,31 +1403,30 @@ export default function AirdropManager() {
                             {formatAddress(entry.solver)}
                           </span>
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              entry.status === 1
-                                ? "bg-green-100 text-green-800"
-                                : entry.status === 2
+                            className={`px-3 py-1 rounded-full text-xs font-semibold ${entry.status === 1
+                              ? "bg-green-100 text-green-800"
+                              : entry.status === 2
                                 ? "bg-red-100 text-red-800"
                                 : "bg-yellow-100 text-yellow-800"
-                            }`}
+                              }`}
                           >
                             {entry.status === 1
                               ? "Approved"
                               : entry.status === 2
-                              ? "Rejected"
-                              : "Pending"}
+                                ? "Rejected"
+                                : "Pending"}
                           </span>
                         </div>
                         <div className="text-sm text-gray-700">
                           <div className="mb-1">
                             <strong>
                               {entry.ipfsProofCid.includes("twitter.com") ||
-                              entry.ipfsProofCid.includes("x.com")
+                                entry.ipfsProofCid.includes("x.com")
                                 ? "X Post:"
                                 : "IPFS:"}
                             </strong>{" "}
                             {entry.ipfsProofCid.includes("twitter.com") ||
-                            entry.ipfsProofCid.includes("x.com") ? (
+                              entry.ipfsProofCid.includes("x.com") ? (
                               <a
                                 href={entry.ipfsProofCid}
                                 target="_blank"
@@ -1484,7 +1482,7 @@ export default function AirdropManager() {
               </div>
             </div>
             <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-              Manage Your Campaigns
+              Manage Your Quests
             </h2>
             <div className="bg-gray-50 border border-gray-200 px-6 py-3 rounded-lg max-w-2xl mx-auto">
               <p className="text-gray-700 text-sm">
@@ -1494,7 +1492,7 @@ export default function AirdropManager() {
             </div>
           </div>
 
-          {/* Your Active Campaigns */}
+          {/* Your Active Quests */}
           <div className="space-y-4">
             {airdrops.filter(
               (a) => a.creator === address && !a.resolved && !a.cancelled
@@ -1507,18 +1505,18 @@ export default function AirdropManager() {
                     </div>
                   </div>
                   <h3 className="text-xl font-medium text-gray-900 mb-3">
-                    No Active Campaigns
+                    No Active Quests
                   </h3>
                   <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                    You don't have any active campaigns to manage. Create your
-                    first campaign to get started!
+                    You don't have any active quests to manage. Create your
+                    first quest to get started!
                   </p>
                   <Button
                     onClick={() => setActiveTab("create")}
                     className="bg-gray-900 hover:bg-gray-800 text-white font-medium px-6 py-2 rounded-lg transition-colors"
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Create New Campaign
+                    Create New Quest
                   </Button>
                 </div>
               </div>
@@ -1533,7 +1531,7 @@ export default function AirdropManager() {
                       key={airdrop.id}
                       className="bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
                     >
-                      {/* Campaign Header */}
+                      {/* Quest Header */}
                       <div className="p-6 border-b border-gray-200">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
@@ -1542,7 +1540,7 @@ export default function AirdropManager() {
                                 <Gift className="h-4 w-4 text-gray-600" />
                               </div>
                               <h3 className="text-lg font-medium text-gray-900">
-                                {airdrop.title || `Campaign #${airdrop.id}`}
+                                {airdrop.title || `Quest #${airdrop.id}`}
                               </h3>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1634,7 +1632,7 @@ export default function AirdropManager() {
                         </div>
 
                         {!entries[airdrop.id] ||
-                        entries[airdrop.id].length === 0 ? (
+                          entries[airdrop.id].length === 0 ? (
                           <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
                             <div className="flex justify-center mb-3">
                               <div className="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center">
@@ -1642,7 +1640,7 @@ export default function AirdropManager() {
                               </div>
                             </div>
                             <p className="text-gray-600 text-sm">
-                              No submissions yet. Share your campaign to get
+                              No submissions yet. Share your quest to get
                               participants!
                             </p>
                           </div>
@@ -1653,13 +1651,12 @@ export default function AirdropManager() {
                                 {entries[airdrop.id].map((entry, index) => (
                                   <div
                                     key={index}
-                                    className={`border rounded-lg p-4 transition-colors ${
-                                      verificationForm.qualifiedIndices.includes(
-                                        index
-                                      )
-                                        ? "border-gray-400 bg-gray-50"
-                                        : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                                    }`}
+                                    className={`border rounded-lg p-4 transition-colors ${verificationForm.qualifiedIndices.includes(
+                                      index
+                                    )
+                                      ? "border-gray-400 bg-gray-50"
+                                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                                      }`}
                                   >
                                     <div className="flex justify-between items-start">
                                       <div className="flex-1">
@@ -1680,15 +1677,15 @@ export default function AirdropManager() {
                                               entry.status === 1
                                                 ? "border-gray-400 text-gray-700 bg-gray-100"
                                                 : entry.status === 2
-                                                ? "border-gray-400 text-gray-700 bg-gray-100"
-                                                : "border-gray-300 text-gray-600 bg-gray-50"
+                                                  ? "border-gray-400 text-gray-700 bg-gray-100"
+                                                  : "border-gray-300 text-gray-600 bg-gray-50"
                                             }
                                           >
                                             {entry.status === 1
                                               ? "Approved"
                                               : entry.status === 2
-                                              ? "Rejected"
-                                              : "Pending"}
+                                                ? "Rejected"
+                                                : "Pending"}
                                           </Badge>
                                         </div>
                                         <div className="text-sm text-gray-600 space-y-1">
@@ -1696,9 +1693,9 @@ export default function AirdropManager() {
                                             {entry.ipfsProofCid.includes(
                                               "twitter.com"
                                             ) ||
-                                            entry.ipfsProofCid.includes(
-                                              "x.com"
-                                            ) ? (
+                                              entry.ipfsProofCid.includes(
+                                                "x.com"
+                                              ) ? (
                                               <>
                                                 <ExternalLink className="w-3 h-3 text-gray-400" />
                                                 <span>X Post: </span>
@@ -1745,12 +1742,12 @@ export default function AirdropManager() {
                                                 index
                                               )
                                                 ? verificationForm.qualifiedIndices.filter(
-                                                    (i) => i !== index
-                                                  )
+                                                  (i) => i !== index
+                                                )
                                                 : [
-                                                    ...verificationForm.qualifiedIndices,
-                                                    index,
-                                                  ];
+                                                  ...verificationForm.qualifiedIndices,
+                                                  index,
+                                                ];
                                             setVerificationForm({
                                               ...verificationForm,
                                               airdropId: airdrop.id,
@@ -1811,10 +1808,10 @@ export default function AirdropManager() {
                                         participants selected •{" "}
                                         {formatETH(
                                           airdrop.perQualifier *
-                                            BigInt(
-                                              verificationForm.qualifiedIndices
-                                                .length
-                                            )
+                                          BigInt(
+                                            verificationForm.qualifiedIndices
+                                              .length
+                                          )
                                         )}{" "}
                                         ETH total
                                       </p>
