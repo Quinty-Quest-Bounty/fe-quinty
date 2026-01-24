@@ -4,48 +4,48 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import AirdropManager from "../../components/AirdropManager";
 import {
- Breadcrumb,
- BreadcrumbItem,
- BreadcrumbLink,
- BreadcrumbList,
- BreadcrumbPage,
- BreadcrumbSeparator,
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
 } from "../../components/ui/breadcrumb";
 import { ChevronRight } from "lucide-react";
 
-export default function AirdropsPage() {
- const router = useRouter();
+export default function QuestsPage() {
+    const router = useRouter();
 
- return (
- <div className="min-h-screen ">
- <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-6 sm:pb-8">
-  {/* Breadcrumb Navigation */}
-  <div className="mb-6 sm:mb-8">
-  <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md transition-all duration-300">
-  <Breadcrumb>
-   <BreadcrumbList>
-   <BreadcrumbItem>
-   <BreadcrumbLink
-    onClick={() => router.push("/")}
-    className="cursor-pointer hover:text-[#0EA885] transition-all duration-300 text-sm font-medium "
-   >
-    Home
-   </BreadcrumbLink>
-   </BreadcrumbItem>
-   <BreadcrumbSeparator>
-   <ChevronRight className="h-4 w-4 text-foreground/40" />
-   </BreadcrumbSeparator>
-   <BreadcrumbItem>
-   <BreadcrumbPage className="text-sm font-semibold text-[#0EA885]">Airdrops</BreadcrumbPage>
-   </BreadcrumbItem>
-   </BreadcrumbList>
-  </Breadcrumb>
-  </div>
-  </div>
+    return (
+        <div className="min-h-screen ">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-6 sm:pb-8">
+                {/* Breadcrumb Navigation */}
+                <div className="mb-6 sm:mb-8">
+                    <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md transition-all duration-300">
+                        <Breadcrumb>
+                            <BreadcrumbList>
+                                <BreadcrumbItem>
+                                    <BreadcrumbLink
+                                        onClick={() => router.push("/")}
+                                        className="cursor-pointer hover:text-[#0EA885] transition-all duration-300 text-sm font-medium "
+                                    >
+                                        Home
+                                    </BreadcrumbLink>
+                                </BreadcrumbItem>
+                                <BreadcrumbSeparator>
+                                    <ChevronRight className="h-4 w-4 text-foreground/40" />
+                                </BreadcrumbSeparator>
+                                <BreadcrumbItem>
+                                    <BreadcrumbPage className="text-sm font-semibold text-[#0EA885]">Quests</BreadcrumbPage>
+                                </BreadcrumbItem>
+                            </BreadcrumbList>
+                        </Breadcrumb>
+                    </div>
+                </div>
 
-  {/* Airdrop Manager Component */}
-  <AirdropManager />
- </div>
- </div>
- );
+                {/* Quest Manager Component */}
+                <AirdropManager />
+            </div>
+        </div>
+    );
 }

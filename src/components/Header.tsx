@@ -20,9 +20,9 @@ const WalletComponents = dynamic(
 const navItems = [
   { name: "Dashboard", link: "/dashboard" },
   { name: "Bounties", link: "/bounties" },
-  { name: "Disputes", link: "/disputes" },
   { name: "Reputation", link: "/reputation" },
-  { name: "Funding", link: "/funding" },
+  { name: "History", link: "/history" },
+  { name: "Quests", link: "/airdrops" },
 ];
 
 export default function Header() {
@@ -107,14 +107,14 @@ export default function Header() {
             {/* Desktop Actions */}
             <div className="hidden items-center gap-2 lg:flex">
               {isConnected && (
-                 <ZKVerificationModal />
+                <ZKVerificationModal />
               )}
               {isMounted && <WalletComponents />}
             </div>
 
             {/* Mobile Menu Toggle */}
             <div className="flex items-center gap-2 lg:hidden ml-auto">
-               {isConnected && <div className="scale-90"><ZKVerificationModal /></div>}
+              {isConnected && <div className="scale-90"><ZKVerificationModal /></div>}
               <Button
                 variant="ghost"
                 size="icon"
@@ -148,14 +148,14 @@ export default function Header() {
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ delay: idx * 0.05 }}
                     >
-                    <Link
-                      href={item.link}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition-all"
-                    >
-                      {item.name}
-                      <ChevronRight className="h-4 w-4 opacity-30" />
-                    </Link>
+                      <Link
+                        href={item.link}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition-all"
+                      >
+                        {item.name}
+                        <ChevronRight className="h-4 w-4 opacity-30" />
+                      </Link>
                     </motion.div>
                   ))}
                   {isMounted && (
@@ -169,7 +169,7 @@ export default function Header() {
           </AnimatePresence>
         </motion.header>
       </div>
-      
+
       {/* Spacer to prevent content from being hidden behind fixed header */}
       {/* We don't strictly need a spacer if the hero has enough padding, but it's safe */}
     </>

@@ -20,7 +20,7 @@ import {
 import { Users, Clock, Coins, Eye, Share2 } from "lucide-react";
 import { useShare } from "@/hooks/useShare";
 
-interface Airdrop {
+interface Quest {
   id: number;
   creator: string;
   title: string;
@@ -36,19 +36,19 @@ interface Airdrop {
   imageUrl?: string;
 }
 
-interface AirdropCardProps {
-  airdrop: Airdrop;
+interface QuestCardProps {
+  airdrop: Quest;
   entryCount?: number;
   onShowSubmitModal?: () => void;
   viewMode?: "grid" | "list";
 }
 
-export default function AirdropCard({
+export default function QuestCard({
   airdrop,
   entryCount = 0,
   onShowSubmitModal,
   viewMode = "grid",
-}: AirdropCardProps) {
+}: QuestCardProps) {
   const router = useRouter();
   const [quickView, setQuickView] = useState(false);
   const { shareLink } = useShare();
@@ -108,7 +108,7 @@ export default function AirdropCard({
                       e.stopPropagation();
                       shareLink(
                         `/airdrops/${airdrop.id}`,
-                        "Share this airdrop"
+                        "Share this quest"
                       );
                     }}
                     className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white transition-all duration-300 border border-white/60"
@@ -128,7 +128,7 @@ export default function AirdropCard({
                     </h3>
                     <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
                       {airdrop.description?.replace(/\n\nImage:.*$/, "") ||
-                        "Social media promotion task"}
+                        "Quest task"}
                     </p>
                   </div>
                   <Badge
@@ -198,7 +198,7 @@ export default function AirdropCard({
             <DialogHeader>
               <DialogTitle>{airdrop.title}</DialogTitle>
               <DialogDescription>
-                Airdrop #{airdrop.id} • {formatETH(airdrop.perQualifier)} ETH
+                Quest #{airdrop.id} • {formatETH(airdrop.perQualifier)} ETH
                 per user
               </DialogDescription>
             </DialogHeader>
@@ -249,7 +249,7 @@ export default function AirdropCard({
                 <h4 className="font-semibold text-sm mb-1">Description</h4>
                 <p className="text-sm text-muted-foreground">
                   {airdrop.description?.replace(/\n\nImage:.*$/, "") ||
-                    "Social media promotion task"}
+                    "Quest task"}
                 </p>
               </div>
 
@@ -339,7 +339,7 @@ export default function AirdropCard({
                 size="icon"
                 onClick={(e) => {
                   e.stopPropagation();
-                  shareLink(`/airdrops/${airdrop.id}`, "Share this airdrop");
+                  shareLink(`/airdrops/${airdrop.id}`, "Share this quest");
                 }}
                 className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md transition-all duration-300 border border-white/60"
               >
@@ -356,7 +356,7 @@ export default function AirdropCard({
             </h3>
             <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
               {airdrop.description?.replace(/\n\nImage:.*$/, "") ||
-                "Social media promotion task"}
+                "Quest task"}
             </p>
           </div>
 
@@ -407,7 +407,7 @@ export default function AirdropCard({
           <DialogHeader>
             <DialogTitle>{airdrop.title}</DialogTitle>
             <DialogDescription>
-              Airdrop #{airdrop.id} • {formatETH(airdrop.perQualifier)} ETH per
+              Quest #{airdrop.id} • {formatETH(airdrop.perQualifier)} ETH per
               user
             </DialogDescription>
           </DialogHeader>
@@ -458,7 +458,7 @@ export default function AirdropCard({
               <h4 className="font-semibold text-sm mb-1">Description</h4>
               <p className="text-sm text-muted-foreground">
                 {airdrop.description?.replace(/\n\nImage:.*$/, "") ||
-                  "Social media promotion task"}
+                  "Quest task"}
               </p>
             </div>
 
