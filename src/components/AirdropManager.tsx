@@ -68,6 +68,7 @@ import {
   FileText,
   ExternalLink,
   Zap,
+  ChevronDown,
 } from "lucide-react";
 
 interface Airdrop {
@@ -147,6 +148,7 @@ export default function AirdropManager() {
 
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [modalAirdropId, setModalAirdropId] = useState<number | null>(null);
+  const [showPastQuests, setShowPastQuests] = useState(false);
 
   // Read airdrop counter
   const { data: airdropCounter, refetch: refetchAirdropCounter } =
@@ -1468,6 +1470,46 @@ export default function AirdropManager() {
               </div>
             </div>
           )}
+
+          {/* Past Quests Section */}
+          <div className="pt-8 border-t border-gray-100">
+            <div className="flex justify-center">
+              <Button
+                variant="outline"
+                onClick={() => setShowPastQuests(!showPastQuests)}
+                className="gap-2"
+              >
+                {showPastQuests ? "Hide" : "Show"} Past Quests
+                <ChevronDown className={`h-4 w-4 transition-transform ${showPastQuests ? "rotate-180" : ""}`} />
+              </Button>
+            </div>
+
+            {showPastQuests && (
+              <div className="mt-8 space-y-6">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-gray-900">Resolved & Cancelled Quests</h3>
+                  <p className="text-sm text-muted-foreground">Historical record of completed campaigns</p>
+                </div>
+                
+                {airdrops.filter((a) => a.resolved || a.cancelled).length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">No past quests found</p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-80">
+                    {airdrops
+                      .filter((a) => a.resolved || a.cancelled)
+                      .map((airdrop) => (
+                        <QuestCard
+                          key={airdrop.id}
+                          airdrop={airdrop}
+                          entryCount={entryCounts[airdrop.id] || 0}
+                          onShowSubmitModal={() => {}} // No submissions for past quests
+                        />
+                      ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
