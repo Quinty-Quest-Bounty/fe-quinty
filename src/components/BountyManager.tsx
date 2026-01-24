@@ -79,7 +79,7 @@ interface Bounty {
   deadline: bigint;
   allowMultipleWinners: boolean;
   winnerShares: readonly bigint[];
-  status: number; // Enum: 0:OPREC, 1:OPEN, 2:PENDING_REVEAL, 3:RESOLVED, 4:DISPUTED, 5:EXPIRED
+  status: number; // Enum: 0:OPREC, 1:OPEN, 2:PENDING_REVEAL, 3:RESOLVED, 4:EXPIRED
   slashPercent: bigint;
   submissions: readonly Submission[];
   selectedWinners: readonly string[];
@@ -267,79 +267,79 @@ export default function BountyManager() {
 
       for (const id of bountyIds) {
         try {
-        // 1. Get all bounty metadata using the new robust function
-        const bountyData = await readContract(wagmiConfig, {
-          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
-            .Quinty as `0x${string}`,
-          abi: QUINTY_ABI,
-          functionName: "getBountyData",
-          args: [BigInt(id)],
-        });
-
-        if (bountyData) {
-          const bountyArray = bountyData as any[];
-          const [
-            creator,
-            description,
-            amount,
-            deadline,
-            allowMultipleWinners,
-            winnerShares,
-            status,
-            slashPercent,
-            selectedWinners,
-            selectedSubmissionIds,
-            hasOprec,
-            oprecDeadline,
-          ] = bountyArray;
-
-          // 2. Get submissions separately
-          const submissionCount = await readContract(wagmiConfig, {
+          // 1. Get all bounty metadata using the new robust function
+          const bountyData = await readContract(wagmiConfig, {
             address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
               .Quinty as `0x${string}`,
             abi: QUINTY_ABI,
-            functionName: "getSubmissionCount",
+            functionName: "getBountyData",
             args: [BigInt(id)],
           });
 
-          const submissions: Submission[] = [];
-          for (let i = 0; i < Number(submissionCount); i++) {
-            const submissionData = await readContract(wagmiConfig, {
+          if (bountyData) {
+            const bountyArray = bountyData as any[];
+            const [
+              creator,
+              description,
+              amount,
+              deadline,
+              allowMultipleWinners,
+              winnerShares,
+              status,
+              slashPercent,
+              selectedWinners,
+              selectedSubmissionIds,
+              hasOprec,
+              oprecDeadline,
+            ] = bountyArray;
+
+            // 2. Get submissions separately
+            const submissionCount = await readContract(wagmiConfig, {
               address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
                 .Quinty as `0x${string}`,
               abi: QUINTY_ABI,
-              functionName: "getSubmissionStruct",
-              args: [BigInt(id), BigInt(i)],
+              functionName: "getSubmissionCount",
+              args: [BigInt(id)],
             });
-            if (submissionData) {
-              submissions.push(submissionData as unknown as Submission);
+
+            const submissions: Submission[] = [];
+            for (let i = 0; i < Number(submissionCount); i++) {
+              const submissionData = await readContract(wagmiConfig, {
+                address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
+                  .Quinty as `0x${string}`,
+                abi: QUINTY_ABI,
+                functionName: "getSubmissionStruct",
+                args: [BigInt(id), BigInt(i)],
+              });
+              if (submissionData) {
+                submissions.push(submissionData as unknown as Submission);
+              }
             }
+
+            const metadataMatch = description.match(
+              /Metadata: ipfs:\/\/([a-zA-Z0-9]+)/
+            );
+            const metadataCid = metadataMatch ? metadataMatch[1] : undefined;
+
+            // 3. Assemble the full bounty object
+            loadedBounties.push({
+              id,
+              creator,
+              description,
+              amount,
+              deadline,
+              allowMultipleWinners,
+              winnerShares,
+              status,
+              slashPercent,
+              submissions,
+              selectedWinners,
+              selectedSubmissionIds,
+              metadataCid,
+              hasOprec,
+              oprecDeadline,
+            });
           }
-
-          const metadataMatch = description.match(
-            /Metadata: ipfs:\/\/([a-zA-Z0-9]+)/
-          );
-          const metadataCid = metadataMatch ? metadataMatch[1] : undefined;
-
-          // 3. Assemble the full bounty object
-          loadedBounties.push({
-            id,
-            creator,
-            description,
-            amount,
-            deadline,
-            allowMultipleWinners,
-            winnerShares,
-            status,
-            slashPercent,
-            submissions,
-            selectedWinners,
-            selectedSubmissionIds,
-            metadataCid,
-            hasOprec,
-            oprecDeadline,
-          });
-        }
         } catch (error) {
           console.error(`Error loading bounty data for ID ${id}:`, error);
         }
@@ -534,8 +534,8 @@ export default function BountyManager() {
     }
   };
 
-  // Trigger slash
-  const triggerSlash = async (bountyId: number) => {
+  // Refund bounty
+  const refundBounty = async (bountyId: number) => {
     if (!isConnected) return;
 
     try {
@@ -543,12 +543,12 @@ export default function BountyManager() {
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
           .Quinty as `0x${string}`,
         abi: QUINTY_ABI,
-        functionName: "triggerSlash",
+        functionName: "refundBounty",
         args: [BigInt(bountyId)],
       });
     } catch (error) {
-      console.error("Error triggering slash:", error);
-      alert("Error triggering slash");
+      console.error("Error refunding bounty:", error);
+      alert("Error refunding bounty");
     }
   };
 
@@ -1261,11 +1261,10 @@ export default function BountyManager() {
                       </label>
 
                       <div
-                        className={`border-2 border-dashed rounded-lg p-6 transition-colors ${
-                          isDragOver
-                            ? "border-primary bg-primary/5"
-                            : "border-muted-foreground/25 hover:border-muted-foreground/50"
-                        }`}
+                        className={`border-2 border-dashed rounded-lg p-6 transition-colors ${isDragOver
+                          ? "border-primary bg-primary/5"
+                          : "border-muted-foreground/25 hover:border-muted-foreground/50"
+                          }`}
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
@@ -1486,7 +1485,7 @@ export default function BountyManager() {
                   bounty={bounty}
                   onSubmitSolution={submitSolution}
                   onSelectWinners={selectWinners}
-                  onTriggerSlash={triggerSlash}
+                  onRefundBounty={refundBounty}
                   onAddReply={addReply}
                   onRevealSolution={revealSolution}
                 />
@@ -1527,9 +1526,9 @@ export default function BountyManager() {
               </p>
             </div>
           ) : bounties.filter(
-              (b) =>
-                address && b.creator.toLowerCase() === address.toLowerCase()
-            ).length === 0 ? (
+            (b) =>
+              address && b.creator.toLowerCase() === address.toLowerCase()
+          ).length === 0 ? (
             <div className="text-center py-12 bg-muted/30 rounded-lg border border-dashed">
               <Target className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
               <p className="text-lg font-medium mb-2">No Bounties Created</p>
@@ -1554,7 +1553,7 @@ export default function BountyManager() {
                     bounty={bounty}
                     onSubmitSolution={submitSolution}
                     onSelectWinners={selectWinners}
-                    onTriggerSlash={triggerSlash}
+                    onRefundBounty={refundBounty}
                     onAddReply={addReply}
                     onRevealSolution={revealSolution}
                   />

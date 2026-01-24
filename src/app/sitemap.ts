@@ -27,18 +27,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: 'https://www.quinty.io/funding',
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
-    {
-      url: 'https://www.quinty.io/disputes',
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.6,
-    },
-    {
       url: 'https://www.quinty.io/history',
       lastModified: new Date(),
       changeFrequency: 'weekly',

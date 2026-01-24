@@ -69,7 +69,7 @@ interface BountyCardProps {
     winners: string[],
     subIds: number[]
   ) => void;
-  onTriggerSlash: (bountyId: number) => void;
+  onRefundBounty: (bountyId: number) => void;
   onAddReply: (bountyId: number, subId: number, content: string) => void;
   onRevealSolution: (
     bountyId: number,
@@ -84,15 +84,14 @@ const BountyStatusEnum = [
   "Open", // 1: OPEN
   "Pending Reveal", // 2: PENDING_REVEAL
   "Resolved", // 3: RESOLVED
-  "Disputed", // 4: DISPUTED
-  "Expired", // 5: EXPIRED
+  "Expired", // 4: EXPIRED
 ];
 
 export default function BountyCard({
   bounty,
   onSubmitSolution,
   onSelectWinners,
-  onTriggerSlash,
+  onRefundBounty,
   onAddReply,
   onRevealSolution,
   viewMode = "grid",
@@ -149,8 +148,6 @@ export default function BountyCard({
       case 3:
         return "outline"; // Resolved
       case 4:
-        return "destructive"; // Disputed
-      case 5:
         return "secondary"; // Expired
       default:
         return "outline";

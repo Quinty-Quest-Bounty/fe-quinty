@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Menu, X, ChevronRight } from "lucide-react";
-import ZKVerificationModal from "./ZKVerificationModal";
+
 
 const WalletComponents = dynamic(
   () => import("./WalletComponents"),
@@ -106,15 +106,11 @@ export default function Header() {
 
             {/* Desktop Actions */}
             <div className="hidden items-center gap-2 lg:flex">
-              {isConnected && (
-                <ZKVerificationModal />
-              )}
               {isMounted && <WalletComponents />}
             </div>
 
             {/* Mobile Menu Toggle */}
             <div className="flex items-center gap-2 lg:hidden ml-auto">
-              {isConnected && <div className="scale-90"><ZKVerificationModal /></div>}
               <Button
                 variant="ghost"
                 size="icon"

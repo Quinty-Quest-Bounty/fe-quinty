@@ -518,66 +518,7 @@ export default function Home() {
                 </div>
               </motion.div>
 
-              {/* Social Verification - Full Width Panel */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.7 }}
-                whileHover={{ y: -3 }}
-                className="col-span-1 md:col-span-3 rounded-2xl border border-blue-200/50 bg-gradient-to-br from-white via-blue-50/20 to-purple-50/20 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-8 hover:shadow-2xl hover:shadow-blue-500/10 hover:border-blue-400/60 transition-all duration-500 dark:border-blue-500/20 dark:bg-gradient-to-br dark:from-white/5 dark:via-blue-500/5 dark:to-purple-500/5 dark:hover:border-blue-500/40 dark:hover:shadow-[0_0_40px_rgba(59,130,246,0.15)] backdrop-blur-sm relative overflow-hidden"
-              >
-                {/* Animated background effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                <div className="max-w-lg relative z-10">
-                  <div className="flex items-center gap-2 mb-4">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                    >
-                      <Globe className="w-5 h-5 text-blue-500 dark:text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-                    </motion.div>
-                    <span className="text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 uppercase tracking-wide dark:from-blue-400 dark:to-purple-400">Social Verification</span>
-                  </div>
-                  <h3 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-blue-900 mb-3 dark:from-white dark:to-blue-300">Proof you're really you.</h3>
-                  <p className="text-sm text-slate-600 leading-relaxed dark:text-gray-300">
-                    Link your X (Twitter) account to your on-chain identity.
-                    Prove ownership without doxxing.
-                  </p>
-                </div>
-
-                <div className="flex-shrink-0 relative z-10">
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    className="flex items-center gap-3 bg-white/90 backdrop-blur-sm pl-4 pr-6 py-4 rounded-2xl border border-blue-200 shadow-lg hover:shadow-xl hover:border-blue-400 transition-all duration-300 dark:bg-black/60 dark:border-blue-500/30 dark:hover:border-blue-500/60 dark:shadow-blue-500/10"
-                  >
-                    <div className="relative">
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden shadow-md dark:from-gray-800 dark:to-gray-700"
-                      >
-                        <Image src="/images/quinty-logo.png" alt="User" fill className="object-contain p-2" style={{ filter: 'brightness(0%)' }} />
-                      </motion.div>
-                      <motion.div
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        className="absolute -bottom-1 -right-1 bg-gradient-to-br from-green-400 to-green-600 text-white p-1 rounded-full border-2 border-white shadow-lg shadow-green-500/50 dark:border-black"
-                      >
-                        <Check className="w-3 h-3" />
-                      </motion.div>
-                    </div>
-                    <div>
-                      <div className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-blue-900 dark:from-white dark:to-blue-300">@QuintyLabs</div>
-                      <div className="text-[10px] text-slate-500 font-mono dark:text-gray-400">Verified via X</div>
-                    </div>
-                    <div className="ml-4 h-10 w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent dark:via-white/10" />
-                    <Button size="sm" variant="ghost" className="text-blue-600 hover:text-white hover:bg-gradient-to-r hover:from-blue-500 hover:to-purple-500 text-xs h-auto py-2 px-4 font-bold rounded-full transition-all duration-300 dark:text-blue-400 dark:hover:text-white shadow-sm hover:shadow-md">
-                      Connect
-                    </Button>
-                  </motion.div>
-                </div>
-              </motion.div>
             </div>
           </div>
         </section>

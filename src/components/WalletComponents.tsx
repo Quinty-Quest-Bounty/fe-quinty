@@ -24,12 +24,18 @@ export default function WalletComponents() {
           <Name />
         </ConnectWallet>
         <WalletDropdown>
-          <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-            <Avatar />
-            <Name />
-            <Address />
-            <EthBalance />
-          </Identity>
+          <div className="px-4 pt-3 pb-2">
+            <div className="flex items-center gap-3">
+              <Avatar />
+              <div className="flex flex-col">
+                <Name />
+                <Address className="text-xs text-gray-500" />
+              </div>
+            </div>
+            <div className="mt-2">
+              <EthBalance className="text-sm font-medium" />
+            </div>
+          </div>
           <WalletDropdownLink icon="wallet" href="https://keys.coinbase.com">
             Wallet
           </WalletDropdownLink>
