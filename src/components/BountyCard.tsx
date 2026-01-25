@@ -1,35 +1,17 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
 import { formatETH, formatTimeLeft, formatAddress } from "../utils/web3";
-import {
-  fetchMetadataFromIpfs,
-  BountyMetadata,
-  IpfsImage,
-} from "../utils/ipfs";
-import {
-  getEthPriceInUSD,
-  convertEthToUSD,
-  formatUSD,
-} from "../utils/prices";
+import { fetchMetadataFromIpfs, BountyMetadata } from "../utils/ipfs";
+import { getEthPriceInUSD, convertEthToUSD, formatUSD } from "../utils/prices";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Clock, Users, Trophy, Eye, Share2, Target } from "lucide-react";
 import { useShare } from "@/hooks/useShare";
+import { BountyQuickView } from "./bounties/BountyQuickView";
 
-// V2 Interfaces
 interface Reply {
   replier: string;
   content: string;
@@ -53,7 +35,7 @@ interface Bounty {
   deadline: bigint;
   allowMultipleWinners: boolean;
   winnerShares: readonly bigint[];
-  status: number; // Enum: 0:OPEN, 1:PENDING_REVEAL, 2:RESOLVED, 3:DISPUTED, 4:EXPIRED
+  status: number;
   slashPercent: bigint;
   submissions: readonly Submission[];
   selectedWinners: readonly string[];
@@ -64,428 +46,102 @@ interface Bounty {
 interface BountyCardProps {
   bounty: Bounty;
   onSubmitSolution: (bountyId: number, ipfsCid: string) => void;
-  onSelectWinners: (
-    bountyId: number,
-    winners: string[],
-    subIds: number[]
-  ) => void;
+  onSelectWinners: (bountyId: number, winners: string[], subIds: number[]) => void;
   onTriggerSlash: (bountyId: number) => void;
   onAddReply: (bountyId: number, subId: number, content: string) => void;
-  onRevealSolution: (
-    bountyId: number,
-    subId: number,
-    revealCid: string
-  ) => void;
-  viewMode?: "grid" | "list";
+  onRevealSolution: (bountyId: number, subId: number, revealCid: string) => void;
 }
 
-const BountyStatusEnum = [
-  "Open Rec", // 0: OPREC
-  "Open", // 1: OPEN
-  "Pending Reveal", // 2: PENDING_REVEAL
-  "Resolved", // 3: RESOLVED
-  "Disputed", // 4: DISPUTED
-  "Expired", // 5: EXPIRED
-];
+const BountyStatusEnum = ["Open Rec", "Open", "Pending Reveal", "Resolved", "Disputed", "Expired"];
 
-export default function BountyCard({
-  bounty,
-  onSubmitSolution,
-  onSelectWinners,
-  onTriggerSlash,
-  onAddReply,
-  onRevealSolution,
-  viewMode = "grid",
-}: BountyCardProps) {
+export default function BountyCard({ bounty }: BountyCardProps) {
   const router = useRouter();
   const { address } = useAccount();
   const [metadata, setMetadata] = useState<BountyMetadata | null>(null);
-  const [, setIsLoadingMetadata] = useState(false);
   const [quickView, setQuickView] = useState(false);
   const { shareLink } = useShare();
   const [ethPrice, setEthPrice] = useState<number>(0);
 
-  const isCreator = address?.toLowerCase() === bounty.creator.toLowerCase();
-  const isExpired = BigInt(Math.floor(Date.now() / 1000)) > bounty.deadline;
-
-  // Fetch ETH price
   useEffect(() => {
-    const fetchPrice = async () => {
-      const price = await getEthPriceInUSD();
-      setEthPrice(price);
-    };
-    fetchPrice();
-    const interval = setInterval(fetchPrice, 60000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
+    getEthPriceInUSD().then(setEthPrice);
     const loadMetadata = async () => {
       if (!bounty.metadataCid) return;
-      setIsLoadingMetadata(true);
       try {
         const meta = await fetchMetadataFromIpfs(bounty.metadataCid);
         setMetadata(meta);
-      } catch (error) {
-        console.error("Failed to load bounty metadata:", error);
-      } finally {
-        setIsLoadingMetadata(false);
+      } catch (e) {
+        console.error(e);
       }
     };
     loadMetadata();
   }, [bounty.metadataCid]);
 
   const statusLabel = BountyStatusEnum[bounty.status] || "Unknown";
-
-  // Get status color for badge variant
   const getStatusVariant = (status: number) => {
-    switch (status) {
-      case 0:
-        return "secondary"; // OPREC
-      case 1:
-        return "default"; // Open
-      case 2:
-        return "secondary"; // Pending Reveal
-      case 3:
-        return "outline"; // Resolved
-      case 4:
-        return "destructive"; // Disputed
-      case 5:
-        return "secondary"; // Expired
-      default:
-        return "outline";
-    }
+    if (status === 1) return "default";
+    if (status === 3) return "outline";
+    if (status === 4) return "destructive";
+    return "secondary";
   };
-
-  if (viewMode === "list") {
-    return (
-      <>
-        <Card
-          className="group relative overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-300 cursor-pointer hover:brightness-95"
-          onClick={() => router.push(`/bounties/${bounty.id}`)}
-        >
-          <div className="flex flex-row">
-            {/* Image Section - with placeholder if no image */}
-            <div className="relative w-64 h-40 overflow-hidden flex-shrink-0">
-              {metadata?.images && metadata.images.length > 0 ? (
-                <img
-                  src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
-                  alt={metadata.title}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
-                  <div className="text-center">
-                    <Target className="h-12 w-12 text-blue-300 mx-auto mb-2" />
-                    <p className="text-xs text-blue-400 font-medium">Bounty #{bounty.id}</p>
-                  </div>
-                </div>
-              )}
-              {/* Quick View and Share buttons overlay */}
-              <div className="absolute top-2 left-2 flex gap-1.5">
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setQuickView(true);
-                  }}
-                  className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white transition-all duration-300 border border-white/60"
-                >
-                  <Eye className="h-4 w-4 text-[#0EA885]" />
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    shareLink(`/bounties/${bounty.id}`, "Share this bounty");
-                  }}
-                  className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white transition-all duration-300 border border-white/60"
-                >
-                  <Share2 className="h-4 w-4 text-[#0EA885]" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex-1 flex flex-col">
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-semibold leading-tight line-clamp-1">
-                      {metadata?.title || bounty.description.split("\n")[0]}
-                    </h3>
-                    <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
-                      {metadata?.description || "No description available"}
-                    </p>
-                  </div>
-                  <Badge
-                    variant={getStatusVariant(bounty.status)}
-                    className="text-xs flex-shrink-0 rounded-full px-3 py-1 border-white/60 bg-white/50 backdrop-blur-sm pointer-events-none"
-                  >
-                    {statusLabel}
-                  </Badge>
-                </div>
-              </CardHeader>
-
-              <CardContent className="pt-0 pb-3 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="flex flex-col gap-0.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#0EA885]/10 to-[#0EA885]/5 border border-[#0EA885]/20">
-                      <div className="flex items-center gap-1.5">
-                        <Trophy className="h-4 w-4 text-[#0EA885]" />
-                        <span className="text-lg font-bold text-[#0EA885]">
-                          {formatETH(bounty.amount)}
-                        </span>
-                        <span className="text-xs font-medium text-[#0EA885]">
-                          ETH
-                        </span>
-                      </div>
-                      {ethPrice > 0 && (
-                        <span className="text-[10px] text-[#0EA885]/70 pl-[22px]">
-                          {formatUSD(convertEthToUSD(Number(bounty.amount) / 1e18, ethPrice))}
-                        </span>
-                      )}
-                    </div>
-
-                    <Separator orientation="vertical" className="h-6" />
-
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Users className="h-3 w-3" />
-                      <span className="font-medium">
-                        {bounty.submissions.length}
-                      </span>
-                    </div>
-
-                    <Separator orientation="vertical" className="h-6" />
-
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      <span className="font-medium">
-                        {formatTimeLeft(bounty.deadline)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-5 w-5">
-                      <AvatarFallback className="text-[10px]">
-                        {bounty.creator.slice(2, 4).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-xs text-muted-foreground">
-                      {formatAddress(bounty.creator)}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </div>
-          </div>
-        </Card>
-
-        {/* Quick View Dialog - same for list view */}
-        <Dialog open={quickView} onOpenChange={setQuickView}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {metadata?.title || bounty.description.split("\n")[0]}
-              </DialogTitle>
-              <DialogDescription>
-                Bounty #{bounty.id} • {formatETH(bounty.amount)} ETH
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4">
-              {/* Image */}
-              {metadata?.images && metadata.images.length > 0 && (
-                <div className="relative w-full flex justify-center">
-                  <img
-                    src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
-                    alt={metadata.title}
-                    className="max-w-full h-auto max-h-[500px] object-contain rounded-xl shadow-sm"
-                  />
-                </div>
-              )}
-
-              {/* Stats Grid */}
-              <div className="grid grid-cols-3 gap-2">
-                <div className="bg-muted rounded p-2">
-                  <p className="text-xs text-muted-foreground">Reward</p>
-                  <p className="font-bold">{formatETH(bounty.amount)} ETH</p>
-                </div>
-                <div className="bg-muted rounded p-2">
-                  <p className="text-xs text-muted-foreground">Submissions</p>
-                  <p className="font-bold">{bounty.submissions.length}</p>
-                </div>
-                <div className="bg-muted rounded p-2">
-                  <p className="text-xs text-muted-foreground">Status</p>
-                  <p className="font-bold">{BountyStatusEnum[bounty.status]}</p>
-                </div>
-              </div>
-
-              {/* Description */}
-              {metadata?.description && (
-                <div>
-                  <h4 className="font-semibold text-sm mb-1">Description</h4>
-                  <p className="text-sm text-muted-foreground">
-                    {metadata.description}
-                  </p>
-                </div>
-              )}
-
-              {/* Requirements */}
-              {metadata?.requirements && metadata.requirements.length > 0 && (
-                <div>
-                  <h4 className="font-semibold text-sm mb-1">Requirements</h4>
-                  <ul className="list-disc list-inside space-y-0.5">
-                    {metadata.requirements.map((req, i) => (
-                      <li key={i} className="text-sm text-muted-foreground">
-                        {req}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Time Left */}
-              <div className="flex items-center gap-2 text-sm">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">
-                  {formatTimeLeft(bounty.deadline)}
-                </span>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2 pt-2">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setQuickView(false)}
-                >
-                  Close
-                </Button>
-                <Button
-                  className="flex-1"
-                  onClick={() => {
-                    setQuickView(false);
-                    router.push(`/bounties/${bounty.id}`);
-                  }}
-                >
-                  View Full Details
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </>
-    );
-  }
 
   return (
     <>
       <Card
-        className="group relative overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-300 cursor-pointer hover:brightness-95"
+        className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white hover:border-[#0EA885]/30 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md"
         onClick={() => router.push(`/bounties/${bounty.id}`)}
       >
-        {/* Status Badge */}
-        <div className="absolute top-2 right-2 z-10">
-          <Badge
-            variant={getStatusVariant(bounty.status)}
-            className="text-xs rounded-full px-3 py-1 border-white/60 bg-white/80 backdrop-blur-sm shadow-md pointer-events-none"
-          >
-            {statusLabel}
-          </Badge>
-        </div>
-
-        {/* Image Section - with placeholder if no image */}
-        <div className="relative w-full h-48 overflow-hidden">
-          {metadata?.images && metadata.images.length > 0 ? (
+        {/* Image Section */}
+        <div className="relative h-40 w-full overflow-hidden bg-slate-50">
+          {metadata?.images?.[0] ? (
             <img
               src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
               alt={metadata.title}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
-              <div className="text-center">
-                <Target className="h-16 w-16 text-blue-300 mx-auto mb-2" />
-                <p className="text-sm text-blue-400 font-medium">Bounty #{bounty.id}</p>
-              </div>
+            <div className="w-full h-full flex items-center justify-center">
+              <Target className="w-10 h-10 text-slate-200" />
             </div>
           )}
-          {/* Quick View and Share buttons overlay */}
-          <div className="absolute top-2 left-2 flex gap-1.5">
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                setQuickView(true);
-              }}
-              className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md transition-all duration-300 border border-white/60"
-            >
-              <Eye className="h-4 w-4 text-[#0EA885]" />
-            </Button>
-            <Button
-              variant="secondary"
-              size="icon"
-              onClick={(e) => {
-                e.stopPropagation();
-                shareLink(`/bounties/${bounty.id}`, "Share this bounty");
-              }}
-              className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md transition-all duration-300 border border-white/60"
-            >
-              <Share2 className="h-4 w-4 text-[#0EA885]" />
-            </Button>
+
+          <div className="absolute top-3 right-3">
+            <Badge variant={getStatusVariant(bounty.status)} className="rounded-full px-2 py-0 text-[10px] font-bold uppercase">
+              {statusLabel}
+            </Badge>
           </div>
         </div>
 
-        <CardHeader className="p-3 space-y-2">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm leading-tight line-clamp-2 font-semibold">
-              {metadata?.title || bounty.description.split("\n")[0]}
-            </h3>
-            <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
-              {metadata?.description || "No description available"}
-            </p>
-          </div>
-
-          <Separator />
-
-          {/* Stats */}
-          <div className="flex items-center justify-between text-xs">
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Users className="h-3 w-3" />
-              <span>{bounty.submissions.length}</span>
+        <CardHeader className="p-5 pb-2">
+          <h3 className="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-[#0EA885] transition-colors">
+            {metadata?.title || bounty.description.split("\n")[0]}
+          </h3>
+          <div className="flex items-center gap-4 mt-1">
+            <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+              <Users className="w-3 h-3" />
+              {bounty.submissions.length} Submissions
             </div>
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              <span>{formatTimeLeft(bounty.deadline)}</span>
+            <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+              <Clock className="w-3 h-3" />
+              {formatTimeLeft(bounty.deadline)}
             </div>
           </div>
         </CardHeader>
 
-        <CardContent className="p-3 pt-0">
-          {/* Reward Section */}
-          <div className="flex items-center justify-between p-2.5 rounded-[1rem] bg-gradient-to-r from-[#0EA885]/10 to-[#0EA885]/5 border border-[#0EA885]/20 shadow-sm transition-all duration-300 hover:brightness-95">
-            <div className="flex flex-col gap-0.5">
-              <div className="flex items-center gap-1.5">
-                <div className="p-1.5 rounded-lg bg-[#0EA885]/10">
-                  <Trophy className="h-4 w-4 text-[#0EA885]" />
-                </div>
-                <span className="text-base font-bold text-[#0EA885]">
-                  {formatETH(bounty.amount)}
-                </span>
-                <span className="text-xs font-medium text-[#0EA885]">ETH</span>
+        <CardContent className="p-5 pt-4">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1">
+                <span className="text-lg font-black text-slate-900">{formatETH(bounty.amount)}</span>
+                <span className="text-[10px] font-bold text-slate-400">ETH</span>
               </div>
               {ethPrice > 0 && (
-                <span className="text-[10px] text-[#0EA885]/70 pl-[34px]">
-                  {formatUSD(convertEthToUSD(Number(bounty.amount) / 1e18, ethPrice))}
+                <span className="text-[10px] font-medium text-slate-400">
+                  ≈ {formatUSD(convertEthToUSD(Number(bounty.amount) / 1e18, ethPrice))}
                 </span>
               )}
             </div>
-            <Avatar className="h-5 w-5">
-              <AvatarFallback className="text-[10px]">
+            <Avatar className="h-7 w-7 border border-slate-100">
+              <AvatarFallback className="text-[8px] font-bold bg-slate-100 text-slate-500">
                 {bounty.creator.slice(2, 4).toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -493,100 +149,13 @@ export default function BountyCard({
         </CardContent>
       </Card>
 
-      {/* Quick View Dialog */}
-      <Dialog open={quickView} onOpenChange={setQuickView}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto rounded-[1.5rem] sm:rounded-[2rem] border border-white/60 bg-white/95 backdrop-blur-xl">
-          <DialogHeader>
-            <DialogTitle>
-              {metadata?.title || bounty.description.split("\n")[0]}
-            </DialogTitle>
-            <DialogDescription>
-              Bounty #{bounty.id} • {formatETH(bounty.amount)} ETH
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            {/* Image */}
-            {metadata?.images && metadata.images.length > 0 && (
-              <div className="relative w-full flex justify-center">
-                <img
-                  src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
-                  alt={metadata.title}
-                  className="max-w-full h-auto max-h-[500px] object-contain rounded-xl shadow-sm"
-                />
-              </div>
-            )}
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-2">
-              <div className="bg-muted rounded p-2">
-                <p className="text-xs text-muted-foreground">Reward</p>
-                <p className="font-bold">{formatETH(bounty.amount)} ETH</p>
-              </div>
-              <div className="bg-muted rounded p-2">
-                <p className="text-xs text-muted-foreground">Submissions</p>
-                <p className="font-bold">{bounty.submissions.length}</p>
-              </div>
-              <div className="bg-muted rounded p-2">
-                <p className="text-xs text-muted-foreground">Status</p>
-                <p className="font-bold">{BountyStatusEnum[bounty.status]}</p>
-              </div>
-            </div>
-
-            {/* Description */}
-            {metadata?.description && (
-              <div>
-                <h4 className="font-semibold text-sm mb-1">Description</h4>
-                <p className="text-sm text-muted-foreground">
-                  {metadata.description}
-                </p>
-              </div>
-            )}
-
-            {/* Requirements */}
-            {metadata?.requirements && metadata.requirements.length > 0 && (
-              <div>
-                <h4 className="font-semibold text-sm mb-1">Requirements</h4>
-                <ul className="list-disc list-inside space-y-0.5">
-                  {metadata.requirements.map((req, i) => (
-                    <li key={i} className="text-sm text-muted-foreground">
-                      {req}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Time Left */}
-            <div className="flex items-center gap-2 text-sm">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">
-                {formatTimeLeft(bounty.deadline)}
-              </span>
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-2 pt-2">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setQuickView(false)}
-              >
-                Close
-              </Button>
-              <Button
-                className="flex-1"
-                onClick={() => {
-                  setQuickView(false);
-                  router.push(`/bounties/${bounty.id}`);
-                }}
-              >
-                View Full Details
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <BountyQuickView
+        isOpen={quickView}
+        onOpenChange={setQuickView}
+        bounty={bounty}
+        metadata={metadata}
+        onViewFull={() => router.push(`/bounties/${bounty.id}`)}
+      />
     </>
   );
 }

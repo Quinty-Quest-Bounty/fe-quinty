@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatETH, formatTimeLeft, formatAddress } from "../utils/web3";
@@ -8,17 +6,10 @@ import { Card, CardContent, CardHeader } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
 import { Avatar, AvatarFallback } from "./ui/avatar";
-import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "./ui/dialog";
-import { Users, Clock, Coins, Eye, Share2 } from "lucide-react";
+import { Users, Clock, Coins, Eye, Share2, Gift } from "lucide-react";
 import { useShare } from "@/hooks/useShare";
+import { QuestQuickView } from "./airdrops/QuestQuickView";
 
 interface Quest {
   id: number;
@@ -40,22 +31,13 @@ interface QuestCardProps {
   airdrop: Quest;
   entryCount?: number;
   onShowSubmitModal?: () => void;
-  viewMode?: "grid" | "list";
 }
 
-export default function QuestCard({
-  airdrop,
-  entryCount = 0,
-  onShowSubmitModal,
-  viewMode = "grid",
-}: QuestCardProps) {
+export default function QuestCard({ airdrop, entryCount = 0 }: QuestCardProps) {
   const router = useRouter();
   const [quickView, setQuickView] = useState(false);
   const { shareLink } = useShare();
-  const progress = Math.min(
-    (airdrop.qualifiersCount / airdrop.maxQualifiers) * 100,
-    100
-  );
+  const progress = Math.min((airdrop.qualifiersCount / airdrop.maxQualifiers) * 100, 100);
   const isExpired = Date.now() / 1000 > airdrop.deadline;
 
   const getStatusColor = () => {
@@ -72,328 +54,68 @@ export default function QuestCard({
     return "Active";
   };
 
-  if (viewMode === "list") {
-    return (
-      <>
-        <Card
-          className="group relative overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-300 cursor-pointer hover:brightness-95"
-          onClick={() => router.push(`/airdrops/${airdrop.id}`)}
-        >
-          <div className="flex flex-row">
-            {/* Image Section */}
-            {airdrop.imageUrl && (
-              <div className="relative w-64 h-40 overflow-hidden bg-muted flex-shrink-0">
-                <IpfsImage
-                  cid={airdrop.imageUrl.replace("ipfs://", "")}
-                  alt={airdrop.title}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                />
-                {/* Quick View and Share buttons overlay */}
-                <div className="absolute top-2 left-2 flex gap-1">
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setQuickView(true);
-                    }}
-                    className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white transition-all duration-300 border border-white/60"
-                  >
-                    <Eye className="h-4 w-4 text-[#0EA885]" />
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      shareLink(
-                        `/airdrops/${airdrop.id}`,
-                        "Share this quest"
-                      );
-                    }}
-                    className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white transition-all duration-300 border border-white/60"
-                  >
-                    <Share2 className="h-4 w-4 text-[#0EA885]" />
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            <div className="flex-1 flex flex-col">
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-semibold leading-tight line-clamp-1">
-                      {airdrop.title}
-                    </h3>
-                    <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
-                      {airdrop.description?.replace(/\n\nImage:.*$/, "") ||
-                        "Quest task"}
-                    </p>
-                  </div>
-                  <Badge
-                    variant={getStatusColor()}
-                    className="text-xs rounded-full px-3 py-1 border-white/60 bg-white/80 backdrop-blur-sm shadow-md flex-shrink-0 pointer-events-none"
-                  >
-                    {getStatusText()}
-                  </Badge>
-                </div>
-              </CardHeader>
-
-              <CardContent className="pt-0 pb-3 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-[0.75rem] bg-gradient-to-r from-green-100/80 to-emerald-100/60 border border-green-200/60 shadow-sm backdrop-blur-sm">
-                      <div className="p-1 rounded-md bg-green-100/80">
-                        <Coins className="h-3.5 w-3.5 text-green-600" />
-                      </div>
-                      <span className="text-lg font-bold text-green-600">
-                        {formatETH(airdrop.perQualifier)}
-                      </span>
-                      <span className="text-xs font-medium text-green-600">
-                        ETH
-                      </span>
-                    </div>
-
-                    <Separator orientation="vertical" className="h-6" />
-
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Users className="h-3 w-3" />
-                      <span className="font-medium">
-                        {entryCount > 0
-                          ? `${entryCount} entries`
-                          : `${airdrop.qualifiersCount}/${airdrop.maxQualifiers}`}
-                      </span>
-                    </div>
-
-                    <Separator orientation="vertical" className="h-6" />
-
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      <span className="font-medium">
-                        {formatTimeLeft(BigInt(airdrop.deadline))}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-5 w-5">
-                      <AvatarFallback className="text-[10px]">
-                        {airdrop.creator.slice(2, 4).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-xs text-muted-foreground">
-                      {formatAddress(airdrop.creator)}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </div>
-          </div>
-        </Card>
-
-        {/* Quick View Dialog */}
-        <Dialog open={quickView} onOpenChange={setQuickView}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto rounded-[1.5rem] sm:rounded-[2rem] border border-white/60 bg-white/95 backdrop-blur-xl">
-            <DialogHeader>
-              <DialogTitle>{airdrop.title}</DialogTitle>
-              <DialogDescription>
-                Quest #{airdrop.id} • {formatETH(airdrop.perQualifier)} ETH
-                per user
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4">
-              {/* Image */}
-              {airdrop.imageUrl && (
-                <div className="relative w-full flex justify-center">
-                  <IpfsImage
-                    cid={airdrop.imageUrl.replace("ipfs://", "")}
-                    alt={airdrop.title}
-                    className="max-w-full h-auto max-h-[500px] object-contain rounded-xl shadow-sm"
-                  />
-                </div>
-              )}
-
-              {/* Stats Grid */}
-              <div className="grid grid-cols-3 gap-2">
-                <div className="bg-muted rounded p-2">
-                  <p className="text-xs text-muted-foreground">Per Qualifier</p>
-                  <p className="font-bold">
-                    {formatETH(airdrop.perQualifier)} ETH
-                  </p>
-                </div>
-                <div className="bg-muted rounded p-2">
-                  <p className="text-xs text-muted-foreground">Participants</p>
-                  <p className="font-bold">
-                    {airdrop.qualifiersCount}/{airdrop.maxQualifiers}
-                  </p>
-                </div>
-                <div className="bg-muted rounded p-2">
-                  <p className="text-xs text-muted-foreground">Status</p>
-                  <p className="font-bold">{getStatusText()}</p>
-                </div>
-              </div>
-
-              {/* Progress */}
-              <div>
-                <div className="mb-2 flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Progress</span>
-                  <span className="font-bold">{Math.round(progress)}%</span>
-                </div>
-                <Progress value={progress} className="h-2" />
-              </div>
-
-              {/* Description */}
-              <div>
-                <h4 className="font-semibold text-sm mb-1">Description</h4>
-                <p className="text-sm text-muted-foreground">
-                  {airdrop.description?.replace(/\n\nImage:.*$/, "") ||
-                    "Quest task"}
-                </p>
-              </div>
-
-              {/* Requirements */}
-              {airdrop.requirements && (
-                <div>
-                  <h4 className="font-semibold text-sm mb-1">Requirements</h4>
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                    {airdrop.requirements}
-                  </p>
-                </div>
-              )}
-
-              {/* Time Left */}
-              <div className="flex items-center gap-2 text-sm">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">
-                  {formatTimeLeft(BigInt(airdrop.deadline))}
-                </span>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2 pt-2">
-                <Button
-                  variant="outline"
-                  className="flex-1 rounded-[1rem] border-white/60 bg-white/70 backdrop-blur-sm hover:bg-white/90 transition-all duration-300"
-                  onClick={() => setQuickView(false)}
-                >
-                  Close
-                </Button>
-                <Button
-                  className="flex-1 rounded-[1rem] bg-[#0EA885] hover:bg-[#0EA885]/90 transition-all duration-300"
-                  onClick={() => {
-                    setQuickView(false);
-                    router.push(`/airdrops/${airdrop.id}`);
-                  }}
-                >
-                  View Full Details
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </>
-    );
-  }
-
   return (
     <>
       <Card
-        className="group relative overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-300 cursor-pointer hover:brightness-95"
+        className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white hover:border-[#0EA885]/30 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md"
         onClick={() => router.push(`/airdrops/${airdrop.id}`)}
       >
-        {/* Status Badge */}
-        <div className="absolute top-2 right-2 z-10">
-          <Badge
-            variant={getStatusColor()}
-            className="text-xs rounded-full px-3 py-1 border-white/60 bg-white/80 backdrop-blur-sm shadow-md pointer-events-none"
-          >
-            {getStatusText()}
-          </Badge>
-        </div>
-
         {/* Image Section */}
-        {airdrop.imageUrl && (
-          <div className="relative w-full h-48 overflow-hidden bg-muted">
+        <div className="relative h-40 w-full overflow-hidden bg-slate-50">
+          {airdrop.imageUrl ? (
             <IpfsImage
               cid={airdrop.imageUrl.replace("ipfs://", "")}
               alt={airdrop.title}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
-            {/* Quick View and Share buttons overlay */}
-            <div className="absolute top-2 left-2 flex gap-1">
-              <Button
-                variant="secondary"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setQuickView(true);
-                }}
-                className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md transition-all duration-300 border border-white/60"
-              >
-                <Eye className="h-4 w-4 text-[#0EA885]" />
-              </Button>
-              <Button
-                variant="secondary"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  shareLink(`/airdrops/${airdrop.id}`, "Share this quest");
-                }}
-                className="h-8 w-8 rounded-[0.75rem] bg-white/90 backdrop-blur-xl hover:bg-white shadow-md transition-all duration-300 border border-white/60"
-              >
-                <Share2 className="h-4 w-4 text-[#0EA885]" />
-              </Button>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Gift className="w-10 h-10 text-slate-200" />
             </div>
+          )}
+
+          <div className="absolute top-3 right-3">
+            <Badge variant={getStatusColor()} className="rounded-full px-2 py-0 text-[10px] font-bold uppercase">
+              {getStatusText()}
+            </Badge>
           </div>
-        )}
+        </div>
 
-        <CardHeader className="p-3 space-y-2">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm leading-tight line-clamp-2 font-semibold">
-              {airdrop.title}
-            </h3>
-            <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
-              {airdrop.description?.replace(/\n\nImage:.*$/, "") ||
-                "Quest task"}
-            </p>
-          </div>
-
-          <Separator />
-
-          {/* Stats */}
-          <div className="flex items-center justify-between text-xs">
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Users className="h-3 w-3" />
-              <span>
-                {entryCount > 0
-                  ? `${entryCount} entries`
-                  : `${airdrop.qualifiersCount}/${airdrop.maxQualifiers}`}
-              </span>
+        <CardHeader className="p-5 pb-2">
+          <h3 className="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-[#0EA885] transition-colors">
+            {airdrop.title}
+          </h3>
+          <div className="flex items-center gap-4 mt-1">
+            <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+              <Users className="w-3 h-3" />
+              {entryCount || airdrop.qualifiersCount} Participants
             </div>
-            <Progress value={progress} className="h-1 w-16" />
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              <span>{formatTimeLeft(BigInt(airdrop.deadline))}</span>
+            <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+              <Clock className="w-3 h-3" />
+              {formatTimeLeft(BigInt(airdrop.deadline))}
             </div>
           </div>
         </CardHeader>
 
-        <CardContent className="p-3 pt-0">
-          {/* Reward Section */}
-          <div className="flex items-center justify-between p-2.5 rounded-[1rem] bg-gradient-to-r from-green-100/80 to-emerald-100/60 border border-green-200/60 shadow-sm transition-all duration-300 backdrop-blur-sm hover:brightness-95">
-            <div className="flex items-center gap-1.5">
-              <div className="p-1.5 rounded-lg bg-green-100/80">
-                <Coins className="h-4 w-4 text-green-600" />
-              </div>
-              <span className="text-base font-bold text-green-600">
-                {formatETH(airdrop.perQualifier)}
-              </span>
-              <span className="text-xs font-medium text-green-600">ETH</span>
+        <CardContent className="p-5 pt-4 space-y-4">
+          <div className="space-y-1">
+            <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-slate-300">
+              <span>Progress</span>
+              <span>{Math.round(progress)}%</span>
             </div>
-            <Avatar className="h-5 w-5 border border-white/60 shadow-sm">
-              <AvatarFallback className="text-[10px]">
+            <Progress value={progress} className="h-1 bg-slate-50" />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1">
+                <span className="text-lg font-black text-slate-900">{formatETH(airdrop.perQualifier)}</span>
+                <span className="text-[10px] font-bold text-slate-400">ETH</span>
+              </div>
+              <span className="text-[10px] font-medium text-slate-400">Per User</span>
+            </div>
+            <Avatar className="h-7 w-7 border border-slate-100">
+              <AvatarFallback className="text-[8px] font-bold bg-slate-100 text-slate-500">
                 {airdrop.creator.slice(2, 4).toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -401,107 +123,12 @@ export default function QuestCard({
         </CardContent>
       </Card>
 
-      {/* Quick View Dialog */}
-      <Dialog open={quickView} onOpenChange={setQuickView}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto rounded-[1.5rem] sm:rounded-[2rem] border border-white/60 bg-white/95 backdrop-blur-xl">
-          <DialogHeader>
-            <DialogTitle>{airdrop.title}</DialogTitle>
-            <DialogDescription>
-              Quest #{airdrop.id} • {formatETH(airdrop.perQualifier)} ETH per
-              user
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            {/* Image */}
-            {airdrop.imageUrl && (
-              <div className="relative w-full flex justify-center">
-                <IpfsImage
-                  cid={airdrop.imageUrl.replace("ipfs://", "")}
-                  alt={airdrop.title}
-                  className="max-w-full h-auto max-h-[500px] object-contain rounded-xl shadow-sm"
-                />
-              </div>
-            )}
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-2">
-              <div className="rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-sm shadow-sm p-2">
-                <p className="text-xs text-muted-foreground">Per Qualifier</p>
-                <p className="font-bold">
-                  {formatETH(airdrop.perQualifier)} ETH
-                </p>
-              </div>
-              <div className="rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-sm shadow-sm p-2">
-                <p className="text-xs text-muted-foreground">Participants</p>
-                <p className="font-bold">
-                  {airdrop.qualifiersCount}/{airdrop.maxQualifiers}
-                </p>
-              </div>
-              <div className="rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-sm shadow-sm p-2">
-                <p className="text-xs text-muted-foreground">Status</p>
-                <p className="font-bold">{getStatusText()}</p>
-              </div>
-            </div>
-
-            {/* Progress */}
-            <div>
-              <div className="mb-2 flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Progress</span>
-                <span className="font-bold">{Math.round(progress)}%</span>
-              </div>
-              <Progress value={progress} className="h-2" />
-            </div>
-
-            {/* Description */}
-            <div>
-              <h4 className="font-semibold text-sm mb-1">Description</h4>
-              <p className="text-sm text-muted-foreground">
-                {airdrop.description?.replace(/\n\nImage:.*$/, "") ||
-                  "Quest task"}
-              </p>
-            </div>
-
-            {/* Requirements */}
-            {airdrop.requirements && (
-              <div>
-                <h4 className="font-semibold text-sm mb-1">Requirements</h4>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                  {airdrop.requirements}
-                </p>
-              </div>
-            )}
-
-            {/* Time Left */}
-            <div className="flex items-center gap-2 text-sm">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">
-                {formatTimeLeft(BigInt(airdrop.deadline))}
-              </span>
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-2 pt-2">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setQuickView(false)}
-              >
-                Close
-              </Button>
-              <Button
-                className="flex-1"
-                onClick={() => {
-                  setQuickView(false);
-                  router.push(`/airdrops/${airdrop.id}`);
-                }}
-              >
-                View Full Details
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <QuestQuickView
+        isOpen={quickView}
+        onOpenChange={setQuickView}
+        airdrop={airdrop}
+        onViewFull={() => router.push(`/airdrops/${airdrop.id}`)}
+      />
     </>
   );
 }
