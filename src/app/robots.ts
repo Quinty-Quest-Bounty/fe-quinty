@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://www.quinty.io/sitemap.xml',
+    sitemap: 'https://base.quinty.io/sitemap.xml',
   };
 }

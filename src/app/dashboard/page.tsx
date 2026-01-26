@@ -15,9 +15,7 @@ import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import {
   Target,
-  Coins,
   Zap,
-  ArrowUpRight,
   LayoutGrid,
   Clock,
   Users,
@@ -26,7 +24,6 @@ import {
   Wallet
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { Card, CardContent } from "../../components/ui/card";
 import {
   fetchMetadataFromIpfs,
   BountyMetadata,
@@ -60,27 +57,25 @@ interface Quest {
   cancelled: boolean;
 }
 
-
-
 // Enhanced Stat Card Component
 const StatCard = ({ title, value, trend, label, icon: Icon, color }: { title: string, value: string, trend?: string, label?: string, icon: any, color: string }) => (
-  <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200">
+  <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
     <div className="flex items-center justify-between mb-4">
-      <div className={`p-2.5 rounded-lg ${color.split(' ')[0]} bg-opacity-10`}>
+      <div className={`p-2 rounded-xl ${color.split(' ')[0]} bg-opacity-10`}>
         <Icon className={`w-5 h-5 ${color.split(' ')[1]}`} />
       </div>
       {trend && (
-        <Badge variant="secondary" className="bg-green-50 text-green-700 hover:bg-green-100 border-0 font-medium text-[10px] px-2">
+        <Badge variant="secondary" className="bg-slate-50 text-slate-600 border-0 font-bold text-[10px] px-2">
           <TrendingUp className="w-3 h-3 mr-1" /> {trend}
         </Badge>
       )}
     </div>
-    <div className="space-y-1">
-      <h3 className="text-2xl font-bold text-gray-900 tracking-tight">{value}</h3>
-      <p className="text-sm font-medium text-gray-500">{title}</p>
+    <div className="space-y-0.5">
+      <h3 className="text-2xl font-black text-slate-900 tracking-tight">{value}</h3>
+      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{title}</p>
     </div>
     {label && (
-      <div className="mt-4 pt-3 border-t border-gray-50 text-xs text-gray-400 flex items-center">
+      <div className="mt-4 pt-3 border-t border-slate-50 text-[10px] font-medium text-slate-400 flex items-center">
         {label}
       </div>
     )}
@@ -99,7 +94,7 @@ export default function DashboardPage() {
 
   // Pagination state
   const [bountyPage, setBountyPage] = useState(1);
-  const [airdropPage, setAirdropPage] = useState(1);
+  const [questPage, setQuestPage] = useState(1);
   const [loadingBounties, setLoadingBounties] = useState(false);
   const [loadingQuests, setLoadingQuests] = useState(false);
 
@@ -124,8 +119,8 @@ export default function DashboardPage() {
     functionName: "bountyCounter",
   });
 
-  // Read airdrop counter
-  const { data: airdropCounter } = useReadContract({
+  // Read quest counter
+  const { data: questCounter } = useReadContract({
     address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]?.AirdropBounty as `0x${string}`,
     abi: AIRDROP_ABI,
     functionName: "airdropCounter",
@@ -233,29 +228,29 @@ export default function DashboardPage() {
   useEffect(() => {
     let isMounted = true;
     const loadQuests = async () => {
-      if (!airdropCounter || !CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]) return;
+      if (!questCounter || !CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]) return;
 
       setLoadingQuests(true);
-      const count = Number(airdropCounter);
+      const count = Number(questCounter);
 
       // Calculate range for current page (load from newest to oldest)
-      const startIndex = Math.max(1, count - (airdropPage * ITEMS_PER_PAGE) + 1);
-      const endIndex = Math.min(count, count - ((airdropPage - 1) * ITEMS_PER_PAGE));
+      const startIndex = Math.max(1, count - (questPage * ITEMS_PER_PAGE) + 1);
+      const endIndex = Math.min(count, count - ((questPage - 1) * ITEMS_PER_PAGE));
 
       const loadedQuests: Quest[] = [];
 
       // Load quests in reverse order (newest first)
       for (let i = endIndex; i >= startIndex; i--) {
         try {
-          const airdropData = await readContract(wagmiConfig, {
+          const questData = await readContract(wagmiConfig, {
             address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
             abi: AIRDROP_ABI,
             functionName: "getAirdrop",
             args: [BigInt(i)],
           });
 
-          if (airdropData && Array.isArray(airdropData)) {
-            const [creator, title, description, totalAmount, perQualifier, maxQualifiers, qualifiersCount, deadline, createdAt, resolved, cancelled] = airdropData as any[];
+          if (questData && Array.isArray(questData)) {
+            const [creator, title, description, totalAmount, perQualifier, maxQualifiers, qualifiersCount, deadline, createdAt, resolved, cancelled] = questData as any[];
             loadedQuests.push({
               id: i,
               creator,
@@ -279,9 +274,7 @@ export default function DashboardPage() {
     };
     loadQuests();
     return () => { isMounted = false; };
-  }, [airdropCounter, airdropPage]);
-
-
+  }, [questCounter, questPage]);
 
   const sections = [
     { id: "all" as const, label: "Overview", icon: LayoutGrid },
@@ -292,21 +285,19 @@ export default function DashboardPage() {
   const getStatusBadge = (status: number) => {
     const statuses = ["OPREC", "OPEN", "REVEAL", "RESOLVED", "DISPUTED", "EXPIRED"];
     const styles = [
-      "bg-blue-100 text-blue-700 border-blue-200", // OPREC
-      "bg-green-100 text-green-700 border-green-200", // OPEN
-      "bg-yellow-100 text-yellow-700 border-yellow-200", // REVEAL
-      "bg-gray-100 text-gray-700 border-gray-200", // RESOLVED
-      "bg-red-100 text-red-700 border-red-200", // DISPUTED
-      "bg-gray-100 text-gray-500 border-gray-200" // EXPIRED
+      "bg-blue-50 text-blue-600 border-blue-100", // OPREC
+      "bg-emerald-50 text-emerald-600 border-emerald-100", // OPEN
+      "bg-amber-50 text-amber-600 border-amber-100", // REVEAL
+      "bg-slate-50 text-slate-600 border-slate-100", // RESOLVED
+      "bg-rose-50 text-rose-600 border-rose-100", // DISPUTED
+      "bg-slate-50 text-slate-400 border-slate-100" // EXPIRED
     ];
     return (
-      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${styles[status] || styles[5]}`}>
+      <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider border ${styles[status] || styles[5]}`}>
         {statuses[status] || "UNKNOWN"}
       </span>
     );
   };
-
-
 
   const formatDeadline = (deadline: bigint | number) => {
     try {
@@ -325,17 +316,17 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 pb-20 font-sans">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-8 max-w-7xl">
+    <div className="min-h-screen bg-white pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-8">
 
         {/* Header Area */}
-        <div className="mb-10">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
-          <p className="text-gray-500 mt-1 text-sm">Welcome back. Here's what's happening on Quinty.</p>
+        <div className="mb-10 text-center">
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Dashboard</h1>
+          <p className="text-slate-500 mt-1 text-sm font-medium">Welcome back. Here's what's happening on Quinty.</p>
         </div>
 
-        {/* Stats Overview - Improved compact cards with more info */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <StatCard
             title="Active Bounties"
             value={bountyCounter ? bountyCounter.toString() : "0"}
@@ -345,12 +336,12 @@ export default function DashboardPage() {
             color="bg-blue-500 text-blue-600"
           />
           <StatCard
-            title="Airdrop Campaigns"
-            value={airdropCounter ? airdropCounter.toString() : "0"}
+            title="Quest Campaigns"
+            value={questCounter ? questCounter.toString() : "0"}
             trend="+8%"
             label="Claimed: 450"
             icon={Zap}
-            color="bg-yellow-500 text-yellow-600"
+            color="bg-amber-500 text-amber-600"
           />
           <StatCard
             title="Reputation NFTs"
@@ -366,281 +357,190 @@ export default function DashboardPage() {
             trend="+20%"
             label="Across all features"
             icon={Wallet}
-            color="bg-emerald-500 text-emerald-600"
+            color="bg-[#0EA885] text-[#0EA885]"
           />
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="mb-8 border-b border-gray-200">
-          <div className="flex gap-8 overflow-x-auto pb-1 no-scrollbar">
+        {/* Navigation Tabs - Pill Style */}
+        <div className="flex justify-center mb-12">
+          <div className="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200">
             {sections.map((section) => {
               const Icon = section.icon;
               const isActive = activeSection === section.id;
 
               return (
-                <button
+                <Button
                   key={section.id}
+                  variant={isActive ? "default" : "ghost"}
+                  size="sm"
                   onClick={() => setActiveSection(section.id)}
-                  className={`flex items-center gap-2 pb-3 px-1 text-sm font-medium transition-all whitespace-nowrap border-b-2 ${isActive
-                    ? "border-[#0EA885] text-[#0EA885]"
-                    : "border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300"
+                  className={`rounded-lg transition-all px-6 ${isActive
+                    ? "bg-white text-slate-900 shadow-sm border border-slate-200"
+                    : "text-slate-500 hover:text-slate-900"
                     }`}
                 >
-                  <Icon className={`h-4 w-4 ${isActive ? "text-[#0EA885]" : "text-gray-400"}`} />
+                  <Icon className="w-4 h-4 mr-2" />
                   {section.label}
-                </button>
+                </Button>
               );
             })}
           </div>
         </div>
 
         {/* Content Grid */}
-        <div className="space-y-12">
+        <div className="space-y-16">
 
           {/* Bounties Section */}
           {(activeSection === "all" || activeSection === "bounties") && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
                   <Target className="h-5 w-5 text-blue-500" />
-                  Latest Bounties
-                </h2>
+                  <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">Latest Bounties</h2>
+                </div>
                 {activeSection === "all" && (
-                  <Button variant="ghost" className="text-sm text-gray-500 hover:text-[#0EA885] hover:bg-transparent p-0 h-auto font-normal" onClick={() => setActiveSection("bounties")}>
-                    View all <ChevronRight className="w-4 h-4 ml-1" />
+                  <Button variant="ghost" size="sm" className="text-xs font-bold text-slate-400 hover:text-[#0EA885]" onClick={() => setActiveSection("bounties")}>
+                    VIEW ALL <ChevronRight className="w-3 h-3 ml-1" />
                   </Button>
                 )}
               </div>
 
               {loadingBounties ? (
                 <div className="flex items-center justify-center py-16">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0EA885]"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-[#0EA885]"></div>
                 </div>
               ) : bounties.length > 0 ? (
-                <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                    {bounties.slice(0, activeSection === "all" ? 4 : undefined).map((bounty) => {
-                      const metadata = bountyMetadata.get(bounty.id);
-                      const title = metadata?.title || bounty.description.split("\n")[0] || "Untitled Bounty Task";
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {bounties.slice(0, activeSection === "all" ? 4 : undefined).map((bounty) => {
+                    const metadata = bountyMetadata.get(bounty.id);
+                    const title = metadata?.title || bounty.description.split("\n")[0] || "Untitled Bounty Task";
 
-                      return (
-                        <div
-                          key={bounty.id}
-                          onClick={() => router.push(`/bounties/${bounty.id}`)}
-                          className="group cursor-pointer rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col"
-                        >
-                          {/* Image Section - with placeholder if no image */}
-                          <div className="relative w-full h-32 overflow-hidden">
-                            {metadata?.images && metadata.images.length > 0 ? (
-                              <img
-                                src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
-                                alt={title}
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
-                                <div className="text-center">
-                                  <Target className="h-10 w-10 text-blue-300 mx-auto mb-1.5" />
-                                  <p className="text-[10px] text-blue-400 font-medium">Bounty #{bounty.id}</p>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="p-3">
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="flex items-center gap-1.5">
-                                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-[10px] font-bold shadow-sm">
-                                  #{bounty.id}
-                                </div>
-                                <span className="text-[10px] text-gray-400 font-medium">Bounty</span>
-                              </div>
-                              {getStatusBadge(bounty.status)}
+                    return (
+                      <div
+                        key={bounty.id}
+                        onClick={() => router.push(`/bounties/${bounty.id}`)}
+                        className="group cursor-pointer rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col"
+                      >
+                        <div className="relative w-full h-32 overflow-hidden bg-slate-50">
+                          {metadata?.images && metadata.images.length > 0 ? (
+                            <img
+                              src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
+                              alt={title}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Target className="h-8 w-8 text-slate-200" />
                             </div>
+                          )}
+                          <div className="absolute top-3 left-3">
+                            {getStatusBadge(bounty.status)}
+                          </div>
+                        </div>
 
-                            <h3 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2 leading-tight group-hover:text-[#0EA885] transition-colors">
-                              {title}
-                            </h3>
-                            <p className="text-[10px] text-gray-400 mb-3 truncate">
-                              Creator: {bounty.creator.substring(0, 6)}...{bounty.creator.substring(38)}
-                            </p>
+                        <div className="p-4 flex flex-col flex-1">
+                          <h3 className="text-sm font-bold text-slate-900 mb-1 line-clamp-2 leading-snug group-hover:text-[#0EA885] transition-colors">
+                            {title}
+                          </h3>
+                          <p className="text-[10px] font-medium text-slate-400 mb-4">
+                            by {bounty.creator.substring(0, 6)}...{bounty.creator.substring(38)}
+                          </p>
 
-                            <div className="pt-3 border-t border-gray-50 flex items-center justify-between">
-                              <div className="flex items-center gap-1 text-gray-500 text-[10px] bg-gray-50 px-1.5 py-1 rounded-md">
-                                <Clock className="h-3 w-3" />
-                                {formatDeadline(bounty.deadline)}
-                              </div>
-                              <div className="text-right">
-                                <div className="text-xs font-bold text-gray-900">
-                                  {(Number(bounty.amount) / 1e18).toFixed(3)} <span className="text-[10px] font-medium text-gray-500">ETH</span>
-                                </div>
-                                {ethPrice > 0 && (
-                                  <div className="text-[10px] text-gray-400">
-                                    {formatUSD(convertEthToUSD(Number(bounty.amount) / 1e18, ethPrice))}
-                                  </div>
-                                )}
+                          <div className="mt-auto pt-3 border-t border-slate-50 flex items-center justify-between">
+                            <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
+                              <Clock className="h-3 w-3" />
+                              {formatDeadline(bounty.deadline)}
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-black text-slate-900">
+                                {(Number(bounty.amount) / 1e18).toFixed(3)} <span className="text-[10px] font-bold text-slate-400">ETH</span>
                               </div>
                             </div>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Pagination Controls for Bounties (only show when not in "all" view) */}
-                  {activeSection === "bounties" && bountyCounter && Number(bountyCounter) > ITEMS_PER_PAGE && (
-                    <div className="flex items-center justify-center gap-2 mt-6">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setBountyPage(p => Math.max(1, p - 1))}
-                        disabled={bountyPage === 1}
-                        className="rounded-full"
-                      >
-                        Previous
-                      </Button>
-                      <span className="text-sm text-gray-600 px-4">
-                        Page {bountyPage} of {Math.ceil(Number(bountyCounter) / ITEMS_PER_PAGE)}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setBountyPage(p => p + 1)}
-                        disabled={bountyPage >= Math.ceil(Number(bountyCounter) / ITEMS_PER_PAGE)}
-                        className="rounded-full"
-                      >
-                        Next
-                      </Button>
-                    </div>
-                  )}
-                </>
+                      </div>
+                    );
+                  })}
+                </div>
               ) : (
-                <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-200">
-                  <Target className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500 font-medium">No active bounties found.</p>
-                  <p className="text-xs text-gray-400 mt-1">Check back later or create one yourself.</p>
+                <div className="text-center py-16 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                  <Target className="h-8 w-8 text-slate-300 mx-auto mb-3" />
+                  <p className="text-sm font-bold text-slate-400">No active bounties found.</p>
                 </div>
               )}
-            </motion.div>
+            </div>
           )}
 
           {/* Quests Section */}
           {(activeSection === "all" || activeSection === "quests") && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.1 }}>
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-yellow-500" />
-                  Active Quests
-                </h2>
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-amber-500" />
+                  <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight">Active Quests</h2>
+                </div>
                 {activeSection === "all" && (
-                  <Button variant="ghost" className="text-sm text-gray-500 hover:text-[#0EA885] hover:bg-transparent p-0 h-auto font-normal" onClick={() => setActiveSection("quests")}>
-                    View all <ChevronRight className="w-4 h-4 ml-1" />
+                  <Button variant="ghost" size="sm" className="text-xs font-bold text-slate-400 hover:text-[#0EA885]" onClick={() => setActiveSection("quests")}>
+                    VIEW ALL <ChevronRight className="w-3 h-3 ml-1" />
                   </Button>
                 )}
               </div>
 
               {loadingQuests ? (
                 <div className="flex items-center justify-center py-16">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-200 border-t-amber-500"></div>
                 </div>
               ) : quests.length > 0 ? (
-                <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                    {quests
-                      .filter((q) => !q.resolved && !q.cancelled)
-                      .slice(0, activeSection === "all" ? 4 : undefined)
-                      .map((quest) => (
-                        <div
-                          key={quest.id}
-                          onClick={() => router.push(`/airdrops/${quest.id}`)}
-                          className="group cursor-pointer rounded-xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col"
-                        >
-                          {/* Placeholder Image for Quests */}
-                          <div className="relative w-full h-32 overflow-hidden">
-                            <div className="w-full h-full bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 flex items-center justify-center">
-                              <div className="text-center">
-                                <Zap className="h-10 w-10 text-yellow-300 mx-auto mb-1.5" />
-                                <p className="text-[10px] text-yellow-400 font-medium">Quest #{quest.id}</p>
-                              </div>
-                            </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {quests
+                    .filter((q) => !q.resolved && !q.cancelled)
+                    .slice(0, activeSection === "all" ? 4 : undefined)
+                    .map((quest) => (
+                      <div
+                        key={quest.id}
+                        onClick={() => router.push(`/quests/${quest.id}`)}
+                        className="group cursor-pointer rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col"
+                      >
+                        <div className="relative w-full h-32 overflow-hidden bg-slate-50 flex items-center justify-center">
+                          <Zap className="h-8 w-8 text-slate-200" />
+                          <div className="absolute top-3 right-3">
+                            <Badge variant="secondary" className="bg-white/90 backdrop-blur-sm text-slate-600 border-slate-100 font-bold text-[9px]">
+                              {Number(quest.totalRecipients)} SPOTS
+                            </Badge>
                           </div>
+                        </div>
 
-                          <div className="p-3">
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="h-6 w-6 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-600 border border-yellow-100">
-                                <Zap className="h-3.5 w-3.5" />
-                              </div>
-                              <Badge variant="secondary" className="bg-gray-50 text-gray-600 border-0 font-normal text-[10px]">
-                                {Number(quest.totalRecipients)} spots
-                              </Badge>
+                        <div className="p-4 flex flex-col flex-1">
+                          <h3 className="text-sm font-bold text-slate-900 mb-1 truncate group-hover:text-amber-600 transition-colors">
+                            {quest.title || `Quest #${quest.id}`}
+                          </h3>
+                          <p className="text-[10px] font-medium text-slate-400 mb-4">
+                            by {quest.creator.substring(0, 6)}...{quest.creator.substring(38)}
+                          </p>
+
+                          <div className="mt-auto pt-3 border-t border-slate-50 flex items-center justify-between">
+                            <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
+                              <Clock className="h-3 w-3" />
+                              {formatDeadline(quest.deadline)}
                             </div>
-
-                            <h3 className="text-sm font-semibold text-gray-900 mb-1 truncate group-hover:text-yellow-600 transition-colors">
-                              {quest.title || `Quest #${quest.id}`}
-                            </h3>
-                            <p className="text-[10px] text-gray-400 mb-3 truncate">
-                              Creator: {quest.creator.substring(0, 6)}...{quest.creator.substring(38)}
-                            </p>
-
-                            <div className="pt-3 border-t border-gray-50 flex items-center justify-between">
-                              <div className="flex items-center gap-1 text-gray-500 text-[10px]">
-                                <Clock className="h-3 w-3" />
-                                {formatDeadline(quest.deadline)}
-                              </div>
-                              <div className="text-right">
-                                <div className="text-xs font-bold text-gray-900">
-                                  {(Number(quest.amount) / 1e18).toFixed(2)} <span className="text-[10px] font-medium text-gray-500">ETH</span>
-                                </div>
-                                {ethPrice > 0 && (
-                                  <div className="text-[10px] text-gray-400">
-                                    {formatUSD(convertEthToUSD(Number(quest.amount) / 1e18, ethPrice))}
-                                  </div>
-                                )}
+                            <div className="text-right">
+                              <div className="text-sm font-black text-slate-900">
+                                {(Number(quest.amount) / 1e18).toFixed(2)} <span className="text-[10px] font-bold text-slate-400">ETH</span>
                               </div>
                             </div>
                           </div>
                         </div>
-                      ))}
-                  </div>
-
-                  {/* Pagination Controls for Quests */}
-                  {activeSection === "quests" && airdropCounter && Number(airdropCounter) > ITEMS_PER_PAGE && (
-                    <div className="flex items-center justify-center gap-2 mt-6">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setAirdropPage(p => Math.max(1, p - 1))}
-                        disabled={airdropPage === 1}
-                        className="rounded-full"
-                      >
-                        Previous
-                      </Button>
-                      <span className="text-sm text-gray-600 px-4">
-                        Page {airdropPage} of {Math.ceil(Number(airdropCounter) / ITEMS_PER_PAGE)}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setAirdropPage(p => p + 1)}
-                        disabled={airdropPage >= Math.ceil(Number(airdropCounter) / ITEMS_PER_PAGE)}
-                        className="rounded-full"
-                      >
-                        Next
-                      </Button>
-                    </div>
-                  )}
-                </>
+                      </div>
+                    ))}
+                </div>
               ) : (
-                <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-200">
-                  <Zap className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500 font-medium">No active quests.</p>
+                <div className="text-center py-16 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                  <Zap className="h-8 w-8 text-slate-300 mx-auto mb-3" />
+                  <p className="text-sm font-bold text-slate-400">No active quests found.</p>
                 </div>
               )}
-            </motion.div>
+            </div>
           )}
-
-          {/* Funding Section */}
-
         </div>
       </div>
     </div>

@@ -1,540 +1,156 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
-import { readContract } from "@wagmi/core";
+import { formatETH } from "../../utils/web3";
+import { useHistory } from "../../hooks/useHistory";
+import { Button } from "../../components/ui/button";
 import {
-    CONTRACT_ADDRESSES,
-    QUINTY_ABI,
-    AIRDROP_ABI,
-    BASE_SEPOLIA_CHAIN_ID,
-} from "../../utils/contracts";
-import { formatETH, formatAddress, wagmiConfig } from "../../utils/web3";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import {
+    ArrowUpRight,
+    ArrowDownLeft,
+    Zap,
     Target,
-    Gift,
-    TrendingUp,
-    Users,
-    Coins,
-    Calendar,
-    ExternalLink,
-    ArrowRight,
-    CheckCircle,
-    XCircle,
-    Clock,
-    Filter,
-    Loader2,
+    History as HistoryIcon,
+    ChevronRight,
+    Search,
+    Filter
 } from "lucide-react";
-
-interface Transaction {
-    id: string;
-    type: "bounty_created" | "bounty_submitted" | "bounty_won" | "bounty_revealed" | "bounty_replied" | "quest_created" | "quest_submitted";
-    contractType: "Quinty" | "Quest";
-    itemId: number;
-    amount?: bigint;
-    timestamp: bigint;
-    status: string;
-    description: string;
-}
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function HistoryPage() {
     const router = useRouter();
     const { address } = useAccount();
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const { transactions, isLoading } = useHistory();
     const [filter, setFilter] = useState<string>("all");
 
-    useEffect(() => {
-        if (address) {
-            loadTransactionHistory();
-        }
-    }, [address]);
+    const filteredTransactions = useMemo(() => {
+        if (filter === "all") return transactions;
+        if (filter === "bounties") return transactions.filter(tx => tx.contractType === "Quinty");
+        if (filter === "quests") return transactions.filter(tx => tx.contractType === "Quest");
+        return transactions;
+    }, [transactions, filter]);
 
-    const loadTransactionHistory = async () => {
-        if (!address) return;
-
-        try {
-            setIsLoading(true);
-            const allTransactions: Transaction[] = [];
-
-            console.log("Loading transaction history for address:", address);
-
-            // Load Bounty transactions
-            try {
-                console.log("Loading bounties...");
-                const bountyCounter = await readContract(wagmiConfig, {
-                    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-                    abi: QUINTY_ABI,
-                    functionName: "bountyCounter",
-                });
-                console.log("Bounty counter:", bountyCounter);
-                const bountyCount = Number(bountyCounter);
-
-                for (let i = 1; i <= bountyCount; i++) {
-                    try {
-                        const bountyData = await readContract(wagmiConfig, {
-                            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-                            abi: QUINTY_ABI,
-                            functionName: "getBountyData",
-                            args: [BigInt(i)],
-                        });
-
-                        const [
-                            creator,
-                            description,
-                            amount,
-                            deadline,
-                            allowMultipleWinners,
-                            winnerShares,
-                            status,
-                            slashPercent,
-                            selectedWinners,
-                            selectedSubmissionIds,
-                            hasOprec,
-                            oprecDeadline,
-                        ] = bountyData as any;
-
-                        // Check if user created this bounty
-                        if (creator.toLowerCase() === address.toLowerCase()) {
-                            console.log(`User created bounty ${i}`);
-                            allTransactions.push({
-                                id: `bounty-created-${i}`,
-                                type: "bounty_created",
-                                contractType: "Quinty",
-                                itemId: i,
-                                amount: amount,
-                                timestamp: deadline,
-                                status: status === 3 ? "Resolved" : status === 1 ? "Open" : status === 0 ? "OPREC" : status === 2 ? "Pending Reveal" : "Active",
-                                description: description.split("\n")[0] || `Bounty #${i}`,
-                            });
-                        }
-
-                        // Get submissions
-                        const submissionCount = await readContract(wagmiConfig, {
-                            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-                            abi: QUINTY_ABI,
-                            functionName: "getSubmissionCount",
-                            args: [BigInt(i)],
-                        });
-
-                        for (let subIdx = 0; subIdx < Number(submissionCount); subIdx++) {
-                            try {
-                                const submissionData = await readContract(wagmiConfig, {
-                                    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-                                    abi: QUINTY_ABI,
-                                    functionName: "getSubmissionStruct",
-                                    args: [BigInt(i), BigInt(subIdx)],
-                                });
-
-                                const sub = submissionData as any;
-
-                                // Check if user submitted to this bounty
-                                if (sub.solver.toLowerCase() === address.toLowerCase()) {
-                                    allTransactions.push({
-                                        id: `bounty-submitted-${i}-${subIdx}`,
-                                        type: "bounty_submitted",
-                                        contractType: "Quinty",
-                                        itemId: i,
-                                        amount: sub.deposit,
-                                        timestamp: sub.submittedAt || deadline,
-                                        status: sub.revealed ? "Revealed" : "Submitted",
-                                        description: description.split("\n")[0] || `Bounty #${i}`,
-                                    });
-
-                                    // Add won transaction if user is selected as winner
-                                    if (sub.selected) {
-                                        allTransactions.push({
-                                            id: `bounty-won-${i}-${subIdx}`,
-                                            type: "bounty_won",
-                                            contractType: "Quinty",
-                                            itemId: i,
-                                            amount: amount,
-                                            timestamp: sub.submittedAt || deadline,
-                                            status: "Won",
-                                            description: description.split("\n")[0] || `Bounty #${i}`,
-                                        });
-                                    }
-
-                                    // Add revealed transaction if solution was revealed
-                                    if (sub.revealed) {
-                                        allTransactions.push({
-                                            id: `bounty-revealed-${i}-${subIdx}`,
-                                            type: "bounty_revealed",
-                                            contractType: "Quinty",
-                                            itemId: i,
-                                            timestamp: sub.revealedAt || sub.submittedAt || deadline,
-                                            status: "Revealed",
-                                            description: description.split("\n")[0] || `Bounty #${i}`,
-                                        });
-                                    }
-                                }
-
-                                // Check for replies by user on any submission
-                                if (sub.replies && Array.isArray(sub.replies)) {
-                                    for (let replyIdx = 0; replyIdx < sub.replies.length; replyIdx++) {
-                                        const reply = sub.replies[replyIdx];
-                                        if (reply.replier.toLowerCase() === address.toLowerCase()) {
-                                            allTransactions.push({
-                                                id: `bounty-replied-${i}-${subIdx}-${replyIdx}`,
-                                                type: "bounty_replied",
-                                                contractType: "Quinty",
-                                                itemId: i,
-                                                timestamp: reply.timestamp || deadline,
-                                                status: "Replied",
-                                                description: description.split("\n")[0] || `Bounty #${i}`,
-                                            });
-                                        }
-                                    }
-                                }
-                            } catch (subError) {
-                                console.error(`Error loading submission ${subIdx} for bounty ${i}:`, subError);
-                            }
-                        }
-                    } catch (bountyError) {
-                        console.error(`Error loading bounty ${i}:`, bountyError);
-                    }
-                }
-            } catch (error) {
-                console.error("Error loading bounty transactions:", error);
-            }
-
-
-
-            // Load Airdrop transactions
-            try {
-                const airdropCounter = await readContract(wagmiConfig, {
-                    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-                    abi: AIRDROP_ABI,
-                    functionName: "airdropCounter",
-                });
-
-                for (let i = 1; i <= Number(airdropCounter); i++) {
-                    try {
-                        const airdrop = await readContract(wagmiConfig, {
-                            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-                            abi: AIRDROP_ABI,
-                            functionName: "getAirdrop",
-                            args: [BigInt(i)],
-                        });
-
-                        const [creator, title, , totalReward, , deadline, , createdAt] = airdrop as any;
-
-                        // Check if user created this airdrop
-                        if (creator.toLowerCase() === address.toLowerCase()) {
-                            allTransactions.push({
-                                id: `quest-created-${i}`,
-                                type: "quest_created",
-                                contractType: "Quest",
-                                itemId: i,
-                                amount: totalReward,
-                                timestamp: createdAt,
-                                status: "Created",
-                                description: title || `Quest #${i}`,
-                            });
-                        }
-
-                        // Check if user submitted to this quest
-                        try {
-                            const hasSubmitted = await readContract(wagmiConfig, {
-                                address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-                                abi: AIRDROP_ABI,
-                                functionName: "hasSubmitted",
-                                args: [BigInt(i), address],
-                            });
-
-                            if (hasSubmitted) {
-                                const submission = await readContract(wagmiConfig, {
-                                    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-                                    abi: AIRDROP_ABI,
-                                    functionName: "getUserSubmission",
-                                    args: [BigInt(i), address],
-                                });
-
-                                const [, submittedAt, status] = submission as any;
-
-                                allTransactions.push({
-                                    id: `quest-submitted-${i}`,
-                                    type: "quest_submitted",
-                                    contractType: "Quest",
-                                    itemId: i,
-                                    timestamp: submittedAt,
-                                    status: status === 1 ? "Approved" : status === 2 ? "Rejected" : "Pending",
-                                    description: title || `Quest #${i}`,
-                                });
-                            }
-                        } catch (submissionError) {
-                            // User hasn't submitted to this quest
-                        }
-                    } catch (airdropError) {
-                        console.error(`Error loading quest ${i}:`, airdropError);
-                    }
-                }
-            } catch (error) {
-                console.error("Error loading quest transactions:", error);
-            }
-
-            // Sort by timestamp descending
-            allTransactions.sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
-
-            console.log("Total transactions loaded:", allTransactions.length);
-            console.log("Transactions:", allTransactions);
-            setTransactions(allTransactions);
-        } catch (error) {
-            console.error("Error loading transaction history:", error);
-        } finally {
-            setIsLoading(false);
-        }
+    const getIcon = (type: string) => {
+        if (type.includes("bounty")) return <Target className="w-4 h-4 text-blue-500" />;
+        if (type.includes("quest")) return <Zap className="w-4 h-4 text-amber-500" />;
+        return <HistoryIcon className="w-4 h-4 text-slate-400" />;
     };
 
-    const getTransactionIcon = (type: Transaction["type"]) => {
-        switch (type) {
-            case "bounty_created":
-            case "bounty_submitted":
-            case "bounty_won":
-            case "bounty_revealed":
-            case "bounty_replied":
-                return Target;
-
-            case "quest_created":
-            case "quest_submitted":
-                return Coins;
-            default:
-                return ArrowRight;
-        }
+    const getStatusColor = (type: string) => {
+        if (type.includes("create")) return "bg-emerald-50 text-emerald-600 border-emerald-100";
+        if (type.includes("submit") || type.includes("join")) return "bg-blue-50 text-blue-600 border-blue-100";
+        if (type.includes("win") || type.includes("resolve")) return "bg-purple-50 text-purple-600 border-purple-100";
+        return "bg-slate-50 text-slate-600 border-slate-100";
     };
-
-    const getTransactionColor = (type: Transaction["type"]) => {
-        if (type.includes("created")) return "text-blue-600 bg-blue-50 border-blue-200";
-        if (type.includes("submitted")) return "text-purple-600 bg-purple-50 border-purple-200";
-        if (type.includes("won")) return "text-green-600 bg-green-50 border-green-200";
-        if (type.includes("revealed")) return "text-emerald-600 bg-emerald-50 border-emerald-200";
-        if (type.includes("replied")) return "text-cyan-600 bg-cyan-50 border-cyan-200";
-        return "text-gray-600 bg-gray-50 border-gray-200";
-    };
-
-    const getTransactionLabel = (type: Transaction["type"]) => {
-        const labels: Record<Transaction["type"], string> = {
-            bounty_created: "Created Bounty",
-            bounty_submitted: "Submitted to Bounty",
-            bounty_won: "Won Bounty",
-            bounty_revealed: "Revealed Solution",
-            bounty_replied: "Replied to Submission",
-
-            quest_created: "Created Quest",
-            quest_submitted: "Submitted to Quest",
-        };
-        return labels[type];
-    };
-
-    const getRouteForTransaction = (tx: Transaction) => {
-        switch (tx.contractType) {
-            case "Quinty":
-                return `/bounties/${tx.itemId}`;
-
-            case "Quest":
-                return `/airdrops/${tx.itemId}`;
-            default:
-                return "#";
-        }
-    };
-
-    const filteredTransactions = filter === "all"
-        ? transactions
-        : transactions.filter((tx) => {
-            if (filter === "bounties") return tx.contractType === "Quinty";
-
-            if (filter === "quests") return tx.contractType === "Quest";
-            return true;
-        });
 
     if (!address) {
         return (
-            <div className="min-h-screen flex items-center justify-center p-4">
-                <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
-                    <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Connect Your Wallet</h2>
-                    <p className="text-muted-foreground text-sm sm:text-base">
-                        Please connect your wallet to view transaction history
-                    </p>
+            <div className="max-w-3xl mx-auto px-4 pt-32 text-center">
+                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <HistoryIcon className="w-8 h-8 text-slate-300" />
                 </div>
-            </div>
-        );
-    }
-
-    if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center p-4">
-                <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
-                    <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto text-[#0EA885]" />
-                    <p className="text-muted-foreground mt-6 text-sm sm:text-base">Loading transaction history...</p>
-                </div>
+                <h2 className="text-xl font-black text-slate-900 mb-2">Connect Wallet</h2>
+                <p className="text-slate-500 text-sm font-medium">Please connect your wallet to view your activity history.</p>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen ">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-6 sm:pb-8">
-                {/* Header */}
-                <div className="mb-8 sm:mb-10 rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-6 sm:p-8 transition-all duration-500">
-                    <h1 className="text-3xl sm:text-4xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Transaction History</h1>
-                    <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-                        View all your interactions with Quinty smart contracts
-                    </p>
+        <div className="max-w-4xl mx-auto px-4 pt-16 sm:pt-20 pb-12">
+            {/* Header Section */}
+            <div className="text-center mb-12">
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Activity History</h1>
+                <p className="text-slate-500 mt-1 text-sm font-medium">Tracking your interactions with the protocol</p>
+            </div>
+
+            {/* Filter Tabs */}
+            <div className="flex justify-center mb-10">
+                <div className="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200">
+                    {[
+                        { id: "all", label: "All Activity" },
+                        { id: "bounties", label: "Bounties" },
+                        { id: "quests", label: "Quests" },
+                    ].map((tab) => (
+                        <Button
+                            key={tab.id}
+                            variant={filter === tab.id ? "default" : "ghost"}
+                            size="sm"
+                            onClick={() => setFilter(tab.id)}
+                            className={`rounded-lg transition-all px-6 font-bold text-xs ${filter === tab.id
+                                    ? "bg-white text-slate-900 shadow-sm border border-slate-200"
+                                    : "text-slate-500 hover:text-slate-900"
+                                }`}
+                        >
+                            {tab.label}
+                        </Button>
+                    ))}
                 </div>
+            </div>
 
-                {/* Stats Overview */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-                    <Card className="rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-300 group">
-                        <CardContent className="p-4 sm:p-5">
-                            <div className="flex items-center gap-2 mb-2">
-                                <div className="p-1.5 rounded-lg bg-blue-100 group- transition-transform duration-300">
-                                    <Target className="h-4 w-4 text-blue-600" />
-                                </div>
-                                <p className="text-xs text-muted-foreground font-medium">Bounties</p>
-                            </div>
-                            <p className="text-2xl sm:text-3xl font-bold">
-                                {transactions.filter((tx) => tx.contractType === "Quinty").length}
-                            </p>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-300 group">
-                        <CardContent className="p-4 sm:p-5">
-                            <div className="flex items-center gap-2 mb-2">
-                                <div className="p-1.5 rounded-lg bg-yellow-100 group- transition-transform duration-300">
-                                    <Coins className="h-4 w-4 text-yellow-600" />
-                                </div>
-                                <p className="text-xs text-muted-foreground font-medium">Quests</p>
-                            </div>
-                            <p className="text-2xl sm:text-3xl font-bold">
-                                {transactions.filter((tx) => tx.contractType === "Quest").length}
-                            </p>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-300 group">
-                        <CardContent className="p-4 sm:p-5">
-                            <div className="flex items-center gap-2 mb-2">
-                                <div className="p-1.5 rounded-lg bg-purple-100 group- transition-transform duration-300">
-                                    <Users className="h-4 w-4 text-purple-600" />
-                                </div>
-                                <p className="text-xs text-muted-foreground font-medium">Total Actions</p>
-                            </div>
-                            <p className="text-2xl sm:text-3xl font-bold">
-                                {transactions.length}
-                            </p>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Filter */}
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6 p-4 rounded-[1.25rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md">
-                    <div className="p-2 rounded-lg bg-[#0EA885]/10">
-                        <Filter className="h-4 w-4 sm:h-5 sm:w-5 text-[#0EA885]" />
-                    </div>
-                    <Select value={filter} onValueChange={setFilter}>
-                        <SelectTrigger className="w-full sm:w-48 rounded-[0.75rem] border-white/60">
-                            <SelectValue placeholder="Filter by type" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-[0.75rem]">
-                            <SelectItem value="all">All Transactions</SelectItem>
-                            <SelectItem value="bounties">Bounties</SelectItem>
-
-                            <SelectItem value="quests">Quests</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <span className="text-xs sm:text-sm text-muted-foreground font-medium px-3 py-1.5 rounded-full bg-[#0EA885]/10">
-                        {filteredTransactions.length} transaction{filteredTransactions.length !== 1 ? "s" : ""}
-                    </span>
-                </div>
-
-                {/* Transactions List */}
-                {filteredTransactions.length === 0 ? (
-                    <Card className="rounded-[1.5rem] sm:rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg">
-                        <CardContent className="py-12 sm:py-16 text-center">
-                            <div className="p-4 rounded-[1.25rem] bg-[#0EA885]/10 inline-flex mb-6">
-                                <Clock className="h-10 w-10 sm:h-12 sm:w-12 text-[#0EA885]" />
-                            </div>
-                            <h3 className="text-lg sm:text-xl font-bold mb-2">No transactions found</h3>
-                            <p className="text-muted-foreground mb-6 text-sm sm:text-base">
-                                {filter === "all"
-                                    ? "You haven't made any transactions yet"
-                                    : `No ${filter} transactions found`}
-                            </p>
-                            <Button
-                                onClick={() => router.push("/bounties")}
-                                className="rounded-[0.75rem] transition-all duration-300"
+            {/* Transactions List */}
+            <div className="space-y-3">
+                {isLoading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className="h-20 bg-slate-50 rounded-2xl animate-pulse border border-slate-100" />
+                    ))
+                ) : filteredTransactions.length > 0 ? (
+                    <AnimatePresence mode="popLayout">
+                        {filteredTransactions.map((tx, idx) => (
+                            <motion.div
+                                key={tx.id || idx}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.05 }}
+                                onClick={() => router.push(tx.contractType === "Quinty" ? `/bounties/${tx.itemId}` : `/quests/${tx.itemId}`)}
+                                className="group cursor-pointer bg-white border border-slate-100 rounded-2xl p-4 hover:shadow-md hover:border-slate-200 transition-all flex items-center gap-4"
                             >
-                                Explore Bounties
-                            </Button>
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <div className="space-y-3">
-                        {filteredTransactions.map((tx) => {
-                            const Icon = getTransactionIcon(tx.type);
-                            const colorClass = getTransactionColor(tx.type);
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${getStatusColor(tx.type)}`}>
+                                    {getIcon(tx.type)}
+                                </div>
 
-                            return (
-                                <Card
-                                    key={tx.id}
-                                    className="rounded-[1.25rem] sm:rounded-[1.5rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-300 cursor-pointer "
-                                    onClick={() => router.push(getRouteForTransaction(tx))}
-                                >
-                                    <CardContent className="p-4 sm:p-5">
-                                        <div className="flex items-center justify-between gap-3 sm:gap-4">
-                                            <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-                                                <div className={`flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-[0.75rem] sm:rounded-[1rem] border ${colorClass} group- transition-transform duration-300`}>
-                                                    <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
-                                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-0.5">
+                                        <span className="text-xs font-black uppercase tracking-wider text-slate-400">
+                                            {tx.type.replace("_", " ")}
+                                        </span>
+                                        <span className="text-[10px] font-bold text-slate-300">•</span>
+                                        <span className="text-[10px] font-bold text-slate-400">
+                                            {new Date(Number(tx.timestamp) * 1000).toLocaleDateString(undefined, {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </span>
+                                    </div>
+                                    <p className="text-sm font-bold text-slate-900 truncate group-hover:text-[#0EA885] transition-colors">
+                                        {tx.description}
+                                    </p>
+                                </div>
 
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <h3 className="font-semibold text-sm truncate">
-                                                            {getTransactionLabel(tx.type)}
-                                                        </h3>
-                                                        <Badge variant="outline" className="text-xs">
-                                                            {tx.status}
-                                                        </Badge>
-                                                    </div>
-                                                    <p className="text-sm text-muted-foreground truncate">
-                                                        {tx.description}
-                                                    </p>
-                                                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                                                        <span className="flex items-center gap-1">
-                                                            <Calendar className="h-3 w-3" />
-                                                            {new Date(Number(tx.timestamp) * 1000).toLocaleDateString()}
-                                                        </span>
-                                                        {tx.amount && (
-                                                            <span className="flex items-center gap-1">
-                                                                <Coins className="h-3 w-3" />
-                                                                {formatETH(tx.amount)} ETH
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <Button variant="ghost" size="sm" className="rounded-[0.75rem] hover:bg-[#0EA885]/10 transition-all duration-300">
-                                                <ExternalLink className="h-4 w-4 text-[#0EA885]" />
-                                            </Button>
+                                <div className="text-right flex flex-col items-end gap-1">
+                                    {tx.amount ? (
+                                        <div className="text-sm font-black text-slate-900">
+                                            {formatETH(tx.amount)} <span className="text-[10px] font-bold text-slate-400">ETH</span>
                                         </div>
-                                    </CardContent>
-                                </Card>
-                            );
-                        })}
+                                    ) : (
+                                        <div className="text-xs font-bold text-slate-300">—</div>
+                                    )}
+                                    <div className="p-1 rounded-lg bg-slate-50 text-slate-300 group-hover:text-[#0EA885] group-hover:bg-[#0EA885]/5 transition-all">
+                                        <ChevronRight className="w-4 h-4" />
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
+                ) : (
+                    <div className="py-20 text-center bg-white rounded-3xl border border-dashed border-slate-200">
+                        <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Search className="w-6 h-6 text-slate-300" />
+                        </div>
+                        <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">No activity found</h3>
+                        <p className="text-xs font-bold text-slate-400 mt-1">Try changing your filters or start interacting with the protocol.</p>
                     </div>
                 )}
             </div>

@@ -3,7 +3,7 @@ import { MetadataRoute } from 'next';
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      url: 'https://www.quinty.io',
+      url: 'https://base.quinty.io',
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 1.0,
@@ -21,7 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: 'https://www.quinty.io/airdrops',
+      url: 'https://www.quinty.io/quests',
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.8,

@@ -6,6 +6,7 @@ import { WagmiProvider } from 'wagmi';
 import { wagmiConfig } from '../utils/web3';
 import { AlertProvider } from '../hooks/useAlert';
 import { AlertDialogProvider } from '../hooks/useAlertDialog';
+import FarcasterProvider from '../components/FarcasterProvider';
 import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
 
@@ -32,11 +33,13 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   },
   }}
   >
-  <AlertProvider>
-  <AlertDialogProvider>
-   {children}
-  </AlertDialogProvider>
-  </AlertProvider>
+  <FarcasterProvider>
+   <AlertProvider>
+    <AlertDialogProvider>
+     {children}
+    </AlertDialogProvider>
+   </AlertProvider>
+  </FarcasterProvider>
   </OnchainKitProvider>
  </QueryClientProvider>
  </WagmiProvider>

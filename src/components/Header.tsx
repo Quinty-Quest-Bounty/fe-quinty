@@ -19,10 +19,10 @@ const WalletComponents = dynamic(
 
 const navItems = [
   { name: "Dashboard", link: "/dashboard" },
+  { name: "Quests", link: "/quests" },
   { name: "Bounties", link: "/bounties" },
   { name: "Reputation", link: "/reputation" },
   { name: "History", link: "/history" },
-  { name: "Quests", link: "/airdrops" },
 ];
 
 export default function Header() {
@@ -43,7 +43,7 @@ export default function Header() {
 
   return (
     <>
-      <div className="fixed inset-x-0 top-0 z-[100] flex justify-center pt-4 sm:pt-6 pointer-events-none">
+      <div className="fixed inset-x-0 top-0 z-[100] flex justify-center pt-2 sm:pt-3 pointer-events-none">
         <motion.header
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -51,8 +51,8 @@ export default function Header() {
           className={cn(
             "pointer-events-auto mx-4 w-full max-w-5xl rounded-2xl lg:rounded-full border transition-all duration-500",
             scrolled
-              ? "bg-white/80 dark:bg-black/80 backdrop-blur-xl border-black/5 dark:border-white/10 shadow-lg shadow-black/5"
-              : "bg-white/50 dark:bg-black/50 backdrop-blur-md border-white/20 dark:border-white/5 shadow-sm"
+              ? "bg-white border-slate-200 shadow-md"
+              : "bg-white border-slate-100 shadow-sm"
           )}
         >
           <div className="flex h-14 items-center justify-between px-2 pl-4 pr-2">
