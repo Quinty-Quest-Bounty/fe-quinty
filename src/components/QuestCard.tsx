@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { Users, Clock, Coins, Eye, Share2, Gift } from "lucide-react";
 import { useShare } from "@/hooks/useShare";
-import { QuestQuickView } from "./airdrops/QuestQuickView";
+import { QuestQuickView } from "./quests/QuestQuickView";
 
 interface Quest {
   id: number;
@@ -28,29 +28,29 @@ interface Quest {
 }
 
 interface QuestCardProps {
-  airdrop: Quest;
+  quest: Quest;
   entryCount?: number;
   onShowSubmitModal?: () => void;
 }
 
-export default function QuestCard({ airdrop, entryCount = 0 }: QuestCardProps) {
+export default function QuestCard({ quest, entryCount = 0 }: QuestCardProps) {
   const router = useRouter();
   const [quickView, setQuickView] = useState(false);
   const { shareLink } = useShare();
-  const progress = Math.min((airdrop.qualifiersCount / airdrop.maxQualifiers) * 100, 100);
-  const isExpired = Date.now() / 1000 > airdrop.deadline;
+  const progress = Math.min((quest.qualifiersCount / quest.maxQualifiers) * 100, 100);
+  const isExpired = Date.now() / 1000 > quest.deadline;
 
   const getStatusColor = () => {
-    if (airdrop.resolved) return "default";
+    if (quest.resolved) return "default";
     if (isExpired) return "destructive";
-    if (airdrop.qualifiersCount >= airdrop.maxQualifiers) return "secondary";
+    if (quest.qualifiersCount >= quest.maxQualifiers) return "secondary";
     return "default";
   };
 
   const getStatusText = () => {
-    if (airdrop.resolved) return "Completed";
+    if (quest.resolved) return "Completed";
     if (isExpired) return "Expired";
-    if (airdrop.qualifiersCount >= airdrop.maxQualifiers) return "Full";
+    if (quest.qualifiersCount >= quest.maxQualifiers) return "Full";
     return "Active";
   };
 
@@ -58,14 +58,14 @@ export default function QuestCard({ airdrop, entryCount = 0 }: QuestCardProps) {
     <>
       <Card
         className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white hover:border-[#0EA885]/30 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md"
-        onClick={() => router.push(`/airdrops/${airdrop.id}`)}
+        onClick={() => router.push(`/quests/${quest.id}`)}
       >
         {/* Image Section */}
         <div className="relative h-40 w-full overflow-hidden bg-slate-50">
-          {airdrop.imageUrl ? (
+          {quest.imageUrl ? (
             <IpfsImage
-              cid={airdrop.imageUrl.replace("ipfs://", "")}
-              alt={airdrop.title}
+              cid={quest.imageUrl.replace("ipfs://", "")}
+              alt={quest.title}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
@@ -83,16 +83,16 @@ export default function QuestCard({ airdrop, entryCount = 0 }: QuestCardProps) {
 
         <CardHeader className="p-5 pb-2">
           <h3 className="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-[#0EA885] transition-colors">
-            {airdrop.title}
+            {quest.title}
           </h3>
           <div className="flex items-center gap-4 mt-1">
             <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
               <Users className="w-3 h-3" />
-              {entryCount || airdrop.qualifiersCount} Participants
+              {entryCount || quest.qualifiersCount} Participants
             </div>
             <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
               <Clock className="w-3 h-3" />
-              {formatTimeLeft(BigInt(airdrop.deadline))}
+              {formatTimeLeft(BigInt(quest.deadline))}
             </div>
           </div>
         </CardHeader>
@@ -109,14 +109,14 @@ export default function QuestCard({ airdrop, entryCount = 0 }: QuestCardProps) {
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
               <div className="flex items-center gap-1">
-                <span className="text-lg font-black text-slate-900">{formatETH(airdrop.perQualifier)}</span>
+                <span className="text-lg font-black text-slate-900">{formatETH(quest.perQualifier)}</span>
                 <span className="text-[10px] font-bold text-slate-400">ETH</span>
               </div>
               <span className="text-[10px] font-medium text-slate-400">Per User</span>
             </div>
             <Avatar className="h-7 w-7 border border-slate-100">
               <AvatarFallback className="text-[8px] font-bold bg-slate-100 text-slate-500">
-                {airdrop.creator.slice(2, 4).toUpperCase()}
+                {quest.creator.slice(2, 4).toUpperCase()}
               </AvatarFallback>
             </Avatar>
           </div>
@@ -126,8 +126,8 @@ export default function QuestCard({ airdrop, entryCount = 0 }: QuestCardProps) {
       <QuestQuickView
         isOpen={quickView}
         onOpenChange={setQuickView}
-        airdrop={airdrop}
-        onViewFull={() => router.push(`/airdrops/${airdrop.id}`)}
+        quest={quest}
+        onViewFull={() => router.push(`/quests/${quest.id}`)}
       />
     </>
   );

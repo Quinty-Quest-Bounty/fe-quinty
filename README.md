@@ -79,7 +79,7 @@ To enable X verification, you need to set up OAuth:
 | Crowdfunding        | `0x0bf8d6EB00b3C4cA6a9F1CFa6Cd40b4cE486F885` |
 | Looking for Grant   | `0xcd01A6d3B8944080B3b1Bb79617415c0Ef895Cc6` |
 | Social Verification | `0x045Fb080d926f049db7597c99B56aEccc8977F36` |
-| Airdrop Bounty      | `0x71C5f5C66e72bBFC7266429cA48ba65c38AFc6A4` |
+| Quest Bounty        | `0x71C5f5C66e72bBFC7266429cA48ba65c38AFc6A4` |
 | Dispute Resolver    | `0x961659d12E9dE91dC543A75911b3b0D269769E82` |
 
 ## 📚 Documentation

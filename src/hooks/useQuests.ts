@@ -4,7 +4,7 @@ import { readContract } from "@wagmi/core";
 import { CONTRACT_ADDRESSES, AIRDROP_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
 import { wagmiConfig } from "../utils/web3";
 
-export interface Airdrop {
+export interface Quest {
     id: number;
     creator: string;
     title: string;
@@ -29,38 +29,38 @@ export interface Entry {
     feedback: string;
 }
 
-export function useAirdrops() {
-    const [airdrops, setAirdrops] = useState<Airdrop[]>([]);
-    const [entryCounts, setEntryCounts] = useState<{ [airdropId: number]: number }>({});
+export function useQuests() {
+    const [quests, setQuests] = useState<Quest[]>([]);
+    const [entryCounts, setEntryCounts] = useState<{ [questId: number]: number }>({});
     const [isLoading, setIsLoading] = useState(true);
 
-    const { data: airdropCounter, refetch: refetchCounter } = useReadContract({
+    const { data: questCounter, refetch: refetchCounter } = useReadContract({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
         abi: AIRDROP_ABI,
         functionName: "airdropCounter",
     });
 
-    const loadAirdrops = useCallback(async () => {
-        if (airdropCounter === undefined) {
+    const loadQuests = useCallback(async () => {
+        if (questCounter === undefined) {
             setIsLoading(false);
             return;
         }
 
         try {
             setIsLoading(true);
-            const counter = Number(airdropCounter);
-            const airdropPromises = Array.from({ length: counter }, (_, i) => {
+            const counter = Number(questCounter);
+            const questPromises = Array.from({ length: counter }, (_, i) => {
                 const id = i + 1;
                 return (async () => {
                     try {
-                        const airdropData = await readContract(wagmiConfig, {
+                        const questData = await readContract(wagmiConfig, {
                             address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
                             abi: AIRDROP_ABI,
                             functionName: "getAirdrop",
                             args: [BigInt(id)],
                         });
 
-                        if (!airdropData) return null;
+                        if (!questData) return null;
 
                         const [
                             creator,
@@ -75,7 +75,7 @@ export function useAirdrops() {
                             resolved,
                             cancelled,
                             requirements,
-                        ] = airdropData as any;
+                        ] = questData as any;
 
                         const entryCount = await readContract(wagmiConfig, {
                             address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
@@ -85,7 +85,7 @@ export function useAirdrops() {
                         });
 
                         return {
-                            airdrop: {
+                            quest: {
                                 id,
                                 creator,
                                 title,
@@ -106,31 +106,31 @@ export function useAirdrops() {
                             entryCount: Number(entryCount),
                         };
                     } catch (e) {
-                        console.error(`Error loading airdrop ${id}`, e);
+                        console.error(`Error loading quest ${id}`, e);
                         return null;
                     }
                 })();
             });
 
-            const results = await Promise.all(airdropPromises);
-            const validResults = results.filter((r): r is { airdrop: Airdrop; entryCount: number } => r !== null);
+            const results = await Promise.all(questPromises);
+            const validResults = results.filter((r): r is { quest: Quest; entryCount: number } => r !== null);
 
-            setAirdrops(validResults.map(r => r.airdrop).reverse());
+            setQuests(validResults.map(r => r.quest).reverse());
             const counts: { [id: number]: number } = {};
             validResults.forEach(r => {
-                counts[r.airdrop.id] = r.entryCount;
+                counts[r.quest.id] = r.entryCount;
             });
             setEntryCounts(counts);
         } catch (error) {
-            console.error("Error loading airdrops", error);
+            console.error("Error loading quests", error);
         } finally {
             setIsLoading(false);
         }
-    }, [airdropCounter]);
+    }, [questCounter]);
 
     useEffect(() => {
-        loadAirdrops();
-    }, [loadAirdrops]);
+        loadQuests();
+    }, [loadQuests]);
 
     useWatchContractEvent({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
@@ -146,9 +146,9 @@ export function useAirdrops() {
         abi: AIRDROP_ABI,
         eventName: "EntrySubmitted",
         onLogs() {
-            loadAirdrops();
+            loadQuests();
         },
     });
 
-    return { airdrops, entryCounts, isLoading, refetch: loadAirdrops };
+    return { quests, entryCounts, isLoading, refetch: loadQuests };
 }

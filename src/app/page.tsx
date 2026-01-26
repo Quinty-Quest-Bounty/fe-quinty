@@ -478,7 +478,7 @@ export default function Home() {
 
 
 
-              {/* Feature 3: Airdrop Bounties (Large) */}
+              {/* Feature 3: Quest Bounties (Large) */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}

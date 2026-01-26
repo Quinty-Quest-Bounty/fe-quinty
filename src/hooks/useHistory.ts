@@ -99,24 +99,24 @@ export function useHistory() {
             });
 
             // Fetch Quest transactions
-            const airdropCounter = await readContract(wagmiConfig, {
+            const questCounter = await readContract(wagmiConfig, {
                 address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
                 abi: AIRDROP_ABI,
                 functionName: "airdropCounter",
             });
 
-            const questPromises = Array.from({ length: Number(airdropCounter) }, (_, i) => {
+            const questPromises = Array.from({ length: Number(questCounter) }, (_, i) => {
                 const id = i + 1;
                 return (async () => {
                     try {
-                        const airdrop = await readContract(wagmiConfig, {
+                        const quest = await readContract(wagmiConfig, {
                             address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
                             abi: AIRDROP_ABI,
                             functionName: "getAirdrop",
                             args: [BigInt(id)],
                         }) as any;
 
-                        const [creator, title, , totalReward, , , , createdAt] = airdrop;
+                        const [creator, title, , totalReward, , , , createdAt] = quest;
 
                         if (creator.toLowerCase() === address.toLowerCase()) {
                             allTransactions.push({

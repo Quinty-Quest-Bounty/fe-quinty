@@ -9,12 +9,12 @@ import { Calendar } from "../ui/calendar";
 import { format } from "date-fns";
 import { ImageUpload } from "../ui/image-upload";
 
-interface AirdropFormProps {
+interface QuestFormProps {
     onSubmit: (data: any) => void;
     isPending: boolean;
 }
 
-export function AirdropForm({ onSubmit, isPending }: AirdropFormProps) {
+export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
     const [formData, setFormData] = useState({
         title: "",
         description: "",

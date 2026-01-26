@@ -3,37 +3,37 @@ import { useAccount, useWriteContract, useChainId } from "wagmi";
 import { CONTRACT_ADDRESSES, AIRDROP_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
 import { parseETH } from "../utils/web3";
 import { ensureBaseSepoliaNetwork } from "../utils/network";
-import QuestCard from "./AirdropCard";
-import { useAirdrops } from "../hooks/useAirdrops";
-import { AirdropListSkeleton } from "./airdrops/AirdropSkeleton";
-import { AirdropFilters } from "./airdrops/AirdropFilters";
-import { AirdropForm } from "./airdrops/AirdropForm";
+import QuestCard from "./QuestCard";
+import { useQuests } from "../hooks/useQuests";
+import { QuestListSkeleton } from "./quests/QuestSkeleton";
+import { QuestFilters } from "./quests/QuestFilters";
+import { QuestForm } from "./quests/QuestForm";
 import { Button } from "./ui/button";
 import { Settings, Plus, LayoutGrid } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function AirdropManager() {
+export default function QuestManager() {
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
   const chainId = useChainId();
-  const { airdrops, entryCounts, isLoading, refetch } = useAirdrops();
+  const { quests, entryCounts, isLoading, refetch } = useQuests();
 
   const [activeTab, setActiveTab] = useState<"browse" | "create" | "manage">("browse");
   const [showPastQuests, setShowPastQuests] = useState(false);
 
-  const activeAirdrops = useMemo(() => {
-    return airdrops.filter(a => !a.resolved && !a.cancelled);
-  }, [airdrops]);
+  const activeQuests = useMemo(() => {
+    return quests.filter(a => !a.resolved && !a.cancelled);
+  }, [quests]);
 
-  const pastAirdrops = useMemo(() => {
-    return airdrops.filter(a => a.resolved || a.cancelled);
-  }, [airdrops]);
+  const pastQuests = useMemo(() => {
+    return quests.filter(a => a.resolved || a.cancelled);
+  }, [quests]);
 
-  const userAirdrops = useMemo(() => {
-    return airdrops.filter(a => a.creator.toLowerCase() === address?.toLowerCase());
-  }, [airdrops, address]);
+  const userQuests = useMemo(() => {
+    return quests.filter(a => a.creator.toLowerCase() === address?.toLowerCase());
+  }, [quests, address]);
 
-  const handleCreateAirdrop = async (formData: any) => {
+  const handleCreateQuest = async (formData: any) => {
     if (chainId !== BASE_SEPOLIA_CHAIN_ID) {
       const networkOk = await ensureBaseSepoliaNetwork();
       if (!networkOk) return;
@@ -110,7 +110,7 @@ export default function AirdropManager() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
             >
-              <AirdropForm onSubmit={handleCreateAirdrop} isPending={false} />
+              <QuestForm onSubmit={handleCreateQuest} isPending={false} />
             </motion.div>
           ) : (
             <motion.div
@@ -120,34 +120,34 @@ export default function AirdropManager() {
               className="space-y-8"
             >
               {activeTab === "browse" && (
-                <AirdropFilters
+                <QuestFilters
                   showPastQuests={showPastQuests}
                   setShowPastQuests={setShowPastQuests}
                 />
               )}
 
               {isLoading ? (
-                <AirdropListSkeleton />
+                <QuestListSkeleton />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {(activeTab === "browse" ? activeAirdrops : userAirdrops).map(a => (
+                  {(activeTab === "browse" ? activeQuests : userQuests).map(a => (
                     <QuestCard
                       key={a.id}
-                      airdrop={a}
+                      quest={a}
                       entryCount={entryCounts[a.id] || 0}
                     />
                   ))}
                 </div>
               )}
 
-              {activeTab === "browse" && showPastQuests && pastAirdrops.length > 0 && (
+              {activeTab === "browse" && showPastQuests && pastQuests.length > 0 && (
                 <div className="pt-12 border-t border-slate-100">
                   <h3 className="text-sm font-bold text-slate-400 mb-8 text-center uppercase tracking-widest">Past Quests</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 opacity-60">
-                    {pastAirdrops.map(a => (
+                    {pastQuests.map(a => (
                       <QuestCard
                         key={a.id}
-                        airdrop={a}
+                        quest={a}
                         entryCount={entryCounts[a.id] || 0}
                       />
                     ))}

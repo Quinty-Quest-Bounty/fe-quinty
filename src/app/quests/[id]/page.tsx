@@ -80,9 +80,9 @@ export default function QuestDetailPage() {
     const router = useRouter();
     const { address } = useAccount();
     const { showAlert } = useAlert();
-    const airdropId = params.id as string;
+    const questId = params.id as string;
 
-    const [airdrop, setAirdrop] = useState<Quest | null>(null);
+    const [quest, setQuest] = useState<Quest | null>(null);
     const [entries, setEntries] = useState<Entry[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [copied, setCopied] = useState(false);
@@ -98,18 +98,18 @@ export default function QuestDetailPage() {
     const { isLoading: isConfirming, isSuccess: isConfirmed } =
         useWaitForTransactionReceipt({ hash });
 
-    // Load airdrop data
-    const loadAirdrop = async () => {
+    // Load quest data
+    const loadQuest = async () => {
         try {
             setIsLoading(true);
-            const airdropData = await readContract(wagmiConfig, {
+            const questData = await readContract(wagmiConfig, {
                 address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
                 abi: AIRDROP_ABI,
                 functionName: "getAirdrop",
-                args: [BigInt(airdropId)],
+                args: [BigInt(questId)],
             });
 
-            if (airdropData) {
+            if (questData) {
                 const [
                     creator,
                     title,
@@ -123,10 +123,10 @@ export default function QuestDetailPage() {
                     resolved,
                     cancelled,
                     requirements,
-                ] = airdropData as any;
+                ] = questData as any;
 
-                setAirdrop({
-                    id: parseInt(airdropId),
+                setQuest({
+                    id: parseInt(questId),
                     creator,
                     title,
                     description,
@@ -149,7 +149,7 @@ export default function QuestDetailPage() {
                     address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
                     abi: AIRDROP_ABI,
                     functionName: "getEntryCount",
-                    args: [BigInt(airdropId)],
+                    args: [BigInt(questId)],
                 });
 
                 const loadedEntries: Entry[] = [];
@@ -158,7 +158,7 @@ export default function QuestDetailPage() {
                         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
                         abi: AIRDROP_ABI,
                         functionName: "getEntry",
-                        args: [BigInt(airdropId), BigInt(i)],
+                        args: [BigInt(questId), BigInt(i)],
                     });
                     const [solver, ipfsProofCid, timestamp, status, feedback] = entryData as any;
                     loadedEntries.push({
@@ -179,14 +179,14 @@ export default function QuestDetailPage() {
     };
 
     useEffect(() => {
-        if (airdropId) {
-            loadAirdrop();
+        if (questId) {
+            loadQuest();
         }
-    }, [airdropId]);
+    }, [questId]);
 
     useEffect(() => {
         if (isConfirmed) {
-            loadAirdrop();
+            loadQuest();
             setNewEntry({ twitterUrl: "", ipfsProofCid: "", description: "" });
             setUploadedProofImage(null);
         }
@@ -216,8 +216,8 @@ export default function QuestDetailPage() {
                 setIsUploadingProof(true);
                 try {
                     proofCid = await uploadToIpfs(uploadedProofImage, {
-                        airdropId: airdropId,
-                        type: "airdrop-proof",
+                        questId: questId,
+                        type: "quest-proof",
                     });
                     console.log("Proof uploaded to IPFS:", proofCid);
                 } catch (uploadError) {
@@ -237,7 +237,7 @@ export default function QuestDetailPage() {
                 address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
                 abi: AIRDROP_ABI,
                 functionName: "submitEntry",
-                args: [BigInt(airdropId), proofCid],
+                args: [BigInt(questId), proofCid],
             });
         } catch (error) {
             console.error("Error submitting entry:", error);
@@ -255,13 +255,13 @@ export default function QuestDetailPage() {
         );
     }
 
-    if (!airdrop) {
+    if (!quest) {
         return (
             <div className="min-h-screen flex items-center justify-center p-4">
                 <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
                     <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Quest not found</h2>
                     <p className="text-muted-foreground mb-6 text-sm sm:text-base">The quest you're looking for doesn't exist.</p>
-                    <Button onClick={() => router.push("/airdrops")} className="rounded-[0.75rem] transition-all duration-300">
+                    <Button onClick={() => router.push("/quests")} className="rounded-[0.75rem] transition-all duration-300">
                         Back to Quests
                     </Button>
                 </div>
@@ -269,24 +269,24 @@ export default function QuestDetailPage() {
         );
     }
 
-    const isCreator = address?.toLowerCase() === airdrop.creator.toLowerCase();
-    const isExpired = Date.now() / 1000 > airdrop.deadline;
-    const progress = Math.min((airdrop.qualifiersCount / airdrop.maxQualifiers) * 100, 100);
+    const isCreator = address?.toLowerCase() === quest.creator.toLowerCase();
+    const isExpired = Date.now() / 1000 > quest.deadline;
+    const progress = Math.min((quest.qualifiersCount / quest.maxQualifiers) * 100, 100);
     const userEntry = entries.find((e) => e.solver.toLowerCase() === address?.toLowerCase());
 
     const getStatusColor = () => {
-        if (airdrop.resolved) return "default";
-        if (airdrop.cancelled) return "destructive";
+        if (quest.resolved) return "default";
+        if (quest.cancelled) return "destructive";
         if (isExpired) return "destructive";
-        if (airdrop.qualifiersCount >= airdrop.maxQualifiers) return "secondary";
+        if (quest.qualifiersCount >= quest.maxQualifiers) return "secondary";
         return "default";
     };
 
     const getStatusText = () => {
-        if (airdrop.cancelled) return "Cancelled";
-        if (airdrop.resolved) return "Completed";
+        if (quest.cancelled) return "Cancelled";
+        if (quest.resolved) return "Completed";
         if (isExpired) return "Expired";
-        if (airdrop.qualifiersCount >= airdrop.maxQualifiers) return "Full";
+        if (quest.qualifiersCount >= quest.maxQualifiers) return "Full";
         return "Active";
     };
 
@@ -332,7 +332,7 @@ export default function QuestDetailPage() {
                                 </BreadcrumbSeparator>
                                 <BreadcrumbItem>
                                     <BreadcrumbLink
-                                        onClick={() => router.push("/airdrops")}
+                                        onClick={() => router.push("/quests")}
                                         className="cursor-pointer hover:text-[#0EA885] transition-all duration-300 text-sm font-medium "
                                     >
                                         Quests
@@ -342,7 +342,7 @@ export default function QuestDetailPage() {
                                     <ChevronRight className="h-4 w-4 text-foreground/40" />
                                 </BreadcrumbSeparator>
                                 <BreadcrumbItem>
-                                    <BreadcrumbPage className="text-sm font-semibold text-[#0EA885]">Quest #{airdropId}</BreadcrumbPage>
+                                    <BreadcrumbPage className="text-sm font-semibold text-[#0EA885]">Quest #{questId}</BreadcrumbPage>
                                 </BreadcrumbItem>
                             </BreadcrumbList>
                         </Breadcrumb>
@@ -361,11 +361,11 @@ export default function QuestDetailPage() {
                                             <Gift className="h-4 w-4 text-primary" />
                                         </div>
                                         <div>
-                                            <CardTitle className="text-lg">{airdrop.title}</CardTitle>
+                                            <CardTitle className="text-lg">{quest.title}</CardTitle>
                                             <div className="flex items-center gap-2 mt-1">
                                                 <span className="text-xs text-muted-foreground">Created by</span>
                                                 <Badge variant="outline" className="text-xs py-0 h-5">
-                                                    {formatAddress(airdrop.creator)}
+                                                    {formatAddress(quest.creator)}
                                                 </Badge>
                                             </div>
                                         </div>
@@ -395,12 +395,12 @@ export default function QuestDetailPage() {
                             </div>
 
                             {/* Quest Image */}
-                            {airdrop.imageUrl && (
+                            {quest.imageUrl && (
                                 <div className="mt-3 flex justify-center">
                                     <div className="w-full max-w-2xl">
                                         <IpfsImage
-                                            cid={airdrop.imageUrl.replace("ipfs://", "")}
-                                            alt={airdrop.title}
+                                            cid={quest.imageUrl.replace("ipfs://", "")}
+                                            alt={quest.title}
                                             className="w-full h-auto rounded-xl shadow-sm"
                                         />
                                     </div>
@@ -415,7 +415,7 @@ export default function QuestDetailPage() {
                                         <span className="text-xs font-medium text-muted-foreground">Reward Per User</span>
                                     </div>
                                     <p className="text-base font-bold text-green-600">
-                                        {formatETH(airdrop.perQualifier)} ETH
+                                        {formatETH(quest.perQualifier)} ETH
                                     </p>
                                 </div>
 
@@ -425,7 +425,7 @@ export default function QuestDetailPage() {
                                         <span className="text-xs font-medium text-muted-foreground">Participants</span>
                                     </div>
                                     <p className="text-sm font-semibold">
-                                        {airdrop.qualifiersCount} / {airdrop.maxQualifiers}
+                                        {quest.qualifiersCount} / {quest.maxQualifiers}
                                     </p>
                                     <Progress value={progress} className="h-1 mt-1.5" />
                                 </div>
@@ -436,7 +436,7 @@ export default function QuestDetailPage() {
                                         <span className="text-xs font-medium text-muted-foreground">Deadline</span>
                                     </div>
                                     <p className="text-sm font-semibold">
-                                        {formatTimeLeft(BigInt(airdrop.deadline))}
+                                        {formatTimeLeft(BigInt(quest.deadline))}
                                     </p>
                                 </div>
 
@@ -446,7 +446,7 @@ export default function QuestDetailPage() {
                                         <span className="text-xs font-medium text-muted-foreground">Total Budget</span>
                                     </div>
                                     <p className="text-sm font-semibold">
-                                        {formatETH(airdrop.totalAmount)} ETH
+                                        {formatETH(quest.totalAmount)} ETH
                                     </p>
                                 </div>
                             </div>
@@ -454,11 +454,11 @@ export default function QuestDetailPage() {
 
                         <CardContent className="pt-3">
                             {/* Description */}
-                            {airdrop.description && (
+                            {quest.description && (
                                 <div className="mb-3">
                                     <h3 className="text-sm font-semibold mb-1.5">Description</h3>
                                     <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                                        {airdrop.description.replace(/\n\nImage:.*$/, "")}
+                                        {quest.description.replace(/\n\nImage:.*$/, "")}
                                     </p>
                                 </div>
                             )}
@@ -468,7 +468,7 @@ export default function QuestDetailPage() {
                                 <h3 className="text-sm font-semibold mb-1.5">Requirements</h3>
                                 <div className="bg-muted/50 rounded-lg p-2.5">
                                     <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                                        {airdrop.requirements}
+                                        {quest.requirements}
                                     </p>
                                 </div>
                             </div>
@@ -476,7 +476,7 @@ export default function QuestDetailPage() {
                             <Separator className="my-4" />
 
                             {/* Submit Entry Section */}
-                            {!isExpired && !airdrop.resolved && !airdrop.cancelled && airdrop.qualifiersCount < airdrop.maxQualifiers && (
+                            {!isExpired && !quest.resolved && !quest.cancelled && quest.qualifiersCount < quest.maxQualifiers && (
                                 <div className="mb-4">
                                     {userEntry ? (
                                         <Card className="rounded-[1.5rem] bg-blue-50 border-blue-200 shadow-md transition-all duration-300">

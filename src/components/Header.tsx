@@ -19,7 +19,7 @@ const WalletComponents = dynamic(
 
 const navItems = [
   { name: "Dashboard", link: "/dashboard" },
-  { name: "Quests", link: "/airdrops" },
+  { name: "Quests", link: "/quests" },
   { name: "Bounties", link: "/bounties" },
   { name: "Reputation", link: "/reputation" },
   { name: "History", link: "/history" },
@@ -43,7 +43,7 @@ export default function Header() {
 
   return (
     <>
-      <div className="fixed inset-x-0 top-0 z-[100] flex justify-center pt-4 sm:pt-6 pointer-events-none">
+      <div className="fixed inset-x-0 top-0 z-[100] flex justify-center pt-2 sm:pt-3 pointer-events-none">
         <motion.header
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}

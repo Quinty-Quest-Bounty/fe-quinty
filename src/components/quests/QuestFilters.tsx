@@ -2,15 +2,15 @@ import React from "react";
 import { Button } from "../ui/button";
 import { ChevronDown, Search } from "lucide-react";
 
-interface AirdropFiltersProps {
+interface QuestFiltersProps {
     showPastQuests: boolean;
     setShowPastQuests: (value: boolean) => void;
 }
 
-export function AirdropFilters({
+export function QuestFilters({
     showPastQuests,
     setShowPastQuests,
-}: AirdropFiltersProps) {
+}: QuestFiltersProps) {
     return (
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-2">

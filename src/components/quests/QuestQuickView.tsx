@@ -9,21 +9,21 @@ import { Progress } from "../ui/progress";
 interface QuestQuickViewProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    airdrop: any;
+    quest: any;
     onViewFull: () => void;
 }
 
-export function QuestQuickView({ isOpen, onOpenChange, airdrop, onViewFull }: QuestQuickViewProps) {
-    const progress = Math.min((airdrop.qualifiersCount / airdrop.maxQualifiers) * 100, 100);
+export function QuestQuickView({ isOpen, onOpenChange, quest, onViewFull }: QuestQuickViewProps) {
+    const progress = Math.min((quest.qualifiersCount / quest.maxQualifiers) * 100, 100);
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2rem] border border-white/60 bg-white/95 backdrop-blur-2xl shadow-2xl p-0">
                 <div className="relative h-64 w-full bg-slate-100">
-                    {airdrop.imageUrl ? (
+                    {quest.imageUrl ? (
                         <IpfsImage
-                            cid={airdrop.imageUrl.replace("ipfs://", "")}
-                            alt={airdrop.title}
+                            cid={quest.imageUrl.replace("ipfs://", "")}
+                            alt={quest.title}
                             className="w-full h-full object-cover"
                         />
                     ) : (
@@ -33,8 +33,8 @@ export function QuestQuickView({ isOpen, onOpenChange, airdrop, onViewFull }: Qu
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     <div className="absolute bottom-6 left-8 right-8">
-                        <h2 className="text-2xl font-bold text-white mb-1">{airdrop.title}</h2>
-                        <p className="text-white/80 text-sm">Quest #{airdrop.id} • {formatETH(airdrop.perQualifier)} ETH per user</p>
+                        <h2 className="text-2xl font-bold text-white mb-1">{quest.title}</h2>
+                        <p className="text-white/80 text-sm">Quest #{quest.id} • {formatETH(quest.perQualifier)} ETH per user</p>
                     </div>
                 </div>
 
@@ -42,15 +42,15 @@ export function QuestQuickView({ isOpen, onOpenChange, airdrop, onViewFull }: Qu
                     <div className="grid grid-cols-3 gap-4">
                         <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                             <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Reward</p>
-                            <p className="text-lg font-black text-purple-600">{formatETH(airdrop.perQualifier)} ETH</p>
+                            <p className="text-lg font-black text-purple-600">{formatETH(quest.perQualifier)} ETH</p>
                         </div>
                         <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                             <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Participants</p>
-                            <p className="text-lg font-black text-slate-700">{airdrop.qualifiersCount}/{airdrop.maxQualifiers}</p>
+                            <p className="text-lg font-black text-slate-700">{quest.qualifiersCount}/{quest.maxQualifiers}</p>
                         </div>
                         <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                             <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Time Left</p>
-                            <p className="text-sm font-bold text-slate-700">{formatTimeLeft(BigInt(airdrop.deadline))}</p>
+                            <p className="text-sm font-bold text-slate-700">{formatTimeLeft(BigInt(quest.deadline))}</p>
                         </div>
                     </div>
 
@@ -66,15 +66,15 @@ export function QuestQuickView({ isOpen, onOpenChange, airdrop, onViewFull }: Qu
                         <div>
                             <h4 className="text-sm font-bold text-slate-900 mb-2">Description</h4>
                             <p className="text-sm text-slate-600 leading-relaxed">
-                                {airdrop.description?.replace(/\n\nImage:.*$/, "") || "No description provided."}
+                                {quest.description?.replace(/\n\nImage:.*$/, "") || "No description provided."}
                             </p>
                         </div>
 
-                        {airdrop.requirements && (
+                        {quest.requirements && (
                             <div>
                                 <h4 className="text-sm font-bold text-slate-900 mb-2">Requirements</h4>
                                 <p className="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">
-                                    {airdrop.requirements}
+                                    {quest.requirements}
                                 </p>
                             </div>
                         )}

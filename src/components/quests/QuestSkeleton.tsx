@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader } from "../ui/card";
 
-export function AirdropSkeleton() {
+export function QuestSkeleton() {
     return (
         <Card className="rounded-2xl border border-slate-100 bg-white animate-pulse overflow-hidden">
             <div className="h-40 w-full bg-slate-100" />
@@ -25,11 +25,11 @@ export function AirdropSkeleton() {
     );
 }
 
-export function AirdropListSkeleton() {
+export function QuestListSkeleton() {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {Array.from({ length: 6 }).map((_, i) => (
-                <AirdropSkeleton key={i} />
+                <QuestSkeleton key={i} />
             ))}
         </div>
     );

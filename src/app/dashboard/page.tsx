@@ -94,7 +94,7 @@ export default function DashboardPage() {
 
   // Pagination state
   const [bountyPage, setBountyPage] = useState(1);
-  const [airdropPage, setAirdropPage] = useState(1);
+  const [questPage, setQuestPage] = useState(1);
   const [loadingBounties, setLoadingBounties] = useState(false);
   const [loadingQuests, setLoadingQuests] = useState(false);
 
@@ -119,8 +119,8 @@ export default function DashboardPage() {
     functionName: "bountyCounter",
   });
 
-  // Read airdrop counter
-  const { data: airdropCounter } = useReadContract({
+  // Read quest counter
+  const { data: questCounter } = useReadContract({
     address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]?.AirdropBounty as `0x${string}`,
     abi: AIRDROP_ABI,
     functionName: "airdropCounter",
@@ -228,29 +228,29 @@ export default function DashboardPage() {
   useEffect(() => {
     let isMounted = true;
     const loadQuests = async () => {
-      if (!airdropCounter || !CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]) return;
+      if (!questCounter || !CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]) return;
 
       setLoadingQuests(true);
-      const count = Number(airdropCounter);
+      const count = Number(questCounter);
 
       // Calculate range for current page (load from newest to oldest)
-      const startIndex = Math.max(1, count - (airdropPage * ITEMS_PER_PAGE) + 1);
-      const endIndex = Math.min(count, count - ((airdropPage - 1) * ITEMS_PER_PAGE));
+      const startIndex = Math.max(1, count - (questPage * ITEMS_PER_PAGE) + 1);
+      const endIndex = Math.min(count, count - ((questPage - 1) * ITEMS_PER_PAGE));
 
       const loadedQuests: Quest[] = [];
 
       // Load quests in reverse order (newest first)
       for (let i = endIndex; i >= startIndex; i--) {
         try {
-          const airdropData = await readContract(wagmiConfig, {
+          const questData = await readContract(wagmiConfig, {
             address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
             abi: AIRDROP_ABI,
             functionName: "getAirdrop",
             args: [BigInt(i)],
           });
 
-          if (airdropData && Array.isArray(airdropData)) {
-            const [creator, title, description, totalAmount, perQualifier, maxQualifiers, qualifiersCount, deadline, createdAt, resolved, cancelled] = airdropData as any[];
+          if (questData && Array.isArray(questData)) {
+            const [creator, title, description, totalAmount, perQualifier, maxQualifiers, qualifiersCount, deadline, createdAt, resolved, cancelled] = questData as any[];
             loadedQuests.push({
               id: i,
               creator,
@@ -274,7 +274,7 @@ export default function DashboardPage() {
     };
     loadQuests();
     return () => { isMounted = false; };
-  }, [airdropCounter, airdropPage]);
+  }, [questCounter, questPage]);
 
   const sections = [
     { id: "all" as const, label: "Overview", icon: LayoutGrid },
@@ -336,8 +336,8 @@ export default function DashboardPage() {
             color="bg-blue-500 text-blue-600"
           />
           <StatCard
-            title="Airdrop Campaigns"
-            value={airdropCounter ? airdropCounter.toString() : "0"}
+            title="Quest Campaigns"
+            value={questCounter ? questCounter.toString() : "0"}
             trend="+8%"
             label="Claimed: 450"
             icon={Zap}
@@ -498,7 +498,7 @@ export default function DashboardPage() {
                     .map((quest) => (
                       <div
                         key={quest.id}
-                        onClick={() => router.push(`/airdrops/${quest.id}`)}
+                        onClick={() => router.push(`/quests/${quest.id}`)}
                         className="group cursor-pointer rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col"
                       >
                         <div className="relative w-full h-32 overflow-hidden bg-slate-50 flex items-center justify-center">

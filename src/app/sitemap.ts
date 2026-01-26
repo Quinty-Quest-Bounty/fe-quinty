@@ -21,7 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
-      url: 'https://www.quinty.io/airdrops',
+      url: 'https://www.quinty.io/quests',
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.8,

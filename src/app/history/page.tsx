@@ -33,7 +33,7 @@ export default function HistoryPage() {
 
     const getIcon = (type: string) => {
         if (type.includes("bounty")) return <Target className="w-4 h-4 text-blue-500" />;
-        if (type.includes("quest") || type.includes("airdrop")) return <Zap className="w-4 h-4 text-amber-500" />;
+        if (type.includes("quest")) return <Zap className="w-4 h-4 text-amber-500" />;
         return <HistoryIcon className="w-4 h-4 text-slate-400" />;
     };
 
@@ -102,7 +102,7 @@ export default function HistoryPage() {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: idx * 0.05 }}
-                                onClick={() => router.push(tx.contractType === "Quinty" ? `/bounties/${tx.itemId}` : `/airdrops/${tx.itemId}`)}
+                                onClick={() => router.push(tx.contractType === "Quinty" ? `/bounties/${tx.itemId}` : `/quests/${tx.itemId}`)}
                                 className="group cursor-pointer bg-white border border-slate-100 rounded-2xl p-4 hover:shadow-md hover:border-slate-200 transition-all flex items-center gap-4"
                             >
                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${getStatusColor(tx.type)}`}>
