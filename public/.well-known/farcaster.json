@@ -1,0 +1,18 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjM2ODMsInR5cGUiOiJjdXN0b2RpYWwiLCJrZXkiOiJweS0weGM0QjY1QzhkMjI2Mjg2OTg5ZkIyZWY3NDYyZTU0MTYwMTRkODQzMTEifQ",
+    "payload": "eyJkb21haW4iOiJiYXNlLnF1aW50eS5pbyJ9",
+    "signature": "REPLACE_WITH_REAL_SIGNATURE_FROM_WARPCAST"
+  },
+  "frame": {
+    "version": "1",
+    "name": "Quinty",
+    "iconUrl": "https://base.quinty.io/images/quinty-logo.png",
+    "homeUrl": "https://base.quinty.io",
+    "imageUrl": "https://base.quinty.io/images/quinty-green.png",
+    "buttonTitle": "Open Quinty",
+    "splashImageUrl": "https://base.quinty.io/images/quinty-green.png",
+    "splashBackgroundColor": "#ffffff",
+    "webhookUrl": "https://base.quinty.io/api/webhook"
+  }
+}

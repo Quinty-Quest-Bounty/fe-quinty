@@ -275,7 +275,7 @@ export default function Home() {
                   <div className="flex-1 flex justify-center">
                     <div className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-white border border-gray-200 shadow-sm transition-shadow group-hover:shadow-md dark:bg-black/50 dark:border-gray-700">
                       <Lock className="w-2.5 h-2.5 text-gray-400 dark:text-gray-500" />
-                      <span className="text-[10px] font-medium text-gray-600 font-mono tracking-wide dark:text-gray-400">quinty.io</span>
+                      <span className="text-[10px] font-medium text-gray-600 font-mono tracking-wide dark:text-gray-400">base.quinty.io</span>
                     </div>
                   </div>
                   <div className="w-10" /> {/* Spacer */}

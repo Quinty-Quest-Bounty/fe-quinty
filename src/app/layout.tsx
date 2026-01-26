@@ -35,6 +35,22 @@ export const metadata: Metadata = {
       "A transparent quest-and-bounty platform where funds are held in smart-contract escrow, letting creators, solvers, and community interact directly without intermediaries.",
     images: ["/images/quinty-green.png"],
   },
+  other: {
+    "fc:frame": JSON.stringify({
+      version: "next",
+      imageUrl: "https://base.quinty.io/images/quinty-green.png",
+      button: {
+        title: "Open Quinty",
+        action: {
+          type: "launch_frame",
+          name: "Quinty",
+          url: "https://base.quinty.io",
+          splashImageUrl: "https://base.quinty.io/images/quinty-green.png",
+          splashBackgroundColor: "#ffffff",
+        },
+      },
+    }),
+  },
 };
 
 const spaceGrotesk = Space_Grotesk({
