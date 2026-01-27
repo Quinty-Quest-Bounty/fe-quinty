@@ -1,20 +1,8 @@
 import { http, createConfig } from "wagmi";
 import { baseSepolia } from "wagmi/chains";
-import { coinbaseWallet, metaMask, walletConnect } from "wagmi/connectors";
 
 export const wagmiConfig = createConfig({
   chains: [baseSepolia],
-  connectors: [
-    coinbaseWallet({
-      appName: "Quinty",
-      preference: "smartWalletOnly",
-    }),
-    metaMask(),
-    walletConnect({
-      projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "",
-    }),
-  ],
-  ssr: true,
   transports: {
     [baseSepolia.id]: http(),
   },

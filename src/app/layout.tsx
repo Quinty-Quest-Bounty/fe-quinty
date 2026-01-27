@@ -74,12 +74,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${jakartaSans.variable}`}>
-      <head>
-        <link
-          rel="stylesheet"
-          href="https://unpkg.com/@coinbase/onchainkit@1.1.1/dist/assets/style.css"
-        />
-      </head>
       <body className={`${jakartaSans.className} antialiased bg-white relative`}>
         <Providers>
           <Header />
