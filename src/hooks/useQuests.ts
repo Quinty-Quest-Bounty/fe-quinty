@@ -18,7 +18,7 @@ export interface Quest {
     resolved: boolean;
     cancelled: boolean;
     requirements: string;
-    imageUrl?: string;
+    imageUrl: string;
 }
 
 export interface Entry {
@@ -100,8 +100,8 @@ export function useQuests() {
                                 cancelled,
                                 requirements,
                                 imageUrl: description.includes("ipfs://")
-                                    ? description.match(/ipfs:\/\/[^\s\n]+/)?.[0]
-                                    : undefined,
+                                    ? description.match(/ipfs:\/\/[^\s\n]+/)?.[0] || ""
+                                    : "",
                             },
                             entryCount: Number(entryCount),
                         };

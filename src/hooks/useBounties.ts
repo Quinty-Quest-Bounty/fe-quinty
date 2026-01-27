@@ -33,8 +33,8 @@ export interface Bounty {
     selectedWinners: readonly string[];
     selectedSubmissionIds: readonly bigint[];
     metadataCid?: string;
-    hasOprec?: boolean;
-    oprecDeadline?: bigint;
+    hasOprec: boolean;
+    oprecDeadline: bigint;
 }
 
 export function useBounties() {
@@ -106,9 +106,9 @@ export function useBounties() {
                             selectedSubmissionIds: bountyData[9],
                             hasOprec: bountyData[10],
                             oprecDeadline: bountyData[11],
-                            submissions,
+                            submissions: submissions as readonly Submission[],
                             metadataCid: metadataMatch ? metadataMatch[1] : undefined,
-                        };
+                        } as Bounty;
                     } catch (e) {
                         console.error(`Error loading bounty ${id}`, e);
                         return null;
