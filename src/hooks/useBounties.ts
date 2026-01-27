@@ -33,8 +33,8 @@ export interface Bounty {
     selectedWinners: readonly string[];
     selectedSubmissionIds: readonly bigint[];
     metadataCid?: string;
-    hasOprec?: boolean;
-    oprecDeadline?: bigint;
+    hasOprec: boolean;
+    oprecDeadline: bigint;
 }
 
 export function useBounties() {
