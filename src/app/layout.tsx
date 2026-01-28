@@ -4,7 +4,10 @@ import Header from "../components/Header";
 import { Space_Grotesk, Plus_Jakarta_Sans } from "next/font/google";
 import type { Metadata } from "next";
 
+const appUrl = "https://base.quinty.io";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(appUrl),
   title: "Quinty - Web3 Quest and Bounty Platform",
   description:
     "A transparent quest-and-bounty platform where funds are held in smart-contract escrow, letting creators, solvers, and community interact directly without intermediaries.",
@@ -38,14 +41,28 @@ export const metadata: Metadata = {
   other: {
     "fc:frame": JSON.stringify({
       version: "next",
-      imageUrl: "https://base.quinty.io/images/quinty-green.png",
+      imageUrl: `${appUrl}/images/quinty-green.png`,
       button: {
         title: "Open Quinty",
         action: {
           type: "launch_frame",
           name: "Quinty",
-          url: "https://base.quinty.io",
-          splashImageUrl: "https://base.quinty.io/images/quinty-green.png",
+          url: appUrl,
+          splashImageUrl: `${appUrl}/images/quinty-green.png`,
+          splashBackgroundColor: "#ffffff",
+        },
+      },
+    }),
+    "fc:miniapp": JSON.stringify({
+      version: "next",
+      imageUrl: `${appUrl}/images/quinty-green.png`,
+      button: {
+        title: "Launch Quinty",
+        action: {
+          type: "launch_miniapp",
+          name: "Quinty",
+          url: appUrl,
+          splashImageUrl: `${appUrl}/images/quinty-green.png`,
           splashBackgroundColor: "#ffffff",
         },
       },
