@@ -3,9 +3,9 @@ export async function GET() {
 
   const manifest = {
     accountAssociation: {
-      header: "",
-      payload: "",
-      signature: "",
+    "header": "eyJmaWQiOjE1Nzc2MzIsInR5cGUiOiJhdXRoIiwia2V5IjoiMHhBMWQ0YTYzNDkwMjU5NTkzMmM2RDlmY2REZjZCNDRCRDcyMTE1OUMwIn0",
+    "payload": "eyJkb21haW4iOiJiYXNlLnF1aW50eS5pbyJ9",
+    "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABuIQXyOQUZBKZYFFlBFew7RkYkWP3U8gF0uT43fe54BZBWmSbqAuCx4t2fxvpWSxlYA0kDabE_zRv_R_gzxKZSQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAl8ZgIay2xclZzG8RWZzuWvO8j9R0fus3XxDee9lRlVy8dAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACKeyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiNnVkOEdYWm9VQ0t3UzFYS0VKYXhnUjBTbGNTV1dUckVJZlFkN0NMMklYOCIsIm9yaWdpbiI6Imh0dHBzOi8va2V5cy5jb2luYmFzZS5jb20iLCJjcm9zc09yaWdpbiI6ZmFsc2V9AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     },
     frame: {
       version: "1",
@@ -27,7 +27,7 @@ export async function GET() {
       splashBackgroundColor: "#ffffff",
       webhookUrl: `${appUrl}/api/webhook`,
       subtitle: "Trustless Quests & Bounties",
-      description: "A trustless collaboration platform built on Base that combines on-chain bounties, grants, and crowdfunding with permanent soulbound reputation.",
+      description: "A trustless collaboration platform",
       screenshotUrls: [
         `${appUrl}/images/quinty-green.png`,
       ],
