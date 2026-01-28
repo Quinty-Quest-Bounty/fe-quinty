@@ -53,6 +53,20 @@ export const metadata: Metadata = {
         },
       },
     }),
+    "fc:miniapp": JSON.stringify({
+      version: "next",
+      imageUrl: `${appUrl}/images/quinty-green.png`,
+      button: {
+        title: "Launch Quinty",
+        action: {
+          type: "launch_miniapp",
+          name: "Quinty",
+          url: appUrl,
+          splashImageUrl: `${appUrl}/images/quinty-green.png`,
+          splashBackgroundColor: "#ffffff",
+        },
+      },
+    }),
   },
 };
 
