@@ -2,8 +2,9 @@ import axios from 'axios';
 import FormData from 'form-data';
 
 // IPFS utilities for handling file uploads and metadata
-export const IPFS_GATEWAY = "https://ipfs.io/ipfs/";
+export const CUSTOM_PINATA_GATEWAY = "https://purple-elderly-silverfish-382.mypinata.cloud/ipfs/";
 export const PINATA_GATEWAY = "https://gateway.pinata.cloud/ipfs/";
+export const IPFS_GATEWAY = "https://ipfs.io/ipfs/";
 
 // Interface for IPFS metadata
 export interface BountyMetadata {
@@ -30,7 +31,7 @@ export interface SubmissionMetadata {
 // Helper function to format IPFS URLs
 export const formatIpfsUrl = (
   cid: string,
-  gateway: string = IPFS_GATEWAY
+  gateway: string = CUSTOM_PINATA_GATEWAY
 ): string => {
   if (!cid) return "";
 
@@ -172,14 +173,14 @@ export const IpfsImage: React.FC<IpfsImageProps> = ({
   className,
   fallback,
 }) => {
-  const [imageSrc, setImageSrc] = useState<string>(() => formatIpfsUrl(cid));
+  const [imageSrc, setImageSrc] = useState<string>(() => formatIpfsUrl(cid, CUSTOM_PINATA_GATEWAY));
   const [hasError, setHasError] = useState<boolean>(false);
 
   const handleError = () => {
     if (!hasError) {
       setHasError(true);
-      // Try alternative gateway
-      setImageSrc(formatIpfsUrl(cid, PINATA_GATEWAY));
+      // Try alternative gateway if custom fails
+      setImageSrc(formatIpfsUrl(cid, IPFS_GATEWAY));
     }
   };
 
