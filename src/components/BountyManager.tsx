@@ -215,21 +215,53 @@ export default function BountyManager() {
 
               {isLoading ? (
                 <BountyListSkeleton />
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {(activeTab === "browse" ? filteredBounties : bounties.filter(b => b.creator.toLowerCase() === address?.toLowerCase())).map(b => (
-                    <BountyCard
-                      key={b.id}
-                      bounty={b}
-                      onSubmitSolution={submitSolution}
-                      onSelectWinners={selectWinners}
-                      onTriggerSlash={triggerSlash}
-                      onAddReply={addReply}
-                      onRevealSolution={revealSolution}
-                    />
-                  ))}
-                </div>
-              )}
+              ) : (() => {
+                const displayBounties = activeTab === "browse"
+                  ? filteredBounties
+                  : bounties.filter(b => b.creator.toLowerCase() === address?.toLowerCase());
+
+                console.log(`${activeTab} tab - Showing ${displayBounties.length} bounties`, { address, totalBounties: bounties.length });
+
+                if (displayBounties.length === 0) {
+                  return (
+                    <div className="text-center py-16">
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
+                        <Target className="w-8 h-8 text-slate-400" />
+                      </div>
+                      <h3 className="text-lg font-bold text-slate-900 mb-2">
+                        {activeTab === "my-bounties" ? "No bounties created yet" : "No bounties found"}
+                      </h3>
+                      <p className="text-slate-500 text-sm mb-6">
+                        {activeTab === "my-bounties"
+                          ? "Create your first bounty to get started"
+                          : "Try adjusting your filters"}
+                      </p>
+                      {activeTab === "my-bounties" && (
+                        <Button onClick={() => setActiveTab("create")} className="bg-[#0EA885] hover:bg-[#0EA885]/90">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create Bounty
+                        </Button>
+                      )}
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {displayBounties.map(b => (
+                      <BountyCard
+                        key={b.id}
+                        bounty={b}
+                        onSubmitSolution={submitSolution}
+                        onSelectWinners={selectWinners}
+                        onTriggerSlash={triggerSlash}
+                        onAddReply={addReply}
+                        onRevealSolution={revealSolution}
+                      />
+                    ))}
+                  </div>
+                );
+              })()}
 
               {activeTab === "browse" && showPastBounties && pastBounties.length > 0 && (
                 <div className="pt-12 border-t border-slate-100">

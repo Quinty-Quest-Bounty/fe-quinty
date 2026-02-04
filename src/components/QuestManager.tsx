@@ -39,12 +39,18 @@ export default function QuestManager() {
       if (!networkOk) return;
     }
 
+    if (!address) {
+      alert("Please connect your wallet first");
+      return;
+    }
+
     try {
+      console.log("Creating quest with form data:", formData);
       const deadlineTimestamp = Math.floor(new Date(formData.deadline).getTime() / 1000);
       const perQualifierWei = parseETH(formData.perQualifier);
       const totalAmount = perQualifierWei * BigInt(formData.maxQualifiers);
 
-      await writeContractAsync({
+      const result = await writeContractAsync({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
         abi: AIRDROP_ABI,
         functionName: "createAirdrop",
@@ -59,9 +65,16 @@ export default function QuestManager() {
         value: totalAmount,
       });
 
-      setActiveTab("browse");
-      refetch();
-    } catch (error) {
+      console.log("Quest created successfully:", result);
+
+      // Wait a bit for the transaction to be indexed
+      setTimeout(() => {
+        refetch();
+        setActiveTab("browse");
+      }, 2000);
+    } catch (error: any) {
+      console.error("Error creating quest:", error);
+      alert(`Error creating quest: ${error.message || error}`);
       console.error(error);
     }
   };
@@ -128,17 +141,47 @@ export default function QuestManager() {
 
               {isLoading ? (
                 <QuestListSkeleton />
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {(activeTab === "browse" ? activeQuests : userQuests).map(a => (
-                    <QuestCard
-                      key={a.id}
-                      quest={a}
-                      entryCount={entryCounts[a.id] || 0}
-                    />
-                  ))}
-                </div>
-              )}
+              ) : (() => {
+                const displayQuests = activeTab === "browse" ? activeQuests : userQuests;
+
+                console.log(`${activeTab} tab - Showing ${displayQuests.length} quests`, { address, totalQuests: quests.length });
+
+                if (displayQuests.length === 0) {
+                  return (
+                    <div className="text-center py-16">
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
+                        <Settings className="w-8 h-8 text-slate-400" />
+                      </div>
+                      <h3 className="text-lg font-bold text-slate-900 mb-2">
+                        {activeTab === "manage" ? "No quests created yet" : "No quests found"}
+                      </h3>
+                      <p className="text-slate-500 text-sm mb-6">
+                        {activeTab === "manage"
+                          ? "Create your first quest to get started"
+                          : "Check back later for new quests"}
+                      </p>
+                      {activeTab === "manage" && (
+                        <Button onClick={() => setActiveTab("create")} className="bg-[#0EA885] hover:bg-[#0EA885]/90">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create Quest
+                        </Button>
+                      )}
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {displayQuests.map(a => (
+                      <QuestCard
+                        key={a.id}
+                        quest={a}
+                        entryCount={entryCounts[a.id] || 0}
+                      />
+                    ))}
+                  </div>
+                );
+              })()}
 
               {activeTab === "browse" && showPastQuests && pastQuests.length > 0 && (
                 <div className="pt-12 border-t border-slate-100">
