@@ -569,10 +569,10 @@ export default function BountyDetailPage() {
 
  if (isLoading) {
  return (
- <div className="min-h-screen flex items-center justify-center p-4">
+ <div className="min-h-dvh flex items-center justify-center p-4">
   <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
-  <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto text-[#0EA885]" />
-  <p className="text-muted-foreground mt-6 text-sm sm:text-base">Loading bounty...</p>
+  <Loader2 className="size-10 sm:size-12 animate-spin mx-auto text-[#0EA885]" />
+  <p className="text-muted-foreground mt-6 text-sm sm:text-base text-pretty">Loading bounty...</p>
   </div>
  </div>
  );
@@ -580,10 +580,10 @@ export default function BountyDetailPage() {
 
  if (!bounty) {
  return (
- <div className="min-h-screen flex items-center justify-center p-4">
+ <div className="min-h-dvh flex items-center justify-center p-4">
   <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
-  <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Bounty not found</h2>
-  <p className="text-muted-foreground mb-6 text-sm sm:text-base">
+  <h2 className="text-2xl sm:text-3xl font-bold mb-3 text-balance">Bounty not found</h2>
+  <p className="text-muted-foreground mb-6 text-sm sm:text-base text-pretty">
   The bounty you're looking for doesn't exist.
   </p>
   <Button
@@ -605,20 +605,20 @@ export default function BountyDetailPage() {
  : 1;
 
  return (
- <div className="min-h-screen relative pt-20 sm:pt-24">
+ <div className="min-h-dvh relative pt-20 sm:pt-24">
  {/* Loading Overlay */}
  {(isPending || isConfirming) && (
   <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-50 flex items-center justify-center p-4">
   <div className="p-8 sm:p-10 rounded-[2rem] shadow-2xl border border-white/60 bg-white/90 backdrop-blur-xl max-w-sm animate-in fade-in zoom-in duration-300">
   <div className="flex flex-col items-center gap-6">
    <div className="p-4 rounded-[1.25rem] bg-[#0EA885]/10">
-   <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-[#0EA885]" />
+   <Loader2 className="size-10 sm:size-12 animate-spin text-[#0EA885]" />
    </div>
    <div className="text-center">
-   <p className="font-bold text-lg sm:text-xl mb-2">
+   <p className="font-bold text-lg sm:text-xl mb-2 text-balance">
    {isPending ? "Waiting for approval..." : "Confirming transaction..."}
    </p>
-   <p className="text-sm text-muted-foreground">
+   <p className="text-sm text-muted-foreground text-pretty">
    Please don't close this page
    </p>
    </div>
@@ -642,7 +642,7 @@ export default function BountyDetailPage() {
    </BreadcrumbLink>
    </BreadcrumbItem>
    <BreadcrumbSeparator>
-   <ChevronRight className="h-4 w-4 text-foreground/40" />
+   <ChevronRight className="size-4 text-foreground/40" />
    </BreadcrumbSeparator>
    <BreadcrumbItem>
    <BreadcrumbLink
@@ -653,7 +653,7 @@ export default function BountyDetailPage() {
    </BreadcrumbLink>
    </BreadcrumbItem>
    <BreadcrumbSeparator>
-   <ChevronRight className="h-4 w-4 text-foreground/40" />
+   <ChevronRight className="size-4 text-foreground/40" />
    </BreadcrumbSeparator>
    <BreadcrumbItem>
    <BreadcrumbPage className="text-sm font-semibold text-[#0EA885]">Bounty #{bountyId}</BreadcrumbPage>
@@ -671,11 +671,11 @@ export default function BountyDetailPage() {
    <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4">
    <div className="flex-1 w-full">
    <div className="flex items-start gap-3 mb-2">
-    <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-[1rem] bg-gradient-to-br from-[#0EA885]/10 to-[#0EA885]/5 border border-[#0EA885]/20">
-    <Target className="h-5 w-5 sm:h-6 sm:w-6 text-[#0EA885]" />
+    <div className="flex size-10 sm:size-12 items-center justify-center rounded-[1rem] bg-[#0EA885]/10 border border-[#0EA885]/20">
+    <Target className="size-5 sm:size-6 text-[#0EA885]" />
     </div>
     <div className="flex-1">
-    <CardTitle className="text-lg sm:text-xl font-bold">
+    <CardTitle className="text-lg sm:text-xl font-bold text-balance">
     {metadata?.title || bounty.description.split("\n")[0]}
     </CardTitle>
     <div className="flex items-center gap-2 mt-1.5">
@@ -696,15 +696,16 @@ export default function BountyDetailPage() {
     size="sm"
     onClick={copyLink}
     className="gap-1.5 h-auto px-3 py-1.5 rounded-full border-white/60 bg-white/50 hover:bg-white/70 transition-all duration-300"
+    aria-label={copied ? "Link copied" : "Share bounty link"}
    >
     {copied ? (
     <>
-    <Check className="w-3 h-3" />
+    <Check className="size-3" />
     <span className="text-xs font-medium">Copied!</span>
     </>
     ) : (
     <>
-    <Copy className="w-3 h-3" />
+    <Copy className="size-3" />
     <span className="text-xs font-medium">Share</span>
     </>
     )}
@@ -727,50 +728,50 @@ export default function BountyDetailPage() {
 
    {/* Stats Grid */}
    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">
-   <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-[1.25rem] p-3 border border-primary/20 transition-all duration-300 ">
+   <div className="bg-primary/10 rounded-[1.25rem] p-3 border border-primary/20 transition-all duration-300 ">
    <div className="flex items-center gap-1 mb-1">
-    <DollarSign className="w-3 h-3 text-primary" />
+    <DollarSign className="size-3 text-primary" />
     <span className="text-xs font-medium text-muted-foreground">
     Bounty Reward
     </span>
    </div>
-   <p className="text-base font-bold text-primary">
+   <p className="text-base font-bold text-primary tabular-nums">
     {formatETH(bounty.amount)} ETH
    </p>
    </div>
 
    <div className="bg-muted/50 rounded-[1.25rem] p-3 transition-all duration-300 ">
    <div className="flex items-center gap-1 mb-1">
-    <Clock className="w-3 h-3 text-muted-foreground" />
+    <Clock className="size-3 text-muted-foreground" />
     <span className="text-xs font-medium text-muted-foreground">
     Deadline
     </span>
    </div>
-   <p className="text-sm font-semibold">
+   <p className="text-sm font-semibold tabular-nums">
     {formatTimeLeft(bounty.deadline)}
    </p>
    </div>
 
    <div className="bg-muted/50 rounded-[1.25rem] p-3 transition-all duration-300 ">
    <div className="flex items-center gap-1 mb-1">
-    <Users className="w-3 h-3 text-muted-foreground" />
+    <Users className="size-3 text-muted-foreground" />
     <span className="text-xs font-medium text-muted-foreground">
     Submissions
     </span>
    </div>
-   <p className="text-sm font-semibold">
+   <p className="text-sm font-semibold tabular-nums">
     {bounty.submissions.length}
    </p>
    </div>
 
    <div className="bg-muted/50 rounded-[1.25rem] p-3 transition-all duration-300 ">
    <div className="flex items-center gap-1 mb-1">
-    <Shield className="w-3 h-3 text-muted-foreground" />
+    <Shield className="size-3 text-muted-foreground" />
     <span className="text-xs font-medium text-muted-foreground">
     Slash %
     </span>
    </div>
-   <p className="text-sm font-semibold">
+   <p className="text-sm font-semibold tabular-nums">
     {Number(bounty.slashPercent) / 100}%
    </p>
    </div>
@@ -849,7 +850,7 @@ export default function BountyDetailPage() {
     : 0;
 
     return (
-    <Card key={index} className="bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
+    <Card key={index} className="bg-yellow-50 border-yellow-200">
      <CardContent className="pt-4 pb-4">
      <div className="flex justify-between items-center">
      <div className="flex items-center gap-3">
@@ -879,10 +880,10 @@ export default function BountyDetailPage() {
       </div>
      </div>
      <div className="text-right">
-      <p className="font-bold text-primary">
+      <p className="font-bold text-primary tabular-nums">
       {winnerShare}%
       </p>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-muted-foreground tabular-nums">
       {formatETH(
       (bounty.amount * BigInt(winnerShare)) /
        BigInt(100)
@@ -912,8 +913,8 @@ export default function BountyDetailPage() {
     : "border-yellow-200 bg-yellow-50 dark:bg-yellow-950"
     }`}>
     <CardHeader className="pb-3">
-    <CardTitle className="text-base flex items-center gap-2">
-     <Users className="w-4 h-4" />
+    <CardTitle className="text-base flex items-center gap-2 text-balance">
+     <Users className="size-4" />
      {userOprecApplication.approved
      ? "✅ OPREC Application Approved"
      : userOprecApplication.rejected
@@ -945,8 +946,8 @@ export default function BountyDetailPage() {
     // User hasn't applied yet
     <Card className="rounded-[1.5rem] border-blue-200 bg-blue-50 dark:bg-blue-950 shadow-md transition-all duration-300">
     <CardHeader className="pb-3">
-    <CardTitle className="text-base flex items-center gap-2">
-     <Users className="w-4 h-4" />
+    <CardTitle className="text-base flex items-center gap-2 text-balance">
+     <Users className="size-4" />
      Apply to OPREC (Open Recruitment)
     </CardTitle>
     </CardHeader>
@@ -1026,8 +1027,8 @@ export default function BountyDetailPage() {
    <Card className="rounded-[1.5rem] shadow-md transition-all duration-300">
     <CardHeader className="pb-3">
     <div className="flex items-center justify-between">
-    <CardTitle className="text-base flex items-center gap-2">
-     <Users className="w-4 h-4" />
+    <CardTitle className="text-base flex items-center gap-2 text-balance">
+     <Users className="size-4" />
      OPREC Applications ({oprecApplications.length})
     </CardTitle>
     <Button
@@ -1065,7 +1066,7 @@ export default function BountyDetailPage() {
         }
        }}
        disabled={app.approved || app.rejected}
-       className="h-4 w-4"
+       className="size-4"
        />
        <p className="text-sm font-medium">{formatAddress(app.applicant)}</p>
        {app.approved && <Badge variant="default" className="text-xs">Approved</Badge>}
@@ -1122,8 +1123,8 @@ export default function BountyDetailPage() {
    <div className="mb-4">
    <Card className="rounded-[1.5rem] border-primary/20 bg-primary/5 shadow-md transition-all duration-300">
     <CardHeader className="pb-3">
-    <CardTitle className="text-base flex items-center gap-2">
-    <Send className="w-4 h-4" />
+    <CardTitle className="text-base flex items-center gap-2 text-balance">
+    <Send className="size-4" />
     Submit Your Solution
     </CardTitle>
     </CardHeader>
@@ -1159,8 +1160,8 @@ export default function BountyDetailPage() {
       htmlFor="solution-image-upload"
       className="cursor-pointer flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors"
      >
-      <div className="w-10 h-10 mb-2 bg-muted rounded-full flex items-center justify-center">
-      <Upload className="w-5 h-5" />
+      <div className="size-10 mb-2 bg-muted rounded-full flex items-center justify-center">
+      <Upload className="size-5" />
       </div>
       <span className="text-xs font-medium mb-1">
       Click to upload solution
@@ -1182,9 +1183,10 @@ export default function BountyDetailPage() {
       variant="destructive"
       size="icon"
       onClick={() => setUploadedSolutionImage(null)}
-      className="absolute -top-2 -right-2 w-6 h-6"
+      className="absolute -top-2 -right-2 size-6"
+      aria-label="Remove solution image"
      >
-      <X className="w-3 h-3" />
+      <X className="size-3" />
      </Button>
      <div className="text-xs text-muted-foreground mt-1 truncate">
       {uploadedSolutionImage.name}
@@ -1245,17 +1247,17 @@ export default function BountyDetailPage() {
     >
      {isUploadingSolution ? (
      <>
-     <Upload className="w-3 h-3 mr-2 animate-spin" />
+     <Upload className="size-3 mr-2 animate-spin" />
      Uploading to IPFS...
      </>
      ) : isPending || isConfirming ? (
      <>
-     <Clock className="w-3 h-3 mr-2 animate-spin" />
+     <Clock className="size-3 mr-2 animate-spin" />
      Submitting...
      </>
      ) : (
      <>
-     <Send className="w-3 h-3 mr-2" />
+     <Send className="size-3 mr-2" />
      Submit Solution
      </>
      )}
@@ -1269,7 +1271,7 @@ export default function BountyDetailPage() {
    {/* Submissions */}
    {bounty.submissions.length > 0 && (
    <div>
-   <h3 className="text-sm font-semibold mb-2">
+   <h3 className="text-sm font-semibold mb-2 text-balance">
     All Submissions ({bounty.submissions.length})
    </h3>
    <div className="space-y-2">
@@ -1286,7 +1288,7 @@ export default function BountyDetailPage() {
     key={index}
     className={`rounded-[1.25rem] transition-all duration-300 ${
      isWinner
-     ? "bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200"
+     ? "bg-yellow-50 border-yellow-200"
      : ""
     }`}
     >
@@ -1370,8 +1372,9 @@ export default function BountyDetailPage() {
      size="sm"
      className="h-7"
      onClick={() => openCidViewer(sub.blindedIpfsCid, `Submission by ${formatAddress(sub.solver)}`)}
+     aria-label={`View submission by ${formatAddress(sub.solver)}`}
      >
-     <ExternalLink className="w-3 h-3 mr-1" />
+     <ExternalLink className="size-3 mr-1" />
      <span className="text-xs">View</span>
      </Button>
      </div>
@@ -1380,7 +1383,7 @@ export default function BountyDetailPage() {
      {sub.replies.length > 0 && (
      <div className="mt-3 pt-3 border-t space-y-2">
      <div className="flex items-center gap-1.5">
-      <MessageCircle className="w-3 h-3 text-muted-foreground" />
+      <MessageCircle className="size-3 text-muted-foreground" />
       <span className="text-xs font-medium">
       Discussion ({sub.replies.length})
       </span>
@@ -1435,7 +1438,7 @@ export default function BountyDetailPage() {
       disabled={isPending || isConfirming}
       className="h-8"
       >
-      <MessageCircle className="w-3 h-3 mr-1" />
+      <MessageCircle className="size-3 mr-1" />
       <span className="text-xs">Reply</span>
       </Button>
      </div>
@@ -1470,7 +1473,7 @@ export default function BountyDetailPage() {
       }
       className="bg-green-600 hover:bg-green-700 h-8"
       >
-      <Unlock className="w-3 h-3 mr-1" />
+      <Unlock className="size-3 mr-1" />
       <span className="text-xs">Reveal</span>
       </Button>
       </div>
@@ -1491,8 +1494,9 @@ export default function BountyDetailPage() {
       size="sm"
       className="h-7"
       onClick={() => openCidViewer(sub.revealIpfsCid, `Solution by ${formatAddress(sub.solver)}`)}
+      aria-label={`View revealed solution by ${formatAddress(sub.solver)}`}
      >
-      <ExternalLink className="w-3 h-3 mr-1" />
+      <ExternalLink className="size-3 mr-1" />
       <span className="text-xs">View Solution</span>
      </Button>
      </div>
@@ -1507,11 +1511,11 @@ export default function BountyDetailPage() {
    {isCreator &&
     bounty.status === 1 &&
     selectedSubmissions.length > 0 && (
-    <Card className="rounded-[1.5rem] mt-4 bg-gradient-to-r from-green-50 to-blue-50 border-green-200 shadow-md transition-all duration-300">
+    <Card className="rounded-[1.5rem] mt-4 bg-green-50 border-green-200 shadow-md transition-all duration-300">
     <CardContent className="py-3 px-4">
      <div className="flex justify-between items-center">
      <div>
-     <h4 className="text-sm font-bold mb-0.5">
+     <h4 className="text-sm font-bold mb-0.5 text-balance">
       Ready to Select Winners?
      </h4>
      <p className="text-xs text-muted-foreground">
@@ -1531,7 +1535,7 @@ export default function BountyDetailPage() {
      }
      size="sm"
      >
-     <Trophy className="w-3 h-3 mr-2" />
+     <Trophy className="size-3 mr-2" />
      <span className="text-xs">
       {isPending || isConfirming
       ? "Confirming..."
@@ -1560,13 +1564,13 @@ export default function BountyDetailPage() {
     </a>
     {isConfirming && (
     <div className="flex items-center gap-2 text-xs text-blue-600">
-    <Clock className="w-3 h-3 animate-spin" />
+    <Clock className="size-3 animate-spin" />
     Waiting for confirmation...
     </div>
     )}
     {isConfirmed && (
     <div className="flex items-center gap-2 text-xs text-green-600">
-    <Check className="w-4 h-4" />
+    <Check className="size-4" />
     Transaction confirmed!
     </div>
     )}
@@ -1631,7 +1635,7 @@ export default function BountyDetailPage() {
     target="_blank"
     rel="noopener noreferrer"
     >
-    <ExternalLink className="w-3 h-3 mr-2" />
+    <ExternalLink className="size-3 mr-2" />
     Open in New Tab
     </a>
    </Button>
@@ -1646,7 +1650,7 @@ export default function BountyDetailPage() {
     });
     }}
    >
-    <Copy className="w-3 h-3 mr-2" />
+    <Copy className="size-3 mr-2" />
     Copy Link
    </Button>
    </div>

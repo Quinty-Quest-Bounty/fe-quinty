@@ -246,10 +246,10 @@ export default function QuestDetailPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="min-h-dvh flex items-center justify-center p-4">
                 <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
-                    <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin mx-auto text-[#0EA885]" />
-                    <p className="text-muted-foreground mt-6 text-sm sm:text-base">Loading quest...</p>
+                    <Loader2 className="size-10 sm:size-12 animate-spin mx-auto text-[#0EA885]" />
+                    <p className="text-muted-foreground mt-6 text-sm sm:text-base text-pretty">Loading quest...</p>
                 </div>
             </div>
         );
@@ -257,10 +257,10 @@ export default function QuestDetailPage() {
 
     if (!quest) {
         return (
-            <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="min-h-dvh flex items-center justify-center p-4">
                 <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
-                    <h2 className="text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">Quest not found</h2>
-                    <p className="text-muted-foreground mb-6 text-sm sm:text-base">The quest you're looking for doesn't exist.</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold mb-3 text-balance">Quest not found</h2>
+                    <p className="text-muted-foreground mb-6 text-sm sm:text-base text-pretty">The quest you're looking for doesn't exist.</p>
                     <Button onClick={() => router.push("/quests")} className="rounded-[0.75rem] transition-all duration-300">
                         Back to Quests
                     </Button>
@@ -291,20 +291,20 @@ export default function QuestDetailPage() {
     };
 
     return (
-        <div className="min-h-screen relative pt-20 sm:pt-24">
+        <div className="min-h-dvh relative pt-20 sm:pt-24">
             {/* Loading Overlay */}
             {(isPending || isConfirming) && (
                 <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-50 flex items-center justify-center p-4">
                     <div className="p-8 sm:p-10 rounded-[2rem] shadow-2xl border border-white/60 bg-white/90 backdrop-blur-xl max-w-sm">
                         <div className="flex flex-col items-center gap-6">
                             <div className="p-4 rounded-[1.25rem] bg-[#0EA885]/10">
-                                <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-[#0EA885]" />
+                                <Loader2 className="size-10 sm:size-12 animate-spin text-[#0EA885]" />
                             </div>
                             <div className="text-center">
-                                <p className="font-bold text-lg sm:text-xl mb-2">
+                                <p className="font-bold text-lg sm:text-xl mb-2 text-balance">
                                     {isPending ? "Waiting for approval..." : "Confirming transaction..."}
                                 </p>
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-sm text-muted-foreground text-pretty">
                                     Please don't close this page
                                 </p>
                             </div>
@@ -328,7 +328,7 @@ export default function QuestDetailPage() {
                                     </BreadcrumbLink>
                                 </BreadcrumbItem>
                                 <BreadcrumbSeparator>
-                                    <ChevronRight className="h-4 w-4 text-foreground/40" />
+                                    <ChevronRight className="size-4 text-foreground/40" />
                                 </BreadcrumbSeparator>
                                 <BreadcrumbItem>
                                     <BreadcrumbLink
@@ -339,7 +339,7 @@ export default function QuestDetailPage() {
                                     </BreadcrumbLink>
                                 </BreadcrumbItem>
                                 <BreadcrumbSeparator>
-                                    <ChevronRight className="h-4 w-4 text-foreground/40" />
+                                    <ChevronRight className="size-4 text-foreground/40" />
                                 </BreadcrumbSeparator>
                                 <BreadcrumbItem>
                                     <BreadcrumbPage className="text-sm font-semibold text-[#0EA885]">Quest #{questId}</BreadcrumbPage>
@@ -357,11 +357,11 @@ export default function QuestDetailPage() {
                             <div className="flex justify-between items-start gap-3">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                                            <Gift className="h-4 w-4 text-primary" />
+                                        <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
+                                            <Gift className="size-4 text-primary" />
                                         </div>
                                         <div>
-                                            <CardTitle className="text-lg">{quest.title}</CardTitle>
+                                            <CardTitle className="text-lg text-balance">{quest.title}</CardTitle>
                                             <div className="flex items-center gap-2 mt-1">
                                                 <span className="text-xs text-muted-foreground">Created by</span>
                                                 <Badge variant="outline" className="text-xs py-0 h-5">
@@ -378,15 +378,16 @@ export default function QuestDetailPage() {
                                         size="sm"
                                         onClick={copyLink}
                                         className="gap-1 h-7 px-2"
+                                        aria-label={copied ? "Link copied" : "Share quest link"}
                                     >
                                         {copied ? (
                                             <>
-                                                <Check className="w-3 h-3" />
+                                                <Check className="size-3" />
                                                 <span className="text-xs">Copied!</span>
                                             </>
                                         ) : (
                                             <>
-                                                <Copy className="w-3 h-3" />
+                                                <Copy className="size-3" />
                                                 <span className="text-xs">Share</span>
                                             </>
                                         )}
@@ -409,43 +410,43 @@ export default function QuestDetailPage() {
 
                             {/* Stats Grid */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">
-                                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-[1.25rem] p-3 border border-green-200 transition-all duration-300 ">
+                                <div className="bg-green-50 rounded-[1.25rem] p-3 border border-green-200">
                                     <div className="flex items-center gap-1 mb-1">
-                                        <Coins className="w-3 h-3 text-green-600" />
+                                        <Coins className="size-3 text-green-600" />
                                         <span className="text-xs font-medium text-muted-foreground">Reward Per User</span>
                                     </div>
-                                    <p className="text-base font-bold text-green-600">
+                                    <p className="text-base font-bold text-green-600 tabular-nums">
                                         {formatETH(quest.perQualifier)} ETH
                                     </p>
                                 </div>
 
-                                <div className="bg-muted/50 rounded-[1.25rem] p-3 transition-all duration-300 ">
+                                <div className="bg-muted/50 rounded-[1.25rem] p-3">
                                     <div className="flex items-center gap-1 mb-1">
-                                        <Users className="w-3 h-3 text-muted-foreground" />
+                                        <Users className="size-3 text-muted-foreground" />
                                         <span className="text-xs font-medium text-muted-foreground">Participants</span>
                                     </div>
-                                    <p className="text-sm font-semibold">
+                                    <p className="text-sm font-semibold tabular-nums">
                                         {quest.qualifiersCount} / {quest.maxQualifiers}
                                     </p>
                                     <Progress value={progress} className="h-1 mt-1.5" />
                                 </div>
 
-                                <div className="bg-muted/50 rounded-[1.25rem] p-3 transition-all duration-300 ">
+                                <div className="bg-muted/50 rounded-[1.25rem] p-3">
                                     <div className="flex items-center gap-1 mb-1">
-                                        <Clock className="w-3 h-3 text-muted-foreground" />
+                                        <Clock className="size-3 text-muted-foreground" />
                                         <span className="text-xs font-medium text-muted-foreground">Deadline</span>
                                     </div>
-                                    <p className="text-sm font-semibold">
+                                    <p className="text-sm font-semibold tabular-nums">
                                         {formatTimeLeft(BigInt(quest.deadline))}
                                     </p>
                                 </div>
 
-                                <div className="bg-muted/50 rounded-[1.25rem] p-3 transition-all duration-300 ">
+                                <div className="bg-muted/50 rounded-[1.25rem] p-3">
                                     <div className="flex items-center gap-1 mb-1">
-                                        <Target className="w-3 h-3 text-muted-foreground" />
+                                        <Target className="size-3 text-muted-foreground" />
                                         <span className="text-xs font-medium text-muted-foreground">Total Budget</span>
                                     </div>
-                                    <p className="text-sm font-semibold">
+                                    <p className="text-sm font-semibold tabular-nums">
                                         {formatETH(quest.totalAmount)} ETH
                                     </p>
                                 </div>
@@ -481,11 +482,11 @@ export default function QuestDetailPage() {
                                     {userEntry ? (
                                         <Card className="rounded-[1.5rem] bg-blue-50 border-blue-200 shadow-md transition-all duration-300">
                                             <CardHeader className="pb-2">
-                                                <CardTitle className="text-base flex items-center gap-2">
-                                                    <Check className="w-4 h-4" />
+                                                <CardTitle className="text-base flex items-center gap-2 text-balance">
+                                                    <Check className="size-4" />
                                                     Your Submission
                                                 </CardTitle>
-                                                <CardDescription className="text-sm">
+                                                <CardDescription className="text-sm text-pretty">
                                                     Status: {" "}
                                                     <Badge
                                                         variant={
@@ -510,7 +511,7 @@ export default function QuestDetailPage() {
                                                         {userEntry.ipfsProofCid.includes("twitter.com") ||
                                                             userEntry.ipfsProofCid.includes("x.com") ? (
                                                             <>
-                                                                <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                                                                <ExternalLink className="size-3 text-muted-foreground" />
                                                                 <span className="text-xs">X Post: </span>
                                                                 <a
                                                                     href={userEntry.ipfsProofCid}
@@ -523,7 +524,7 @@ export default function QuestDetailPage() {
                                                             </>
                                                         ) : (
                                                             <>
-                                                                <FileText className="w-3 h-3 text-muted-foreground" />
+                                                                <FileText className="size-3 text-muted-foreground" />
                                                                 <span className="text-xs">IPFS: {userEntry.ipfsProofCid}</span>
                                                             </>
                                                         )}
@@ -542,11 +543,11 @@ export default function QuestDetailPage() {
                                     ) : (
                                         <Card className="rounded-[1.5rem] border-primary/20 bg-primary/5 shadow-md transition-all duration-300">
                                             <CardHeader className="pb-3">
-                                                <CardTitle className="text-base flex items-center gap-2">
-                                                    <Send className="w-4 h-4" />
+                                                <CardTitle className="text-base flex items-center gap-2 text-balance">
+                                                    <Send className="size-4" />
                                                     Submit Your Entry
                                                 </CardTitle>
-                                                <CardDescription className="text-sm">
+                                                <CardDescription className="text-sm text-pretty">
                                                     Provide proof of your social media engagement to qualify for rewards
                                                 </CardDescription>
                                             </CardHeader>
@@ -555,7 +556,7 @@ export default function QuestDetailPage() {
                                                     <div className="space-y-1.5">
                                                         <Label htmlFor="twitterUrl" className="text-xs">X Post URL</Label>
                                                         <div className="relative">
-                                                            <ExternalLink className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3 w-3 text-muted-foreground" />
+                                                            <ExternalLink className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3 text-muted-foreground" />
                                                             <Input
                                                                 id="twitterUrl"
                                                                 type="url"
@@ -591,8 +592,8 @@ export default function QuestDetailPage() {
                                                                     htmlFor="proof-image-upload"
                                                                     className="cursor-pointer flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors"
                                                                 >
-                                                                    <div className="w-10 h-10 mb-2 bg-muted rounded-full flex items-center justify-center">
-                                                                        <Upload className="w-5 h-5" />
+                                                                    <div className="size-10 mb-2 bg-muted rounded-full flex items-center justify-center">
+                                                                        <Upload className="size-5" />
                                                                     </div>
                                                                     <span className="text-xs font-medium mb-1">
                                                                         Click to upload proof
@@ -614,9 +615,10 @@ export default function QuestDetailPage() {
                                                                     variant="destructive"
                                                                     size="icon"
                                                                     onClick={() => setUploadedProofImage(null)}
-                                                                    className="absolute -top-2 -right-2 w-6 h-6"
+                                                                    className="absolute -top-2 -right-2 size-6"
+                                                                    aria-label="Remove proof image"
                                                                 >
-                                                                    <X className="w-3 h-3" />
+                                                                    <X className="size-3" />
                                                                 </Button>
                                                                 <div className="text-xs text-muted-foreground mt-1 truncate">
                                                                     {uploadedProofImage.name}
@@ -651,17 +653,17 @@ export default function QuestDetailPage() {
                                                     >
                                                         {isUploadingProof ? (
                                                             <>
-                                                                <Upload className="w-3 h-3 mr-2 animate-spin" />
+                                                                <Upload className="size-3 mr-2 animate-spin" />
                                                                 Uploading to IPFS...
                                                             </>
                                                         ) : isPending || isConfirming ? (
                                                             <>
-                                                                <Clock className="w-3 h-3 mr-2 animate-spin" />
+                                                                <Clock className="size-3 mr-2 animate-spin" />
                                                                 Submitting...
                                                             </>
                                                         ) : (
                                                             <>
-                                                                <Send className="w-3 h-3 mr-2" />
+                                                                <Send className="size-3 mr-2" />
                                                                 Submit Entry
                                                             </>
                                                         )}
@@ -676,7 +678,7 @@ export default function QuestDetailPage() {
                             {/* Entries List */}
                             {entries.length > 0 && (
                                 <div>
-                                    <h3 className="text-sm font-semibold mb-2">
+                                    <h3 className="text-sm font-semibold mb-2 text-balance">
                                         All Entries ({entries.length})
                                     </h3>
                                     <div className="space-y-2">
@@ -686,7 +688,7 @@ export default function QuestDetailPage() {
                                                     <div className="flex justify-between items-start">
                                                         <div className="flex-1">
                                                             <div className="flex items-center gap-2 mb-2">
-                                                                <div className="h-6 w-6 bg-muted rounded-full flex items-center justify-center">
+                                                                <div className="size-6 bg-muted rounded-full flex items-center justify-center">
                                                                     <span className="text-[10px] font-medium">
                                                                         {entry.solver.slice(0, 2).toUpperCase()}
                                                                     </span>
@@ -716,7 +718,7 @@ export default function QuestDetailPage() {
                                                                     {entry.ipfsProofCid.includes("twitter.com") ||
                                                                         entry.ipfsProofCid.includes("x.com") ? (
                                                                         <>
-                                                                            <ExternalLink className="w-3 h-3" />
+                                                                            <ExternalLink className="size-3" />
                                                                             <span>X Post: </span>
                                                                             <a
                                                                                 href={entry.ipfsProofCid}
@@ -729,13 +731,13 @@ export default function QuestDetailPage() {
                                                                         </>
                                                                     ) : (
                                                                         <>
-                                                                            <FileText className="w-3 h-3" />
+                                                                            <FileText className="size-3" />
                                                                             <span>IPFS: {entry.ipfsProofCid}</span>
                                                                         </>
                                                                     )}
                                                                 </div>
                                                                 <div className="flex items-center gap-1.5">
-                                                                    <Calendar className="w-3 h-3" />
+                                                                    <Calendar className="size-3" />
                                                                     <span>
                                                                         Submitted: {new Date(entry.timestamp * 1000).toLocaleDateString()}
                                                                     </span>
@@ -753,8 +755,9 @@ export default function QuestDetailPage() {
                                                                     href={`https://ipfs.io/ipfs/${entry.ipfsProofCid}`}
                                                                     target="_blank"
                                                                     rel="noopener noreferrer"
+                                                                    aria-label="View IPFS proof"
                                                                 >
-                                                                    <ExternalLink className="w-3 h-3 mr-1" />
+                                                                    <ExternalLink className="size-3 mr-1" />
                                                                     <span className="text-xs">View</span>
                                                                 </a>
                                                             </Button>
@@ -782,13 +785,13 @@ export default function QuestDetailPage() {
                                         </a>
                                         {isConfirming && (
                                             <div className="flex items-center gap-2 text-xs text-blue-600">
-                                                <Clock className="w-3 h-3 animate-spin" />
+                                                <Clock className="size-3 animate-spin" />
                                                 Waiting for confirmation...
                                             </div>
                                         )}
                                         {isConfirmed && (
                                             <div className="flex items-center gap-2 text-xs text-green-600">
-                                                <Check className="w-4 h-4" />
+                                                <Check className="size-4" />
                                                 Transaction confirmed!
                                             </div>
                                         )}
