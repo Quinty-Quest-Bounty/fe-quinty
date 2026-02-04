@@ -66,6 +66,13 @@ export const uploadToIpfs = async (
   file: File | Blob,
   metadata?: any
 ): Promise<string> => {
+  const jwtToken = process.env.NEXT_PUBLIC_PINATA_JWT;
+
+  if (!jwtToken) {
+    console.error("Pinata JWT token is missing. Please add NEXT_PUBLIC_PINATA_JWT to your .env.local file");
+    throw new Error("Pinata JWT token is not configured");
+  }
+
   const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
 
   const data = new FormData();
@@ -77,15 +84,19 @@ export const uploadToIpfs = async (
   }
 
   const headers = {
-    'Authorization': `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT || ''}`
+    'Authorization': `Bearer ${jwtToken}`
   };
 
   try {
     const res = await axios.post(url, data, { headers });
+    if (!res.data || !res.data.IpfsHash) {
+      throw new Error("Invalid response from Pinata");
+    }
+    console.log("Successfully uploaded to IPFS:", res.data.IpfsHash);
     return res.data.IpfsHash;
-  } catch (error) {
-    console.error("IPFS upload failed:", error);
-    throw new Error("Failed to upload to IPFS");
+  } catch (error: any) {
+    console.error("IPFS upload failed:", error.response?.data || error.message);
+    throw new Error(error.response?.data?.error || "Failed to upload to IPFS");
   }
 };
 

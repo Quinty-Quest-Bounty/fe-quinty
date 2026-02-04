@@ -27,10 +27,16 @@ export function ImageUpload({ onUpload, value, className }: ImageUploadProps) {
 
         try {
             const cid = await uploadToIpfs(file);
+            if (!cid) {
+                throw new Error("Failed to get IPFS CID");
+            }
+            console.log("Image uploaded to IPFS:", cid);
             onUpload(cid);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Upload failed:", error);
+            alert(`Image upload failed: ${error.message || 'Please check your Pinata configuration'}`);
             setPreview(null);
+            onUpload("");
         } finally {
             setIsUploading(false);
         }

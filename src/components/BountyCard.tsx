@@ -94,7 +94,7 @@ export default function BountyCard({ bounty }: BountyCardProps) {
         <div className="relative h-40 w-full overflow-hidden bg-slate-50">
           {metadata?.images?.[0] ? (
             <img
-              src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
+              src={`https://purple-elderly-silverfish-382.mypinata.cloud/ipfs/${metadata.images[0]}`}
               alt={metadata.title}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
