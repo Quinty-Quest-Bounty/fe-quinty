@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { CONTRACT_ADDRESSES, QUINTY_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
 import { parseETH } from "../utils/web3";
@@ -16,7 +16,7 @@ export default function BountyManager() {
   const { address } = useAccount();
   const { bounties, isLoading, refetch } = useBounties();
   const { writeContract, data: hash, isPending } = useWriteContract();
-  const { isLoading: isConfirming } = useWaitForTransactionReceipt({ hash });
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
   const [activeTab, setActiveTab] = useState<"browse" | "create" | "my-bounties">("browse");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -37,21 +37,39 @@ export default function BountyManager() {
 
   const handleCreateBounty = async (formData: any) => {
     try {
+      console.log("Creating bounty with form data:", formData);
+
+      // Check wallet connection
+      if (!address) {
+        alert("Please connect your wallet first");
+        return;
+      }
+
+      // Validate required fields
+      if (!formData.title || !formData.description || !formData.amount || !formData.deadline) {
+        alert("Please fill in all required fields");
+        return;
+      }
+
       const metadata: BountyMetadata = {
         title: formData.title,
         description: formData.description,
         requirements: formData.requirements.filter((r: string) => r.trim()),
         deliverables: formData.deliverables.filter((d: string) => d.trim()),
         skills: formData.skills.filter((s: string) => s.trim()),
-        images: [],
+        images: formData.images || [],
         deadline: Math.floor(new Date(formData.deadline).getTime() / 1000),
         bountyType: formData.bountyType,
       };
 
+      console.log("Uploading metadata to IPFS...");
       const metadataCid = await uploadMetadataToIpfs(metadata);
+      console.log("Metadata CID:", metadataCid);
+
       const winnerSharesArg = formData.allowMultipleWinners ? formData.winnerShares.map((s: number) => BigInt(s * 100)) : [];
       const oprecDeadline = formData.hasOprec && formData.oprecDeadline ? Math.floor(new Date(formData.oprecDeadline).getTime() / 1000) : 0;
 
+      console.log("Calling smart contract...");
       writeContract({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
@@ -68,7 +86,8 @@ export default function BountyManager() {
         value: parseETH(formData.amount),
       });
     } catch (e: any) {
-      console.error(e);
+      console.error("Error creating bounty:", e);
+      alert(`Error creating bounty: ${e.message || e}`);
     }
   };
 
@@ -120,6 +139,17 @@ export default function BountyManager() {
       args: [BigInt(bountyId), BigInt(subId), revealCid],
     });
   };
+
+  // Handle transaction confirmation
+  useEffect(() => {
+    if (isConfirmed) {
+      console.log("Transaction confirmed!");
+      refetch();
+      if (activeTab === "create") {
+        setActiveTab("browse");
+      }
+    }
+  }, [isConfirmed, refetch, activeTab]);
 
   return (
     <div className="space-y-10">
