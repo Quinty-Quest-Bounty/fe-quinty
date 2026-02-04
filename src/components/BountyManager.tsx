@@ -155,8 +155,8 @@ export default function BountyManager() {
     <div className="space-y-10">
       {/* Unified Header Section */}
       <div className="mb-10 text-center">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Bounties</h1>
-        <p className="text-slate-500 mt-1 text-sm font-medium">
+        <h1 className="text-3xl font-black text-slate-900 text-balance">Bounties</h1>
+        <p className="text-slate-500 mt-1 text-sm font-medium text-pretty">
           Secure, escrow-backed tasks for developers and creators.
         </p>
       </div>
@@ -178,7 +178,7 @@ export default function BountyManager() {
                 : "text-slate-500 hover:text-slate-900"
                 }`}
             >
-              <tab.icon className="w-4 h-4 mr-2" />
+              <tab.icon className="size-4 mr-2" />
               {tab.label}
             </Button>
           ))}
@@ -225,20 +225,20 @@ export default function BountyManager() {
                 if (displayBounties.length === 0) {
                   return (
                     <div className="text-center py-16">
-                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
-                        <Target className="w-8 h-8 text-slate-400" />
+                      <div className="inline-flex items-center justify-center size-16 rounded-full bg-slate-100 mb-4">
+                        <Target className="size-8 text-slate-400" />
                       </div>
-                      <h3 className="text-lg font-bold text-slate-900 mb-2">
+                      <h3 className="text-lg font-bold text-slate-900 text-balance mb-2">
                         {activeTab === "my-bounties" ? "No bounties created yet" : "No bounties found"}
                       </h3>
-                      <p className="text-slate-500 text-sm mb-6">
+                      <p className="text-slate-500 text-sm text-pretty mb-6">
                         {activeTab === "my-bounties"
                           ? "Create your first bounty to get started"
                           : "Try adjusting your filters"}
                       </p>
                       {activeTab === "my-bounties" && (
                         <Button onClick={() => setActiveTab("create")} className="bg-[#0EA885] hover:bg-[#0EA885]/90">
-                          <Plus className="w-4 h-4 mr-2" />
+                          <Plus className="size-4 mr-2" />
                           Create Bounty
                         </Button>
                       )}
@@ -265,7 +265,7 @@ export default function BountyManager() {
 
               {activeTab === "browse" && showPastBounties && pastBounties.length > 0 && (
                 <div className="pt-12 border-t border-slate-100">
-                  <h3 className="text-sm font-bold text-slate-400 mb-8 text-center uppercase tracking-widest">Past Bounties</h3>
+                  <h3 className="text-sm font-bold text-slate-400 mb-8 text-center uppercase">Past Bounties</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 opacity-60">
                     {pastBounties.map(b => (
                       <BountyCard

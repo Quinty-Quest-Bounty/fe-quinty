@@ -70,7 +70,7 @@ export default function QuestCard({ quest, entryCount = 0 }: QuestCardProps) {
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Gift className="w-10 h-10 text-slate-200" />
+              <Gift className="size-10 text-slate-200" />
             </div>
           )}
 
@@ -82,16 +82,16 @@ export default function QuestCard({ quest, entryCount = 0 }: QuestCardProps) {
         </div>
 
         <CardHeader className="p-5 pb-2">
-          <h3 className="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-[#0EA885] transition-colors">
+          <h3 className="text-base font-bold text-slate-900 text-balance line-clamp-1 group-hover:text-[#0EA885] transition-colors">
             {quest.title}
           </h3>
           <div className="flex items-center gap-4 mt-1">
-            <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-              <Users className="w-3 h-3" />
+            <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase">
+              <Users className="size-3" />
               {entryCount || quest.qualifiersCount} Participants
             </div>
-            <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-              <Clock className="w-3 h-3" />
+            <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase">
+              <Clock className="size-3" />
               {formatTimeLeft(BigInt(quest.deadline))}
             </div>
           </div>
@@ -99,9 +99,9 @@ export default function QuestCard({ quest, entryCount = 0 }: QuestCardProps) {
 
         <CardContent className="p-5 pt-4 space-y-4">
           <div className="space-y-1">
-            <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-slate-300">
+            <div className="flex justify-between text-[9px] font-black uppercase text-slate-300">
               <span>Progress</span>
-              <span>{Math.round(progress)}%</span>
+              <span className="tabular-nums">{Math.round(progress)}%</span>
             </div>
             <Progress value={progress} className="h-1 bg-slate-50" />
           </div>
@@ -109,12 +109,12 @@ export default function QuestCard({ quest, entryCount = 0 }: QuestCardProps) {
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
               <div className="flex items-center gap-1">
-                <span className="text-lg font-black text-slate-900">{formatETH(quest.perQualifier)}</span>
+                <span className="text-lg font-black text-slate-900 tabular-nums">{formatETH(quest.perQualifier)}</span>
                 <span className="text-[10px] font-bold text-slate-400">ETH</span>
               </div>
               <span className="text-[10px] font-medium text-slate-400">Per User</span>
             </div>
-            <Avatar className="h-7 w-7 border border-slate-100">
+            <Avatar className="size-7 border border-slate-100">
               <AvatarFallback className="text-[8px] font-bold bg-slate-100 text-slate-500">
                 {quest.creator.slice(2, 4).toUpperCase()}
               </AvatarFallback>

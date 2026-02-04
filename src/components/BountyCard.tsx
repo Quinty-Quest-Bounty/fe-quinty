@@ -100,7 +100,7 @@ export default function BountyCard({ bounty }: BountyCardProps) {
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Target className="w-10 h-10 text-slate-200" />
+              <Target className="size-10 text-slate-200" />
             </div>
           )}
 
@@ -112,16 +112,16 @@ export default function BountyCard({ bounty }: BountyCardProps) {
         </div>
 
         <CardHeader className="p-5 pb-2">
-          <h3 className="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-[#0EA885] transition-colors">
+          <h3 className="text-base font-bold text-slate-900 text-balance line-clamp-1 group-hover:text-[#0EA885] transition-colors">
             {metadata?.title || bounty.description.split("\n")[0]}
           </h3>
           <div className="flex items-center gap-4 mt-1">
-            <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-              <Users className="w-3 h-3" />
+            <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase">
+              <Users className="size-3" />
               {bounty.submissions.length} Submissions
             </div>
-            <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-              <Clock className="w-3 h-3" />
+            <div className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase">
+              <Clock className="size-3" />
               {formatTimeLeft(bounty.deadline)}
             </div>
           </div>
@@ -131,16 +131,16 @@ export default function BountyCard({ bounty }: BountyCardProps) {
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
               <div className="flex items-center gap-1">
-                <span className="text-lg font-black text-slate-900">{formatETH(bounty.amount)}</span>
+                <span className="text-lg font-black text-slate-900 tabular-nums">{formatETH(bounty.amount)}</span>
                 <span className="text-[10px] font-bold text-slate-400">ETH</span>
               </div>
               {ethPrice > 0 && (
-                <span className="text-[10px] font-medium text-slate-400">
+                <span className="text-[10px] font-medium text-slate-400 tabular-nums">
                   ≈ {formatUSD(convertEthToUSD(Number(bounty.amount) / 1e18, ethPrice))}
                 </span>
               )}
             </div>
-            <Avatar className="h-7 w-7 border border-slate-100">
+            <Avatar className="size-7 border border-slate-100">
               <AvatarFallback className="text-[8px] font-bold bg-slate-100 text-slate-500">
                 {bounty.creator.slice(2, 4).toUpperCase()}
               </AvatarFallback>
