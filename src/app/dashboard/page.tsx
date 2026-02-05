@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useReadContract } from "wagmi";
+import Image from "next/image";
 import {
   CONTRACT_ADDRESSES,
   QUINTY_ABI,
@@ -48,6 +49,7 @@ import {
   convertEthToUSD,
   formatUSD,
 } from "../../utils/prices";
+import ethIcon from "../../assets/crypto/eth.svg";
 
 // === TYPES ===
 type FilterType = "all" | "live" | "in-review" | "completed" | "ended";
@@ -87,17 +89,12 @@ const DISPLAY_PER_PAGE = 12;
 const LOAD_MORE_COUNT = 12;
 
 // === HELPERS ===
-const getCategoryGradient = (category?: string): string => {
-  switch (category) {
-    case "development": return "from-blue-500 to-indigo-600";
-    case "design": return "from-purple-500 to-pink-600";
-    case "marketing": return "from-orange-500 to-red-500";
-    case "research": return "from-emerald-500 to-teal-600";
-    default: return "from-slate-500 to-slate-600";
-  }
+const getCategoryColor = (category?: string): string => {
+  // All categories use very light solid color
+  return "bg-slate-100 dark:bg-slate-200";
 };
 
-const getCategoryColor = (category?: string): string => {
+const getCategoryBadgeColor = (category?: string): string => {
   switch (category) {
     case "development": return "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20";
     case "design": return "bg-purple-50 text-purple-600 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20";
@@ -107,11 +104,9 @@ const getCategoryColor = (category?: string): string => {
   }
 };
 
-const getAvatarGradient = (address: string) => {
-  const hash = address.toLowerCase().slice(2);
-  const h1 = parseInt(hash.slice(0, 4), 16) % 360;
-  const h2 = (h1 + 40) % 360;
-  return { from: `hsl(${h1}, 65%, 55%)`, to: `hsl(${h2}, 65%, 40%)` };
+const getAvatarUrl = (address: string, size: number = 40) => {
+  // Use DiceBear API with identicon style - creates geometric block patterns
+  return `https://api.dicebear.com/7.x/identicon/svg?seed=${address}&size=${size}`;
 };
 
 // === SKELETON COMPONENTS ===
@@ -298,7 +293,7 @@ export default function DashboardPage() {
           try {
             const meta = await fetchMetadataFromIpfs(b.metadataCid);
             newMeta.set(b.id, meta);
-          } catch {}
+          } catch { }
         }
       }
       if (newMeta.size > 0) setBountyMetadata(prev => new Map([...prev, ...newMeta]));
@@ -350,7 +345,7 @@ export default function DashboardPage() {
             args: [BigInt(b.id)],
           });
           counts.set(`bounty-${b.id}`, Number(c));
-        } catch {}
+        } catch { }
       }
       for (const q of quests) {
         try {
@@ -361,7 +356,7 @@ export default function DashboardPage() {
             args: [BigInt(q.id)],
           });
           counts.set(`quest-${q.id}`, Number(c));
-        } catch {}
+        } catch { }
       }
       if (counts.size > 0) setSubmissionCounts(prev => new Map([...prev, ...counts]));
     };
@@ -526,36 +521,7 @@ export default function DashboardPage() {
 
   // === RENDER ===
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
-      {/* ===== COMPACT HERO STRIP ===== */}
-      <div className="bg-gradient-to-r from-[#0EA885] to-[#0c8a6f] text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="h-14 sm:h-16 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-white/80 animate-pulse flex-shrink-0" />
-              <span className="text-sm sm:text-base font-bold tracking-tight">Trust shouldn&apos;t be optional.</span>
-              <span className="hidden md:inline text-white/30">|</span>
-              <span className="hidden md:inline text-xs text-white/60 font-medium">Discover bounties &amp; quests</span>
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button size="sm" className="h-8 bg-white text-[#0EA885] hover:bg-white/90 text-xs font-bold gap-1.5 rounded-none shadow-none">
-                  <Plus className="w-3.5 h-3.5" /> Create
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => router.push("/bounties/create")} className="cursor-pointer">
-                  <Target className="w-4 h-4 mr-2" /> Create Bounty
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/quests/create")} className="cursor-pointer">
-                  <Zap className="w-4 h-4 mr-2" /> Create Quest
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20 pt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Mobile stats toggle */}
         <button
@@ -673,7 +639,6 @@ export default function DashboardPage() {
                   {displayedItems.map(item => {
                     const statusInfo = getStatusInfo(item);
                     const { title, image, category, subCount } = getItemData(item);
-                    const avatarColors = getAvatarGradient(item.creator);
 
                     return (
                       <div
@@ -681,18 +646,18 @@ export default function DashboardPage() {
                         onClick={() => router.push(`/${item.type === "bounty" ? "bounties" : "quests"}/${item.id}`)}
                         className="group cursor-pointer bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-[#0EA885] hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
                       >
-                        {/* Image / Gradient Fallback */}
+                        {/* Image / Solid Fallback */}
                         <div className="relative w-full h-36 overflow-hidden">
                           {image ? (
                             <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                           ) : (
-                            <div className={`w-full h-full bg-gradient-to-br ${item.type === "quest" ? "from-amber-400 to-orange-500" : getCategoryGradient(category)} flex items-center justify-center`}>
-                              {item.type === "bounty" ? <Target className="w-10 h-10 text-white/20" /> : <Zap className="w-10 h-10 text-white/20" />}
+                            <div className="w-full h-full bg-slate-100 dark:bg-slate-200 flex items-center justify-center">
+                              {item.type === "bounty" ? <Target className="w-10 h-10 text-slate-400 dark:text-slate-500" /> : <Zap className="w-10 h-10 text-slate-400 dark:text-slate-500" />}
                             </div>
                           )}
                           <div className="absolute top-3 left-3 flex items-center gap-1.5">
                             <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-wider border ${statusInfo.color}`}>{statusInfo.label}</span>
-                            {category && <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${getCategoryColor(category)}`}>{category}</span>}
+                            {category && <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${getCategoryBadgeColor(category)}`}>{category}</span>}
                           </div>
                           <div className="absolute top-3 right-3">
                             <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-white/90 dark:bg-black/70 backdrop-blur-sm text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
@@ -703,7 +668,7 @@ export default function DashboardPage() {
 
                         <div className="p-4 flex flex-col flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <div className="w-5 h-5 rounded-full flex-shrink-0" style={{ background: `linear-gradient(135deg, ${avatarColors.from}, ${avatarColors.to})` }} />
+                            <img src={getAvatarUrl(item.creator, 20)} alt="" className="w-5 h-5 flex-shrink-0" />
                             <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">{formatAddress(item.creator)}</span>
                           </div>
                           <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-3 line-clamp-2 leading-tight group-hover:text-[#0EA885] transition-colors">{title}</h3>
@@ -720,7 +685,7 @@ export default function DashboardPage() {
                             </div>
                             <div className="text-right">
                               <div className="flex items-center justify-end gap-1.5">
-                                <div className="w-4 h-4 bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white text-[8px] font-black">Ξ</div>
+                                <Image src={ethIcon} alt="ETH" width={16} height={16} className="flex-shrink-0" />
                                 <span className="text-sm font-black text-slate-900 dark:text-white">{(Number(item.amount) / 1e18).toFixed(3)}</span>
                               </div>
                               {ethPrice > 0 && (
@@ -738,7 +703,6 @@ export default function DashboardPage() {
                   {displayedItems.map(item => {
                     const statusInfo = getStatusInfo(item);
                     const { title, image, category, subCount } = getItemData(item);
-                    const avatarColors = getAvatarGradient(item.creator);
 
                     return (
                       <div
@@ -750,28 +714,28 @@ export default function DashboardPage() {
                           {image ? (
                             <img src={image} alt={title} className="w-full h-full object-cover" />
                           ) : (
-                            <div className={`w-full h-full bg-gradient-to-br ${item.type === "quest" ? "from-amber-400 to-orange-500" : getCategoryGradient(category)} flex items-center justify-center`}>
-                              {item.type === "bounty" ? <Target className="w-5 h-5 text-white/40" /> : <Zap className="w-5 h-5 text-white/40" />}
+                            <div className="w-full h-full bg-slate-100 dark:bg-slate-200 flex items-center justify-center">
+                              {item.type === "bounty" ? <Target className="w-5 h-5 text-slate-400 dark:text-slate-500" /> : <Zap className="w-5 h-5 text-slate-400 dark:text-slate-500" />}
                             </div>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <div className="w-4 h-4 rounded-full flex-shrink-0" style={{ background: `linear-gradient(135deg, ${avatarColors.from}, ${avatarColors.to})` }} />
+                            <img src={getAvatarUrl(item.creator, 16)} alt="" className="w-4 h-4 flex-shrink-0" />
                             <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">{formatAddress(item.creator)}</span>
                           </div>
                           <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1.5 truncate group-hover:text-[#0EA885] transition-colors">{title}</h3>
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border ${statusInfo.color}`}>{statusInfo.label}</span>
                             <span className="px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">{item.type === "bounty" ? "BOUNTY" : "QUEST"}</span>
-                            {category && <span className={`px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider border ${getCategoryColor(category)}`}>{category}</span>}
+                            {category && <span className={`px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider border ${getCategoryBadgeColor(category)}`}>{category}</span>}
                             <span className="text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1"><Clock className="w-3 h-3" />{formatDeadline(item.deadline)}</span>
                             {subCount > 0 && <span className="text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1"><Users className="w-3 h-3" />{subCount}</span>}
                           </div>
                         </div>
                         <div className="flex-shrink-0 text-right">
                           <div className="flex items-center justify-end gap-1.5 mb-0.5">
-                            <div className="w-5 h-5 bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white text-[10px] font-black">Ξ</div>
+                            <Image src={ethIcon} alt="ETH" width={20} height={20} className="flex-shrink-0" />
                             <span className="text-lg font-black text-slate-900 dark:text-white">{(Number(item.amount) / 1e18).toFixed(3)}</span>
                           </div>
                           {ethPrice > 0 && <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500">{formatUSD(convertEthToUSD(Number(item.amount) / 1e18, ethPrice))}</div>}
@@ -816,7 +780,7 @@ export default function DashboardPage() {
                   {/* Total in Escrow */}
                   <div className="bg-gradient-to-br from-[#0EA885] to-[#0c8a6f] p-4 text-white">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-7 h-7 bg-white/20 flex items-center justify-center text-xs font-black">Ξ</div>
+                      <Image src={ethIcon} alt="ETH" width={28} height={28} className="flex-shrink-0" />
                       <span className="text-xs font-bold uppercase tracking-wider">Total in Escrow</span>
                     </div>
                     <div className="flex items-baseline gap-2">
@@ -842,15 +806,15 @@ export default function DashboardPage() {
                             {fImage ? (
                               <img src={fImage} alt="" className="w-full h-full object-cover" />
                             ) : (
-                              <div className={`w-full h-full bg-gradient-to-br ${getCategoryGradient(meta?.bountyType)} flex items-center justify-center`}>
-                                <Target className="w-8 h-8 text-white/20" />
+                              <div className="w-full h-full bg-slate-100 dark:bg-slate-200 flex items-center justify-center">
+                                <Target className="w-8 h-8 text-slate-400 dark:text-slate-500" />
                               </div>
                             )}
                           </div>
                           <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-2 line-clamp-2">{fTitle}</h4>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-1.5">
-                              <div className="w-4 h-4 bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white text-[7px] font-black">Ξ</div>
+                              <Image src={ethIcon} alt="ETH" width={16} height={16} className="flex-shrink-0" />
                               <span className="text-sm font-black text-slate-900 dark:text-white">{(Number(featuredBounty.amount) / 1e18).toFixed(3)}</span>
                             </div>
                             <div className="flex items-center gap-1 text-[10px] font-medium text-slate-400"><Clock className="w-3 h-3" />{formatDeadline(featuredBounty.deadline)}</div>
@@ -884,7 +848,7 @@ export default function DashboardPage() {
                     {ethPrice > 0 && (
                       <div className="px-4 py-2.5 flex items-center justify-between bg-purple-50/50 dark:bg-purple-500/5">
                         <span className="text-xs text-slate-600 dark:text-slate-400 font-medium flex items-center gap-1.5">
-                          <div className="w-4 h-4 bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white text-[7px] font-black">Ξ</div>
+                          <Image src={ethIcon} alt="ETH" width={16} height={16} className="flex-shrink-0" />
                           ETH Price
                         </span>
                         <span className="text-sm font-black text-slate-900 dark:text-white">{formatUSD(ethPrice)}</span>
@@ -901,16 +865,13 @@ export default function DashboardPage() {
                       </div>
                       <div className="divide-y divide-slate-50 dark:divide-slate-800">
                         {recentActivity.map((act, i) => {
-                          const colors = getAvatarGradient(act.creator);
                           return (
                             <div
                               key={i}
                               className="px-4 py-3 flex items-start gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors"
                               onClick={() => router.push(`/${act.type === "bounty" ? "bounties" : "quests"}/${act.id}`)}
                             >
-                              <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: `linear-gradient(135deg, ${colors.from}, ${colors.to})` }}>
-                                {act.type === "bounty" ? <Target className="w-3.5 h-3.5 text-white" /> : <Zap className="w-3.5 h-3.5 text-white" />}
-                              </div>
+                              <img src={getAvatarUrl(act.creator, 28)} alt="" className="w-7 h-7 flex-shrink-0 mt-0.5" />
                               <div className="flex-1 min-w-0">
                                 <p className="text-xs text-slate-700 dark:text-slate-300 font-medium truncate">{act.title}</p>
                                 <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{act.action} &bull; {formatAddress(act.creator)}</p>

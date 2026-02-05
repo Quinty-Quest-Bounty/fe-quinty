@@ -127,21 +127,19 @@
     @apply transition-all duration-300 ease-out hover:brightness-95;
   }
 
-  /* Custom scrollbar */
+  /* Hide scrollbar */
   ::-webkit-scrollbar {
-    width: 6px;
+    display: none;
   }
 
-  ::-webkit-scrollbar-track {
-    @apply bg-muted;
+  /* Hide scrollbar for Firefox */
+  * {
+    scrollbar-width: none;
   }
 
-  ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/30 rounded-full;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/50;
+  /* Hide scrollbar for IE and Edge */
+  * {
+    -ms-overflow-style: none;
   }
 }
 
