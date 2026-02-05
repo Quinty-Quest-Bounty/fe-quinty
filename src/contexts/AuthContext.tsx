@@ -87,20 +87,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const fullName = privyUser.google?.name;
 
       const avatarUrl =
-        privyUser.google?.pictureUrl ||
+        (privyUser.google as any)?.picture ||
         privyUser.twitter?.profilePictureUrl;
 
       // Create profile object
       const profileData: UserProfile = {
         id: privyUser.id,
-        email,
+        email: email || undefined,
         username,
-        full_name: fullName,
-        avatar_url: avatarUrl,
-        wallet_address: walletAddress,
-        google_id: googleId,
-        twitter_id: twitterId,
-        twitter_username: twitterUsername,
+        full_name: fullName || undefined,
+        avatar_url: avatarUrl || undefined,
+        wallet_address: walletAddress || undefined,
+        google_id: googleId || undefined,
+        twitter_id: twitterId || undefined,
+        twitter_username: twitterUsername || undefined,
       };
 
       console.log('Profile data prepared:', {

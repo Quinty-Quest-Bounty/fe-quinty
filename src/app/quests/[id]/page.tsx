@@ -30,7 +30,6 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import { Label } from "../../../components/ui/label";
-import { Separator } from "../../../components/ui/separator";
 import { Progress } from "../../../components/ui/progress";
 import {
     ChevronRight,
@@ -48,6 +47,8 @@ import {
     Loader2,
     Upload,
     X,
+    CheckCircle2,
+    Sparkles,
 } from "lucide-react";
 
 interface Quest {
@@ -247,7 +248,7 @@ export default function QuestDetailPage() {
     if (isLoading) {
         return (
             <div className="min-h-dvh flex items-center justify-center p-4">
-                <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
+                <div className="text-center border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
                     <Loader2 className="size-10 sm:size-12 animate-spin mx-auto text-[#0EA885]" />
                     <p className="text-muted-foreground mt-6 text-sm sm:text-base text-pretty">Loading quest...</p>
                 </div>
@@ -258,10 +259,10 @@ export default function QuestDetailPage() {
     if (!quest) {
         return (
             <div className="min-h-dvh flex items-center justify-center p-4">
-                <div className="text-center rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
+                <div className="text-center border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg p-8 sm:p-12 max-w-md">
                     <h2 className="text-2xl sm:text-3xl font-bold mb-3 text-balance">Quest not found</h2>
                     <p className="text-muted-foreground mb-6 text-sm sm:text-base text-pretty">The quest you're looking for doesn't exist.</p>
-                    <Button onClick={() => router.push("/quests")} className="rounded-[0.75rem] transition-all duration-300">
+                    <Button onClick={() => router.push("/quests")} className="transition-all duration-300">
                         Back to Quests
                     </Button>
                 </div>
@@ -295,9 +296,9 @@ export default function QuestDetailPage() {
             {/* Loading Overlay */}
             {(isPending || isConfirming) && (
                 <div className="fixed inset-0 bg-black/20 backdrop-blur-md z-50 flex items-center justify-center p-4">
-                    <div className="p-8 sm:p-10 rounded-[2rem] shadow-2xl border border-white/60 bg-white/90 backdrop-blur-xl max-w-sm">
+                    <div className="p-8 sm:p-10 shadow-2xl border border-white/60 bg-white/90 backdrop-blur-xl max-w-sm animate-in fade-in zoom-in duration-300">
                         <div className="flex flex-col items-center gap-6">
-                            <div className="p-4 rounded-[1.25rem] bg-[#0EA885]/10">
+                            <div className="p-4 bg-[#0EA885]/10">
                                 <Loader2 className="size-10 sm:size-12 animate-spin text-[#0EA885]" />
                             </div>
                             <div className="text-center">
@@ -313,16 +314,16 @@ export default function QuestDetailPage() {
                 </div>
             )}
 
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
                 {/* Breadcrumb */}
                 <div className="mb-6 sm:mb-8">
-                    <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-[1rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-md transition-all duration-300">
+                    <div className="inline-flex items-center gap-2 px-4 py-2.5 border border-white/60 bg-white/70 backdrop-blur-xl shadow-md transition-all duration-300">
                         <Breadcrumb>
                             <BreadcrumbList>
                                 <BreadcrumbItem>
                                     <BreadcrumbLink
                                         onClick={() => router.push("/")}
-                                        className="cursor-pointer hover:text-[#0EA885] transition-all duration-300 text-sm font-medium "
+                                        className="cursor-pointer hover:text-[#0EA885] transition-all duration-300 text-sm font-medium"
                                     >
                                         Home
                                     </BreadcrumbLink>
@@ -333,7 +334,7 @@ export default function QuestDetailPage() {
                                 <BreadcrumbItem>
                                     <BreadcrumbLink
                                         onClick={() => router.push("/quests")}
-                                        className="cursor-pointer hover:text-[#0EA885] transition-all duration-300 text-sm font-medium "
+                                        className="cursor-pointer hover:text-[#0EA885] transition-all duration-300 text-sm font-medium"
                                     >
                                         Quests
                                     </BreadcrumbLink>
@@ -349,437 +350,513 @@ export default function QuestDetailPage() {
                     </div>
                 </div>
 
-                {/* Main Content */}
-                <div className="space-y-6">
-                    {/* Header Card */}
-                    <Card className="rounded-[2rem] border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg transition-all duration-500 ">
-                        <CardHeader className="pb-3">
-                            <div className="flex justify-between items-start gap-3">
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
-                                            <Gift className="size-4 text-primary" />
+                {/* Two-Column Layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    {/* LEFT SIDEBAR - Sticky */}
+                    <div className="lg:col-span-4 space-y-4">
+                        <div className="lg:sticky lg:top-24 space-y-4">
+                            {/* Reward Card */}
+                            <Card className="border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg">
+                                <CardContent className="p-6">
+                                    <div className="text-center mb-6">
+                                        <div className="inline-flex items-center justify-center size-16 bg-[#0EA885]/10 border-2 border-[#0EA885]/20 mb-4">
+                                            <svg className="size-8 text-[#0EA885]" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 18c-3.18-.76-6-5.08-6-9.5V8.5l6-3 6 3v2c0 4.42-2.82 8.74-6 9.5z"/>
+                                            </svg>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-sm text-muted-foreground font-medium uppercase tracking-wide">Reward Per User</p>
+                                            <p className="text-4xl font-bold text-[#0EA885] tabular-nums">{formatETH(quest.perQualifier)}</p>
+                                            <p className="text-sm text-muted-foreground font-semibold">ETH</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Submit Entry Button */}
+                                    {!isExpired && !quest.resolved && !quest.cancelled && quest.qualifiersCount < quest.maxQualifiers && !userEntry && (
+                                        <Button
+                                            onClick={() => {
+                                                const submitSection = document.getElementById('submit-entry-section');
+                                                submitSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                            }}
+                                            className="w-full bg-[#0EA885] hover:bg-[#0EA885]/90 text-white font-semibold py-6 text-base"
+                                        >
+                                            <Send className="size-5 mr-2" />
+                                            Submit Entry
+                                        </Button>
+                                    )}
+                                </CardContent>
+                            </Card>
+
+                            {/* Stats Card */}
+                            <Card className="border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg">
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="text-base font-bold">Quest Stats</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="flex items-center justify-between py-2 border-b border-border/50">
+                                        <div className="flex items-center gap-2">
+                                            <Users className="size-4 text-muted-foreground" />
+                                            <span className="text-sm font-medium text-muted-foreground">Participants</span>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-sm font-bold tabular-nums">{quest.qualifiersCount} / {quest.maxQualifiers}</span>
+                                            <Progress value={progress} className="h-1 mt-1 w-20" />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between py-2 border-b border-border/50">
+                                        <div className="flex items-center gap-2">
+                                            <Clock className="size-4 text-muted-foreground" />
+                                            <span className="text-sm font-medium text-muted-foreground">Deadline</span>
+                                        </div>
+                                        <span className="text-sm font-bold tabular-nums">{formatTimeLeft(BigInt(quest.deadline))}</span>
+                                    </div>
+
+                                    <div className="flex items-center justify-between py-2 border-b border-border/50">
+                                        <div className="flex items-center gap-2">
+                                            <Coins className="size-4 text-muted-foreground" />
+                                            <span className="text-sm font-medium text-muted-foreground">Total Budget</span>
+                                        </div>
+                                        <span className="text-sm font-bold tabular-nums">{formatETH(quest.totalAmount)} ETH</span>
+                                    </div>
+
+                                    <div className="flex items-center justify-between py-2">
+                                        <div className="flex items-center gap-2">
+                                            <Target className="size-4 text-muted-foreground" />
+                                            <span className="text-sm font-medium text-muted-foreground">Status</span>
+                                        </div>
+                                        <Badge className="bg-[#0EA885] hover:bg-[#0EA885]/90 text-white">{getStatusText()}</Badge>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            {/* Creator Info */}
+                            <Card className="border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg">
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="text-base font-bold">Creator</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="flex items-center gap-3 p-3 bg-muted/30 border border-border/30">
+                                        <div className="size-10 bg-[#0EA885]/10 flex items-center justify-center border border-[#0EA885]/20">
+                                            <Users className="size-5 text-[#0EA885]" />
                                         </div>
                                         <div>
-                                            <CardTitle className="text-lg text-balance">{quest.title}</CardTitle>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <span className="text-xs text-muted-foreground">Created by</span>
-                                                <Badge variant="outline" className="text-xs py-0 h-5">
-                                                    {formatAddress(quest.creator)}
-                                                </Badge>
-                                            </div>
+                                            <p className="text-sm font-mono font-semibold">{formatAddress(quest.creator)}</p>
+                                            {isCreator && (
+                                                <Badge variant="outline" className="mt-1 text-xs h-5">You</Badge>
+                                            )}
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            {/* Share Button */}
+                            <Button
+                                variant="outline"
+                                onClick={copyLink}
+                                className="w-full gap-2 border-white/60 bg-white/50 hover:bg-white/70"
+                            >
+                                {copied ? (
+                                    <>
+                                        <Check className="size-4" />
+                                        <span className="font-medium">Link Copied!</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Copy className="size-4" />
+                                        <span className="font-medium">Share Quest</span>
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* RIGHT MAIN CONTENT */}
+                    <div className="lg:col-span-8 space-y-6">
+                        {/* Hero Image */}
+                        {quest.imageUrl && (
+                            <div className="w-full overflow-hidden border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg">
+                                <IpfsImage
+                                    cid={quest.imageUrl.replace("ipfs://", "")}
+                                    alt={quest.title}
+                                    className="w-full h-auto max-h-96 object-cover"
+                                />
+                            </div>
+                        )}
+
+                        {/* Title Section */}
+                        <Card className="border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg">
+                            <CardHeader>
+                                <div className="flex items-start gap-4">
+                                    <div className="size-12 bg-[#0EA885]/10 flex items-center justify-center border-2 border-[#0EA885]/20 shrink-0">
+                                        <Gift className="size-6 text-[#0EA885]" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-balance">
+                                            {quest.title}
+                                        </h1>
+                                        <div className="flex items-center gap-3 flex-wrap">
+                                            <Badge className="bg-[#0EA885] hover:bg-[#0EA885]/90 text-white text-xs">{getStatusText()}</Badge>
+                                            <span className="text-xs text-muted-foreground">
+                                                Quest #{questId}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex gap-2">
-                                    <Badge variant={getStatusColor()} className="text-xs">{getStatusText()}</Badge>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={copyLink}
-                                        className="gap-1 h-7 px-2"
-                                        aria-label={copied ? "Link copied" : "Share quest link"}
-                                    >
-                                        {copied ? (
-                                            <>
-                                                <Check className="size-3" />
-                                                <span className="text-xs">Copied!</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Copy className="size-3" />
-                                                <span className="text-xs">Share</span>
-                                            </>
-                                        )}
-                                    </Button>
-                                </div>
-                            </div>
+                            </CardHeader>
+                        </Card>
 
-                            {/* Quest Image */}
-                            {quest.imageUrl && (
-                                <div className="mt-3 flex justify-center">
-                                    <div className="w-full max-w-2xl">
-                                        <IpfsImage
-                                            cid={quest.imageUrl.replace("ipfs://", "")}
-                                            alt={quest.title}
-                                            className="w-full h-auto rounded-xl shadow-sm"
-                                        />
-                                    </div>
-                                </div>
-                            )}
+                        {/* About This Quest */}
+                        <Card className="border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="flex items-center gap-2 text-lg">
+                                    <FileText className="size-5 text-[#0EA885]" />
+                                    About This Quest
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
+                                    {quest.description.replace(/\n\nImage:.*$/, "")}
+                                </p>
+                            </CardContent>
+                        </Card>
 
-                            {/* Stats Grid */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">
-                                <div className="bg-green-50 rounded-[1.25rem] p-3 border border-green-200">
-                                    <div className="flex items-center gap-1 mb-1">
-                                        <Coins className="size-3 text-green-600" />
-                                        <span className="text-xs font-medium text-muted-foreground">Reward Per User</span>
-                                    </div>
-                                    <p className="text-base font-bold text-green-600 tabular-nums">
-                                        {formatETH(quest.perQualifier)} ETH
-                                    </p>
-                                </div>
-
-                                <div className="bg-muted/50 rounded-[1.25rem] p-3">
-                                    <div className="flex items-center gap-1 mb-1">
-                                        <Users className="size-3 text-muted-foreground" />
-                                        <span className="text-xs font-medium text-muted-foreground">Participants</span>
-                                    </div>
-                                    <p className="text-sm font-semibold tabular-nums">
-                                        {quest.qualifiersCount} / {quest.maxQualifiers}
-                                    </p>
-                                    <Progress value={progress} className="h-1 mt-1.5" />
-                                </div>
-
-                                <div className="bg-muted/50 rounded-[1.25rem] p-3">
-                                    <div className="flex items-center gap-1 mb-1">
-                                        <Clock className="size-3 text-muted-foreground" />
-                                        <span className="text-xs font-medium text-muted-foreground">Deadline</span>
-                                    </div>
-                                    <p className="text-sm font-semibold tabular-nums">
-                                        {formatTimeLeft(BigInt(quest.deadline))}
-                                    </p>
-                                </div>
-
-                                <div className="bg-muted/50 rounded-[1.25rem] p-3">
-                                    <div className="flex items-center gap-1 mb-1">
-                                        <Target className="size-3 text-muted-foreground" />
-                                        <span className="text-xs font-medium text-muted-foreground">Total Budget</span>
-                                    </div>
-                                    <p className="text-sm font-semibold tabular-nums">
-                                        {formatETH(quest.totalAmount)} ETH
-                                    </p>
-                                </div>
-                            </div>
-                        </CardHeader>
-
-                        <CardContent className="pt-3">
-                            {/* Description */}
-                            {quest.description && (
-                                <div className="mb-3">
-                                    <h3 className="text-sm font-semibold mb-1.5">Description</h3>
-                                    <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                                        {quest.description.replace(/\n\nImage:.*$/, "")}
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Requirements */}
-                            <div className="mb-3">
-                                <h3 className="text-sm font-semibold mb-1.5">Requirements</h3>
-                                <div className="bg-muted/50 rounded-lg p-2.5">
-                                    <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                                        {quest.requirements}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <Separator className="my-4" />
-
-                            {/* Submit Entry Section */}
-                            {!isExpired && !quest.resolved && !quest.cancelled && quest.qualifiersCount < quest.maxQualifiers && (
-                                <div className="mb-4">
-                                    {userEntry ? (
-                                        <Card className="rounded-[1.5rem] bg-blue-50 border-blue-200 shadow-md transition-all duration-300">
-                                            <CardHeader className="pb-2">
-                                                <CardTitle className="text-base flex items-center gap-2 text-balance">
-                                                    <Check className="size-4" />
-                                                    Your Submission
-                                                </CardTitle>
-                                                <CardDescription className="text-sm text-pretty">
-                                                    Status: {" "}
-                                                    <Badge
-                                                        variant={
-                                                            userEntry.status === 1
-                                                                ? "default"
-                                                                : userEntry.status === 2
-                                                                    ? "destructive"
-                                                                    : "secondary"
-                                                        }
-                                                    >
-                                                        {userEntry.status === 1
-                                                            ? "Approved"
-                                                            : userEntry.status === 2
-                                                                ? "Rejected"
-                                                                : "Pending"}
-                                                    </Badge>
-                                                </CardDescription>
-                                            </CardHeader>
-                                            <CardContent className="pt-0">
-                                                <div className="space-y-2">
-                                                    <div className="flex items-center gap-1.5">
-                                                        {userEntry.ipfsProofCid.includes("twitter.com") ||
-                                                            userEntry.ipfsProofCid.includes("x.com") ? (
-                                                            <>
-                                                                <ExternalLink className="size-3 text-muted-foreground" />
-                                                                <span className="text-xs">X Post: </span>
-                                                                <a
-                                                                    href={userEntry.ipfsProofCid}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    className="text-xs text-blue-600 hover:text-blue-800 underline"
-                                                                >
-                                                                    View Post
-                                                                </a>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <FileText className="size-3 text-muted-foreground" />
-                                                                <span className="text-xs">IPFS: {userEntry.ipfsProofCid}</span>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                    {userEntry.feedback && (
-                                                        <div className="mt-2 p-2 bg-white rounded-lg">
-                                                            <strong className="text-xs">Feedback:</strong>
-                                                            <p className="text-xs text-muted-foreground mt-0.5">
-                                                                {userEntry.feedback}
-                                                            </p>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    ) : (
-                                        <Card className="rounded-[1.5rem] border-primary/20 bg-primary/5 shadow-md transition-all duration-300">
-                                            <CardHeader className="pb-3">
-                                                <CardTitle className="text-base flex items-center gap-2 text-balance">
-                                                    <Send className="size-4" />
-                                                    Submit Your Entry
-                                                </CardTitle>
-                                                <CardDescription className="text-sm text-pretty">
-                                                    Provide proof of your social media engagement to qualify for rewards
-                                                </CardDescription>
-                                            </CardHeader>
-                                            <CardContent className="pt-0">
-                                                <div className="space-y-3">
-                                                    <div className="space-y-1.5">
-                                                        <Label htmlFor="twitterUrl" className="text-xs">X Post URL</Label>
-                                                        <div className="relative">
-                                                            <ExternalLink className="absolute left-2.5 top-1/2 transform -translate-y-1/2 size-3 text-muted-foreground" />
-                                                            <Input
-                                                                id="twitterUrl"
-                                                                type="url"
-                                                                placeholder="https://x.com/..."
-                                                                value={newEntry.twitterUrl}
-                                                                onChange={(e) =>
-                                                                    setNewEntry({ ...newEntry, twitterUrl: e.target.value })
-                                                                }
-                                                                className="pl-8 text-sm h-8"
-                                                            />
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="space-y-1.5">
-                                                        <Label htmlFor="proofImage" className="text-xs">Upload Proof Image *</Label>
-
-                                                        {!uploadedProofImage ? (
-                                                            <div className="border-2 border-dashed rounded-lg p-4 transition-colors border-muted-foreground/25 hover:border-muted-foreground/50">
-                                                                <input
-                                                                    type="file"
-                                                                    accept="image/*"
-                                                                    onChange={(e) => {
-                                                                        const file = e.target.files?.[0];
-                                                                        if (file) {
-                                                                            setUploadedProofImage(file);
-                                                                            setNewEntry({ ...newEntry, ipfsProofCid: "" });
-                                                                        }
-                                                                    }}
-                                                                    className="hidden"
-                                                                    id="proof-image-upload"
-                                                                />
-                                                                <label
-                                                                    htmlFor="proof-image-upload"
-                                                                    className="cursor-pointer flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors"
-                                                                >
-                                                                    <div className="size-10 mb-2 bg-muted rounded-full flex items-center justify-center">
-                                                                        <Upload className="size-5" />
-                                                                    </div>
-                                                                    <span className="text-xs font-medium mb-1">
-                                                                        Click to upload proof
-                                                                    </span>
-                                                                    <span className="text-xs text-center">
-                                                                        JPG, PNG, GIF up to 10MB
-                                                                    </span>
-                                                                </label>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="relative group">
-                                                                <img
-                                                                    src={URL.createObjectURL(uploadedProofImage)}
-                                                                    alt="Proof preview"
-                                                                    className="w-full h-32 object-cover rounded-lg border"
-                                                                />
-                                                                <Button
-                                                                    type="button"
-                                                                    variant="destructive"
-                                                                    size="icon"
-                                                                    onClick={() => setUploadedProofImage(null)}
-                                                                    className="absolute -top-2 -right-2 size-6"
-                                                                    aria-label="Remove proof image"
-                                                                >
-                                                                    <X className="size-3" />
-                                                                </Button>
-                                                                <div className="text-xs text-muted-foreground mt-1 truncate">
-                                                                    {uploadedProofImage.name}
-                                                                </div>
-                                                            </div>
-                                                        )}
-
-                                                        <p className="text-xs text-muted-foreground">
-                                                            Upload a screenshot or proof image (will be uploaded to IPFS)
-                                                        </p>
-                                                    </div>
-
-                                                    <div className="space-y-1.5">
-                                                        <Label htmlFor="notes" className="text-xs">Additional Notes (Optional)</Label>
-                                                        <Textarea
-                                                            id="notes"
-                                                            placeholder="Any additional information..."
-                                                            value={newEntry.description}
-                                                            onChange={(e) =>
-                                                                setNewEntry({ ...newEntry, description: e.target.value })
-                                                            }
-                                                            rows={2}
-                                                            className="text-sm resize-none"
-                                                        />
-                                                    </div>
-
-                                                    <Button
-                                                        onClick={submitEntry}
-                                                        disabled={(!uploadedProofImage && !newEntry.ipfsProofCid.trim()) || isPending || isConfirming || isUploadingProof}
-                                                        className="w-full"
-                                                        size="sm"
-                                                    >
-                                                        {isUploadingProof ? (
-                                                            <>
-                                                                <Upload className="size-3 mr-2 animate-spin" />
-                                                                Uploading to IPFS...
-                                                            </>
-                                                        ) : isPending || isConfirming ? (
-                                                            <>
-                                                                <Clock className="size-3 mr-2 animate-spin" />
-                                                                Submitting...
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <Send className="size-3 mr-2" />
-                                                                Submit Entry
-                                                            </>
-                                                        )}
-                                                    </Button>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Entries List */}
-                            {entries.length > 0 && (
-                                <div>
-                                    <h3 className="text-sm font-semibold mb-2 text-balance">
-                                        All Entries ({entries.length})
-                                    </h3>
+                        {/* Requirements */}
+                        {quest.requirements && (
+                            <Card className="border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg">
+                                <CardHeader className="pb-4">
+                                    <CardTitle className="flex items-center gap-2 text-lg">
+                                        <CheckCircle2 className="size-5 text-[#0EA885]" />
+                                        Requirements
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
                                     <div className="space-y-2">
+                                        {quest.requirements.split('\n').filter(req => req.trim()).map((req, index) => (
+                                            <div key={index} className="flex items-start gap-3">
+                                                <div className="size-5 bg-[#0EA885]/10 flex items-center justify-center shrink-0 mt-0.5">
+                                                    <div className="size-2 bg-[#0EA885]" />
+                                                </div>
+                                                <span className="text-sm text-foreground/80 leading-relaxed">{req}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {/* User's Own Entry Status */}
+                        {userEntry && (
+                            <Card className={`border shadow-lg ${
+                                userEntry.status === 1
+                                    ? "border-green-300 bg-green-50/70"
+                                    : userEntry.status === 2
+                                    ? "border-red-300 bg-red-50/70"
+                                    : "border-blue-300 bg-blue-50/70"
+                            } backdrop-blur-xl`}>
+                                <CardHeader className="pb-3">
+                                    <CardTitle className="text-base flex items-center gap-2">
+                                        <Check className="size-5" />
+                                        Your Submission
+                                    </CardTitle>
+                                    <CardDescription className="text-sm">
+                                        Status:{" "}
+                                        <Badge
+                                            variant={
+                                                userEntry.status === 1
+                                                    ? "default"
+                                                    : userEntry.status === 2
+                                                    ? "destructive"
+                                                    : "secondary"
+                                            }
+                                        >
+                                            {userEntry.status === 1
+                                                ? "Approved"
+                                                : userEntry.status === 2
+                                                ? "Rejected"
+                                                : "Pending"}
+                                        </Badge>
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2">
+                                            {userEntry.ipfsProofCid.includes("twitter.com") ||
+                                                userEntry.ipfsProofCid.includes("x.com") ? (
+                                                <>
+                                                    <ExternalLink className="size-4 text-muted-foreground" />
+                                                    <span className="text-sm">X Post: </span>
+                                                    <a
+                                                        href={userEntry.ipfsProofCid}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-sm text-blue-600 hover:text-blue-800 underline"
+                                                    >
+                                                        View Post
+                                                    </a>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <FileText className="size-4 text-muted-foreground" />
+                                                    <span className="text-sm">IPFS: {userEntry.ipfsProofCid}</span>
+                                                </>
+                                            )}
+                                        </div>
+                                        {userEntry.feedback && (
+                                            <div className="p-3 bg-white border">
+                                                <strong className="text-sm">Feedback:</strong>
+                                                <p className="text-sm text-muted-foreground mt-1">
+                                                    {userEntry.feedback}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
+
+                        {/* Submit Entry Section */}
+                        {!isExpired && !quest.resolved && !quest.cancelled && quest.qualifiersCount < quest.maxQualifiers && !userEntry && (
+                            <div id="submit-entry-section">
+                                <Card className="border border-[#0EA885]/30 bg-[#0EA885]/5 backdrop-blur-xl shadow-lg">
+                                    <CardHeader className="pb-4">
+                                        <CardTitle className="text-lg flex items-center gap-2">
+                                            <Send className="size-5 text-[#0EA885]" />
+                                            Submit Your Entry
+                                        </CardTitle>
+                                        <CardDescription className="text-sm">
+                                            Provide proof of your social media engagement to qualify for rewards
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="twitterUrl" className="text-sm font-semibold">X Post URL (Optional)</Label>
+                                                <div className="relative">
+                                                    <ExternalLink className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground" />
+                                                    <Input
+                                                        id="twitterUrl"
+                                                        type="url"
+                                                        placeholder="https://x.com/..."
+                                                        value={newEntry.twitterUrl}
+                                                        onChange={(e) =>
+                                                            setNewEntry({ ...newEntry, twitterUrl: e.target.value })
+                                                        }
+                                                        className="pl-10 text-sm h-10 border-border bg-white"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="proofImage" className="text-sm font-semibold">Upload Proof Image *</Label>
+
+                                                {!uploadedProofImage ? (
+                                                    <div className="border-2 border-dashed border-muted-foreground/25 hover:border-muted-foreground/50 p-6 transition-colors bg-white">
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={(e) => {
+                                                                const file = e.target.files?.[0];
+                                                                if (file) {
+                                                                    setUploadedProofImage(file);
+                                                                    setNewEntry({ ...newEntry, ipfsProofCid: "" });
+                                                                }
+                                                            }}
+                                                            className="hidden"
+                                                            id="proof-image-upload"
+                                                        />
+                                                        <label
+                                                            htmlFor="proof-image-upload"
+                                                            className="cursor-pointer flex flex-col items-center text-muted-foreground hover:text-foreground transition-colors"
+                                                        >
+                                                            <div className="size-12 mb-3 bg-muted flex items-center justify-center">
+                                                                <Upload className="size-6" />
+                                                            </div>
+                                                            <span className="text-sm font-medium mb-1">
+                                                                Click to upload proof
+                                                            </span>
+                                                            <span className="text-xs text-center">
+                                                                JPG, PNG, GIF up to 10MB
+                                                            </span>
+                                                        </label>
+                                                    </div>
+                                                ) : (
+                                                    <div className="relative group">
+                                                        <img
+                                                            src={URL.createObjectURL(uploadedProofImage)}
+                                                            alt="Proof preview"
+                                                            className="w-full h-48 object-cover border"
+                                                        />
+                                                        <Button
+                                                            type="button"
+                                                            variant="destructive"
+                                                            size="icon"
+                                                            onClick={() => setUploadedProofImage(null)}
+                                                            className="absolute -top-2 -right-2 size-8"
+                                                            aria-label="Remove proof image"
+                                                        >
+                                                            <X className="size-4" />
+                                                        </Button>
+                                                        <div className="text-xs text-muted-foreground mt-2 truncate">
+                                                            {uploadedProofImage.name}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                <p className="text-xs text-muted-foreground">
+                                                    Upload a screenshot or proof image (will be uploaded to IPFS)
+                                                </p>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="notes" className="text-sm font-semibold">Additional Notes (Optional)</Label>
+                                                <Textarea
+                                                    id="notes"
+                                                    placeholder="Any additional information..."
+                                                    value={newEntry.description}
+                                                    onChange={(e) =>
+                                                        setNewEntry({ ...newEntry, description: e.target.value })
+                                                    }
+                                                    rows={3}
+                                                    className="text-sm resize-none border-border bg-white"
+                                                />
+                                            </div>
+
+                                            <Button
+                                                onClick={submitEntry}
+                                                disabled={(!uploadedProofImage && !newEntry.ipfsProofCid.trim()) || isPending || isConfirming || isUploadingProof}
+                                                className="w-full bg-[#0EA885] hover:bg-[#0EA885]/90 text-white font-semibold py-6"
+                                            >
+                                                {isUploadingProof ? (
+                                                    <>
+                                                        <Upload className="size-4 mr-2 animate-spin" />
+                                                        Uploading to IPFS...
+                                                    </>
+                                                ) : isPending || isConfirming ? (
+                                                    <>
+                                                        <Clock className="size-4 mr-2 animate-spin" />
+                                                        Submitting...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Send className="size-4 mr-2" />
+                                                        Submit Entry
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        )}
+
+                        {/* All Entries Section */}
+                        {entries.length > 0 && (
+                            <Card className="border border-white/60 bg-white/70 backdrop-blur-xl shadow-lg">
+                                <CardHeader className="pb-4">
+                                    <CardTitle className="text-lg flex items-center gap-2">
+                                        <Users className="size-5 text-[#0EA885]" />
+                                        All Entries ({entries.length})
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-3">
                                         {entries.map((entry, index) => (
-                                            <Card key={index} className="rounded-[1.25rem] transition-all duration-300 ">
-                                                <CardContent className="py-3 px-4">
-                                                    <div className="flex justify-between items-start">
-                                                        <div className="flex-1">
-                                                            <div className="flex items-center gap-2 mb-2">
-                                                                <div className="size-6 bg-muted rounded-full flex items-center justify-center">
-                                                                    <span className="text-[10px] font-medium">
-                                                                        {entry.solver.slice(0, 2).toUpperCase()}
-                                                                    </span>
-                                                                </div>
-                                                                <span className="text-sm font-medium">
-                                                                    {formatAddress(entry.solver)}
-                                                                </span>
+                                            <div key={index} className="p-4 border bg-white border-border">
+                                                <div className="flex justify-between items-start">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-3 mb-2">
+                                                            <div className="size-10 bg-[#0EA885]/10 flex items-center justify-center border border-[#0EA885]/20">
+                                                                <Users className="size-5 text-[#0EA885]" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-semibold">{formatAddress(entry.solver)}</p>
                                                                 <Badge
                                                                     variant={
                                                                         entry.status === 1
                                                                             ? "default"
                                                                             : entry.status === 2
-                                                                                ? "destructive"
-                                                                                : "secondary"
+                                                                            ? "destructive"
+                                                                            : "secondary"
                                                                     }
-                                                                    className="text-xs"
+                                                                    className="text-xs mt-1"
                                                                 >
                                                                     {entry.status === 1
                                                                         ? "Approved"
                                                                         : entry.status === 2
-                                                                            ? "Rejected"
-                                                                            : "Pending"}
+                                                                        ? "Rejected"
+                                                                        : "Pending"}
                                                                 </Badge>
                                                             </div>
-                                                            <div className="text-xs text-muted-foreground space-y-0.5">
-                                                                <div className="flex items-center gap-1.5">
-                                                                    {entry.ipfsProofCid.includes("twitter.com") ||
-                                                                        entry.ipfsProofCid.includes("x.com") ? (
-                                                                        <>
-                                                                            <ExternalLink className="size-3" />
-                                                                            <span>X Post: </span>
-                                                                            <a
-                                                                                href={entry.ipfsProofCid}
-                                                                                target="_blank"
-                                                                                rel="noopener noreferrer"
-                                                                                className="text-blue-600 hover:text-blue-800 underline"
-                                                                            >
-                                                                                View Post
-                                                                            </a>
-                                                                        </>
-                                                                    ) : (
-                                                                        <>
-                                                                            <FileText className="size-3" />
-                                                                            <span>IPFS: {entry.ipfsProofCid}</span>
-                                                                        </>
-                                                                    )}
-                                                                </div>
-                                                                <div className="flex items-center gap-1.5">
-                                                                    <Calendar className="size-3" />
-                                                                    <span>
-                                                                        Submitted: {new Date(entry.timestamp * 1000).toLocaleDateString()}
-                                                                    </span>
-                                                                </div>
-                                                                {entry.feedback && (
-                                                                    <div className="mt-1.5 p-2 bg-muted rounded text-xs">
-                                                                        <strong>Feedback:</strong> {entry.feedback}
-                                                                    </div>
+                                                        </div>
+                                                        <div className="space-y-1 ml-13">
+                                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                                {entry.ipfsProofCid.includes("twitter.com") ||
+                                                                    entry.ipfsProofCid.includes("x.com") ? (
+                                                                    <>
+                                                                        <ExternalLink className="size-3" />
+                                                                        <span>X Post: </span>
+                                                                        <a
+                                                                            href={entry.ipfsProofCid}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="text-blue-600 hover:text-blue-800 underline"
+                                                                        >
+                                                                            View Post
+                                                                        </a>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <FileText className="size-3" />
+                                                                        <span>IPFS: {entry.ipfsProofCid}</span>
+                                                                    </>
                                                                 )}
                                                             </div>
+                                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                                <Calendar className="size-3" />
+                                                                <span>
+                                                                    Submitted: {new Date(entry.timestamp * 1000).toLocaleDateString()}
+                                                                </span>
+                                                            </div>
+                                                            {entry.feedback && (
+                                                                <div className="mt-2 p-2 bg-muted border text-xs">
+                                                                    <strong>Feedback:</strong> {entry.feedback}
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                        {!(entry.ipfsProofCid.includes("twitter.com") || entry.ipfsProofCid.includes("x.com")) && (
-                                                            <Button variant="outline" size="sm" className="h-7" asChild>
-                                                                <a
-                                                                    href={`https://ipfs.io/ipfs/${entry.ipfsProofCid}`}
-                                                                    target="_blank"
-                                                                    rel="noopener noreferrer"
-                                                                    aria-label="View IPFS proof"
-                                                                >
-                                                                    <ExternalLink className="size-3 mr-1" />
-                                                                    <span className="text-xs">View</span>
-                                                                </a>
-                                                            </Button>
-                                                        )}
                                                     </div>
-                                                </CardContent>
-                                            </Card>
+                                                    {!(entry.ipfsProofCid.includes("twitter.com") || entry.ipfsProofCid.includes("x.com")) && (
+                                                        <Button variant="outline" size="sm" className="h-8 border-border" asChild>
+                                                            <a
+                                                                href={`https://ipfs.io/ipfs/${entry.ipfsProofCid}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                aria-label="View IPFS proof"
+                                                            >
+                                                                <ExternalLink className="size-3 mr-1" />
+                                                                <span className="text-xs">View</span>
+                                                            </a>
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </div>
                                         ))}
                                     </div>
-                                </div>
-                            )}
+                                </CardContent>
+                            </Card>
+                        )}
 
-                            {/* Transaction Status */}
-                            {hash && (
-                                <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        {/* Transaction Status */}
+                        {hash && (
+                            <Card className="border border-blue-300 bg-blue-50/70 backdrop-blur-xl shadow-lg">
+                                <CardContent className="p-4">
                                     <div className="space-y-2">
-                                        <p className="text-xs font-medium">Transaction Hash:</p>
+                                        <p className="text-xs font-semibold">Transaction Hash:</p>
                                         <a
                                             href={`https://shannon-explorer.somnia.network/tx/${hash}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-blue-600 hover:text-blue-800 font-mono text-xs break-all"
+                                            className="text-blue-600 hover:text-blue-800 font-mono text-xs break-all underline"
                                         >
                                             {hash}
                                         </a>
@@ -796,10 +873,10 @@ export default function QuestDetailPage() {
                                             </div>
                                         )}
                                     </div>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
+                                </CardContent>
+                            </Card>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

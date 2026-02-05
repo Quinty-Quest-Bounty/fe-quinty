@@ -24,7 +24,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     },
     loginMethods: ['email', 'google', 'wallet', 'twitter'],
     embeddedWallets: {
-     createOnLogin: 'users-without-wallets',
+     ethereum: {
+      createOnLogin: 'users-without-wallets',
+     },
     },
     defaultChain: baseSepolia,
     supportedChains: [baseSepolia],
