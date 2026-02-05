@@ -80,12 +80,12 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
     };
 
     return (
-        <Card className="max-w-4xl mx-auto rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
-            <CardHeader className="border-b border-slate-50 p-6">
+        <Card className="max-w-4xl mx-auto border border-slate-200 bg-white overflow-hidden">
+            <CardHeader className="border-b border-slate-200 p-6">
                 <div className="flex items-center gap-3">
                     <Target className="w-5 h-5 text-[#0EA885]" />
                     <div>
-                        <CardTitle className="text-lg font-bold text-slate-900">Create New Bounty</CardTitle>
+                        <CardTitle className="text-lg font-black text-slate-900">Create New Bounty</CardTitle>
                         <p className="text-slate-400 text-xs">Set up your task and escrow rewards</p>
                     </div>
                 </div>
@@ -109,7 +109,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                                     placeholder="e.g. Build a React Dashboard"
                                     value={formData.title}
                                     onChange={e => setFormData({ ...formData, title: e.target.value })}
-                                    className="rounded-xl border-slate-200 bg-slate-50/30 focus:bg-white transition-colors"
+                                    className="border-slate-200 bg-white"
                                 />
                             </div>
 
@@ -119,7 +119,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                                     value={formData.bountyType}
                                     onValueChange={(v) => setFormData({ ...formData, bountyType: v })}
                                 >
-                                    <SelectTrigger className="rounded-xl border-slate-200 bg-slate-50/30">
+                                    <SelectTrigger className="border-slate-200 bg-white">
                                         <SelectValue placeholder="Select type" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -139,7 +139,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                                     rows={4}
                                     value={formData.description}
                                     onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                    className="rounded-xl border-slate-200 bg-slate-50/30 focus:bg-white transition-colors resize-none"
+                                    className="border-slate-200 bg-white resize-none"
                                 />
                             </div>
 
@@ -160,7 +160,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                                             placeholder="e.g. 3+ years React exp..."
                                             value={req}
                                             onChange={e => handleFieldChange("requirements", idx, e.target.value)}
-                                            className="rounded-xl border-slate-200 bg-slate-50/30"
+                                            className="border-slate-200 bg-white"
                                         />
                                         {formData.requirements.length > 1 && (
                                             <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveField("requirements", idx)} className="text-slate-300 hover:text-red-500">
@@ -188,7 +188,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                                             placeholder="e.g. GitHub Repo Link..."
                                             value={del}
                                             onChange={e => handleFieldChange("deliverables", idx, e.target.value)}
-                                            className="rounded-xl border-slate-200 bg-slate-50/30"
+                                            className="border-slate-200 bg-white"
                                         />
                                         {formData.deliverables.length > 1 && (
                                             <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveField("deliverables", idx)} className="text-slate-300 hover:text-red-500">
@@ -212,7 +212,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                                         placeholder="0.5"
                                         value={formData.amount}
                                         onChange={e => setFormData({ ...formData, amount: e.target.value })}
-                                        className="pl-10 rounded-xl border-slate-200 bg-slate-50/30 focus:bg-white transition-colors"
+                                        className="pl-10 border-slate-200 bg-white"
                                     />
                                 </div>
                             </div>
@@ -222,12 +222,12 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                                 <div className="flex gap-2">
                                     <Popover>
                                         <PopoverTrigger asChild>
-                                            <Button variant="outline" className="flex-1 rounded-xl border-slate-200 bg-slate-50/30 justify-start font-normal text-slate-600">
+                                            <Button variant="outline" className="flex-1 border-slate-200 bg-white justify-start font-normal text-slate-600">
                                                 <CalendarIcon className="mr-2 h-4 w-4 text-slate-400" />
                                                 {deadlineDate ? format(deadlineDate, "PPP") : "Pick a date"}
                                             </Button>
                                         </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0 rounded-xl border-slate-100 shadow-xl">
+                                        <PopoverContent className="w-auto p-0 border-slate-200">
                                             <Calendar
                                                 mode="single"
                                                 selected={deadlineDate}
@@ -241,7 +241,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                                         type="time"
                                         value={deadlineTime}
                                         onChange={e => setDeadlineTime(e.target.value)}
-                                        className="w-28 rounded-xl border-slate-200 bg-slate-50/30"
+                                        className="w-28 border-slate-200 bg-white"
                                     />
                                 </div>
                             </div>
@@ -263,7 +263,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                                             placeholder="e.g. TypeScript, Solidity..."
                                             value={skill}
                                             onChange={e => handleFieldChange("skills", idx, e.target.value)}
-                                            className="rounded-xl border-slate-200 bg-slate-50/30"
+                                            className="border-slate-200 bg-white"
                                         />
                                         {formData.skills.length > 1 && (
                                             <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveField("skills", idx)} className="text-slate-300 hover:text-red-500">
@@ -275,7 +275,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                             </div>
 
                             {/* Advanced Options */}
-                            <div className="space-y-4 p-4 rounded-xl bg-slate-50 border border-slate-100">
+                            <div className="space-y-4 p-4 bg-slate-50 border border-slate-200">
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
@@ -286,7 +286,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                                             type="number"
                                             value={formData.slashPercent}
                                             onChange={e => setFormData({ ...formData, slashPercent: parseInt(e.target.value) || 0 })}
-                                            className="w-16 h-8 text-xs rounded-lg border-slate-200 bg-white"
+                                            className="w-16 h-8 text-xs border-slate-200 bg-white"
                                         />
                                     </div>
 
@@ -297,7 +297,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                                         </div>
                                         <input
                                             type="checkbox"
-                                            className="w-4 h-4 rounded border-slate-300 text-[#0EA885] focus:ring-[#0EA885]"
+                                            className="w-4 h-4 border-slate-300 text-[#0EA885] focus:ring-[#0EA885]"
                                             checked={formData.allowMultipleWinners}
                                             onChange={e => setFormData({ ...formData, allowMultipleWinners: e.target.checked })}
                                         />
@@ -318,7 +318,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                                                             type="number"
                                                             value={share}
                                                             onChange={e => handleShareChange(idx, parseInt(e.target.value) || 0)}
-                                                            className="h-8 text-xs rounded-lg border-slate-200 bg-white"
+                                                            className="h-8 text-xs border-slate-200 bg-white"
                                                         />
                                                         {formData.winnerShares.length > 1 && (
                                                             <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveField("winnerShares", idx)} className="h-8 w-8 text-slate-300">
@@ -335,7 +335,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                                         <label className="text-xs font-bold text-slate-700">Has Oprec</label>
                                         <input
                                             type="checkbox"
-                                            className="w-4 h-4 rounded border-slate-300 text-[#0EA885] focus:ring-[#0EA885]"
+                                            className="w-4 h-4 border-slate-300 text-[#0EA885] focus:ring-[#0EA885]"
                                             checked={formData.hasOprec}
                                             onChange={e => setFormData({ ...formData, hasOprec: e.target.checked })}
                                         />
@@ -343,7 +343,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                                     {formData.hasOprec && (
                                         <Popover>
                                             <PopoverTrigger asChild>
-                                                <Button variant="outline" className="w-full h-8 rounded-lg border-slate-200 bg-white justify-start text-xs font-normal">
+                                                <Button variant="outline" className="w-full h-8 border-slate-200 bg-white justify-start text-xs font-normal">
                                                     <CalendarIcon className="mr-2 h-3 w-3 text-slate-400" />
                                                     {oprecDate ? format(oprecDate, "PPP") : "Oprec Deadline"}
                                                 </Button>
@@ -364,7 +364,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                             <Button
                                 type="submit"
                                 disabled={isPending || !formData.title || !formData.amount || !deadlineDate}
-                                className="w-full h-11 rounded-xl bg-[#0EA885] hover:bg-[#0EA885]/90 text-white font-bold shadow-sm transition-all mt-4"
+                                className="w-full h-11 bg-[#0EA885] hover:bg-[#0c8a6f] text-white font-bold uppercase tracking-wider transition-all mt-4"
                             >
                                 {isPending ? "Creating Bounty..." : "Launch Bounty"}
                             </Button>

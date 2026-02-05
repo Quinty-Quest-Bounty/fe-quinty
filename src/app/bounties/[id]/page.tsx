@@ -556,7 +556,7 @@ export default function BountyDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-dvh flex items-center justify-center bg-slate-50">
+      <div className="flex items-center justify-center min-h-dvh bg-slate-50">
         <div className="text-center">
           <Loader2 className="size-12 animate-spin mx-auto text-[#0EA885] mb-4" />
           <p className="text-sm text-slate-600 text-pretty">Loading bounty...</p>
@@ -567,10 +567,10 @@ export default function BountyDetailPage() {
 
   if (!bounty) {
     return (
-      <div className="min-h-dvh flex items-center justify-center bg-slate-50">
+      <div className="flex items-center justify-center min-h-dvh bg-slate-50">
         <div className="text-center">
-          <h2 className="text-2xl font-black mb-3 text-balance">Bounty not found</h2>
-          <p className="text-sm text-slate-600 mb-6 text-pretty">
+          <h2 className="mb-3 text-2xl font-black text-balance">Bounty not found</h2>
+          <p className="mb-6 text-sm text-slate-600 text-pretty">
             The bounty you're looking for doesn't exist.
           </p>
           <Button
@@ -600,15 +600,15 @@ export default function BountyDetailPage() {
   };
 
   return (
-    <div className="min-h-dvh bg-slate-50 relative">
+    <div className="relative min-h-dvh bg-slate-50">
       {/* Loading Overlay */}
       {(isPending || isConfirming) && (
-        <div className="fixed inset-0 bg-black/20 z-50 flex items-center justify-center">
-          <div className="bg-white p-8 border border-slate-200 max-w-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
+          <div className="max-w-sm p-8 bg-white border border-slate-200">
             <div className="flex flex-col items-center gap-4">
               <Loader2 className="size-12 animate-spin text-[#0EA885]" />
               <div className="text-center">
-                <p className="font-bold text-lg mb-2 text-balance">
+                <p className="mb-2 text-lg font-bold text-balance">
                   {isPending ? "Waiting for approval..." : "Confirming transaction..."}
                 </p>
                 <p className="text-sm text-slate-600 text-pretty">
@@ -620,9 +620,9 @@ export default function BountyDetailPage() {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-12">
+      <div className="px-4 pt-20 pb-12 mx-auto max-w-7xl sm:px-6 lg:px-8 sm:pt-24">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm mb-6 text-slate-600">
+        <div className="flex items-center gap-2 mb-6 text-sm text-slate-600">
           <button onClick={() => router.push("/")} className="hover:text-[#0EA885]">
             Home
           </button>
@@ -636,15 +636,15 @@ export default function BountyDetailPage() {
 
         {/* Header */}
         <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+          <div className="flex flex-col gap-4 mb-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-3">
                 <Badge className={`text-[10px] font-bold uppercase tracking-wider border ${getStatusColor()}`}>
                   {statusLabel}
                 </Badge>
-                <span className="text-xs text-slate-400 uppercase">Bounty #{bountyId}</span>
+                <span className="text-xs uppercase text-slate-400">Bounty #{bountyId}</span>
               </div>
-              <h1 className="text-3xl sm:text-4xl font-black text-slate-900 mb-2 text-balance">
+              <h1 className="mb-2 text-3xl font-black sm:text-4xl text-slate-900 text-balance">
                 {metadata?.title || bounty.description.split("\n")[0]}
               </h1>
               <p className="text-sm text-slate-600">
@@ -658,37 +658,37 @@ export default function BountyDetailPage() {
                 size="sm"
                 className="border-slate-200"
               >
-                {copied ? <Check className="size-4 mr-2" /> : <Copy className="size-4 mr-2" />}
+                {copied ? <Check className="mr-2 size-4" /> : <Copy className="mr-2 size-4" />}
                 {copied ? "Copied!" : "Share"}
               </Button>
             </div>
           </div>
 
           {/* Reward Banner */}
-          <div className="bg-white border border-slate-200 p-6">
+          <div className="p-6 bg-white border border-slate-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="size-12 bg-[#0EA885]/10 border border-[#0EA885]/20 flex items-center justify-center">
                   <Target className="size-6 text-[#0EA885]" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Bounty Reward</p>
+                  <p className="mb-1 text-xs font-bold tracking-wider uppercase text-slate-600">Bounty Reward</p>
                   <p className="text-3xl font-black text-slate-900 tabular-nums">{formatETH(bounty.amount)} ETH</p>
                 </div>
               </div>
               <div className="flex items-center gap-4 text-sm">
                 <div className="text-right">
-                  <p className="text-xs font-medium text-slate-500 mb-1">Deadline</p>
+                  <p className="mb-1 text-xs font-medium text-slate-500">Deadline</p>
                   <p className="font-bold text-slate-900">{formatTimeLeft(bounty.deadline)}</p>
                 </div>
-                <div className="h-8 w-px bg-slate-200"></div>
+                <div className="w-px h-8 bg-slate-200"></div>
                 <div className="text-right">
-                  <p className="text-xs font-medium text-slate-500 mb-1">Submissions</p>
+                  <p className="mb-1 text-xs font-medium text-slate-500">Submissions</p>
                   <p className="font-bold text-slate-900 tabular-nums">{bounty.submissions.length}</p>
                 </div>
-                <div className="h-8 w-px bg-slate-200"></div>
+                <div className="w-px h-8 bg-slate-200"></div>
                 <div className="text-right">
-                  <p className="text-xs font-medium text-slate-500 mb-1">Slash Rate</p>
+                  <p className="mb-1 text-xs font-medium text-slate-500">Slash Rate</p>
                   <p className="font-bold text-slate-900 tabular-nums">{Number(bounty.slashPercent) / 100}%</p>
                 </div>
               </div>
@@ -702,30 +702,30 @@ export default function BountyDetailPage() {
             <img
               src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
               alt={metadata.title}
-              className="w-full h-auto max-h-96 object-cover border border-slate-200"
+              className="object-cover w-full h-auto border max-h-96 border-slate-200"
             />
           </div>
         )}
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Main Column */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6 lg:col-span-2">
             {/* About */}
-            <div className="bg-white border border-slate-200 p-6">
-              <h2 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
+            <div className="p-6 bg-white border border-slate-200">
+              <h2 className="flex items-center gap-2 mb-4 text-lg font-black text-slate-900">
                 <FileText className="size-5 text-[#0EA885]" />
                 About This Bounty
               </h2>
-              <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap text-pretty">
+              <div className="text-sm leading-relaxed whitespace-pre-wrap text-slate-700 text-pretty">
                 {metadata?.description || bounty.description}
               </div>
             </div>
 
             {/* Requirements */}
             {metadata?.requirements && metadata.requirements.length > 0 && (
-              <div className="bg-white border border-slate-200 p-6">
-                <h2 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
+              <div className="p-6 bg-white border border-slate-200">
+                <h2 className="flex items-center gap-2 mb-4 text-lg font-black text-slate-900">
                   <CheckCircle2 className="size-5 text-[#0EA885]" />
                   Requirements
                 </h2>
@@ -744,8 +744,8 @@ export default function BountyDetailPage() {
 
             {/* Deliverables */}
             {metadata?.deliverables && metadata.deliverables.length > 0 && (
-              <div className="bg-white border border-slate-200 p-6">
-                <h2 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
+              <div className="p-6 bg-white border border-slate-200">
+                <h2 className="flex items-center gap-2 mb-4 text-lg font-black text-slate-900">
                   <Package className="size-5 text-[#0EA885]" />
                   Deliverables
                 </h2>
@@ -764,8 +764,8 @@ export default function BountyDetailPage() {
 
             {/* Winners Display */}
             {bounty.status >= 2 && bounty.selectedWinners.length > 0 && (
-              <div className="bg-amber-50 border-2 border-amber-200 p-6">
-                <h2 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
+              <div className="p-6 border-2 bg-amber-50 border-amber-200">
+                <h2 className="flex items-center gap-2 mb-4 text-lg font-black text-slate-900">
                   <Trophy className="size-5 text-amber-600" />
                   Selected Winners
                 </h2>
@@ -778,16 +778,16 @@ export default function BountyDetailPage() {
                       : 0;
 
                     return (
-                      <div key={index} className="bg-white border border-amber-200 p-4">
-                        <div className="flex justify-between items-center">
+                      <div key={index} className="p-4 bg-white border border-amber-200">
+                        <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <span className="text-2xl">
                               {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "🏆"}
                             </span>
                             <div>
-                              <p className="font-bold text-sm font-mono">{formatAddress(winner)}</p>
+                              <p className="font-mono text-sm font-bold">{formatAddress(winner)}</p>
                               {submission?.revealed && (
-                                <Badge variant="outline" className="mt-1 text-xs border-green-500 text-green-700">
+                                <Badge variant="outline" className="mt-1 text-xs text-green-700 border-green-500">
                                   Revealed
                                 </Badge>
                               )}
@@ -818,7 +818,7 @@ export default function BountyDetailPage() {
                       ? "border-red-200 bg-red-50"
                       : "border-blue-200 bg-blue-50"
                   }`}>
-                    <h3 className="font-bold text-lg mb-2">
+                    <h3 className="mb-2 text-lg font-bold">
                       {userOprecApplication.approved
                         ? "✓ Application Approved"
                         : userOprecApplication.rejected
@@ -835,15 +835,15 @@ export default function BountyDetailPage() {
                     </p>
                   </div>
                 ) : (
-                  <div className="bg-white border border-slate-200 p-6">
-                    <h2 className="text-lg font-black text-slate-900 mb-4">Apply to OPREC</h2>
-                    <p className="text-sm text-slate-600 mb-6">
+                  <div className="p-6 bg-white border border-slate-200">
+                    <h2 className="mb-4 text-lg font-black text-slate-900">Apply to OPREC</h2>
+                    <p className="mb-6 text-sm text-slate-600">
                       Deadline: {new Date(Number(bounty.oprecDeadline) * 1000).toLocaleString()}
                     </p>
 
                     <div className="space-y-4">
                       <div>
-                        <label className="text-sm font-bold text-slate-900 mb-2 block">Team Members (Optional)</label>
+                        <label className="block mb-2 text-sm font-bold text-slate-900">Team Members (Optional)</label>
                         {oprecForm.teamMembers.map((member, idx) => (
                           <div key={idx} className="flex gap-2 mb-2">
                             <Input
@@ -871,7 +871,7 @@ export default function BountyDetailPage() {
                       </div>
 
                       <div>
-                        <label className="text-sm font-bold text-slate-900 mb-2 block">Work Examples *</label>
+                        <label className="block mb-2 text-sm font-bold text-slate-900">Work Examples *</label>
                         <textarea
                           placeholder="Links to your previous work, portfolio, GitHub, etc."
                           value={oprecForm.workExamples}
@@ -882,7 +882,7 @@ export default function BountyDetailPage() {
                       </div>
 
                       <div>
-                        <label className="text-sm font-bold text-slate-900 mb-2 block">Skill Description *</label>
+                        <label className="block mb-2 text-sm font-bold text-slate-900">Skill Description *</label>
                         <textarea
                           placeholder="Describe your relevant skills and experience"
                           value={oprecForm.skillDescription}
@@ -907,7 +907,7 @@ export default function BountyDetailPage() {
 
             {/* OPREC Management (Creator) */}
             {bounty.hasOprec && bounty.status === 0 && isCreator && (
-              <div className="bg-white border border-slate-200 p-6">
+              <div className="p-6 bg-white border border-slate-200">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-lg font-black text-slate-900">
                     OPREC Applications ({oprecApplications.length})
@@ -924,7 +924,7 @@ export default function BountyDetailPage() {
 
                 <div className="space-y-3">
                   {oprecApplications.length === 0 ? (
-                    <p className="text-sm text-slate-500 text-center py-8">No applications yet</p>
+                    <p className="py-8 text-sm text-center text-slate-500">No applications yet</p>
                   ) : (
                     <>
                       {oprecApplications.map((app, idx) => (
@@ -953,18 +953,18 @@ export default function BountyDetailPage() {
                               className="mt-1"
                             />
                             <div className="flex-1">
-                              <p className="text-sm font-bold font-mono mb-1">{formatAddress(app.applicant)}</p>
+                              <p className="mb-1 font-mono text-sm font-bold">{formatAddress(app.applicant)}</p>
                               {app.approved && <Badge className="text-xs bg-green-600">Approved</Badge>}
                               {app.rejected && <Badge variant="destructive" className="text-xs">Rejected</Badge>}
                               {app.teamMembers.length > 0 && (
-                                <p className="text-xs text-slate-600 mt-2">
+                                <p className="mt-2 text-xs text-slate-600">
                                   Team: {app.teamMembers.map(m => formatAddress(m)).join(", ")}
                                 </p>
                               )}
-                              <p className="text-xs text-slate-600 mt-2">
+                              <p className="mt-2 text-xs text-slate-600">
                                 <strong>Work:</strong> {app.workExamples}
                               </p>
-                              <p className="text-xs text-slate-600 mt-1">
+                              <p className="mt-1 text-xs text-slate-600">
                                 <strong>Skills:</strong> {app.skillDescription}
                               </p>
                             </div>
@@ -1001,7 +1001,7 @@ export default function BountyDetailPage() {
             {/* Submit Solution */}
             {bounty.status === 1 && !isCreator && !isExpired && (
               <div id="submit-solution-section" className="bg-white border-2 border-[#0EA885]/20 p-6">
-                <h2 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
+                <h2 className="flex items-center gap-2 mb-6 text-lg font-black text-slate-900">
                   <Send className="size-5 text-[#0EA885]" />
                   Submit Your Solution
                 </h2>
@@ -1016,9 +1016,9 @@ export default function BountyDetailPage() {
                   )}
 
                   <div>
-                    <label className="text-sm font-bold text-slate-900 mb-2 block">Upload Solution Image *</label>
+                    <label className="block mb-2 text-sm font-bold text-slate-900">Upload Solution Image *</label>
                     {!uploadedSolutionImage ? (
-                      <div className="border-2 border-dashed border-slate-300 hover:border-slate-400 p-8 transition-colors">
+                      <div className="p-8 transition-colors border-2 border-dashed border-slate-300 hover:border-slate-400">
                         <input
                           type="file"
                           accept="image/*"
@@ -1034,10 +1034,10 @@ export default function BountyDetailPage() {
                         />
                         <label
                           htmlFor="solution-image-upload"
-                          className="cursor-pointer flex flex-col items-center"
+                          className="flex flex-col items-center cursor-pointer"
                         >
-                          <Upload className="size-8 mb-3 text-slate-400" />
-                          <span className="text-sm font-medium text-slate-700 mb-1">
+                          <Upload className="mb-3 size-8 text-slate-400" />
+                          <span className="mb-1 text-sm font-medium text-slate-700">
                             Click to upload solution
                           </span>
                           <span className="text-xs text-slate-500">
@@ -1050,7 +1050,7 @@ export default function BountyDetailPage() {
                         <img
                           src={URL.createObjectURL(uploadedSolutionImage)}
                           alt="Solution preview"
-                          className="w-full h-48 object-cover border border-slate-200"
+                          className="object-cover w-full h-48 border border-slate-200"
                         />
                         <Button
                           type="button"
@@ -1062,7 +1062,7 @@ export default function BountyDetailPage() {
                         >
                           <X className="size-4" />
                         </Button>
-                        <p className="text-xs text-slate-600 mt-2 truncate">
+                        <p className="mt-2 text-xs truncate text-slate-600">
                           {uploadedSolutionImage.name}
                         </p>
                       </div>
@@ -1070,7 +1070,7 @@ export default function BountyDetailPage() {
                   </div>
 
                   <div>
-                    <label className="text-sm font-bold text-slate-900 mb-2 block">Team Members (Optional)</label>
+                    <label className="block mb-2 text-sm font-bold text-slate-900">Team Members (Optional)</label>
                     {teamMembers.map((member, idx) => (
                       <div key={idx} className="flex gap-2 mb-2">
                         <Input
@@ -1115,17 +1115,17 @@ export default function BountyDetailPage() {
                   >
                     {isUploadingSolution ? (
                       <>
-                        <Upload className="size-4 mr-2 animate-spin" />
+                        <Upload className="mr-2 size-4 animate-spin" />
                         Uploading to IPFS...
                       </>
                     ) : isPending || isConfirming ? (
                       <>
-                        <Clock className="size-4 mr-2 animate-spin" />
+                        <Clock className="mr-2 size-4 animate-spin" />
                         Submitting...
                       </>
                     ) : (
                       <>
-                        <Send className="size-4 mr-2" />
+                        <Send className="mr-2 size-4" />
                         Submit Solution
                       </>
                     )}
@@ -1136,8 +1136,8 @@ export default function BountyDetailPage() {
 
             {/* Submissions & Discussion */}
             {bounty.submissions.length > 0 && (
-              <div className="bg-white border border-slate-200 p-6">
-                <h2 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
+              <div className="p-6 bg-white border border-slate-200">
+                <h2 className="flex items-center gap-2 mb-6 text-lg font-black text-slate-900">
                   <MessageCircle className="size-5 text-[#0EA885]" />
                   Submissions & Discussion ({bounty.submissions.length})
                 </h2>
@@ -1154,8 +1154,8 @@ export default function BountyDetailPage() {
                           isWinner ? "bg-amber-50 border-amber-200" : "border-slate-200"
                         }`}
                       >
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex items-center gap-3 flex-1">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center flex-1 gap-3">
                             {isCreator && bounty.status === 1 && (
                               <div className="flex items-center gap-2">
                                 <Checkbox
@@ -1172,7 +1172,7 @@ export default function BountyDetailPage() {
                                       setWinnerRanks(newRanks);
                                     }}
                                   >
-                                    <SelectTrigger className="w-28 h-8 text-xs border-slate-200">
+                                    <SelectTrigger className="h-8 text-xs w-28 border-slate-200">
                                       <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -1188,15 +1188,15 @@ export default function BountyDetailPage() {
                             )}
 
                             {isWinner && bounty.status === 2 && (
-                              <Badge className="text-xs bg-amber-600 text-white">
+                              <Badge className="text-xs text-white bg-amber-600">
                                 {winnerIndex === 0 ? "🥇 1st" : winnerIndex === 1 ? "🥈 2nd" : winnerIndex === 2 ? "🥉 3rd" : `🏆 ${winnerIndex + 1}th`}
                               </Badge>
                             )}
 
                             <div>
-                              <p className="text-sm font-bold font-mono">{formatAddress(sub.solver)}</p>
+                              <p className="font-mono text-sm font-bold">{formatAddress(sub.solver)}</p>
                               {sub.solver.toLowerCase() === bounty.creator.toLowerCase() && (
-                                <Badge variant="outline" className="text-xs mt-1">Creator</Badge>
+                                <Badge variant="outline" className="mt-1 text-xs">Creator</Badge>
                               )}
                             </div>
                           </div>
@@ -1207,18 +1207,18 @@ export default function BountyDetailPage() {
                             onClick={() => openCidViewer(sub.blindedIpfsCid, `Submission by ${formatAddress(sub.solver)}`)}
                             className="border-slate-200"
                           >
-                            <ExternalLink className="size-3 mr-1" />
+                            <ExternalLink className="mr-1 size-3" />
                             View
                           </Button>
                         </div>
 
                         {/* Replies */}
                         {sub.replies.length > 0 && (
-                          <div className="mt-3 pt-3 border-t border-slate-200 space-y-2">
+                          <div className="pt-3 mt-3 space-y-2 border-t border-slate-200">
                             {sub.replies.map((reply, rIndex) => (
-                              <div key={rIndex} className="bg-slate-50 p-3">
+                              <div key={rIndex} className="p-3 bg-slate-50">
                                 <div className="flex items-center gap-2 mb-1">
-                                  <span className="font-bold text-xs font-mono">{formatAddress(reply.replier)}</span>
+                                  <span className="font-mono text-xs font-bold">{formatAddress(reply.replier)}</span>
                                   {reply.replier.toLowerCase() === bounty.creator.toLowerCase() && (
                                     <Badge variant="outline" className="text-xs">Creator</Badge>
                                   )}
@@ -1231,7 +1231,7 @@ export default function BountyDetailPage() {
 
                         {/* Add Reply */}
                         {bounty.status === 1 && (isCreator || address?.toLowerCase() === sub.solver.toLowerCase()) && (
-                          <div className="flex gap-2 mt-3 pt-3 border-t border-slate-200">
+                          <div className="flex gap-2 pt-3 mt-3 border-t border-slate-200">
                             <Input
                               placeholder="Add reply..."
                               value={replyContent[index] || ""}
@@ -1251,7 +1251,7 @@ export default function BountyDetailPage() {
 
                         {/* Reveal Solution */}
                         {bounty.status === 2 && isWinner && address?.toLowerCase() === sub.solver.toLowerCase() && !sub.revealed && (
-                          <div className="mt-3 pt-3 border-t border-slate-200">
+                          <div className="pt-3 mt-3 border-t border-slate-200">
                             <div className="flex gap-2">
                               <Input
                                 placeholder="Enter reveal IPFS CID..."
@@ -1265,7 +1265,7 @@ export default function BountyDetailPage() {
                                 disabled={!revealCid[index]?.trim() || isPending || isConfirming}
                                 className="bg-green-600 hover:bg-green-700"
                               >
-                                <Unlock className="size-3 mr-1" />
+                                <Unlock className="mr-1 size-3" />
                                 Reveal
                               </Button>
                             </div>
@@ -1274,7 +1274,7 @@ export default function BountyDetailPage() {
 
                         {/* Already Revealed */}
                         {bounty.status === 2 && sub.revealed && isWinner && (
-                          <div className="mt-3 pt-3 border-t border-slate-200 flex items-center justify-between">
+                          <div className="flex items-center justify-between pt-3 mt-3 border-t border-slate-200">
                             <Badge variant="outline" className="text-green-600 border-green-500">
                               ✓ Solution Revealed
                             </Badge>
@@ -1284,7 +1284,7 @@ export default function BountyDetailPage() {
                               onClick={() => openCidViewer(sub.revealIpfsCid, `Solution by ${formatAddress(sub.solver)}`)}
                               className="border-slate-200"
                             >
-                              <ExternalLink className="size-3 mr-1" />
+                              <ExternalLink className="mr-1 size-3" />
                               View Solution
                             </Button>
                           </div>
@@ -1304,9 +1304,9 @@ export default function BountyDetailPage() {
                       isPending ||
                       isConfirming
                     }
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold mt-6"
+                    className="w-full mt-6 font-bold text-white bg-green-600 hover:bg-green-700"
                   >
-                    <Trophy className="size-4 mr-2" />
+                    <Trophy className="mr-2 size-4" />
                     {isPending || isConfirming ? "Confirming..." : `Select Winners (${selectedSubmissions.length})`}
                   </Button>
                 )}
@@ -1315,24 +1315,24 @@ export default function BountyDetailPage() {
 
             {/* Transaction Status */}
             {hash && (
-              <div className="bg-blue-50 border border-blue-200 p-4">
-                <p className="text-xs font-bold text-slate-900 mb-2">Transaction Hash:</p>
+              <div className="p-4 border border-blue-200 bg-blue-50">
+                <p className="mb-2 text-xs font-bold text-slate-900">Transaction Hash:</p>
                 <a
                   href={`https://shannon-explorer.somnia.network/tx/${hash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 font-mono text-xs break-all underline"
+                  className="font-mono text-xs text-blue-600 underline break-all hover:text-blue-800"
                 >
                   {hash}
                 </a>
                 {isConfirming && (
-                  <div className="flex items-center gap-2 text-xs text-blue-600 mt-2">
+                  <div className="flex items-center gap-2 mt-2 text-xs text-blue-600">
                     <Clock className="size-3 animate-spin" />
                     Waiting for confirmation...
                   </div>
                 )}
                 {isConfirmed && (
-                  <div className="flex items-center gap-2 text-xs text-green-600 mt-2">
+                  <div className="flex items-center gap-2 mt-2 text-xs text-green-600">
                     <Check className="size-4" />
                     Transaction confirmed!
                   </div>
@@ -1343,8 +1343,8 @@ export default function BountyDetailPage() {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white border border-slate-200 p-6 sticky top-24">
-              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider mb-4">Quick Actions</h3>
+            <div className="sticky p-6 bg-white border border-slate-200 top-24">
+              <h3 className="mb-4 text-sm font-black tracking-wider uppercase text-slate-900">Quick Actions</h3>
 
               {bounty.status === 1 && !isCreator && !isExpired && (
                 <Button
@@ -1355,14 +1355,14 @@ export default function BountyDetailPage() {
                   className="w-full bg-[#0EA885] hover:bg-[#0c8a6f] text-white font-bold mb-3"
                   disabled={bounty.hasOprec && !isApprovedParticipant}
                 >
-                  <Send className="size-4 mr-2" />
+                  <Send className="mr-2 size-4" />
                   Submit Solution
                 </Button>
               )}
 
               {metadata?.skills && metadata.skills.length > 0 && (
-                <div className="mt-6 pt-6 border-t border-slate-200">
-                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider mb-3">Skills Required</h3>
+                <div className="pt-6 mt-6 border-t border-slate-200">
+                  <h3 className="mb-3 text-sm font-black tracking-wider uppercase text-slate-900">Skills Required</h3>
                   <div className="flex flex-wrap gap-2">
                     {metadata.skills.map((skill, index) => (
                       <Badge key={index} variant="outline" className="text-xs border-slate-200">
@@ -1387,7 +1387,7 @@ export default function BountyDetailPage() {
           <div className="mt-4">
             {viewingCid && (
               <div className="space-y-4">
-                <div className="border border-slate-200 p-4">
+                <div className="p-4 border border-slate-200">
                   <img
                     src={`https://ipfs.io/ipfs/${viewingCid}`}
                     alt="IPFS Content"
@@ -1416,7 +1416,7 @@ export default function BountyDetailPage() {
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" asChild className="flex-1 border-slate-200">
                     <a href={`https://ipfs.io/ipfs/${viewingCid}`} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="size-3 mr-2" />
+                      <ExternalLink className="mr-2 size-3" />
                       Open in New Tab
                     </a>
                   </Button>
@@ -1432,7 +1432,7 @@ export default function BountyDetailPage() {
                     }}
                     className="border-slate-200"
                   >
-                    <Copy className="size-3 mr-2" />
+                    <Copy className="mr-2 size-3" />
                     Copy Link
                   </Button>
                 </div>

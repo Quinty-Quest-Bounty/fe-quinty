@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useReadContract } from "wagmi";
 import {
@@ -10,9 +10,9 @@ import {
   BASE_SEPOLIA_CHAIN_ID,
 } from "../../utils/contracts";
 import { readContract } from "@wagmi/core";
-import { wagmiConfig } from "../../utils/web3";
+import { wagmiConfig, formatAddress } from "../../utils/web3";
 import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
+import { Input } from "../../components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +23,6 @@ import {
   Target,
   Zap,
   Clock,
-  TrendingUp,
   Filter,
   ChevronDown,
   LayoutGrid,
@@ -31,10 +30,18 @@ import {
   Check,
   BarChart3,
   X,
+  Search,
+  Users,
+  ArrowUpDown,
+  Plus,
+  ArrowRight,
+  Star,
+  Activity,
 } from "lucide-react";
 import {
   fetchMetadataFromIpfs,
   BountyMetadata,
+  formatIpfsUrl,
 } from "../../utils/ipfs";
 import {
   getEthPriceInUSD,
@@ -42,11 +49,12 @@ import {
   formatUSD,
 } from "../../utils/prices";
 
-type FilterType = "all" | "live" | "in-review" | "completed" | "development" | "ended";
-type ItemType = "bounty" | "quest";
+// === TYPES ===
+type FilterType = "all" | "live" | "in-review" | "completed" | "ended";
 type TypeFilter = "all" | "bounties" | "quests";
 type CategoryFilter = "all" | "development" | "design" | "marketing" | "research" | "other";
 type ViewMode = "card" | "list";
+type SortBy = "newest" | "highest_reward" | "ending_soon";
 
 interface Bounty {
   id: number;
@@ -73,29 +81,153 @@ interface Quest {
 
 type UnifiedItem = Bounty | Quest;
 
+// === CONSTANTS ===
 const ITEMS_PER_PAGE = 20;
+const DISPLAY_PER_PAGE = 12;
+const LOAD_MORE_COUNT = 12;
 
+// === HELPERS ===
+const getCategoryGradient = (category?: string): string => {
+  switch (category) {
+    case "development": return "from-blue-500 to-indigo-600";
+    case "design": return "from-purple-500 to-pink-600";
+    case "marketing": return "from-orange-500 to-red-500";
+    case "research": return "from-emerald-500 to-teal-600";
+    default: return "from-slate-500 to-slate-600";
+  }
+};
+
+const getCategoryColor = (category?: string): string => {
+  switch (category) {
+    case "development": return "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20";
+    case "design": return "bg-purple-50 text-purple-600 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20";
+    case "marketing": return "bg-orange-50 text-orange-600 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20";
+    case "research": return "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
+    default: return "bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700";
+  }
+};
+
+const getAvatarGradient = (address: string) => {
+  const hash = address.toLowerCase().slice(2);
+  const h1 = parseInt(hash.slice(0, 4), 16) % 360;
+  const h2 = (h1 + 40) % 360;
+  return { from: `hsl(${h1}, 65%, 55%)`, to: `hsl(${h2}, 65%, 40%)` };
+};
+
+// === SKELETON COMPONENTS ===
+const SkeletonCard = () => (
+  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden animate-pulse">
+    <div className="h-36 bg-slate-200 dark:bg-slate-800" />
+    <div className="p-4 space-y-3">
+      <div className="flex items-center gap-2">
+        <div className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700" />
+        <div className="h-3 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
+      </div>
+      <div className="h-4 w-3/4 bg-slate-200 dark:bg-slate-700 rounded" />
+      <div className="h-3 w-1/2 bg-slate-200 dark:bg-slate-700 rounded" />
+      <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-between">
+        <div className="h-3 w-16 bg-slate-200 dark:bg-slate-700 rounded" />
+        <div className="h-4 w-20 bg-slate-200 dark:bg-slate-700 rounded" />
+      </div>
+    </div>
+  </div>
+);
+
+const SkeletonListItem = () => (
+  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center gap-4 animate-pulse">
+    <div className="w-12 h-12 bg-slate-200 dark:bg-slate-700 flex-shrink-0" />
+    <div className="flex-1 space-y-2">
+      <div className="h-4 w-1/3 bg-slate-200 dark:bg-slate-700 rounded" />
+      <div className="h-3 w-1/2 bg-slate-200 dark:bg-slate-700 rounded" />
+    </div>
+    <div className="h-5 w-20 bg-slate-200 dark:bg-slate-700 rounded" />
+  </div>
+);
+
+const SidebarSkeleton = () => (
+  <div className="space-y-4 animate-pulse">
+    <div className="bg-slate-200 dark:bg-slate-800 h-24" />
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+      <div className="h-8 bg-slate-100 dark:bg-slate-800" />
+      <div className="p-4 space-y-3">
+        <div className="h-20 bg-slate-200 dark:bg-slate-700 rounded" />
+        <div className="h-4 w-3/4 bg-slate-200 dark:bg-slate-700 rounded" />
+        <div className="h-3 w-1/2 bg-slate-200 dark:bg-slate-700 rounded" />
+      </div>
+    </div>
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+      <div className="h-8 bg-slate-100 dark:bg-slate-800" />
+      <div className="p-3 space-y-2">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="flex justify-between py-1">
+            <div className="h-3 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
+            <div className="h-3 w-8 bg-slate-200 dark:bg-slate-700 rounded" />
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+// === MAIN COMPONENT ===
 export default function DashboardPage() {
   const router = useRouter();
+
+  // UI State
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("card");
   const [showStats, setShowStats] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [sortBy, setSortBy] = useState<SortBy>("newest");
+  const [displayCount, setDisplayCount] = useState(DISPLAY_PER_PAGE);
+
+  // Data State
   const [bounties, setBounties] = useState<Bounty[]>([]);
   const [quests, setQuests] = useState<Quest[]>([]);
   const [loading, setLoading] = useState(true);
   const [bountyMetadata, setBountyMetadata] = useState<Map<number, BountyMetadata>>(new Map());
   const [ethPrice, setEthPrice] = useState<number>(0);
+  const [submissionCounts, setSubmissionCounts] = useState<Map<string, number>>(new Map());
 
-  // Fetch ETH price on mount
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // === EFFECTS ===
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Reset display count on filter/sort/search change
+  useEffect(() => {
+    setDisplayCount(DISPLAY_PER_PAGE);
+  }, [activeFilter, typeFilter, categoryFilter, debouncedSearch, sortBy]);
+
+  // Keyboard shortcut: / or Ctrl+K to focus search
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const tag = document.activeElement?.tagName || "";
+      if ((e.key === "/" || (e.ctrlKey && e.key === "k")) && !["INPUT", "TEXTAREA"].includes(tag)) {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
+
+  // Fetch ETH price
   useEffect(() => {
     const fetchPrice = async () => {
       const price = await getEthPriceInUSD();
       setEthPrice(price);
     };
     fetchPrice();
-    const interval = setInterval(fetchPrice, 60000); // Refresh every 60 seconds
+    const interval = setInterval(fetchPrice, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -116,11 +248,15 @@ export default function DashboardPage() {
   useEffect(() => {
     let isMounted = true;
     const loadBounties = async () => {
-      if (!bountyCounter || !CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]) return;
+      if (bountyCounter === undefined || !CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]) return;
 
       const count = Number(bountyCounter);
-      const loadedBounties: Bounty[] = [];
+      if (count === 0) {
+        if (isMounted) setLoading(false);
+        return;
+      }
 
+      const loadedBounties: Bounty[] = [];
       for (let i = count; i >= Math.max(1, count - ITEMS_PER_PAGE + 1); i--) {
         try {
           const bountyData = await readContract(wagmiConfig, {
@@ -131,37 +267,13 @@ export default function DashboardPage() {
           });
 
           if (bountyData && Array.isArray(bountyData)) {
-            const [
-              creator,
-              description,
-              amount,
-              deadline,
-              allowMultipleWinners,
-              winnerShares,
-              status,
-              slashPercent,
-              selectedWinners,
-              selectedSubmissionIds,
-              hasOprec,
-              oprecDeadline,
-            ] = bountyData as any[];
-
+            const [creator, description, amount, deadline, , , status] = bountyData as any[];
             let metadataCid;
-            if (description && typeof description === 'string') {
-              const metadataMatch = description.match(/Metadata: ipfs:\/\/([a-zA-Z0-9]+)/);
-              metadataCid = metadataMatch ? metadataMatch[1] : undefined;
+            if (description && typeof description === "string") {
+              const match = description.match(/Metadata: ipfs:\/\/([a-zA-Z0-9]+)/);
+              metadataCid = match ? match[1] : undefined;
             }
-
-            loadedBounties.push({
-              id: i,
-              creator,
-              description: description || "",
-              amount,
-              deadline,
-              status,
-              metadataCid,
-              type: "bounty",
-            });
+            loadedBounties.push({ id: i, creator, description: description || "", amount, deadline, status, metadataCid, type: "bounty" });
           }
         } catch (err) {
           console.error(`Error loading bounty ${i}:`, err);
@@ -177,41 +289,32 @@ export default function DashboardPage() {
     return () => { isMounted = false; };
   }, [bountyCounter]);
 
-  // Load metadata for bounties
+  // Load metadata
   useEffect(() => {
     const loadMetadata = async () => {
-      const newMetadata = new Map<number, BountyMetadata>();
-
-      for (const bounty of bounties) {
-        if (bounty.metadataCid && !bountyMetadata.has(bounty.id)) {
+      const newMeta = new Map<number, BountyMetadata>();
+      for (const b of bounties) {
+        if (b.metadataCid && !bountyMetadata.has(b.id)) {
           try {
-            const meta = await fetchMetadataFromIpfs(bounty.metadataCid);
-            newMetadata.set(bounty.id, meta);
-          } catch (error) {
-            console.error(`Failed to load metadata for bounty ${bounty.id}:`, error);
-          }
+            const meta = await fetchMetadataFromIpfs(b.metadataCid);
+            newMeta.set(b.id, meta);
+          } catch {}
         }
       }
-
-      if (newMetadata.size > 0) {
-        setBountyMetadata(prev => new Map([...prev, ...newMetadata]));
-      }
+      if (newMeta.size > 0) setBountyMetadata(prev => new Map([...prev, ...newMeta]));
     };
-
-    if (bounties.length > 0) {
-      loadMetadata();
-    }
+    if (bounties.length > 0) loadMetadata();
   }, [bounties]);
 
   // Load quests
   useEffect(() => {
     let isMounted = true;
     const loadQuests = async () => {
-      if (!questCounter || !CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]) return;
-
+      if (questCounter === undefined || !CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]) return;
       const count = Number(questCounter);
-      const loadedQuests: Quest[] = [];
+      if (count === 0) return;
 
+      const loadedQuests: Quest[] = [];
       for (let i = count; i >= Math.max(1, count - ITEMS_PER_PAGE + 1); i--) {
         try {
           const questData = await readContract(wagmiConfig, {
@@ -220,564 +323,606 @@ export default function DashboardPage() {
             functionName: "getAirdrop",
             args: [BigInt(i)],
           });
-
           if (questData && Array.isArray(questData)) {
-            const [creator, title, description, totalAmount, perQualifier, maxQualifiers, qualifiersCount, deadline, createdAt, resolved, cancelled] = questData as any[];
-            loadedQuests.push({
-              id: i,
-              creator,
-              title,
-              amount: totalAmount,
-              totalRecipients: qualifiersCount,
-              deadline: BigInt(deadline),
-              resolved,
-              cancelled,
-              type: "quest",
-            });
+            const [creator, title, , totalAmount, , , qualifiersCount, deadline, , resolved, cancelled] = questData as any[];
+            loadedQuests.push({ id: i, creator, title, amount: totalAmount, totalRecipients: qualifiersCount, deadline: BigInt(deadline), resolved, cancelled, type: "quest" });
           }
         } catch (err) {
           console.error(`Error loading quest ${i}:`, err);
         }
       }
-
-      if (isMounted) {
-        setQuests(loadedQuests);
-      }
+      if (isMounted) setQuests(loadedQuests);
     };
     loadQuests();
     return () => { isMounted = false; };
   }, [questCounter]);
 
-  // Unified filtering
+  // Fetch submission counts
+  useEffect(() => {
+    const fetchCounts = async () => {
+      const counts = new Map<string, number>();
+      for (const b of bounties) {
+        try {
+          const c = await readContract(wagmiConfig, {
+            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+            abi: QUINTY_ABI,
+            functionName: "getSubmissionCount",
+            args: [BigInt(b.id)],
+          });
+          counts.set(`bounty-${b.id}`, Number(c));
+        } catch {}
+      }
+      for (const q of quests) {
+        try {
+          const c = await readContract(wagmiConfig, {
+            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
+            abi: AIRDROP_ABI,
+            functionName: "getEntryCount",
+            args: [BigInt(q.id)],
+          });
+          counts.set(`quest-${q.id}`, Number(c));
+        } catch {}
+      }
+      if (counts.size > 0) setSubmissionCounts(prev => new Map([...prev, ...counts]));
+    };
+    if (bounties.length > 0 || quests.length > 0) fetchCounts();
+  }, [bounties, quests]);
+
+  // === COMPUTED ===
+
   const unifiedItems: UnifiedItem[] = useMemo(() => {
     let combined = [...bounties, ...quests];
 
-    // Type filter (Bounties/Quests)
-    if (typeFilter === "bounties") {
-      combined = combined.filter(item => item.type === "bounty");
-    } else if (typeFilter === "quests") {
-      combined = combined.filter(item => item.type === "quest");
-    }
+    if (typeFilter === "bounties") combined = combined.filter(i => i.type === "bounty");
+    else if (typeFilter === "quests") combined = combined.filter(i => i.type === "quest");
 
-    // Category filter (for bounties only)
     if (categoryFilter !== "all") {
       combined = combined.filter(item => {
         if (item.type === "bounty") {
-          const bounty = item as Bounty;
-          const metadata = bountyMetadata.get(bounty.id);
-          return metadata?.bountyType === categoryFilter;
+          const meta = bountyMetadata.get((item as Bounty).id);
+          return meta?.bountyType === categoryFilter;
         }
-        return true; // Don't filter quests by category
+        return true;
       });
     }
 
-    // Status filter
-    return combined.filter(item => {
+    combined = combined.filter(item => {
       const now = BigInt(Math.floor(Date.now() / 1000));
       const isEnded = item.deadline < now;
-
       if (item.type === "bounty") {
-        const bounty = item as Bounty;
+        const b = item as Bounty;
         if (activeFilter === "all") return true;
-        if (activeFilter === "live") return bounty.status === 1 && !isEnded; // OPEN
-        if (activeFilter === "in-review") return bounty.status === 2; // REVEAL
-        if (activeFilter === "completed") return bounty.status === 3; // RESOLVED
-        if (activeFilter === "development") return bounty.status === 0; // OPREC
+        if (activeFilter === "live") return b.status === 1 && !isEnded;
+        if (activeFilter === "in-review") return b.status === 2;
+        if (activeFilter === "completed") return b.status === 3;
         if (activeFilter === "ended") return isEnded;
       } else {
-        const quest = item as Quest;
+        const q = item as Quest;
         if (activeFilter === "all") return true;
-        if (activeFilter === "live") return !quest.resolved && !quest.cancelled && !isEnded;
-        if (activeFilter === "completed") return quest.resolved;
-        if (activeFilter === "ended") return isEnded || quest.cancelled;
+        if (activeFilter === "live") return !q.resolved && !q.cancelled && !isEnded;
+        if (activeFilter === "completed") return q.resolved;
+        if (activeFilter === "ended") return isEnded || q.cancelled;
       }
       return false;
     });
-  }, [bounties, quests, activeFilter, typeFilter, categoryFilter, bountyMetadata]);
+
+    if (debouncedSearch) {
+      const q = debouncedSearch.toLowerCase();
+      combined = combined.filter(item => {
+        if (item.type === "bounty") {
+          const b = item as Bounty;
+          const meta = bountyMetadata.get(b.id);
+          return (meta?.title || "").toLowerCase().includes(q) || b.description.toLowerCase().includes(q) || b.creator.toLowerCase().includes(q);
+        }
+        const quest = item as Quest;
+        return quest.title.toLowerCase().includes(q) || quest.creator.toLowerCase().includes(q);
+      });
+    }
+
+    combined.sort((a, b) => {
+      if (sortBy === "highest_reward") return Number(b.amount) - Number(a.amount);
+      if (sortBy === "ending_soon") return Number(a.deadline) - Number(b.deadline);
+      return b.id - a.id;
+    });
+
+    return combined;
+  }, [bounties, quests, activeFilter, typeFilter, categoryFilter, bountyMetadata, debouncedSearch, sortBy]);
+
+  const displayedItems = useMemo(() => unifiedItems.slice(0, displayCount), [unifiedItems, displayCount]);
+
+  const featuredBounty = useMemo(() => {
+    const now = BigInt(Math.floor(Date.now() / 1000));
+    const live = bounties.filter(b => b.status === 1 && b.deadline >= now);
+    if (live.length === 0) return null;
+    return live.sort((a, b) => Number(b.amount) - Number(a.amount))[0];
+  }, [bounties]);
+
+  const recentActivity = useMemo(() => {
+    const items: { type: "bounty" | "quest"; id: number; title: string; action: string; creator: string }[] = [];
+    bounties.slice(0, 3).forEach(b => {
+      const meta = bountyMetadata.get(b.id);
+      const action = b.status === 3 ? "Resolved" : b.status === 2 ? "In review" : "Now live";
+      items.push({ type: "bounty", id: b.id, title: meta?.title || `Bounty #${b.id}`, action, creator: b.creator });
+    });
+    quests.slice(0, 2).forEach(q => {
+      items.push({ type: "quest", id: q.id, title: q.title || `Quest #${q.id}`, action: q.resolved ? "Completed" : "Now live", creator: q.creator });
+    });
+    return items.slice(0, 5);
+  }, [bounties, quests, bountyMetadata]);
+
+  const stats = useMemo(() => {
+    const now = BigInt(Math.floor(Date.now() / 1000));
+    return {
+      activeBounties: bounties.filter(b => b.status === 1 && b.deadline >= now).length,
+      activeQuests: quests.filter(q => !q.resolved && !q.cancelled && q.deadline >= now).length,
+      completed: bounties.filter(b => b.status === 3).length + quests.filter(q => q.resolved).length,
+      totalEth: [...bounties, ...quests].reduce((sum, item) => sum + Number(item.amount) / 1e18, 0),
+    };
+  }, [bounties, quests]);
+
+  // === HELPERS ===
 
   const getStatusInfo = (item: UnifiedItem) => {
     const now = BigInt(Math.floor(Date.now() / 1000));
     const isEnded = item.deadline < now;
-
-    if (isEnded) {
-      return { label: "ENDED", color: "bg-slate-100 text-slate-600 border-slate-200" };
-    }
+    if (isEnded) return { label: "ENDED", color: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700" };
 
     if (item.type === "bounty") {
-      const bounty = item as Bounty;
-      const statusMap = [
-        { label: "DEVELOPMENT", color: "bg-blue-50 text-blue-600 border-blue-200" }, // OPREC
-        { label: "LIVE", color: "bg-[#0EA885]/10 text-[#0EA885] border-[#0EA885]/20" }, // OPEN
-        { label: "IN REVIEW", color: "bg-amber-50 text-amber-600 border-amber-200" }, // REVEAL
-        { label: "COMPLETED", color: "bg-slate-100 text-slate-600 border-slate-200" }, // RESOLVED
-        { label: "DISPUTED", color: "bg-rose-50 text-rose-600 border-rose-200" }, // DISPUTED
-        { label: "EXPIRED", color: "bg-slate-100 text-slate-400 border-slate-200" }, // EXPIRED
+      const map = [
+        { label: "OPREC", color: "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20" },
+        { label: "LIVE", color: "bg-[#0EA885]/10 text-[#0EA885] border-[#0EA885]/20" },
+        { label: "IN REVIEW", color: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20" },
+        { label: "COMPLETED", color: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700" },
+        { label: "DISPUTED", color: "bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20" },
+        { label: "EXPIRED", color: "bg-slate-100 text-slate-400 border-slate-200 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700" },
       ];
-      return statusMap[bounty.status] || statusMap[5];
-    } else {
-      const quest = item as Quest;
-      if (quest.resolved) {
-        return { label: "COMPLETED", color: "bg-slate-100 text-slate-600 border-slate-200" };
-      }
-      if (quest.cancelled) {
-        return { label: "ENDED", color: "bg-slate-100 text-slate-400 border-slate-200" };
-      }
-      return { label: "LIVE", color: "bg-[#0EA885]/10 text-[#0EA885] border-[#0EA885]/20" };
+      return map[(item as Bounty).status] || map[5];
     }
+    const q = item as Quest;
+    if (q.resolved) return { label: "COMPLETED", color: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700" };
+    if (q.cancelled) return { label: "ENDED", color: "bg-slate-100 text-slate-400 border-slate-200 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700" };
+    return { label: "LIVE", color: "bg-[#0EA885]/10 text-[#0EA885] border-[#0EA885]/20" };
   };
 
   const formatDeadline = (deadline: bigint | number) => {
     try {
-      const date = new Date(Number(deadline) * 1000);
-      const now = new Date();
-      const diff = date.getTime() - now.getTime();
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
+      const diff = new Date(Number(deadline) * 1000).getTime() - Date.now();
       if (diff < 0) return "Ended";
-      if (days > 0) return `${days}d left`;
-      return `${hours}h left`;
-    } catch (e) {
-      return "Invalid Date";
-    }
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      return days > 0 ? `${days}d left` : `${hours}h left`;
+    } catch { return "N/A"; }
   };
 
-  const filters: { id: FilterType; label: string }[] = [
-    { id: "all", label: "All" },
-    { id: "live", label: "Live" },
-    { id: "in-review", label: "In Review" },
-    { id: "completed", label: "Completed" },
-    { id: "development", label: "Development" },
-    { id: "ended", label: "Ended" },
-  ];
+  const getItemData = (item: UnifiedItem) => {
+    const subCount = submissionCounts.get(`${item.type}-${item.id}`) || 0;
+    if (item.type === "bounty") {
+      const b = item as Bounty;
+      const meta = bountyMetadata.get(b.id);
+      return {
+        title: meta?.title || b.description.split("\n")[0] || "Untitled Bounty",
+        image: meta?.images?.[0] ? formatIpfsUrl(meta.images[0]) : null,
+        category: meta?.bountyType || "",
+        subCount,
+      };
+    }
+    const q = item as Quest;
+    return { title: q.title || `Quest #${q.id}`, image: null, category: "", subCount };
+  };
 
+  // === FILTER CONFIG ===
+  const statusFilters: { id: FilterType; label: string }[] = [
+    { id: "all", label: "All" }, { id: "live", label: "Live" }, { id: "in-review", label: "In Review" }, { id: "completed", label: "Completed" }, { id: "ended", label: "Ended" },
+  ];
   const typeFilters: { id: TypeFilter; label: string }[] = [
-    { id: "all", label: "All" },
-    { id: "bounties", label: "Bounties" },
-    { id: "quests", label: "Quests" },
+    { id: "all", label: "All" }, { id: "bounties", label: "Bounties" }, { id: "quests", label: "Quests" },
   ];
-
   const categoryFilters: { id: CategoryFilter; label: string }[] = [
-    { id: "all", label: "All Categories" },
-    { id: "development", label: "Development" },
-    { id: "design", label: "Design" },
-    { id: "marketing", label: "Marketing" },
-    { id: "research", label: "Research" },
-    { id: "other", label: "Other" },
+    { id: "all", label: "All Categories" }, { id: "development", label: "Development" }, { id: "design", label: "Design" }, { id: "marketing", label: "Marketing" }, { id: "research", label: "Research" }, { id: "other", label: "Other" },
+  ];
+  const sortOptions: { id: SortBy; label: string }[] = [
+    { id: "newest", label: "Newest" }, { id: "highest_reward", label: "Highest Reward" }, { id: "ending_soon", label: "Ending Soon" },
   ];
 
+  // === RENDER ===
   return (
-    <div className="min-h-screen bg-slate-50 pb-20">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-br from-[#0EA885] to-[#0c8a6f] text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-8 sm:pb-12">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-            <div className="max-w-2xl">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight mb-2">
-                Trust shouldn't be optional.
-              </h1>
-              <p className="text-white/60 text-xs sm:text-sm font-medium">
-                Discover bounties and quests, contribute to projects, and earn rewards
-              </p>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
+      {/* ===== COMPACT HERO STRIP ===== */}
+      <div className="bg-gradient-to-r from-[#0EA885] to-[#0c8a6f] text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="h-14 sm:h-16 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-white/80 animate-pulse flex-shrink-0" />
+              <span className="text-sm sm:text-base font-bold tracking-tight">Trust shouldn&apos;t be optional.</span>
+              <span className="hidden md:inline text-white/30">|</span>
+              <span className="hidden md:inline text-xs text-white/60 font-medium">Discover bounties &amp; quests</span>
             </div>
-            <div className="hidden lg:block">
-              <div className="w-48 h-28 bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center">
-                <TrendingUp className="w-16 h-16 text-white/50" />
-              </div>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" className="h-8 bg-white text-[#0EA885] hover:bg-white/90 text-xs font-bold gap-1.5 rounded-none shadow-none">
+                  <Plus className="w-3.5 h-3.5" /> Create
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => router.push("/bounties/create")} className="cursor-pointer">
+                  <Target className="w-4 h-4 mr-2" /> Create Bounty
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/quests/create")} className="cursor-pointer">
+                  <Zap className="w-4 h-4 mr-2" /> Create Quest
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
-        {/* Stats Toggle Button - Mobile Only */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* Mobile stats toggle */}
         <button
           onClick={() => setShowStats(!showStats)}
-          className="lg:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#0EA885] text-white flex items-center justify-center shadow-lg hover:bg-[#0c8a6f] transition-colors border-2 border-white"
+          className="lg:hidden fixed bottom-6 right-6 z-50 w-12 h-12 bg-[#0EA885] text-white flex items-center justify-center shadow-lg hover:bg-[#0c8a6f] transition-colors"
         >
           {showStats ? <X className="w-5 h-5" /> : <BarChart3 className="w-5 h-5" />}
         </button>
 
-        {/* Two Column Layout - Stack on mobile */}
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* Left Column - Main Content */}
+          {/* ===== MAIN CONTENT ===== */}
           <div className="flex-1 min-w-0 order-2 lg:order-1">
-            {/* Explore Section */}
-            <div className="mb-6 sm:mb-8">
-              <div className="flex items-center justify-between mb-4 sm:mb-6">
-                <h2 className="text-xl sm:text-2xl font-black text-slate-900">Explore</h2>
-
-                {/* View Toggle */}
-                <div className="flex items-center gap-0 bg-white border border-slate-200">
-                  <button
-                    onClick={() => setViewMode("card")}
-                    className={`h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center transition-colors ${viewMode === "card" ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-50"
-                      }`}
-                  >
-                    <LayoutGrid className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  </button>
-                  <button
-                    onClick={() => setViewMode("list")}
-                    className={`h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center transition-colors border-l border-slate-200 ${viewMode === "list" ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-50"
-                      }`}
-                  >
-                    <List className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  </button>
-                </div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">Explore</h2>
+              <div className="flex items-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                <button onClick={() => setViewMode("card")} className={`h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center transition-colors ${viewMode === "card" ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"}`}>
+                  <LayoutGrid className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </button>
+                <button onClick={() => setViewMode("list")} className={`h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center transition-colors border-l border-slate-200 dark:border-slate-700 ${viewMode === "list" ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"}`}>
+                  <List className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </button>
               </div>
+            </div>
 
-              {/* Filter Bars */}
-              <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-                {/* Type Filters - Top Row */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-1 overflow-x-auto pb-2 sm:pb-0">
-                    {typeFilters.map((filter) => (
-                      <button
-                        key={filter.id}
-                        onClick={() => setTypeFilter(filter.id)}
-                        className={`px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-bold uppercase tracking-wider transition-colors border whitespace-nowrap ${typeFilter === filter.id
-                          ? "bg-slate-900 text-white border-slate-900"
-                          : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-                          }`}
-                      >
-                        {filter.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Category Dropdown */}
-                  {(typeFilter === "all" || typeFilter === "bounties") && (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="h-8 sm:h-9 px-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-colors whitespace-nowrap">
-                          <Filter className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                          <span className="hidden sm:inline">{categoryFilters.find(f => f.id === categoryFilter)?.label || "Category"}</span>
-                          <span className="sm:hidden">All Categories</span>
-                          <ChevronDown className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        {categoryFilters.map((filter) => (
-                          <DropdownMenuItem
-                            key={filter.id}
-                            onClick={() => setCategoryFilter(filter.id)}
-                            className="text-xs uppercase tracking-wider cursor-pointer"
-                          >
-                            <Check className={`w-4 h-4 mr-2 ${categoryFilter === filter.id ? "opacity-100" : "opacity-0"}`} />
-                            {filter.label}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  )}
-                </div>
-
-                {/* Status Filters - Bottom Row - Scrollable on mobile */}
-                <div className="flex items-center gap-1 overflow-x-auto pb-2 sm:pb-0">
-                  {filters.map((filter) => (
-                    <button
-                      key={filter.id}
-                      onClick={() => setActiveFilter(filter.id)}
-                      className={`px-2.5 sm:px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors border whitespace-nowrap ${activeFilter === filter.id
-                        ? "bg-[#0EA885] text-white border-[#0EA885]"
-                        : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-                        }`}
-                    >
-                      {filter.label}
-                    </button>
+            {/* Row 1: Type tabs + Search + Sort */}
+            <div className="flex items-center gap-2 sm:gap-3 mb-3">
+              <div className="flex items-center gap-1 flex-shrink-0">
+                {typeFilters.map(f => (
+                  <button key={f.id} onClick={() => setTypeFilter(f.id)} className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors border whitespace-nowrap ${typeFilter === f.id ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white" : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"}`}>
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex-1 relative min-w-0">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                <Input ref={searchRef} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search... ( / )" className="pl-9 pr-8 h-9 text-sm" />
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="h-9 px-3 flex items-center gap-2 text-xs font-medium bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap flex-shrink-0">
+                    <ArrowUpDown className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">{sortOptions.find(s => s.id === sortBy)?.label}</span>
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-44">
+                  {sortOptions.map(opt => (
+                    <DropdownMenuItem key={opt.id} onClick={() => setSortBy(opt.id)} className="text-xs cursor-pointer">
+                      <Check className={`w-4 h-4 mr-2 ${sortBy === opt.id ? "opacity-100" : "opacity-0"}`} />
+                      {opt.label}
+                    </DropdownMenuItem>
                   ))}
-                </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Row 2: Status pills + Category dropdown */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-1 overflow-x-auto pb-1 flex-1">
+                {statusFilters.map(f => (
+                  <button key={f.id} onClick={() => setActiveFilter(f.id)} className={`px-2.5 sm:px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors border whitespace-nowrap ${activeFilter === f.id ? "bg-[#0EA885] text-white border-[#0EA885]" : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"}`}>
+                    {f.label}
+                  </button>
+                ))}
               </div>
+              {(typeFilter === "all" || typeFilter === "bounties") && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="h-8 px-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap ml-2 flex-shrink-0">
+                      <Filter className="w-3 h-3" />
+                      <span className="hidden sm:inline">{categoryFilters.find(f => f.id === categoryFilter)?.label}</span>
+                      <span className="sm:hidden">Category</span>
+                      <ChevronDown className="w-3 h-3" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    {categoryFilters.map(f => (
+                      <DropdownMenuItem key={f.id} onClick={() => setCategoryFilter(f.id)} className="text-xs uppercase tracking-wider cursor-pointer">
+                        <Check className={`w-4 h-4 mr-2 ${categoryFilter === f.id ? "opacity-100" : "opacity-0"}`} />
+                        {f.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
 
-              {/* Items Grid/List */}
-              {loading ? (
-                <div className="flex items-center justify-center py-20">
-                  <div className="animate-spin border-4 border-slate-200 border-t-[#0EA885] w-12 h-12"></div>
+            {/* Results count */}
+            {!loading && (
+              <div className="text-xs text-slate-500 dark:text-slate-400 mb-4 font-medium">
+                Showing {Math.min(displayCount, unifiedItems.length)} of {unifiedItems.length} items
+                {debouncedSearch && <span className="ml-1">for &quot;{debouncedSearch}&quot;</span>}
+              </div>
+            )}
+
+            {/* ===== CONTENT ===== */}
+            {loading ? (
+              viewMode === "card" ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
                 </div>
-              ) : unifiedItems.length > 0 ? (
-                <div className={viewMode === "card" ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6" : "flex flex-col gap-3 sm:gap-4"}>
-                  {unifiedItems.map((item) => {
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {Array.from({ length: 4 }).map((_, i) => <SkeletonListItem key={i} />)}
+                </div>
+              )
+            ) : displayedItems.length > 0 ? (
+              viewMode === "card" ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {displayedItems.map(item => {
                     const statusInfo = getStatusInfo(item);
-                    let title = "";
-                    let icon = null;
-                    let image = null;
-                    let category = "";
+                    const { title, image, category, subCount } = getItemData(item);
+                    const avatarColors = getAvatarGradient(item.creator);
 
-                    if (item.type === "bounty") {
-                      const bounty = item as Bounty;
-                      const metadata = bountyMetadata.get(bounty.id);
-                      title = metadata?.title || bounty.description.split("\n")[0] || "Untitled Bounty";
-                      category = metadata?.bountyType || "";
-                      icon = <Target className="h-10 w-10 text-slate-300" />;
-
-                      if (metadata?.images && metadata.images.length > 0) {
-                        image = `https://ipfs.io/ipfs/${metadata.images[0]}`;
-                      }
-                    } else {
-                      const quest = item as Quest;
-                      title = quest.title || `Quest #${quest.id}`;
-                      icon = <Zap className="h-10 w-10 text-slate-300" />;
-                    }
-
-                    // Card View
-                    if (viewMode === "card") {
-                      return (
-                        <div
-                          key={`${item.type}-${item.id}`}
-                          onClick={() => router.push(`/${item.type === "bounty" ? "bounties" : "quests"}/${item.id}`)}
-                          className="group cursor-pointer bg-white border border-slate-200 hover:border-[#0EA885] hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
-                        >
-                          <div className="relative w-full h-36 overflow-hidden bg-slate-50 flex items-center justify-center">
-                            {image ? (
-                              <img
-                                src={image}
-                                alt={title}
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                              />
-                            ) : (
-                              icon
-                            )}
-                            <div className="absolute top-3 left-3">
-                              <span className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-wider border ${statusInfo.color}`}>
-                                {statusInfo.label}
-                              </span>
-                            </div>
-                            <div className="absolute top-3 right-3">
-                              <span className="px-2 py-1 text-[9px] font-bold uppercase tracking-wider bg-white/90 backdrop-blur-sm text-slate-700 border border-slate-200">
-                                {item.type === "bounty" ? "BOUNTY" : "QUEST"}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="p-4 flex flex-col flex-1">
-                            <h3 className="text-sm font-bold text-slate-900 mb-2 line-clamp-2 leading-tight group-hover:text-[#0EA885] transition-colors">
-                              {title}
-                            </h3>
-                            <p className="text-[10px] font-medium text-slate-400 mb-4">
-                              by {item.creator.substring(0, 6)}...{item.creator.substring(38)}
-                            </p>
-                            <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
-                              <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
-                                <Clock className="h-3 w-3" />
-                                {formatDeadline(item.deadline)}
-                              </div>
-                              <div className="text-right">
-                                <div className="flex items-center justify-end gap-1.5 mb-0.5">
-                                  <div className="w-4 h-4 bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white text-[8px] font-black">
-                                    Ξ
-                                  </div>
-                                  <span className="text-sm font-black text-slate-900">
-                                    {(Number(item.amount) / 1e18).toFixed(3)}
-                                  </span>
-                                </div>
-                                {ethPrice > 0 && (
-                                  <div className="text-[10px] font-medium text-slate-400">
-                                    {formatUSD(convertEthToUSD(Number(item.amount) / 1e18, ethPrice))}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    // List View
                     return (
                       <div
                         key={`${item.type}-${item.id}`}
                         onClick={() => router.push(`/${item.type === "bounty" ? "bounties" : "quests"}/${item.id}`)}
-                        className="group cursor-pointer bg-white border border-slate-200 hover:border-[#0EA885] hover:shadow-md transition-all duration-200 p-4 flex items-center gap-4"
+                        className="group cursor-pointer bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-[#0EA885] hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
                       >
-                        {/* Icon/Image */}
-                        <div className="flex-shrink-0 w-14 h-14 bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden">
+                        {/* Image / Gradient Fallback */}
+                        <div className="relative w-full h-36 overflow-hidden">
                           {image ? (
-                            <img src={image} alt={title} className="w-full h-full object-cover" />
-                          ) : item.type === "bounty" ? (
-                            <Target className="w-6 h-6 text-slate-400" />
+                            <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                           ) : (
-                            <Zap className="w-6 h-6 text-slate-400" />
+                            <div className={`w-full h-full bg-gradient-to-br ${item.type === "quest" ? "from-amber-400 to-orange-500" : getCategoryGradient(category)} flex items-center justify-center`}>
+                              {item.type === "bounty" ? <Target className="w-10 h-10 text-white/20" /> : <Zap className="w-10 h-10 text-white/20" />}
+                            </div>
                           )}
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-bold text-slate-900 mb-1 truncate group-hover:text-[#0EA885] transition-colors">
-                            {title}
-                          </h3>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border ${statusInfo.color}`}>
-                              {statusInfo.label}
-                            </span>
-                            <span className="px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider bg-slate-100 text-slate-600">
+                          <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                            <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-wider border ${statusInfo.color}`}>{statusInfo.label}</span>
+                            {category && <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${getCategoryColor(category)}`}>{category}</span>}
+                          </div>
+                          <div className="absolute top-3 right-3">
+                            <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-white/90 dark:bg-black/70 backdrop-blur-sm text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                               {item.type === "bounty" ? "BOUNTY" : "QUEST"}
                             </span>
-                            {category && (
-                              <span className="px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider bg-slate-50 text-slate-500 border border-slate-200">
-                                {category}
-                              </span>
-                            )}
-                            <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {formatDeadline(item.deadline)}
-                            </span>
                           </div>
                         </div>
 
-                        {/* Amount */}
-                        <div className="flex-shrink-0 text-right">
-                          <div className="flex items-center justify-end gap-2 mb-1">
-                            <div className="w-5 h-5 bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white text-[10px] font-black">
-                              Ξ
-                            </div>
-                            <span className="text-lg font-black text-slate-900">
-                              {(Number(item.amount) / 1e18).toFixed(3)}
-                            </span>
+                        <div className="p-4 flex flex-col flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-5 h-5 rounded-full flex-shrink-0" style={{ background: `linear-gradient(135deg, ${avatarColors.from}, ${avatarColors.to})` }} />
+                            <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">{formatAddress(item.creator)}</span>
                           </div>
-                          {ethPrice > 0 && (
-                            <div className="text-[11px] font-medium text-slate-400">
-                              {formatUSD(convertEthToUSD(Number(item.amount) / 1e18, ethPrice))}
+                          <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-3 line-clamp-2 leading-tight group-hover:text-[#0EA885] transition-colors">{title}</h3>
+                          <div className="mt-auto pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                                <Clock className="h-3 w-3" />{formatDeadline(item.deadline)}
+                              </div>
+                              {subCount > 0 && (
+                                <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                                  <Users className="h-3 w-3" />{subCount}
+                                </div>
+                              )}
                             </div>
-                          )}
+                            <div className="text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <div className="w-4 h-4 bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white text-[8px] font-black">Ξ</div>
+                                <span className="text-sm font-black text-slate-900 dark:text-white">{(Number(item.amount) / 1e18).toFixed(3)}</span>
+                              </div>
+                              {ethPrice > 0 && (
+                                <div className="text-[10px] font-medium text-slate-400 dark:text-slate-500">{formatUSD(convertEthToUSD(Number(item.amount) / 1e18, ethPrice))}</div>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <div className="text-center py-20 bg-slate-50 border-2 border-dashed border-slate-300">
-                  <Target className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                  <p className="text-sm font-bold text-slate-400">No items found for this filter.</p>
+                <div className="flex flex-col gap-3">
+                  {displayedItems.map(item => {
+                    const statusInfo = getStatusInfo(item);
+                    const { title, image, category, subCount } = getItemData(item);
+                    const avatarColors = getAvatarGradient(item.creator);
+
+                    return (
+                      <div
+                        key={`${item.type}-${item.id}`}
+                        onClick={() => router.push(`/${item.type === "bounty" ? "bounties" : "quests"}/${item.id}`)}
+                        className="group cursor-pointer bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-[#0EA885] hover:shadow-md transition-all duration-200 px-4 py-3 flex items-center gap-4"
+                      >
+                        <div className="flex-shrink-0 w-12 h-12 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden">
+                          {image ? (
+                            <img src={image} alt={title} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className={`w-full h-full bg-gradient-to-br ${item.type === "quest" ? "from-amber-400 to-orange-500" : getCategoryGradient(category)} flex items-center justify-center`}>
+                              {item.type === "bounty" ? <Target className="w-5 h-5 text-white/40" /> : <Zap className="w-5 h-5 text-white/40" />}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <div className="w-4 h-4 rounded-full flex-shrink-0" style={{ background: `linear-gradient(135deg, ${avatarColors.from}, ${avatarColors.to})` }} />
+                            <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">{formatAddress(item.creator)}</span>
+                          </div>
+                          <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1.5 truncate group-hover:text-[#0EA885] transition-colors">{title}</h3>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border ${statusInfo.color}`}>{statusInfo.label}</span>
+                            <span className="px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">{item.type === "bounty" ? "BOUNTY" : "QUEST"}</span>
+                            {category && <span className={`px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider border ${getCategoryColor(category)}`}>{category}</span>}
+                            <span className="text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1"><Clock className="w-3 h-3" />{formatDeadline(item.deadline)}</span>
+                            {subCount > 0 && <span className="text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1"><Users className="w-3 h-3" />{subCount}</span>}
+                          </div>
+                        </div>
+                        <div className="flex-shrink-0 text-right">
+                          <div className="flex items-center justify-end gap-1.5 mb-0.5">
+                            <div className="w-5 h-5 bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white text-[10px] font-black">Ξ</div>
+                            <span className="text-lg font-black text-slate-900 dark:text-white">{(Number(item.amount) / 1e18).toFixed(3)}</span>
+                          </div>
+                          {ethPrice > 0 && <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500">{formatUSD(convertEthToUSD(Number(item.amount) / 1e18, ethPrice))}</div>}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              )}
-            </div>
+              )
+            ) : (
+              <div className="text-center py-20 bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-700">
+                <Search className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                <p className="text-sm font-bold text-slate-400 dark:text-slate-500 mb-1">No items found</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500">Try adjusting your filters or search query</p>
+              </div>
+            )}
+
+            {/* ===== LOAD MORE ===== */}
+            {!loading && displayedItems.length < unifiedItems.length && (
+              <div className="text-center mt-8 space-y-3">
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                  Showing {displayedItems.length} of {unifiedItems.length} items
+                </p>
+                <Button variant="outline" onClick={() => setDisplayCount(prev => prev + LOAD_MORE_COUNT)} className="px-8 text-xs font-bold uppercase tracking-wider">
+                  Load More
+                </Button>
+              </div>
+            )}
           </div>
 
-          {/* Right Column - Stats Sidebar - Hidden by default on mobile */}
-          <div className={`${showStats ? 'fixed inset-0 z-40 bg-black/50 lg:relative lg:bg-transparent' : 'hidden'} lg:block w-full lg:w-80 flex-shrink-0 order-1 lg:order-2`}>
-            <div className={`${showStats ? 'fixed right-0 top-0 bottom-0 w-80 transform transition-transform duration-300 ease-in-out' : ''} lg:relative bg-white border border-slate-200 overflow-hidden h-full lg:h-auto overflow-y-auto`}>
-              {/* Total Value in Escrow - Header Section */}
-              <div className="bg-gradient-to-br from-[#0EA885] to-[#0c8a6f] p-5 sm:p-6 text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 transform rotate-45 translate-x-16 -translate-y-16"></div>
-                <div className="relative">
-                  <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-xs sm:text-sm font-black">
-                      Ξ
+          {/* ===== SIDEBAR ===== */}
+          <div
+            className={`${showStats ? "fixed inset-0 z-40 bg-black/50 lg:relative lg:bg-transparent" : "hidden"} lg:block w-full lg:w-72 flex-shrink-0 order-1 lg:order-2`}
+            onClick={() => setShowStats(false)}
+          >
+            <div
+              className={`${showStats ? "fixed right-0 top-0 bottom-0 w-72 overflow-y-auto" : ""} lg:relative lg:sticky lg:top-6 space-y-4 bg-slate-50 dark:bg-slate-950 lg:bg-transparent`}
+              onClick={e => e.stopPropagation()}
+            >
+              {loading ? <SidebarSkeleton /> : (
+                <>
+                  {/* Total in Escrow */}
+                  <div className="bg-gradient-to-br from-[#0EA885] to-[#0c8a6f] p-4 text-white">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-7 h-7 bg-white/20 flex items-center justify-center text-xs font-black">Ξ</div>
+                      <span className="text-xs font-bold uppercase tracking-wider">Total in Escrow</span>
                     </div>
-                    <h3 className="text-xs font-bold uppercase tracking-wider">Total in Escrow</h3>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-black">{stats.totalEth.toFixed(3)}</span>
+                      <span className="text-xs font-medium text-white/60">ETH</span>
+                    </div>
+                    {ethPrice > 0 && <div className="text-sm font-medium text-white/70 mt-1">{formatUSD(convertEthToUSD(stats.totalEth, ethPrice))}</div>}
                   </div>
-                  <div className="space-y-1">
-                    <div className="text-2xl sm:text-3xl font-black">
-                      {(() => {
-                        const totalEth = [...bounties, ...quests].reduce((sum, item) => {
-                          return sum + (Number(item.amount) / 1e18);
-                        }, 0);
-                        return totalEth.toFixed(3);
-                      })()}
+
+                  {/* Featured Bounty */}
+                  {featuredBounty && (() => {
+                    const meta = bountyMetadata.get(featuredBounty.id);
+                    const fImage = meta?.images?.[0] ? formatIpfsUrl(meta.images[0]) : null;
+                    const fTitle = meta?.title || `Bounty #${featuredBounty.id}`;
+                    return (
+                      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden">
+                        <div className="px-4 py-2 bg-amber-50 dark:bg-amber-500/10 border-b border-amber-100 dark:border-amber-500/20 flex items-center gap-2">
+                          <Star className="w-3.5 h-3.5 text-amber-500" />
+                          <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Featured Bounty</span>
+                        </div>
+                        <div className="p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" onClick={() => router.push(`/bounties/${featuredBounty.id}`)}>
+                          <div className="w-full h-24 mb-3 overflow-hidden">
+                            {fImage ? (
+                              <img src={fImage} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className={`w-full h-full bg-gradient-to-br ${getCategoryGradient(meta?.bountyType)} flex items-center justify-center`}>
+                                <Target className="w-8 h-8 text-white/20" />
+                              </div>
+                            )}
+                          </div>
+                          <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-2 line-clamp-2">{fTitle}</h4>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-4 h-4 bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white text-[7px] font-black">Ξ</div>
+                              <span className="text-sm font-black text-slate-900 dark:text-white">{(Number(featuredBounty.amount) / 1e18).toFixed(3)}</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-[10px] font-medium text-slate-400"><Clock className="w-3 h-3" />{formatDeadline(featuredBounty.deadline)}</div>
+                          </div>
+                          <Button variant="outline" size="sm" className="w-full mt-3 text-xs font-bold gap-1">
+                            View Bounty <ArrowRight className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Quick Stats */}
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800">
+                    <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800 flex items-center gap-2">
+                      <BarChart3 className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                      <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Stats</span>
+                    </div>
+                    <div className="px-4 py-2.5 flex items-center justify-between">
+                      <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Active Bounties</span>
+                      <span className="text-sm font-black text-blue-600 dark:text-blue-400">{stats.activeBounties}</span>
+                    </div>
+                    <div className="px-4 py-2.5 flex items-center justify-between">
+                      <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Active Quests</span>
+                      <span className="text-sm font-black text-amber-600 dark:text-amber-400">{stats.activeQuests}</span>
+                    </div>
+                    <div className="px-4 py-2.5 flex items-center justify-between">
+                      <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Completed</span>
+                      <span className="text-sm font-black text-[#0EA885]">{stats.completed}</span>
                     </div>
                     {ethPrice > 0 && (
-                      <div className="text-sm font-medium text-white/80">
-                        {formatUSD(convertEthToUSD(
-                          [...bounties, ...quests].reduce((sum, item) => sum + (Number(item.amount) / 1e18), 0),
-                          ethPrice
-                        ))}
+                      <div className="px-4 py-2.5 flex items-center justify-between bg-purple-50/50 dark:bg-purple-500/5">
+                        <span className="text-xs text-slate-600 dark:text-slate-400 font-medium flex items-center gap-1.5">
+                          <div className="w-4 h-4 bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white text-[7px] font-black">Ξ</div>
+                          ETH Price
+                        </span>
+                        <span className="text-sm font-black text-slate-900 dark:text-white">{formatUSD(ethPrice)}</span>
                       </div>
                     )}
                   </div>
-                </div>
-              </div>
 
-              {/* Stats Sections */}
-              <div className="divide-y divide-slate-200">
-                {/* Active Bounties */}
-                <div className="p-4 sm:p-5 hover:bg-blue-50/50 transition-colors">
-                  <div className="flex items-center justify-between mb-3 sm:mb-4">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">Active Bounties</h3>
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-500 flex items-center justify-center">
-                      <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
-                    </div>
-                  </div>
-                  <div className="flex items-end justify-between">
-                    <div>
-                      <div className="text-2xl sm:text-3xl font-black text-slate-900">
-                        {bounties.filter(b => b.status === 1).length}
+                  {/* Recent Activity */}
+                  {recentActivity.length > 0 && (
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                      <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 flex items-center gap-2">
+                        <Activity className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Recent Activity</span>
                       </div>
-                      <div className="text-xs text-slate-500 mt-1 font-medium">
-                        of {bounties.length} total
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs text-blue-600 font-bold">
-                        {bounties.length > 0 ? Math.round((bounties.filter(b => b.status === 1).length / bounties.length) * 100) : 0}%
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Active Quests */}
-                <div className="p-4 sm:p-5 hover:bg-amber-50/50 transition-colors">
-                  <div className="flex items-center justify-between mb-3 sm:mb-4">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">Active Quests</h3>
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 bg-amber-500 flex items-center justify-center">
-                      <Zap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
-                    </div>
-                  </div>
-                  <div className="flex items-end justify-between">
-                    <div>
-                      <div className="text-2xl sm:text-3xl font-black text-slate-900">
-                        {quests.filter(q => !q.resolved && !q.cancelled).length}
-                      </div>
-                      <div className="text-xs text-slate-500 mt-1 font-medium">
-                        of {quests.length} total
+                      <div className="divide-y divide-slate-50 dark:divide-slate-800">
+                        {recentActivity.map((act, i) => {
+                          const colors = getAvatarGradient(act.creator);
+                          return (
+                            <div
+                              key={i}
+                              className="px-4 py-3 flex items-start gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                              onClick={() => router.push(`/${act.type === "bounty" ? "bounties" : "quests"}/${act.id}`)}
+                            >
+                              <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: `linear-gradient(135deg, ${colors.from}, ${colors.to})` }}>
+                                {act.type === "bounty" ? <Target className="w-3.5 h-3.5 text-white" /> : <Zap className="w-3.5 h-3.5 text-white" />}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs text-slate-700 dark:text-slate-300 font-medium truncate">{act.title}</p>
+                                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{act.action} &bull; {formatAddress(act.creator)}</p>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-xs text-amber-600 font-bold">
-                        {quests.length > 0 ? Math.round((quests.filter(q => !q.resolved && !q.cancelled).length / quests.length) * 100) : 0}%
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Completed Items */}
-                <div className="p-4 sm:p-5 hover:bg-emerald-50/50 transition-colors">
-                  <div className="flex items-center justify-between mb-3 sm:mb-4">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">Completed</h3>
-                    <div className="w-7 h-7 sm:w-8 sm:h-8 bg-emerald-500 flex items-center justify-center">
-                      <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-slate-600">Bounties</span>
-                      <span className="text-xl font-black text-slate-900">
-                        {bounties.filter(b => b.status === 3).length}
-                      </span>
-                    </div>
-                    <div className="h-px bg-slate-200"></div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-slate-600">Quests</span>
-                      <span className="text-xl font-black text-slate-900">
-                        {quests.filter(q => q.resolved).length}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* ETH Price */}
-                {ethPrice > 0 && (
-                  <div className="p-5 bg-gradient-to-r from-purple-50 to-blue-50">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white text-[10px] font-black">
-                          Ξ
-                        </div>
-                        <span className="text-xs font-bold text-slate-700">ETH Price</span>
-                      </div>
-                      <span className="text-sm font-black text-slate-900">{formatUSD(ethPrice)}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>

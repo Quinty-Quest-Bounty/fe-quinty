@@ -37,12 +37,12 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
     };
 
     return (
-        <Card className="max-w-3xl mx-auto rounded-2xl border border-slate-100 bg-white shadow-sm overflow-hidden">
-            <CardHeader className="border-b border-slate-50 p-6">
+        <Card className="max-w-3xl mx-auto border border-slate-200 bg-white overflow-hidden">
+            <CardHeader className="border-b border-slate-200 p-6">
                 <div className="flex items-center gap-3">
                     <Gift className="w-5 h-5 text-[#0EA885]" />
                     <div>
-                        <CardTitle className="text-lg font-bold text-slate-900">Create New Quest</CardTitle>
+                        <CardTitle className="text-lg font-black text-slate-900">Create New Quest</CardTitle>
                         <p className="text-slate-400 text-xs">Launch a reward campaign for your community</p>
                     </div>
                 </div>
@@ -65,7 +65,7 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
                                     placeholder="e.g. Follow us on X and Join Discord"
                                     value={formData.title}
                                     onChange={e => setFormData({ ...formData, title: e.target.value })}
-                                    className="rounded-xl border-slate-200 bg-slate-50/30 focus:bg-white transition-colors"
+                                    className="border-slate-200 bg-white"
                                 />
                             </div>
 
@@ -76,7 +76,7 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
                                     rows={3}
                                     value={formData.description}
                                     onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                    className="rounded-xl border-slate-200 bg-slate-50/30 focus:bg-white transition-colors resize-none"
+                                    className="border-slate-200 bg-white resize-none"
                                 />
                             </div>
 
@@ -87,7 +87,7 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
                                     rows={4}
                                     value={formData.requirements}
                                     onChange={e => setFormData({ ...formData, requirements: e.target.value })}
-                                    className="rounded-xl border-slate-200 bg-slate-50/30 focus:bg-white transition-colors resize-none"
+                                    className="border-slate-200 bg-white resize-none"
                                 />
                             </div>
                         </div>
@@ -104,7 +104,7 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
                                             placeholder="0.01"
                                             value={formData.perQualifier}
                                             onChange={e => setFormData({ ...formData, perQualifier: e.target.value })}
-                                            className="pl-10 rounded-xl border-slate-200 bg-slate-50/30 focus:bg-white transition-colors"
+                                            className="pl-10 border-slate-200 bg-white"
                                         />
                                     </div>
                                 </div>
@@ -117,7 +117,7 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
                                             placeholder="100"
                                             value={formData.maxQualifiers}
                                             onChange={e => setFormData({ ...formData, maxQualifiers: parseInt(e.target.value) || 0 })}
-                                            className="pl-10 rounded-xl border-slate-200 bg-slate-50/30 focus:bg-white transition-colors"
+                                            className="pl-10 border-slate-200 bg-white"
                                         />
                                     </div>
                                 </div>
@@ -127,12 +127,12 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
                                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Deadline</label>
                                 <Popover>
                                     <PopoverTrigger asChild>
-                                        <Button variant="outline" className="w-full rounded-xl border-slate-200 bg-slate-50/30 justify-start font-normal text-slate-600">
+                                        <Button variant="outline" className="w-full border-slate-200 bg-white justify-start font-normal text-slate-600">
                                             <CalendarIcon className="mr-2 h-4 w-4 text-slate-400" />
                                             {deadlineDate ? format(deadlineDate, "PPP") : "Pick a date"}
                                         </Button>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0 rounded-xl border-slate-100 shadow-xl">
+                                    <PopoverContent className="w-auto p-0 border-slate-200">
                                         <Calendar
                                             mode="single"
                                             selected={deadlineDate}
@@ -144,7 +144,7 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
                                 </Popover>
                             </div>
 
-                            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                            <div className="p-4 bg-slate-50 border border-slate-200">
                                 <div className="flex items-center justify-between mb-1">
                                     <span className="text-xs font-bold text-slate-700">Total Escrow</span>
                                     <span className="text-base font-black text-[#0EA885]">
@@ -157,7 +157,7 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
                             <Button
                                 type="submit"
                                 disabled={isPending || !formData.title || !formData.perQualifier || !deadlineDate}
-                                className="w-full h-11 rounded-xl bg-[#0EA885] hover:bg-[#0EA885]/90 text-white font-bold shadow-sm transition-all mt-4"
+                                className="w-full h-11 bg-[#0EA885] hover:bg-[#0c8a6f] text-white font-bold uppercase tracking-wider transition-all mt-4"
                             >
                                 {isPending ? "Launching Quest..." : "Launch Quest"}
                             </Button>
