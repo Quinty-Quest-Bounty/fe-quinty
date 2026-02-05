@@ -11,6 +11,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Menu, X, ChevronRight } from "lucide-react";
 import ZKVerificationModal from "./ZKVerificationModal";
+import { useAuth } from "@/contexts/AuthContext";
+import LoginButton from "./auth/LoginButton";
+import UserMenu from "./auth/UserMenu";
 
 const WalletComponents = dynamic(
   () => import("./WalletComponents"),
@@ -19,16 +22,14 @@ const WalletComponents = dynamic(
 
 const navItems = [
   { name: "Dashboard", link: "/dashboard" },
-  { name: "Quests", link: "/quests" },
-  { name: "Bounties", link: "/bounties" },
-  { name: "Reputation", link: "/reputation" },
-  { name: "History", link: "/history" },
+  { name: "Profile", link: "/profile" },
 ];
 
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const { isConnected } = useAccount();
+  const { profile, loading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [hoveredPath, setHoveredPath] = useState<string | null>(pathname);
@@ -43,19 +44,19 @@ export default function Header() {
 
   return (
     <>
-      <div className="fixed inset-x-0 top-0 z-[100] flex justify-center pt-2 sm:pt-3 pointer-events-none">
+      <div className="fixed inset-x-0 top-0 z-[100] pointer-events-none">
         <motion.header
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6, type: "spring", bounce: 0.3 }}
           className={cn(
-            "pointer-events-auto mx-4 w-full max-w-5xl rounded-2xl lg:rounded-full border transition-all duration-500",
+            "pointer-events-auto w-full border-b transition-all duration-300",
             scrolled
-              ? "bg-white border-slate-200 shadow-md"
-              : "bg-white border-slate-100 shadow-sm"
+              ? "bg-white border-slate-200 shadow-sm"
+              : "bg-white/95 backdrop-blur-sm border-slate-100"
           )}
         >
-          <div className="flex h-14 items-center justify-between px-2 pl-4 pr-2">
+          <div className="max-w-7xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
             {/* Logo */}
             <button
               type="button"
@@ -77,28 +78,26 @@ export default function Header() {
             </button>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-1">
+            <nav className="hidden lg:flex items-center gap-6">
               {navItems.map((item) => {
                 const isActive = item.link === pathname;
                 return (
                   <Link
                     key={item.name}
                     href={item.link}
-                    onMouseEnter={() => setHoveredPath(item.link)}
-                    onMouseLeave={() => setHoveredPath(pathname)}
                     className={cn(
-                      "relative px-4 py-2 text-sm font-medium transition-colors duration-200 z-10",
-                      isActive ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                      "relative text-sm font-medium transition-colors duration-200",
+                      isActive ? "text-[#0EA885]" : "text-slate-600 hover:text-[#0EA885]"
                     )}
                   >
-                    {item.link === hoveredPath && (
+                    {item.name}
+                    {isActive && (
                       <motion.div
-                        layoutId="navbar-hover"
-                        className="absolute inset-0 bg-black/5 dark:bg-white/10 rounded-full -z-10"
+                        layoutId="navbar-active"
+                        className="absolute -bottom-5 left-0 right-0 h-0.5 bg-[#0EA885]"
                         transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                       />
                     )}
-                    {item.name}
                   </Link>
                 );
               })}
@@ -109,6 +108,17 @@ export default function Header() {
               {isConnected && (
                 <ZKVerificationModal />
               )}
+              {/* Auth components */}
+              {!loading && isMounted && (
+                <>
+                  {profile ? (
+                    <UserMenu />
+                  ) : (
+                    <LoginButton />
+                  )}
+                </>
+              )}
+              {/* Keep wallet components for wallet-first users */}
               {isMounted && <WalletComponents />}
             </div>
 
@@ -119,7 +129,7 @@ export default function Header() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="rounded-full h-10 w-10 hover:bg-black/5"
+                className="h-10 w-10 hover:bg-slate-100"
               >
                 {isMobileMenuOpen ? (
                   <X className="h-5 w-5" />
@@ -160,6 +170,21 @@ export default function Header() {
                   ))}
                   {isMounted && (
                     <div className="mt-3 pt-3 border-t border-black/5 dark:border-white/10 flex flex-col gap-2 px-2">
+                      {/* Auth components for mobile */}
+                      {!loading && (
+                        <>
+                          {profile ? (
+                            <div className="flex items-center gap-2 justify-between px-2">
+                              <span className="text-sm font-medium text-gray-700">
+                                {profile.username || profile.email?.split('@')[0]}
+                              </span>
+                              <UserMenu />
+                            </div>
+                          ) : (
+                            <LoginButton />
+                          )}
+                        </>
+                      )}
                       <WalletComponents />
                     </div>
                   )}

@@ -1,123 +1,32 @@
-"use client";
+'use client';
 
-import { useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-function OAuthCallbackContent() {
- const searchParams = useSearchParams();
+// Privy handles OAuth callbacks automatically
+// This page is kept for backwards compatibility with the old X OAuth flow
 
- useEffect(() => {
- const code = searchParams.get("code");
- const state = searchParams.get("state");
- const error = searchParams.get("error");
- const errorDescription = searchParams.get("error_description");
+export default function AuthCallback() {
+  const router = useRouter();
 
- // Check X state
- const storedState = sessionStorage.getItem('oauth_state_twitter');
- const codeVerifier = sessionStorage.getItem('oauth_verifier_twitter');
- const redirectUri = sessionStorage.getItem('oauth_redirect_uri_twitter');
- const provider = storedState === state ? 'twitter' : '';
+  useEffect(() => {
+    // Redirect to home or dashboard after a short delay
+    const timer = setTimeout(() => {
+      router.push('/dashboard');
+    }, 1000);
 
- if (error) {
- // Send error to parent window
- if (window.opener) {
-  window.opener.postMessage(
-  {
-  type: "oauth_error",
-  provider,
-  data: {
-   error: errorDescription || error,
-  },
-  },
-  window.location.origin
+    return () => clearTimeout(timer);
+  }, [router]);
+
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900" />
+        </div>
+        <h1 className="text-2xl font-bold mb-2">Authentication successful!</h1>
+        <p className="text-slate-600">Redirecting...</p>
+      </div>
+    </div>
   );
- }
- window.close();
- return;
- }
-
- if (code && provider && codeVerifier && redirectUri) {
- // Clean up storage immediately
- sessionStorage.removeItem(`oauth_state_${provider}`);
- sessionStorage.removeItem(`oauth_verifier_${provider}`);
- sessionStorage.removeItem(`oauth_redirect_uri_${provider}`);
-
- // Call backend to exchange code for REAL user data
- fetch('/api/x/verify', {
-  method: 'POST',
-  headers: {
-  'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-  code,
-  codeVerifier,
-  redirectUri,
-  }),
- })
-  .then(async (res) => {
-  if (!res.ok) {
-  const errorData = await res.json();
-  throw new Error(errorData.error || 'Verification failed');
-  }
-  return res.json();
-  })
-  .then((data) => {
-  // Send REAL verified data to parent window
-  if (window.opener) {
-  window.opener.postMessage(
-   {
-   type: "oauth_success",
-   provider,
-   data: {
-   username: data.username, // REAL username from X API
-   userId: data.userId,  // REAL user ID from X API
-   verified: true,
-   },
-   },
-   window.location.origin
-  );
-  }
-  window.close();
-  })
-  .catch((err) => {
-  console.error('Verification error:', err);
-  if (window.opener) {
-  window.opener.postMessage(
-   {
-   type: "oauth_error",
-   provider,
-   data: {
-   error: err.message || 'Failed to verify X account',
-   },
-   },
-   window.location.origin
-  );
-  }
-  window.close();
-  });
- }
- }, [searchParams]);
-
- return (
- <div className="flex items-center justify-center min-h-screen">
- <div className="text-center">
-  <h1 className="text-2xl font-bold mb-4">Authenticating...</h1>
-  <p className="text-gray-600">Please wait while we verify your X account.</p>
- </div>
- </div>
- );
-}
-
-export default function OAuthCallback() {
- return (
- <Suspense fallback={
- <div className="flex items-center justify-center min-h-screen">
-  <div className="text-center">
-  <h1 className="text-2xl font-bold mb-4">Loading...</h1>
-  </div>
- </div>
- }>
- <OAuthCallbackContent />
- </Suspense>
- );
 }
