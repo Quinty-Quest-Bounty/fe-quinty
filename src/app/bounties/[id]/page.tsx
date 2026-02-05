@@ -12,6 +12,7 @@ import {
   CONTRACT_ADDRESSES,
   QUINTY_ABI,
   BASE_SEPOLIA_CHAIN_ID,
+  BountyStatus,
 } from "../../../utils/contracts";
 import {
   formatETH,
@@ -24,15 +25,8 @@ import { useAlert } from "../../../hooks/useAlert";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
-import { Checkbox } from "../../../components/ui/checkbox";
+import { Textarea } from "../../../components/ui/textarea";
 import { Alert, AlertDescription } from "../../../components/ui/alert";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -46,8 +40,6 @@ import {
   Users,
   Trophy,
   ExternalLink,
-  MessageCircle,
-  Unlock,
   Copy,
   Check,
   Target,
@@ -59,59 +51,50 @@ import {
   FileText,
   CheckCircle2,
   Package,
+  AlertTriangle,
+  Gavel,
+  Zap,
 } from "lucide-react";
 
-interface Reply {
-  replier: string;
-  content: string;
-  timestamp: bigint;
-}
-
+// New interface matching the updated contract
 interface Submission {
-  solver: string;
-  blindedIpfsCid: string;
-  revealIpfsCid: string;
+  submitter: string;
+  ipfsCid: string;
+  socialHandle: string;
   deposit: bigint;
-  replies: readonly Reply[];
-  revealed: boolean;
+  timestamp: bigint;
 }
 
 interface Bounty {
   id: number;
   creator: string;
+  title: string;
   description: string;
   amount: bigint;
-  deadline: bigint;
-  allowMultipleWinners: boolean;
-  winnerShares: readonly bigint[];
-  status: number;
+  openDeadline: bigint;
+  judgingDeadline: bigint;
   slashPercent: bigint;
-  submissions: readonly Submission[];
-  selectedWinners: readonly string[];
-  selectedSubmissionIds: readonly bigint[];
+  status: BountyStatus;
+  selectedWinner: string;
+  selectedSubmissionId: bigint;
+  submissionCount: number;
+  totalDeposits: bigint;
+  submissions: Submission[];
   metadataCid?: string;
-  hasOprec?: boolean;
-  oprecDeadline?: bigint;
 }
 
-interface OprecApplication {
-  applicant: string;
-  teamMembers: readonly string[];
-  workExamples: string;
-  skillDescription: string;
-  timestamp: bigint;
-  approved: boolean;
-  rejected: boolean;
+// Phase helper
+function getCurrentPhase(bounty: Bounty): string {
+  const now = BigInt(Math.floor(Date.now() / 1000));
+  
+  if (bounty.status === BountyStatus.RESOLVED) return "RESOLVED";
+  if (bounty.status === BountyStatus.SLASHED) return "SLASHED";
+  
+  if (now <= bounty.openDeadline) return "OPEN";
+  if (now <= bounty.judgingDeadline) return "JUDGING";
+  
+  return "SLASH_PENDING";
 }
-
-const BountyStatusEnum = [
-  "DEVELOPMENT", // 0: OPREC
-  "LIVE", // 1: OPEN
-  "IN REVIEW", // 2: PENDING_REVEAL
-  "COMPLETED", // 3: RESOLVED
-  "DISPUTED", // 4: DISPUTED
-  "EXPIRED", // 5: EXPIRED
-];
 
 export default function BountyDetailPage() {
   const params = useParams();
@@ -123,126 +106,97 @@ export default function BountyDetailPage() {
   const [bounty, setBounty] = useState<Bounty | null>(null);
   const [metadata, setMetadata] = useState<BountyMetadata | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [submissionCid, setSubmissionCid] = useState("");
-  const [teamMembers, setTeamMembers] = useState<string[]>([]);
-  const [selectedSubmissions, setSelectedSubmissions] = useState<number[]>([]);
-  const [winnerRanks, setWinnerRanks] = useState<{ [subId: number]: number }>(
-    {}
-  );
-  const [replyContent, setReplyContent] = useState<{ [subId: number]: string }>(
-    {}
-  );
-  const [revealCid, setRevealCid] = useState<{ [subId: number]: string }>({});
+  const [socialHandle, setSocialHandle] = useState("");
   const [copied, setCopied] = useState(false);
   const [viewingCid, setViewingCid] = useState<string | null>(null);
   const [viewingTitle, setViewingTitle] = useState<string>("");
   const [uploadedSolutionImage, setUploadedSolutionImage] = useState<File | null>(null);
   const [isUploadingSolution, setIsUploadingSolution] = useState(false);
-
-  // OPREC related state
-  const [oprecApplications, setOprecApplications] = useState<OprecApplication[]>([]);
-  const [oprecForm, setOprecForm] = useState({
-    teamMembers: [""],
-    workExamples: "",
-    skillDescription: "",
-  });
-  const [selectedApplicationIds, setSelectedApplicationIds] = useState<number[]>([]);
-  const [isApprovedParticipant, setIsApprovedParticipant] = useState(false);
-  const [userOprecApplication, setUserOprecApplication] = useState<OprecApplication | null>(null);
+  const [requiredDeposit, setRequiredDeposit] = useState<bigint>(BigInt(0));
+  const [selectedWinnerId, setSelectedWinnerId] = useState<number | null>(null);
+  const [hasUserSubmitted, setHasUserSubmitted] = useState(false);
 
   const { writeContract, data: hash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({ hash });
 
-  // Load bounty data
+  // Load bounty data using new contract interface
   const loadBounty = async () => {
     try {
       setIsLoading(true);
+      
+      // Get bounty data using new getBounty function
       const bountyData = await readContract(wagmiConfig, {
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
-        functionName: "getBountyData",
+        functionName: "getBounty",
         args: [BigInt(bountyId)],
-      });
+      }) as any[];
 
       if (bountyData) {
-        const bountyArray = bountyData as any[];
         const [
           creator,
+          title,
           description,
           amount,
-          deadline,
-          allowMultipleWinners,
-          winnerShares,
-          status,
+          openDeadline,
+          judgingDeadline,
           slashPercent,
-          selectedWinners,
-          selectedSubmissionIds,
-          hasOprec,
-          oprecDeadline,
-        ] = bountyArray;
+          status,
+          selectedWinner,
+          selectedSubmissionId,
+          submissionCount,
+          totalDeposits,
+        ] = bountyData;
 
-        // Get submissions
-        const submissionCount = await readContract(wagmiConfig, {
-          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
-            .Quinty as `0x${string}`,
+        // Get all submissions using new getAllSubmissions function
+        const submissions = await readContract(wagmiConfig, {
+          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
           abi: QUINTY_ABI,
-          functionName: "getSubmissionCount",
+          functionName: "getAllSubmissions",
           args: [BigInt(bountyId)],
-        });
+        }) as Submission[];
 
-        const submissions: Submission[] = [];
-        for (let i = 0; i < Number(submissionCount); i++) {
-          const submissionData = await readContract(wagmiConfig, {
-            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]
-              .Quinty as `0x${string}`,
+        // Get required deposit amount
+        const deposit = await readContract(wagmiConfig, {
+          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+          abi: QUINTY_ABI,
+          functionName: "getRequiredDeposit",
+          args: [BigInt(bountyId)],
+        }) as bigint;
+        setRequiredDeposit(deposit);
+
+        // Check if current user has submitted
+        if (address) {
+          const hasSubmitted = await readContract(wagmiConfig, {
+            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
             abi: QUINTY_ABI,
-            functionName: "getSubmissionStruct",
-            args: [BigInt(bountyId), BigInt(i)],
-          });
-          if (submissionData) {
-            submissions.push(submissionData as unknown as Submission);
-          }
+            functionName: "hasUserSubmitted",
+            args: [BigInt(bountyId), address],
+          }) as boolean;
+          setHasUserSubmitted(hasSubmitted);
         }
 
-        const metadataMatch = description.match(
-          /Metadata: ipfs:\/\/([a-zA-Z0-9]+)/
-        );
+        const metadataMatch = description.match(/Metadata: ipfs:\/\/([a-zA-Z0-9]+)/);
         const metadataCid = metadataMatch ? metadataMatch[1] : undefined;
 
         setBounty({
           id: parseInt(bountyId),
           creator,
+          title,
           description,
           amount,
-          deadline,
-          allowMultipleWinners,
-          winnerShares,
-          status,
+          openDeadline,
+          judgingDeadline,
           slashPercent,
-          submissions,
-          selectedWinners,
-          selectedSubmissionIds,
+          status: Number(status) as BountyStatus,
+          selectedWinner,
+          selectedSubmissionId,
+          submissionCount: Number(submissionCount),
+          totalDeposits,
+          submissions: submissions as Submission[],
           metadataCid,
-          hasOprec,
-          oprecDeadline,
         });
-
-        // Load OPREC applications if hasOprec
-        if (hasOprec) {
-          await loadOprecApplications();
-        }
-
-        // Check if current user is approved participant
-        if (address && hasOprec) {
-          const isApproved = await readContract(wagmiConfig, {
-            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-            abi: QUINTY_ABI,
-            functionName: "approvedParticipants",
-            args: [BigInt(bountyId), address],
-          });
-          setIsApprovedParticipant(isApproved as boolean);
-        }
 
         // Load metadata
         if (metadataCid) {
@@ -265,7 +219,7 @@ export default function BountyDetailPage() {
     if (bountyId) {
       loadBounty();
     }
-  }, [bountyId]);
+  }, [bountyId, address]);
 
   useEffect(() => {
     if (isConfirmed) {
@@ -280,154 +234,18 @@ export default function BountyDetailPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Load OPREC applications
-  const loadOprecApplications = async () => {
-    try {
-      const appCount = await readContract(wagmiConfig, {
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-        abi: QUINTY_ABI,
-        functionName: "getOprecApplicationCount",
-        args: [BigInt(bountyId)],
-      });
-
-      const apps: OprecApplication[] = [];
-      for (let i = 0; i < Number(appCount); i++) {
-        const appData = await readContract(wagmiConfig, {
-          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-          abi: QUINTY_ABI,
-          functionName: "getOprecApplication",
-          args: [BigInt(bountyId), BigInt(i)],
-        });
-        const [applicant, teamMembers, workExamples, skillDescription, timestamp, approved, rejected] = appData as [
-          string,
-          readonly string[],
-          string,
-          string,
-          bigint,
-          boolean,
-          boolean
-        ];
-        const app = { applicant, teamMembers, workExamples, skillDescription, timestamp, approved, rejected };
-        apps.push(app);
-
-        // Check if this is current user's application
-        if (address && applicant.toLowerCase() === address.toLowerCase()) {
-          setUserOprecApplication(app);
-        }
-      }
-      setOprecApplications(apps);
-    } catch (error) {
-      console.error("Error loading OPREC applications:", error);
-    }
-  };
-
-  // Apply to OPREC
-  const applyToOprec = async () => {
-    if (!oprecForm.workExamples.trim() || !oprecForm.skillDescription.trim()) {
-      showAlert({
-        title: "Missing Information",
-        description: "Please provide work examples and skill description",
-      });
-      return;
-    }
-
-    try {
-      const validTeamMembers = oprecForm.teamMembers
-        .filter(addr => addr.trim())
-        .filter(addr => /^0x[a-fA-F0-9]{40}$/.test(addr.trim()));
-
-      writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-        abi: QUINTY_ABI,
-        functionName: "applyToOprec",
-        args: [
-          BigInt(bountyId),
-          validTeamMembers as `0x${string}`[],
-          oprecForm.workExamples,
-          oprecForm.skillDescription,
-        ],
-      });
-
-      setOprecForm({ teamMembers: [""], workExamples: "", skillDescription: "" });
-    } catch (error) {
-      console.error("Error applying to OPREC:", error);
-      showAlert({
-        title: "Application Failed",
-        description: error instanceof Error ? error.message : "Failed to submit application",
-      });
-    }
-  };
-
-  // Approve OPREC applications
-  const approveApplications = async () => {
-    if (selectedApplicationIds.length === 0) return;
-
-    try {
-      writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-        abi: QUINTY_ABI,
-        functionName: "approveOprecApplications",
-        args: [BigInt(bountyId), selectedApplicationIds.map(id => BigInt(id))],
-      });
-      setSelectedApplicationIds([]);
-    } catch (error) {
-      console.error("Error approving applications:", error);
-    }
-  };
-
-  // Reject OPREC applications
-  const rejectApplications = async () => {
-    if (selectedApplicationIds.length === 0) return;
-
-    try {
-      writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-        abi: QUINTY_ABI,
-        functionName: "rejectOprecApplications",
-        args: [BigInt(bountyId), selectedApplicationIds.map(id => BigInt(id))],
-      });
-      setSelectedApplicationIds([]);
-    } catch (error) {
-      console.error("Error rejecting applications:", error);
-    }
-  };
-
-  // End OPREC phase
-  const endOprecPhase = async () => {
-    try {
-      writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-        abi: QUINTY_ABI,
-        functionName: "endOprecPhase",
-        args: [BigInt(bountyId)],
-      });
-    } catch (error) {
-      console.error("Error ending OPREC phase:", error);
-    }
-  };
-
+  // Submit solution with 1% deposit
   const submitSolution = async () => {
-    if (!bounty || (!uploadedSolutionImage && !submissionCid.trim())) {
+    if (!bounty || (!uploadedSolutionImage && !socialHandle.trim())) {
       showAlert({
         title: "Missing Information",
-        description: "Please upload a solution image or enter an IPFS CID",
+        description: "Please upload a solution image and enter your social handle",
       });
       return;
     }
-
-    // Check OPREC approval if hasOprec
-    if (bounty.hasOprec && !isApprovedParticipant) {
-      showAlert({
-        title: "Not Approved",
-        description: "You must be approved in the OPREC phase to submit a solution",
-      });
-      return;
-    }
-
-    const depositAmount = bounty.amount / BigInt(10);
 
     try {
-      let solutionCid = submissionCid;
+      let solutionCid = "";
 
       // Upload image to IPFS if a file is selected
       if (uploadedSolutionImage) {
@@ -451,19 +269,17 @@ export default function BountyDetailPage() {
         }
       }
 
-      const validTeamMembers = teamMembers
-        .filter(addr => addr.trim())
-        .filter(addr => /^0x[a-fA-F0-9]{40}$/.test(addr.trim()));
+      console.log("Submitting with deposit:", requiredDeposit.toString());
 
       writeContract({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
-        functionName: "submitSolution",
-        args: [BigInt(bountyId), solutionCid, validTeamMembers as `0x${string}`[]],
-        value: depositAmount,
+        functionName: "submitToBounty",
+        args: [BigInt(bountyId), solutionCid, socialHandle],
+        value: requiredDeposit,
       });
-      setSubmissionCid("");
-      setTeamMembers([]);
+
+      setSocialHandle("");
       setUploadedSolutionImage(null);
     } catch (error) {
       console.error("Error submitting solution:", error);
@@ -474,79 +290,48 @@ export default function BountyDetailPage() {
     }
   };
 
-  const selectWinners = async () => {
-    if (!bounty) return;
-    const rankedSubmissions = selectedSubmissions
-      .filter((subId) => winnerRanks[subId] > 0)
-      .sort((a, b) => winnerRanks[a] - winnerRanks[b]);
-
-    const selectedSolvers = rankedSubmissions.map(
-      (i) => bounty.submissions[i].solver
-    );
+  // Select winner (creator only, during judging phase)
+  const selectWinner = async () => {
+    if (selectedWinnerId === null) return;
 
     try {
       writeContract({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
-        functionName: "selectWinners",
-        args: [
-          BigInt(bountyId),
-          selectedSolvers,
-          rankedSubmissions.map((id) => BigInt(id)),
-        ],
+        functionName: "selectWinner",
+        args: [BigInt(bountyId), BigInt(selectedWinnerId)],
       });
     } catch (error) {
-      console.error("Error selecting winners:", error);
+      console.error("Error selecting winner:", error);
     }
   };
 
-  const addReply = async (subId: number) => {
-    if (!replyContent[subId]?.trim()) return;
-
+  // Trigger slash (anyone can call after judging deadline)
+  const triggerSlash = async () => {
     try {
       writeContract({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
-        functionName: "addReply",
-        args: [BigInt(bountyId), BigInt(subId), replyContent[subId]],
+        functionName: "triggerSlash",
+        args: [BigInt(bountyId)],
       });
-      setReplyContent({ ...replyContent, [subId]: "" });
     } catch (error) {
-      console.error("Error adding reply:", error);
+      console.error("Error triggering slash:", error);
     }
   };
 
-  const revealSolution = async (subId: number) => {
-    if (!revealCid[subId]?.trim()) return;
-
+  // Refund if no submissions
+  const refundNoSubmissions = async () => {
     try {
       writeContract({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
-        functionName: "revealSolution",
-        args: [BigInt(bountyId), BigInt(subId), revealCid[subId]],
+        functionName: "refundNoSubmissions",
+        args: [BigInt(bountyId)],
       });
     } catch (error) {
-      console.error("Error revealing solution:", error);
+      console.error("Error refunding:", error);
     }
-  };
-
-  const toggleSubmissionSelection = (index: number) => {
-    setSelectedSubmissions((prev) => {
-      const isSelected = prev.includes(index);
-      if (isSelected) {
-        setWinnerRanks((prevRanks) => {
-          const newRanks = { ...prevRanks };
-          delete newRanks[index];
-          return newRanks;
-        });
-        return prev.filter((i) => i !== index);
-      } else {
-        const nextRank = Math.max(0, ...Object.values(winnerRanks)) + 1;
-        setWinnerRanks((prev) => ({ ...prev, [index]: nextRank }));
-        return [...prev, index];
-      }
-    });
   };
 
   const openCidViewer = (cid: string, title: string) => {
@@ -585,18 +370,34 @@ export default function BountyDetailPage() {
   }
 
   const isCreator = address?.toLowerCase() === bounty.creator.toLowerCase();
-  const isExpired = BigInt(Math.floor(Date.now() / 1000)) > bounty.deadline;
-  const statusLabel = BountyStatusEnum[bounty.status] || "Unknown";
-  const maxWinners = bounty.allowMultipleWinners
-    ? bounty.winnerShares.length
-    : 1;
+  const phase = getCurrentPhase(bounty);
+  const now = BigInt(Math.floor(Date.now() / 1000));
+  
+  const canSubmit = phase === "OPEN" && !isCreator && !hasUserSubmitted;
+  const canSelectWinner = isCreator && (phase === "JUDGING" || (phase === "OPEN" && now > bounty.openDeadline));
+  const canSlash = phase === "SLASH_PENDING" && bounty.submissionCount > 0;
+  const canRefund = phase === "SLASH_PENDING" && bounty.submissionCount === 0 && isCreator;
+
+  const getPhaseLabel = () => {
+    switch (phase) {
+      case "OPEN": return "Open for Submissions";
+      case "JUDGING": return "Judging Phase";
+      case "RESOLVED": return "Completed";
+      case "SLASHED": return "Creator Slashed";
+      case "SLASH_PENDING": return "Slash Pending";
+      default: return "Unknown";
+    }
+  };
 
   const getStatusColor = () => {
-    if (bounty.status === 0) return "bg-blue-50 text-blue-600 border-blue-200";
-    if (bounty.status === 1) return "bg-[#0EA885]/10 text-[#0EA885] border-[#0EA885]/20";
-    if (bounty.status === 2) return "bg-amber-50 text-amber-600 border-amber-200";
-    if (bounty.status === 3) return "bg-slate-100 text-slate-600 border-slate-200";
-    return "bg-slate-50 text-slate-500 border-slate-200";
+    switch (phase) {
+      case "OPEN": return "bg-[#0EA885]/10 text-[#0EA885] border-[#0EA885]/20";
+      case "JUDGING": return "bg-amber-50 text-amber-600 border-amber-200";
+      case "RESOLVED": return "bg-slate-100 text-slate-600 border-slate-200";
+      case "SLASHED": return "bg-red-50 text-red-600 border-red-200";
+      case "SLASH_PENDING": return "bg-red-50 text-red-600 border-red-200";
+      default: return "bg-slate-50 text-slate-500 border-slate-200";
+    }
   };
 
   return (
@@ -634,9 +435,9 @@ export default function BountyDetailPage() {
           <span className="font-bold text-slate-900">Bounty #{bountyId}</span>
         </div>
 
-        {/* Main Content Grid - Two Column Layout */}
+        {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* LEFT SIDEBAR - Sticky */}
+          {/* LEFT SIDEBAR */}
           <div className="lg:col-span-4 space-y-4 order-2 lg:order-1">
             <div className="lg:sticky lg:top-24 space-y-4">
               {/* Reward Card */}
@@ -652,17 +453,37 @@ export default function BountyDetailPage() {
                 </div>
 
                 {/* Action Buttons */}
-                {bounty.status === 1 && !isCreator && !isExpired && (
+                {canSubmit && (
                   <Button
                     onClick={() => {
                       const submitSection = document.getElementById('submit-solution-section');
                       submitSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }}
                     className="w-full bg-[#0EA885] hover:bg-[#0c8a6f] text-white font-bold mb-3"
-                    disabled={bounty.hasOprec && !isApprovedParticipant}
                   >
                     <Send className="size-4 mr-2" />
-                    Submit Solution
+                    Submit Solution ({formatETH(requiredDeposit)} ETH deposit)
+                  </Button>
+                )}
+
+                {canSlash && (
+                  <Button
+                    onClick={triggerSlash}
+                    disabled={isPending || isConfirming}
+                    className="w-full bg-red-600 hover:bg-red-700 text-white font-bold mb-3"
+                  >
+                    <Zap className="size-4 mr-2" />
+                    Trigger Slash ({Number(bounty.slashPercent) / 100}%)
+                  </Button>
+                )}
+
+                {canRefund && (
+                  <Button
+                    onClick={refundNoSubmissions}
+                    disabled={isPending || isConfirming}
+                    className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold mb-3"
+                  >
+                    Claim Refund (No Submissions)
                   </Button>
                 )}
 
@@ -682,22 +503,30 @@ export default function BountyDetailPage() {
                 <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 mb-4">Quick Stats</h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between py-2 border-b border-slate-200">
-                    <span className="text-xs font-bold text-slate-600">Status</span>
+                    <span className="text-xs font-bold text-slate-600">Phase</span>
                     <Badge className={`text-[10px] font-black uppercase tracking-wider border ${getStatusColor()}`}>
-                      {statusLabel}
+                      {getPhaseLabel()}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between py-2 border-b border-slate-200">
-                    <span className="text-xs font-bold text-slate-600">Deadline</span>
-                    <span className="text-xs font-black text-slate-900 tabular-nums">{formatTimeLeft(bounty.deadline)}</span>
+                    <span className="text-xs font-bold text-slate-600">Submissions Close</span>
+                    <span className="text-xs font-black text-slate-900 tabular-nums">{formatTimeLeft(bounty.openDeadline)}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-slate-200">
+                    <span className="text-xs font-bold text-slate-600">Judging Ends</span>
+                    <span className="text-xs font-black text-slate-900 tabular-nums">{formatTimeLeft(bounty.judgingDeadline)}</span>
                   </div>
                   <div className="flex items-center justify-between py-2 border-b border-slate-200">
                     <span className="text-xs font-bold text-slate-600">Submissions</span>
-                    <span className="text-xs font-black text-slate-900 tabular-nums">{bounty.submissions.length}</span>
+                    <span className="text-xs font-black text-slate-900 tabular-nums">{bounty.submissionCount}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-slate-200">
+                    <span className="text-xs font-bold text-slate-600">Required Deposit</span>
+                    <span className="text-xs font-black text-slate-900 tabular-nums">{formatETH(requiredDeposit)} ETH</span>
                   </div>
                   <div className="flex items-center justify-between py-2">
-                    <span className="text-xs font-bold text-slate-600">Slash Rate</span>
-                    <span className="text-xs font-black text-slate-900 tabular-nums">{Number(bounty.slashPercent) / 100}%</span>
+                    <span className="text-xs font-bold text-slate-600">Slash Penalty</span>
+                    <span className="text-xs font-black text-red-600 tabular-nums">{Number(bounty.slashPercent) / 100}%</span>
                   </div>
                 </div>
               </div>
@@ -736,11 +565,21 @@ export default function BountyDetailPage() {
 
           {/* RIGHT MAIN CONTENT */}
           <div className="lg:col-span-8 space-y-6 order-1 lg:order-2">
+            {/* Slash Warning Banner */}
+            {canSlash && (
+              <Alert className="border-red-200 bg-red-50">
+                <AlertTriangle className="size-4 text-red-600" />
+                <AlertDescription className="text-red-700 font-medium">
+                  Creator missed the judging deadline! Anyone can trigger the slash to distribute {Number(bounty.slashPercent) / 100}% of the escrow to submitters.
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Hero Image */}
             {metadata?.images && metadata.images.length > 0 && (
               <div className="bg-white border border-slate-200 overflow-hidden">
                 <img
-                  src={`https://ipfs.io/ipfs/${metadata.images[0]}`}
+                  src={`https://purple-elderly-silverfish-382.mypinata.cloud/ipfs/${metadata.images[0]}`}
                   alt={metadata.title}
                   className="w-full h-auto max-h-96 object-cover"
                 />
@@ -751,12 +590,12 @@ export default function BountyDetailPage() {
             <div className="bg-white border border-slate-200 p-6">
               <div className="flex items-center gap-2 mb-3">
                 <Badge className={`text-[10px] font-black uppercase tracking-wider border ${getStatusColor()}`}>
-                  {statusLabel}
+                  {getPhaseLabel()}
                 </Badge>
                 <span className="text-[10px] font-bold text-slate-400 uppercase">Bounty #{bountyId}</span>
               </div>
               <h1 className="text-3xl sm:text-4xl font-black text-slate-900 mb-2 text-balance">
-                {metadata?.title || bounty.description.split("\n")[0]}
+                {metadata?.title || bounty.title || bounty.description.split("\n")[0]}
               </h1>
               <p className="text-sm text-slate-600 text-pretty">
                 Created by <span className="font-mono font-bold">{formatAddress(bounty.creator)}</span>
@@ -814,246 +653,51 @@ export default function BountyDetailPage() {
               </div>
             )}
 
-            {/* Winners Display */}
-            {bounty.status >= 2 && bounty.selectedWinners.length > 0 && (
+            {/* Winner Display */}
+            {bounty.status === BountyStatus.RESOLVED && bounty.selectedWinner !== "0x0000000000000000000000000000000000000000" && (
               <div className="bg-white border border-slate-200 p-6">
                 <h2 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
                   <Trophy className="size-5 text-[#0EA885]" />
-                  Selected Winners
+                  Winner
                 </h2>
-                <div className="space-y-3">
-                  {bounty.selectedWinners.map((winner, index) => {
-                    const submissionIndex = Number(bounty.selectedSubmissionIds[index]);
-                    const submission = bounty.submissions[submissionIndex];
-                    const winnerShare = bounty.winnerShares[index]
-                      ? Number(bounty.winnerShares[index]) / 100
-                      : 0;
-
-                    return (
-                      <div key={index} className="bg-slate-50 border border-slate-200 p-4">
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center gap-3">
-                            <div className="size-10 bg-[#0EA885]/10 border border-[#0EA885]/20 flex items-center justify-center">
-                              <span className="text-lg">
-                                {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "🏆"}
-                              </span>
-                            </div>
-                            <div>
-                              <p className="font-bold text-sm font-mono">{formatAddress(winner)}</p>
-                              {submission?.revealed && (
-                                <Badge variant="outline" className="mt-1 text-[10px] font-bold border-slate-200">
-                                  Revealed
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-black text-[#0EA885] text-lg tabular-nums">{winnerShare}%</p>
-                            <p className="text-xs font-bold text-slate-500 tabular-nums">
-                              {formatETH((bounty.amount * BigInt(winnerShare)) / BigInt(100))} ETH
-                            </p>
-                          </div>
-                        </div>
+                <div className="bg-amber-50 border border-amber-200 p-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <div className="size-10 bg-[#0EA885]/10 border border-[#0EA885]/20 flex items-center justify-center">
+                        <span className="text-lg">🏆</span>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* OPREC Section (Participants) */}
-            {bounty.hasOprec && bounty.status === 0 && !isCreator && (
-              <div id="oprec-section">
-                {userOprecApplication ? (
-                  <div className={`border p-6 ${
-                    userOprecApplication.approved
-                      ? "border-slate-200 bg-white"
-                      : userOprecApplication.rejected
-                      ? "border-slate-200 bg-white"
-                      : "border-slate-200 bg-white"
-                  }`}>
-                    <h3 className="font-black text-lg mb-2 text-slate-900">
-                      {userOprecApplication.approved
-                        ? "Application Approved"
-                        : userOprecApplication.rejected
-                        ? "Application Rejected"
-                        : "Application Pending"}
-                    </h3>
-                    <p className="text-sm text-slate-700 text-pretty">
-                      {userOprecApplication.approved &&
-                        "Your application has been approved! You can submit solutions when the bounty opens."}
-                      {userOprecApplication.rejected &&
-                        "Your application was rejected by the bounty creator."}
-                      {!userOprecApplication.approved && !userOprecApplication.rejected &&
-                        "Your application is pending review by the bounty creator."}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="bg-white border border-slate-200 p-6">
-                    <h2 className="text-lg font-black text-slate-900 mb-4">Apply to OPREC</h2>
-                    <p className="text-sm text-slate-600 mb-6 text-pretty">
-                      Deadline: {new Date(Number(bounty.oprecDeadline) * 1000).toLocaleString()}
-                    </p>
-
-                    <div className="space-y-4">
                       <div>
-                        <label className="text-sm font-bold text-slate-900 mb-2 block">Team Members (Optional)</label>
-                        {oprecForm.teamMembers.map((member, idx) => (
-                          <div key={idx} className="flex gap-2 mb-2">
-                            <Input
-                              placeholder="0x..."
-                              value={member}
-                              onChange={(e) => {
-                                const newMembers = [...oprecForm.teamMembers];
-                                newMembers[idx] = e.target.value;
-                                setOprecForm({ ...oprecForm, teamMembers: newMembers });
-                              }}
-                              className="flex-1 border-slate-200"
-                            />
-                            {idx === oprecForm.teamMembers.length - 1 && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setOprecForm({ ...oprecForm, teamMembers: [...oprecForm.teamMembers, ""] })}
-                                className="border-slate-200"
-                              >
-                                +
-                              </Button>
-                            )}
-                          </div>
-                        ))}
+                        <p className="font-bold text-sm font-mono">{formatAddress(bounty.selectedWinner)}</p>
+                        <p className="text-xs text-slate-600">Submission #{Number(bounty.selectedSubmissionId)}</p>
                       </div>
-
-                      <div>
-                        <label className="text-sm font-bold text-slate-900 mb-2 block">Work Examples *</label>
-                        <textarea
-                          placeholder="Links to your previous work, portfolio, GitHub, etc."
-                          value={oprecForm.workExamples}
-                          onChange={(e) => setOprecForm({ ...oprecForm, workExamples: e.target.value })}
-                          className="w-full p-3 border border-slate-200 text-sm min-h-[100px]"
-                          rows={3}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-sm font-bold text-slate-900 mb-2 block">Skill Description *</label>
-                        <textarea
-                          placeholder="Describe your relevant skills and experience"
-                          value={oprecForm.skillDescription}
-                          onChange={(e) => setOprecForm({ ...oprecForm, skillDescription: e.target.value })}
-                          className="w-full p-3 border border-slate-200 text-sm min-h-[100px]"
-                          rows={3}
-                        />
-                      </div>
-
-                      <Button
-                        onClick={applyToOprec}
-                        disabled={isPending || isConfirming}
-                        className="w-full bg-[#0EA885] hover:bg-[#0c8a6f] text-white"
-                      >
-                        {isPending || isConfirming ? "Applying..." : "Apply to OPREC"}
-                      </Button>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-black text-[#0EA885] text-lg tabular-nums">{formatETH(bounty.amount)} ETH</p>
+                      <p className="text-xs font-bold text-slate-500">+ deposit refunded</p>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             )}
 
-            {/* OPREC Management (Creator) */}
-            {bounty.hasOprec && bounty.status === 0 && isCreator && (
+            {/* Slashed Display */}
+            {bounty.status === BountyStatus.SLASHED && (
               <div className="bg-white border border-slate-200 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg font-black text-slate-900">
-                    OPREC Applications ({oprecApplications.length})
-                  </h2>
-                  <Button
-                    onClick={endOprecPhase}
-                    disabled={isPending}
-                    size="sm"
-                    className="bg-slate-900 hover:bg-slate-800"
-                  >
-                    End OPREC Phase
-                  </Button>
-                </div>
-
-                <div className="space-y-3">
-                  {oprecApplications.length === 0 ? (
-                    <p className="text-sm text-slate-500 text-center py-8">No applications yet</p>
-                  ) : (
-                    <>
-                      {oprecApplications.map((app, idx) => (
-                        <div
-                          key={idx}
-                          className={`p-4 border ${
-                            app.approved
-                              ? "bg-green-50 border-green-200"
-                              : app.rejected
-                              ? "bg-red-50 border-red-200"
-                              : "bg-white border-slate-200"
-                          }`}
-                        >
-                          <div className="flex items-start gap-3 mb-2">
-                            <input
-                              type="checkbox"
-                              checked={selectedApplicationIds.includes(idx)}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setSelectedApplicationIds([...selectedApplicationIds, idx]);
-                                } else {
-                                  setSelectedApplicationIds(selectedApplicationIds.filter(id => id !== idx));
-                                }
-                              }}
-                              disabled={app.approved || app.rejected}
-                              className="mt-1"
-                            />
-                            <div className="flex-1">
-                              <p className="text-sm font-bold font-mono mb-1">{formatAddress(app.applicant)}</p>
-                              {app.approved && <Badge className="text-xs bg-green-600">Approved</Badge>}
-                              {app.rejected && <Badge variant="destructive" className="text-xs">Rejected</Badge>}
-                              {app.teamMembers.length > 0 && (
-                                <p className="text-xs text-slate-600 mt-2">
-                                  Team: {app.teamMembers.map(m => formatAddress(m)).join(", ")}
-                                </p>
-                              )}
-                              <p className="text-xs text-slate-600 mt-2">
-                                <strong>Work:</strong> {app.workExamples}
-                              </p>
-                              <p className="text-xs text-slate-600 mt-1">
-                                <strong>Skills:</strong> {app.skillDescription}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                      {selectedApplicationIds.length > 0 && (
-                        <div className="flex gap-2 pt-2">
-                          <Button
-                            onClick={approveApplications}
-                            disabled={isPending}
-                            className="flex-1 bg-green-600 hover:bg-green-700"
-                            size="sm"
-                          >
-                            Approve ({selectedApplicationIds.length})
-                          </Button>
-                          <Button
-                            onClick={rejectApplications}
-                            disabled={isPending}
-                            variant="destructive"
-                            className="flex-1"
-                            size="sm"
-                          >
-                            Reject ({selectedApplicationIds.length})
-                          </Button>
-                        </div>
-                      )}
-                    </>
-                  )}
+                <h2 className="text-lg font-black text-red-600 mb-4 flex items-center gap-2">
+                  <AlertTriangle className="size-5" />
+                  Bounty Slashed
+                </h2>
+                <div className="bg-red-50 border border-red-200 p-4">
+                  <p className="text-sm text-red-700">
+                    The creator missed the judging deadline. {Number(bounty.slashPercent) / 100}% of the escrow 
+                    ({formatETH((bounty.amount * bounty.slashPercent) / BigInt(10000))} ETH) was distributed to submitters.
+                  </p>
                 </div>
               </div>
             )}
 
             {/* Submit Solution */}
-            {bounty.status === 1 && !isCreator && !isExpired && (
+            {canSubmit && (
               <div id="submit-solution-section" className="bg-white border border-slate-200 p-6">
                 <h2 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
                   <Send className="size-5 text-[#0EA885]" />
@@ -1061,16 +705,26 @@ export default function BountyDetailPage() {
                 </h2>
 
                 <div className="space-y-4">
-                  {bounty.hasOprec && !isApprovedParticipant && (
-                    <Alert variant="destructive" className="border-slate-200">
-                      <AlertDescription className="text-pretty">
-                        You must be approved in the OPREC phase to submit a solution.
-                      </AlertDescription>
-                    </Alert>
-                  )}
+                  <Alert className="border-amber-200 bg-amber-50">
+                    <AlertDescription className="text-amber-700 text-sm">
+                      <strong>1% deposit required:</strong> You must pay {formatETH(requiredDeposit)} ETH as a deposit. 
+                      This will be refunded when the winner is selected.
+                    </AlertDescription>
+                  </Alert>
 
                   <div>
-                    <label className="text-sm font-black text-slate-900 mb-2 block">Upload Solution Image *</label>
+                    <label className="text-sm font-black text-slate-900 mb-2 block">Your Social Handle (X/Twitter) *</label>
+                    <Input
+                      placeholder="@yourhandle"
+                      value={socialHandle}
+                      onChange={(e) => setSocialHandle(e.target.value)}
+                      className="border-slate-200"
+                    />
+                    <p className="text-xs text-slate-500 mt-1">This will be stored on-chain for verification</p>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-black text-slate-900 mb-2 block">Upload Solution *</label>
                     {!uploadedSolutionImage ? (
                       <div className="border-2 border-dashed border-slate-300 hover:border-slate-400 bg-slate-50 p-8 transition-colors">
                         <input
@@ -1080,7 +734,6 @@ export default function BountyDetailPage() {
                             const file = e.target.files?.[0];
                             if (file) {
                               setUploadedSolutionImage(file);
-                              setSubmissionCid("");
                             }
                           }}
                           className="hidden"
@@ -1123,47 +776,10 @@ export default function BountyDetailPage() {
                     )}
                   </div>
 
-                  <div>
-                    <label className="text-sm font-black text-slate-900 mb-2 block">Team Members (Optional)</label>
-                    {teamMembers.map((member, idx) => (
-                      <div key={idx} className="flex gap-2 mb-2">
-                        <Input
-                          placeholder="0x..."
-                          value={member}
-                          onChange={(e) => {
-                            const newMembers = [...teamMembers];
-                            newMembers[idx] = e.target.value;
-                            setTeamMembers(newMembers);
-                          }}
-                          className="flex-1 border-slate-200"
-                        />
-                        {idx === teamMembers.length - 1 ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setTeamMembers([...teamMembers, ""])}
-                            className="border-slate-200 font-bold"
-                          >
-                            +
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setTeamMembers(teamMembers.filter((_, i) => i !== idx))}
-                            className="border-slate-200 font-bold"
-                          >
-                            -
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
                   <Button
                     onClick={submitSolution}
                     disabled={
-                      isPending || isConfirming || isUploadingSolution || (!uploadedSolutionImage && !submissionCid.trim()) || (bounty.hasOprec && !isApprovedParticipant)
+                      isPending || isConfirming || isUploadingSolution || !uploadedSolutionImage || !socialHandle.trim()
                     }
                     className="w-full bg-[#0EA885] hover:bg-[#0c8a6f] text-white font-black py-6"
                   >
@@ -1180,7 +796,7 @@ export default function BountyDetailPage() {
                     ) : (
                       <>
                         <Send className="size-4 mr-2" />
-                        Submit Solution
+                        Submit Solution (Pay {formatETH(requiredDeposit)} ETH Deposit)
                       </>
                     )}
                   </Button>
@@ -1188,181 +804,105 @@ export default function BountyDetailPage() {
               </div>
             )}
 
-            {/* Submissions & Discussion */}
+            {/* Already Submitted Notice */}
+            {hasUserSubmitted && phase === "OPEN" && (
+              <Alert className="border-green-200 bg-green-50">
+                <CheckCircle2 className="size-4 text-green-600" />
+                <AlertDescription className="text-green-700">
+                  You have already submitted to this bounty. Wait for the creator to select a winner.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Submissions List */}
             {bounty.submissions.length > 0 && (
               <div className="bg-white border border-slate-200 p-6">
                 <h2 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
-                  <MessageCircle className="size-5 text-[#0EA885]" />
-                  Submissions & Discussion ({bounty.submissions.length})
+                  <Users className="size-5 text-[#0EA885]" />
+                  Submissions ({bounty.submissions.length})
                 </h2>
 
                 <div className="space-y-4">
                   {bounty.submissions.map((sub, index) => {
-                    const isWinner = bounty.selectedSubmissionIds.includes(BigInt(index));
-                    const winnerIndex = bounty.selectedSubmissionIds.findIndex((id) => id === BigInt(index));
+                    const isWinner = bounty.selectedWinner.toLowerCase() === sub.submitter.toLowerCase() && 
+                                     Number(bounty.selectedSubmissionId) === index;
 
                     return (
                       <div
                         key={index}
                         className={`p-4 border ${
                           isWinner ? "bg-amber-50 border-amber-200" : "border-slate-200"
+                        } ${canSelectWinner ? "cursor-pointer hover:border-[#0EA885]" : ""} ${
+                          selectedWinnerId === index ? "ring-2 ring-[#0EA885]" : ""
                         }`}
+                        onClick={() => canSelectWinner && setSelectedWinnerId(selectedWinnerId === index ? null : index)}
                       >
-                        <div className="flex justify-between items-start mb-3">
+                        <div className="flex justify-between items-start">
                           <div className="flex items-center gap-3 flex-1">
-                            {isCreator && bounty.status === 1 && (
-                              <div className="flex items-center gap-2">
-                                <Checkbox
-                                  id={`submission-${index}`}
-                                  checked={selectedSubmissions.includes(index)}
-                                  onCheckedChange={() => toggleSubmissionSelection(index)}
-                                />
-                                {selectedSubmissions.includes(index) && (
-                                  <Select
-                                    value={(winnerRanks[index] || 1).toString()}
-                                    onValueChange={(value) => {
-                                      const newRanks = { ...winnerRanks };
-                                      newRanks[index] = parseInt(value);
-                                      setWinnerRanks(newRanks);
-                                    }}
-                                  >
-                                    <SelectTrigger className="w-28 h-8 text-xs font-bold border-slate-200">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {Array.from({ length: maxWinners }, (_, i) => (
-                                        <SelectItem key={i + 1} value={(i + 1).toString()}>
-                                          {i + 1 === 1 ? "🥇 1st" : i + 1 === 2 ? "🥈 2nd" : i + 1 === 3 ? "🥉 3rd" : `${i + 1}th`}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                )}
+                            {canSelectWinner && (
+                              <div className={`size-5 rounded-full border-2 flex items-center justify-center ${
+                                selectedWinnerId === index ? "border-[#0EA885] bg-[#0EA885]" : "border-slate-300"
+                              }`}>
+                                {selectedWinnerId === index && <Check className="size-3 text-white" />}
                               </div>
                             )}
 
-                            {isWinner && bounty.status === 2 && (
+                            {isWinner && (
                               <Badge className="text-[10px] font-black bg-[#0EA885] text-white border-0">
-                                {winnerIndex === 0 ? "🥇 1st" : winnerIndex === 1 ? "🥈 2nd" : winnerIndex === 2 ? "🥉 3rd" : `🏆 ${winnerIndex + 1}th`}
+                                🏆 Winner
                               </Badge>
                             )}
 
                             <div>
-                              <p className="text-sm font-bold font-mono">{formatAddress(sub.solver)}</p>
-                              {sub.solver.toLowerCase() === bounty.creator.toLowerCase() && (
-                                <Badge variant="outline" className="text-[10px] font-bold border-slate-200 mt-1">Creator</Badge>
-                              )}
+                              <p className="text-sm font-bold font-mono">{formatAddress(sub.submitter)}</p>
+                              <p className="text-xs text-slate-500">@{sub.socialHandle}</p>
                             </div>
                           </div>
 
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openCidViewer(sub.blindedIpfsCid, `Submission by ${formatAddress(sub.solver)}`)}
-                            className="border-slate-200 font-bold"
-                          >
-                            <ExternalLink className="size-3 mr-1" />
-                            View
-                          </Button>
-                        </div>
-
-                        {/* Replies */}
-                        {sub.replies.length > 0 && (
-                          <div className="mt-3 pt-3 border-t border-slate-200 space-y-2">
-                            {sub.replies.map((reply, rIndex) => (
-                              <div key={rIndex} className="bg-slate-50 border border-slate-200 p-3">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="font-bold text-xs font-mono">{formatAddress(reply.replier)}</span>
-                                  {reply.replier.toLowerCase() === bounty.creator.toLowerCase() && (
-                                    <Badge variant="outline" className="text-[10px] font-bold border-slate-200">Creator</Badge>
-                                  )}
-                                </div>
-                                <p className="text-xs text-slate-700 text-pretty">{reply.content}</p>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Add Reply */}
-                        {bounty.status === 1 && (isCreator || address?.toLowerCase() === sub.solver.toLowerCase()) && (
-                          <div className="flex gap-2 mt-3 pt-3 border-t border-slate-200">
-                            <Input
-                              placeholder="Add reply..."
-                              value={replyContent[index] || ""}
-                              onChange={(e) => setReplyContent({ ...replyContent, [index]: e.target.value })}
-                              className="text-sm border-slate-200"
-                            />
-                            <Button
-                              size="sm"
-                              onClick={() => addReply(index)}
-                              disabled={isPending || isConfirming}
-                              className="bg-[#0EA885] hover:bg-[#0c8a6f] font-bold"
-                            >
-                              Reply
-                            </Button>
-                          </div>
-                        )}
-
-                        {/* Reveal Solution */}
-                        {bounty.status === 2 && isWinner && address?.toLowerCase() === sub.solver.toLowerCase() && !sub.revealed && (
-                          <div className="mt-3 pt-3 border-t border-slate-200">
-                            <div className="flex gap-2">
-                              <Input
-                                placeholder="Enter reveal IPFS CID..."
-                                value={revealCid[index] || ""}
-                                onChange={(e) => setRevealCid({ ...revealCid, [index]: e.target.value })}
-                                className="text-sm border-slate-200"
-                              />
-                              <Button
-                                size="sm"
-                                onClick={() => revealSolution(index)}
-                                disabled={!revealCid[index]?.trim() || isPending || isConfirming}
-                                className="bg-slate-900 hover:bg-slate-800 font-bold"
-                              >
-                                <Unlock className="size-3 mr-1" />
-                                Reveal
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Already Revealed */}
-                        {bounty.status === 2 && sub.revealed && isWinner && (
-                          <div className="mt-3 pt-3 border-t border-slate-200 flex items-center justify-between">
-                            <Badge variant="outline" className="text-[10px] font-black text-slate-900 border-slate-200">
-                              Solution Revealed
-                            </Badge>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-slate-500">
+                              Deposit: {formatETH(sub.deposit)} ETH
+                            </span>
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => openCidViewer(sub.revealIpfsCid, `Solution by ${formatAddress(sub.solver)}`)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openCidViewer(sub.ipfsCid, `Submission by ${formatAddress(sub.submitter)}`);
+                              }}
                               className="border-slate-200 font-bold"
                             >
                               <ExternalLink className="size-3 mr-1" />
-                              View Solution
+                              View
                             </Button>
                           </div>
-                        )}
+                        </div>
                       </div>
                     );
                   })}
                 </div>
 
-                {/* Select Winners Button */}
-                {isCreator && bounty.status === 1 && selectedSubmissions.length > 0 && (
+                {/* Select Winner Button */}
+                {canSelectWinner && selectedWinnerId !== null && (
                   <Button
-                    onClick={selectWinners}
-                    disabled={
-                      selectedSubmissions.length === 0 ||
-                      selectedSubmissions.some((id) => !winnerRanks[id]) ||
-                      isPending ||
-                      isConfirming
-                    }
+                    onClick={selectWinner}
+                    disabled={isPending || isConfirming}
                     className="w-full bg-[#0EA885] hover:bg-[#0c8a6f] text-white font-black mt-6"
                   >
                     <Trophy className="size-4 mr-2" />
-                    {isPending || isConfirming ? "Confirming..." : `Select Winners (${selectedSubmissions.length})`}
+                    {isPending || isConfirming ? "Confirming..." : "Select as Winner"}
                   </Button>
+                )}
+
+                {/* Judging Deadline Warning */}
+                {canSelectWinner && (
+                  <Alert className="mt-4 border-amber-200 bg-amber-50">
+                    <Gavel className="size-4 text-amber-600" />
+                    <AlertDescription className="text-amber-700 text-sm">
+                      You must select a winner before {new Date(Number(bounty.judgingDeadline) * 1000).toLocaleString()} 
+                      or you will be slashed {Number(bounty.slashPercent) / 100}% of the escrow.
+                    </AlertDescription>
+                  </Alert>
                 )}
               </div>
             )}
@@ -1372,7 +912,7 @@ export default function BountyDetailPage() {
               <div className="bg-white border border-slate-200 p-4">
                 <p className="text-xs font-black text-slate-900 mb-2">Transaction Hash:</p>
                 <a
-                  href={`https://shannon-explorer.somnia.network/tx/${hash}`}
+                  href={`https://sepolia-explorer.base.org/tx/${hash}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#0EA885] hover:text-[#0c8a6f] font-mono text-xs break-all underline font-bold"
@@ -1409,7 +949,7 @@ export default function BountyDetailPage() {
               <div className="space-y-4">
                 <div className="border border-slate-200 p-4">
                   <img
-                    src={`https://ipfs.io/ipfs/${viewingCid}`}
+                    src={`https://purple-elderly-silverfish-382.mypinata.cloud/ipfs/${viewingCid}`}
                     alt="IPFS Content"
                     className="w-full"
                     onError={(e) => {
@@ -1450,7 +990,7 @@ export default function BountyDetailPage() {
                         description: "IPFS link copied to clipboard"
                       });
                     }}
-                    className="border-slate-200"
+                    className="flex-1 border-slate-200"
                   >
                     <Copy className="size-3 mr-2" />
                     Copy Link

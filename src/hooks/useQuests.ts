@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useReadContract, useWatchContractEvent } from "wagmi";
 import { readContract } from "@wagmi/core";
-import { CONTRACT_ADDRESSES, AIRDROP_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
+import { CONTRACT_ADDRESSES, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
 import { wagmiConfig } from "../utils/web3";
 
 export interface Quest {
@@ -24,6 +24,7 @@ export interface Quest {
 export interface Entry {
     solver: string;
     ipfsProofCid: string;
+    socialHandle: string;
     timestamp: number;
     status: number; // 0: Pending, 1: Approved, 2: Rejected
     feedback: string;
@@ -35,9 +36,9 @@ export function useQuests() {
     const [isLoading, setIsLoading] = useState(true);
 
     const { data: questCounter, refetch: refetchCounter } = useReadContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-        abi: AIRDROP_ABI,
-        functionName: "airdropCounter",
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+        abi: QUEST_ABI,
+        functionName: "questCounter",
     });
 
     const loadQuests = useCallback(async () => {
@@ -54,9 +55,9 @@ export function useQuests() {
                 return (async () => {
                     try {
                         const questData = await readContract(wagmiConfig, {
-                            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-                            abi: AIRDROP_ABI,
-                            functionName: "getAirdrop",
+                            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+                            abi: QUEST_ABI,
+                            functionName: "getQuest",
                             args: [BigInt(id)],
                         });
 
@@ -78,8 +79,8 @@ export function useQuests() {
                         ] = questData as any;
 
                         const entryCount = await readContract(wagmiConfig, {
-                            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-                            abi: AIRDROP_ABI,
+                            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+                            abi: QUEST_ABI,
                             functionName: "getEntryCount",
                             args: [BigInt(id)],
                         });
@@ -133,18 +134,27 @@ export function useQuests() {
     }, [loadQuests]);
 
     useWatchContractEvent({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-        abi: AIRDROP_ABI,
-        eventName: "AirdropCreated",
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+        abi: QUEST_ABI,
+        eventName: "QuestCreated",
         onLogs() {
             refetchCounter();
         },
     });
 
     useWatchContractEvent({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-        abi: AIRDROP_ABI,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+        abi: QUEST_ABI,
         eventName: "EntrySubmitted",
+        onLogs() {
+            loadQuests();
+        },
+    });
+
+    useWatchContractEvent({
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+        abi: QUEST_ABI,
+        eventName: "EntryVerified",
         onLogs() {
             loadQuests();
         },
