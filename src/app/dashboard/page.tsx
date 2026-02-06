@@ -388,10 +388,11 @@ export default function DashboardPage() {
       if (item.type === "bounty") {
         const b = item as Bounty;
         if (activeFilter === "all") return true;
-        if (activeFilter === "live") return b.status === 1 && !isEnded;
-        if (activeFilter === "in-review") return b.status === 2;
-        if (activeFilter === "completed") return b.status === 3;
-        if (activeFilter === "ended") return isEnded;
+        // Live = OPEN (0) or JUDGING (1)
+        if (activeFilter === "live") return (b.status === 0 || b.status === 1);
+        if (activeFilter === "in-review") return b.status === 1; // JUDGING
+        if (activeFilter === "completed") return b.status === 2; // RESOLVED
+        if (activeFilter === "ended") return b.status === 2 || b.status === 3; // RESOLVED or SLASHED
       } else {
         const q = item as Quest;
         if (activeFilter === "all") return true;
@@ -449,9 +450,11 @@ export default function DashboardPage() {
   const stats = useMemo(() => {
     const now = BigInt(Math.floor(Date.now() / 1000));
     return {
-      activeBounties: bounties.filter(b => b.status === 1 && b.deadline >= now).length,
+      // Active = OPEN (0) or JUDGING (1) phase
+      activeBounties: bounties.filter(b => (b.status === 0 || b.status === 1)).length,
       activeQuests: quests.filter(q => !q.resolved && !q.cancelled && q.deadline >= now).length,
-      completed: bounties.filter(b => b.status === 3).length + quests.filter(q => q.resolved).length,
+      // Completed = RESOLVED (2) for bounties
+      completed: bounties.filter(b => b.status === 2).length + quests.filter(q => q.resolved).length,
       totalEth: [...bounties, ...quests].reduce((sum, item) => sum + Number(item.amount) / 1e18, 0),
     };
   }, [bounties, quests]);
