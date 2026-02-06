@@ -32,8 +32,12 @@ import {
     Check,
     Wallet,
     Settings,
+    Pencil,
+    Loader2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../../contexts/AuthContext";
+import { Input } from "../../components/ui/input";
 
 type ProfileTab = "overview" | "reputation" | "history" | "create";
 type CreateType = "bounty" | "quest" | null;
@@ -57,6 +61,12 @@ export default function ProfilePage() {
     const [createType, setCreateType] = useState<CreateType>(null);
     const [showCreateOptions, setShowCreateOptions] = useState(false);
     const [copiedAddress, setCopiedAddress] = useState(false);
+    
+    // Username editing
+    const { profile, updateUsername } = useAuth();
+    const [isEditingUsername, setIsEditingUsername] = useState(false);
+    const [newUsername, setNewUsername] = useState("");
+    const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
 
     // Handle hydration mismatch
     useEffect(() => {
@@ -247,6 +257,72 @@ export default function ProfilePage() {
             {/* Wallet Info Card */}
             <div className="max-w-3xl mx-auto mb-8">
                 <div className="bg-white border-2 border-slate-200 p-6">
+                    {/* Username Section */}
+                    <div className="mb-6 pb-6 border-b border-slate-100">
+                        <div className="flex items-center gap-2 mb-3">
+                            <User className="w-4 h-4 text-[#0EA885]" />
+                            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Display Name</span>
+                        </div>
+                        {isEditingUsername ? (
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    value={newUsername}
+                                    onChange={(e) => setNewUsername(e.target.value)}
+                                    placeholder="Enter username"
+                                    className="max-w-xs text-sm font-bold"
+                                    autoFocus
+                                />
+                                <Button
+                                    size="sm"
+                                    onClick={async () => {
+                                        if (!newUsername.trim()) return;
+                                        setIsUpdatingUsername(true);
+                                        const success = await updateUsername(newUsername.trim());
+                                        setIsUpdatingUsername(false);
+                                        if (success) {
+                                            setIsEditingUsername(false);
+                                        }
+                                    }}
+                                    disabled={isUpdatingUsername || !newUsername.trim()}
+                                    className="bg-[#0EA885] hover:bg-[#0c9676]"
+                                >
+                                    {isUpdatingUsername ? (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                        <Check className="w-4 h-4" />
+                                    )}
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                        setIsEditingUsername(false);
+                                        setNewUsername(profile?.username || "");
+                                    }}
+                                    disabled={isUpdatingUsername}
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-2">
+                                <span className="text-lg font-black text-slate-900">
+                                    {profile?.username || formatAddress(address || "")}
+                                </span>
+                                <button
+                                    onClick={() => {
+                                        setNewUsername(profile?.username || "");
+                                        setIsEditingUsername(true);
+                                    }}
+                                    className="p-1.5 hover:bg-slate-100 transition-colors border border-slate-200"
+                                    title="Edit username"
+                                >
+                                    <Pencil className="w-3.5 h-3.5 text-slate-400" />
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
                     <div className="flex items-start justify-between gap-4">
                         {/* Left: Address */}
                         <div className="flex-1">

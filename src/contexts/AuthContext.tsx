@@ -27,6 +27,7 @@ interface AuthContextType {
   signInWithTwitter: () => void;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  updateUsername: (username: string) => Promise<boolean>;
   privyUser: any;
 }
 
@@ -180,6 +181,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateUsername = async (username: string): Promise<boolean> => {
+    if (!profile) return false;
+
+    try {
+      const response = await axios.patch(
+        `${apiUrl}/auth/profile`,
+        { username },
+        { withCredentials: true }
+      );
+
+      if (response.data) {
+        setProfile((prev) => prev ? { ...prev, username } : null);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Failed to update username:', error);
+      return false;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -191,6 +213,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signInWithTwitter,
         signOut,
         refreshProfile,
+        updateUsername,
         privyUser,
       }}
     >
