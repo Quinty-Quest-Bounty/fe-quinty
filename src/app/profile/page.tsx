@@ -200,7 +200,7 @@ export default function ProfilePage() {
     }
 
     return (
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-12">
+        <div key={address || 'disconnected'} className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-12">
             {/* Header Section */}
             <div className="text-center mb-8 sm:mb-12">
                 <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Profile</h1>

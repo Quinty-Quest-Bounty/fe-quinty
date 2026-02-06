@@ -22,6 +22,7 @@ export function useHistory() {
 
     const loadHistory = useCallback(async () => {
         if (!address) {
+            setTransactions([]);
             setIsLoading(false);
             return;
         }
@@ -149,6 +150,13 @@ export function useHistory() {
     useEffect(() => {
         loadHistory();
     }, [loadHistory]);
+
+    // Clear transactions when wallet disconnects
+    useEffect(() => {
+        if (!address) {
+            setTransactions([]);
+        }
+    }, [address]);
 
     return { transactions, isLoading, refetch: loadHistory };
 }
