@@ -2,8 +2,8 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId } from "wagmi";
-import { formatETH, parseETH } from "../../utils/web3";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId, useBalance } from "wagmi";
+import { formatETH, parseETH, formatAddress } from "../../utils/web3";
 import { useHistory } from "../../hooks/useHistory";
 import { CONTRACT_ADDRESSES, QUINTY_ABI, AIRDROP_ABI, BASE_SEPOLIA_CHAIN_ID } from "../../utils/contracts";
 import { uploadMetadataToIpfs, BountyMetadata } from "../../utils/ipfs";
@@ -24,6 +24,9 @@ import {
     User,
     Plus,
     ChevronDown,
+    Copy,
+    Check,
+    Wallet,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -34,6 +37,9 @@ export default function ProfilePage() {
     const router = useRouter();
     const { address } = useAccount();
     const chainId = useChainId();
+    const { data: balanceData } = useBalance({
+        address: address,
+    });
     const { transactions, isLoading } = useHistory();
     const { writeContract, data: bountyHash, isPending: isBountyPending } = useWriteContract();
     const { writeContractAsync } = useWriteContract();
@@ -42,6 +48,7 @@ export default function ProfilePage() {
     const [historyFilter, setHistoryFilter] = useState<string>("all");
     const [createType, setCreateType] = useState<CreateType>(null);
     const [showCreateOptions, setShowCreateOptions] = useState(false);
+    const [copiedAddress, setCopiedAddress] = useState(false);
 
     const filteredTransactions = useMemo(() => {
         if (historyFilter === "all") return transactions;
@@ -165,6 +172,15 @@ export default function ProfilePage() {
         }
     }, [isBountyConfirmed]);
 
+    // Copy address handler
+    const copyAddress = () => {
+        if (address) {
+            navigator.clipboard.writeText(address);
+            setCopiedAddress(true);
+            setTimeout(() => setCopiedAddress(false), 2000);
+        }
+    };
+
     if (!address) {
         return (
             <div className="max-w-3xl mx-auto px-4 pt-32 text-center">
@@ -183,6 +199,51 @@ export default function ProfilePage() {
             <div className="text-center mb-8 sm:mb-12">
                 <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Profile</h1>
                 <p className="text-slate-500 mt-1 text-sm font-medium">Your reputation and activity history</p>
+            </div>
+
+            {/* Wallet Info Card */}
+            <div className="max-w-3xl mx-auto mb-8">
+                <div className="bg-white border-2 border-slate-200 p-6">
+                    <div className="flex items-start justify-between gap-4">
+                        {/* Left: Address */}
+                        <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-3">
+                                <Wallet className="w-4 h-4 text-[#0EA885]" />
+                                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Wallet Address</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="font-mono text-sm font-bold text-slate-900">{formatAddress(address || "")}</span>
+                                <button
+                                    onClick={copyAddress}
+                                    className="p-1.5 hover:bg-slate-100 transition-colors border border-slate-200"
+                                    title="Copy address"
+                                >
+                                    {copiedAddress ? (
+                                        <Check className="w-3.5 h-3.5 text-[#0EA885]" />
+                                    ) : (
+                                        <Copy className="w-3.5 h-3.5 text-slate-400" />
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Right: Balance */}
+                        <div className="text-right">
+                            <div className="flex items-center justify-end gap-2 mb-3">
+                                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Balance</span>
+                            </div>
+                            <div className="flex items-baseline gap-1 justify-end">
+                                <span className="text-2xl font-black text-slate-900 tabular-nums">
+                                    {balanceData ? formatETH(balanceData.value) : "0.00"}
+                                </span>
+                                <span className="text-xs font-bold text-slate-400">ETH</span>
+                            </div>
+                            <div className="text-xs text-slate-400 font-medium mt-1">
+                                {balanceData?.symbol || "ETH"} · Base Sepolia
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Tab Navigation */}
