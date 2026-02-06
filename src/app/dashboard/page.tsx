@@ -465,14 +465,12 @@ export default function DashboardPage() {
 
     if (item.type === "bounty") {
       const map = [
-        { label: "OPREC", color: "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20" },
-        { label: "LIVE", color: "bg-[#0EA885]/10 text-[#0EA885] border-[#0EA885]/20" },
-        { label: "IN REVIEW", color: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20" },
-        { label: "COMPLETED", color: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700" },
-        { label: "DISPUTED", color: "bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20" },
-        { label: "EXPIRED", color: "bg-slate-100 text-slate-400 border-slate-200 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700" },
+        { label: "OPEN", color: "bg-[#0EA885]/10 text-[#0EA885] border-[#0EA885]/20" },
+        { label: "JUDGING", color: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20" },
+        { label: "RESOLVED", color: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700" },
+        { label: "SLASHED", color: "bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20" },
       ];
-      return map[(item as Bounty).status] || map[5];
+      return map[(item as Bounty).status] || map[0];
     }
     const q = item as Quest;
     if (q.resolved) return { label: "COMPLETED", color: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700" };
