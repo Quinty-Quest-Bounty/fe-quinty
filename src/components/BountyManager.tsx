@@ -51,8 +51,15 @@ export default function BountyManager() {
         return;
       }
 
-      if (!formData.title || !formData.description || !formData.amount || !formData.openDeadline || !formData.judgingDeadline) {
-        alert("Please fill in all required fields");
+      const missingFields = [];
+      if (!formData.title) missingFields.push("Title");
+      if (!formData.description) missingFields.push("Description");
+      if (!formData.amount) missingFields.push("Amount");
+      if (!formData.openDeadline) missingFields.push("Submission Deadline");
+      if (!formData.judgingDeadline) missingFields.push("Judging Deadline");
+
+      if (missingFields.length > 0) {
+        alert(`Please fill in: ${missingFields.join(", ")}`);
         return;
       }
 
