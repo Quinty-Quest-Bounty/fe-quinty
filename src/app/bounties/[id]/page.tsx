@@ -22,6 +22,7 @@ import {
 } from "../../../utils/web3";
 import { fetchMetadataFromIpfs, BountyMetadata, uploadToIpfs } from "../../../utils/ipfs";
 import { useAlert } from "../../../hooks/useAlert";
+import { useSocialVerification } from "../../../hooks/useSocialVerification";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
@@ -54,6 +55,7 @@ import {
   AlertTriangle,
   Gavel,
   Zap,
+  Link as LinkIcon,
 } from "lucide-react";
 
 // New interface matching the updated contract
@@ -102,6 +104,9 @@ export default function BountyDetailPage() {
   const { address } = useAccount();
   const { showAlert } = useAlert();
   const bountyId = params.id as string;
+
+  // X account verification
+  const { xAccount, connectX, isConnecting: isConnectingX, isConnected: isXConnected, isLoading: isLoadingX } = useSocialVerification();
 
   const [bounty, setBounty] = useState<Bounty | null>(null);
   const [metadata, setMetadata] = useState<BountyMetadata | null>(null);
@@ -236,10 +241,19 @@ export default function BountyDetailPage() {
 
   // Submit solution with 1% deposit
   const submitSolution = async () => {
-    if (!bounty || (!uploadedSolutionImage && !socialHandle.trim())) {
+    // Check if X account is connected
+    if (!isXConnected || !xAccount) {
+      showAlert({
+        title: "X Account Required",
+        description: "Please connect your X account to submit a solution",
+      });
+      return;
+    }
+
+    if (!bounty || !uploadedSolutionImage) {
       showAlert({
         title: "Missing Information",
-        description: "Please upload a solution image and enter your social handle",
+        description: "Please upload a solution image",
       });
       return;
     }
@@ -269,17 +283,20 @@ export default function BountyDetailPage() {
         }
       }
 
+      // Use verified X account username from database
+      const verifiedSocialHandle = xAccount.username.replace('@', '');
+
       console.log("Submitting with deposit:", requiredDeposit.toString());
+      console.log("Using verified social handle:", verifiedSocialHandle);
 
       writeContract({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "submitToBounty",
-        args: [BigInt(bountyId), solutionCid, socialHandle],
+        args: [BigInt(bountyId), solutionCid, verifiedSocialHandle],
         value: requiredDeposit,
       });
 
-      setSocialHandle("");
       setUploadedSolutionImage(null);
     } catch (error) {
       console.error("Error submitting solution:", error);
@@ -712,15 +729,56 @@ export default function BountyDetailPage() {
                     </AlertDescription>
                   </Alert>
 
+                  {/* X Account Verification Section */}
                   <div>
-                    <label className="text-sm font-black text-slate-900 mb-2 block">Your Social Handle (X/Twitter) *</label>
-                    <Input
-                      placeholder="@yourhandle"
-                      value={socialHandle}
-                      onChange={(e) => setSocialHandle(e.target.value)}
-                      className="border-slate-200"
-                    />
-                    <p className="text-xs text-slate-500 mt-1">This will be stored on-chain for verification</p>
+                    <label className="text-sm font-black text-slate-900 mb-2 block">Your X Account *</label>
+                    {isLoadingX ? (
+                      <div className="flex items-center gap-2 p-4 border border-slate-200 bg-slate-50">
+                        <Loader2 className="size-4 animate-spin text-slate-400" />
+                        <span className="text-sm text-slate-500">Loading X account...</span>
+                      </div>
+                    ) : isXConnected && xAccount ? (
+                      <div className="flex items-center justify-between p-4 bg-black border-2 border-black">
+                        <div className="flex items-center gap-3">
+                          <X className="size-6 text-white" />
+                          <div>
+                            <p className="font-bold text-white">{xAccount.username}</p>
+                            <p className="text-xs text-gray-400">Verified via OAuth</p>
+                          </div>
+                        </div>
+                        <Badge className="bg-[#0EA885] text-white border-0 font-bold text-[10px] uppercase tracking-wider">
+                          <CheckCircle2 className="size-3 mr-1" />
+                          Verified
+                        </Badge>
+                      </div>
+                    ) : (
+                      <div className="p-4 border-2 border-dashed border-slate-300 bg-slate-50">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-bold text-slate-700">X account required</p>
+                            <p className="text-xs text-slate-500">Connect your X account to submit</p>
+                          </div>
+                          <Button
+                            onClick={connectX}
+                            disabled={isConnectingX}
+                            className="bg-black hover:bg-slate-800 text-white"
+                          >
+                            {isConnectingX ? (
+                              <>
+                                <Loader2 className="size-4 mr-2 animate-spin" />
+                                Connecting...
+                              </>
+                            ) : (
+                              <>
+                                <LinkIcon className="size-4 mr-2" />
+                                Connect X
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    <p className="text-xs text-slate-500 mt-1">Your verified X handle will be stored on-chain for transparency</p>
                   </div>
 
                   <div>
@@ -779,7 +837,7 @@ export default function BountyDetailPage() {
                   <Button
                     onClick={submitSolution}
                     disabled={
-                      isPending || isConfirming || isUploadingSolution || !uploadedSolutionImage || !socialHandle.trim()
+                      isPending || isConfirming || isUploadingSolution || !uploadedSolutionImage || !isXConnected
                     }
                     className="w-full bg-[#0EA885] hover:bg-[#0c8a6f] text-white font-black py-6"
                   >

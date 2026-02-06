@@ -34,10 +34,15 @@ import {
     Settings,
     Pencil,
     Loader2,
+    X as XIcon,
+    CheckCircle,
+    Link as LinkIcon,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../contexts/AuthContext";
 import { Input } from "../../components/ui/input";
+import { useSocialVerification } from "../../hooks/useSocialVerification";
+import { Badge } from "../../components/ui/badge";
 
 type ProfileTab = "overview" | "reputation" | "history" | "create";
 type CreateType = "bounty" | "quest" | null;
@@ -67,6 +72,9 @@ export default function ProfilePage() {
     const [isEditingUsername, setIsEditingUsername] = useState(false);
     const [newUsername, setNewUsername] = useState("");
     const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
+
+    // X account linking
+    const { xAccount, connectX, disconnectX, isConnecting: isConnectingX, isConnected: isXConnected } = useSocialVerification();
 
     // Handle hydration mismatch
     useEffect(() => {
@@ -319,6 +327,65 @@ export default function ProfilePage() {
                                 >
                                     <Pencil className="w-3.5 h-3.5 text-slate-400" />
                                 </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* X Account Section */}
+                    <div className="mb-6 pb-6 border-b border-slate-100">
+                        <div className="flex items-center gap-2 mb-3">
+                            <XIcon className="w-4 h-4 text-slate-900" />
+                            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">X Account</span>
+                            {isXConnected && (
+                                <Badge className="bg-[#0EA885]/10 text-[#0EA885] border-[#0EA885]/20 text-[10px] font-bold">
+                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                    Verified
+                                </Badge>
+                            )}
+                        </div>
+                        {isXConnected && xAccount ? (
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-black flex items-center justify-center">
+                                        <XIcon className="w-5 h-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <span className="text-lg font-black text-slate-900">{xAccount.username}</span>
+                                        <p className="text-xs text-slate-500">Connected & verified via OAuth</p>
+                                    </div>
+                                </div>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={disconnectX}
+                                    className="text-xs border-slate-200"
+                                >
+                                    Disconnect
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center justify-between">
+                                <p className="text-sm text-slate-500">
+                                    Connect your X account to create bounties and quests
+                                </p>
+                                <Button
+                                    size="sm"
+                                    onClick={connectX}
+                                    disabled={isConnectingX}
+                                    className="bg-black hover:bg-slate-800 text-white"
+                                >
+                                    {isConnectingX ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            Connecting...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <LinkIcon className="w-4 h-4 mr-2" />
+                                            Connect X
+                                        </>
+                                    )}
+                                </Button>
                             </div>
                         )}
                     </div>

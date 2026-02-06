@@ -1,10 +1,13 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import axios from "axios";
 
 export interface XAccount {
   username: string;
   userId: string;
   verified: boolean;
 }
+
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 // Generate a random code verifier for PKCE
 function generateCodeVerifier(): string {
@@ -34,6 +37,49 @@ export function useSocialVerification() {
   const [xAccount, setXAccount] = useState<XAccount | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load X account from database on mount
+  useEffect(() => {
+    const loadXAccount = async () => {
+      try {
+        const response = await axios.get(`${apiUrl}/auth/me`, { withCredentials: true });
+        if (response.data?.twitter_username) {
+          setXAccount({
+            username: response.data.twitter_username.startsWith('@') 
+              ? response.data.twitter_username 
+              : `@${response.data.twitter_username}`,
+            userId: response.data.twitter_id || '',
+            verified: true,
+          });
+        }
+      } catch (err) {
+        // User not logged in or no X account linked - that's fine
+        console.log('No X account found in DB');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadXAccount();
+  }, []);
+
+  // Save X account to database
+  const saveXAccountToDb = useCallback(async (account: XAccount) => {
+    try {
+      await axios.patch(
+        `${apiUrl}/auth/profile`,
+        { 
+          twitter_username: account.username.replace('@', ''),
+          twitter_id: account.userId,
+        },
+        { withCredentials: true }
+      );
+      return true;
+    } catch (err) {
+      console.error('Failed to save X account to DB:', err);
+      return false;
+    }
+  }, []);
 
   const buildXAuthUrl = useCallback(async (): Promise<string | null> => {
     const clientId = process.env.NEXT_PUBLIC_TWITTER_CLIENT_ID;
@@ -108,6 +154,9 @@ export function useSocialVerification() {
               verified: true,
             };
 
+            // Save to database
+            await saveXAccountToDb(account);
+
             setXAccount(account);
             setIsConnecting(false);
             resolve(account);
@@ -158,7 +207,7 @@ export function useSocialVerification() {
       setIsConnecting(false);
       return null;
     }
-  }, [buildXAuthUrl, isConnecting]);
+  }, [buildXAuthUrl, isConnecting, saveXAccountToDb]);
 
   const disconnectX = useCallback(() => {
     setXAccount(null);
@@ -169,6 +218,7 @@ export function useSocialVerification() {
     connectX,
     disconnectX,
     isConnecting,
+    isLoading,
     error,
     isConnected: !!xAccount,
   };
