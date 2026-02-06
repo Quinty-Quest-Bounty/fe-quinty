@@ -78,10 +78,20 @@ export default function ProfilePage() {
                 return;
             }
 
-            if (!formData.title || !formData.description || !formData.amount || !formData.deadline) {
-                alert("Please fill in all required fields");
+            const missingFields = [];
+            if (!formData.title) missingFields.push("Title");
+            if (!formData.description) missingFields.push("Description");
+            if (!formData.amount) missingFields.push("Amount");
+            if (!formData.openDeadline) missingFields.push("Submission Deadline");
+            if (!formData.judgingDeadline) missingFields.push("Judging Deadline");
+
+            if (missingFields.length > 0) {
+                alert(`Please fill in: ${missingFields.join(", ")}`);
                 return;
             }
+
+            const openDeadlineTs = Math.floor(new Date(formData.openDeadline).getTime() / 1000);
+            const judgingDeadlineTs = Math.floor(new Date(formData.judgingDeadline).getTime() / 1000);
 
             const metadata: BountyMetadata = {
                 title: formData.title,
@@ -90,26 +100,22 @@ export default function ProfilePage() {
                 deliverables: formData.deliverables.filter((d: string) => d.trim()),
                 skills: formData.skills.filter((s: string) => s.trim()),
                 images: formData.images || [],
-                deadline: Math.floor(new Date(formData.deadline).getTime() / 1000),
+                deadline: judgingDeadlineTs,
                 bountyType: formData.bountyType,
             };
 
             const metadataCid = await uploadMetadataToIpfs(metadata);
-            const winnerSharesArg = formData.allowMultipleWinners ? formData.winnerShares.map((s: number) => BigInt(s * 100)) : [];
-            const oprecDeadline = formData.hasOprec && formData.oprecDeadline ? Math.floor(new Date(formData.oprecDeadline).getTime() / 1000) : 0;
 
             writeContract({
                 address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
                 abi: QUINTY_ABI,
                 functionName: "createBounty",
                 args: [
-                    `${formData.title}\n\nMetadata: ipfs://${metadataCid}`,
-                    BigInt(metadata.deadline),
-                    formData.allowMultipleWinners,
-                    winnerSharesArg,
-                    BigInt(formData.slashPercent * 100),
-                    formData.hasOprec,
-                    BigInt(oprecDeadline),
+                    formData.title,
+                    `${formData.description}\n\nMetadata: ipfs://${metadataCid}`,
+                    BigInt(openDeadlineTs),
+                    BigInt(judgingDeadlineTs),
+                    BigInt(formData.slashPercent),
                 ],
                 value: parseETH(formData.amount),
             });
