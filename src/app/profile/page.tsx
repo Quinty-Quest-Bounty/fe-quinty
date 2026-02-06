@@ -5,10 +5,14 @@ import { useRouter } from "next/navigation";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId, useBalance } from "wagmi";
 import { formatETH, parseETH, formatAddress } from "../../utils/web3";
 import { useHistory } from "../../hooks/useHistory";
+import { useBounties } from "../../hooks/useBounties";
+import { useQuests } from "../../hooks/useQuests";
 import { CONTRACT_ADDRESSES, QUINTY_ABI, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID } from "../../utils/contracts";
 import { uploadMetadataToIpfs, BountyMetadata } from "../../utils/ipfs";
 import { ensureBaseSepoliaNetwork } from "../../utils/network";
 import ReputationDisplay from "../../components/ReputationDisplay";
+import BountyCard from "../../components/BountyCard";
+import QuestCard from "../../components/QuestCard";
 import { BountyForm } from "../../components/bounties/BountyForm";
 import { QuestForm } from "../../components/quests/QuestForm";
 import { Button } from "../../components/ui/button";
@@ -27,10 +31,11 @@ import {
     Copy,
     Check,
     Wallet,
+    Settings,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-type ProfileTab = "reputation" | "history" | "create";
+type ProfileTab = "reputation" | "history" | "my-bounties" | "my-quests" | "create";
 type CreateType = "bounty" | "quest" | null;
 
 export default function ProfilePage() {
@@ -42,6 +47,8 @@ export default function ProfilePage() {
         address: address,
     });
     const { transactions, isLoading } = useHistory();
+    const { bounties, isLoading: isBountiesLoading } = useBounties();
+    const { quests, entryCounts, isLoading: isQuestsLoading } = useQuests();
     const { writeContract, data: bountyHash, isPending: isBountyPending } = useWriteContract();
     const { writeContractAsync } = useWriteContract();
     const { isLoading: isBountyConfirming, isSuccess: isBountyConfirmed } = useWaitForTransactionReceipt({ hash: bountyHash });
@@ -55,6 +62,17 @@ export default function ProfilePage() {
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    // Filter bounties and quests created by the user
+    const myBounties = useMemo(() => {
+        if (!address) return [];
+        return bounties.filter(b => b.creator.toLowerCase() === address.toLowerCase());
+    }, [bounties, address]);
+
+    const myQuests = useMemo(() => {
+        if (!address) return [];
+        return quests.filter(q => q.creator.toLowerCase() === address.toLowerCase());
+    }, [quests, address]);
 
     const filteredTransactions = useMemo(() => {
         if (historyFilter === "all") return transactions;
@@ -273,27 +291,59 @@ export default function ProfilePage() {
 
             {/* Tab Navigation */}
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8 sm:mb-10">
-                <div className="inline-flex gap-1 p-1 bg-slate-100 border border-slate-200">
+                <div className="inline-flex flex-wrap gap-1 p-1 bg-slate-100 border border-slate-200">
                     <button
                         onClick={() => setActiveTab("reputation")}
-                        className={`px-4 sm:px-6 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
+                        className={`px-3 sm:px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
                             activeTab === "reputation"
                                 ? "bg-white text-slate-900 shadow-sm border border-slate-200"
                                 : "text-slate-500 hover:text-slate-900"
                         }`}
                     >
-                        <Award className="w-4 h-4 inline-block mr-2" />
+                        <Award className="w-4 h-4 inline-block mr-1.5" />
                         Reputation
                     </button>
                     <button
+                        onClick={() => setActiveTab("my-bounties")}
+                        className={`px-3 sm:px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
+                            activeTab === "my-bounties"
+                                ? "bg-white text-slate-900 shadow-sm border border-slate-200"
+                                : "text-slate-500 hover:text-slate-900"
+                        }`}
+                    >
+                        <Target className="w-4 h-4 inline-block mr-1.5" />
+                        My Bounties
+                        {myBounties.length > 0 && (
+                            <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-blue-100 text-blue-600 rounded-full">
+                                {myBounties.length}
+                            </span>
+                        )}
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("my-quests")}
+                        className={`px-3 sm:px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
+                            activeTab === "my-quests"
+                                ? "bg-white text-slate-900 shadow-sm border border-slate-200"
+                                : "text-slate-500 hover:text-slate-900"
+                        }`}
+                    >
+                        <Zap className="w-4 h-4 inline-block mr-1.5" />
+                        My Quests
+                        {myQuests.length > 0 && (
+                            <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-amber-100 text-amber-600 rounded-full">
+                                {myQuests.length}
+                            </span>
+                        )}
+                    </button>
+                    <button
                         onClick={() => setActiveTab("history")}
-                        className={`px-4 sm:px-6 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
+                        className={`px-3 sm:px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
                             activeTab === "history"
                                 ? "bg-white text-slate-900 shadow-sm border border-slate-200"
                                 : "text-slate-500 hover:text-slate-900"
                         }`}
                     >
-                        <HistoryIcon className="w-4 h-4 inline-block mr-2" />
+                        <HistoryIcon className="w-4 h-4 inline-block mr-1.5" />
                         History
                     </button>
                 </div>
@@ -327,6 +377,98 @@ export default function ProfilePage() {
                         transition={{ duration: 0.2 }}
                     >
                         <ReputationDisplay />
+                    </motion.div>
+                ) : activeTab === "my-bounties" ? (
+                    <motion.div
+                        key="my-bounties"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        {isBountiesLoading ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {Array.from({ length: 3 }).map((_, i) => (
+                                    <div key={i} className="h-64 bg-slate-50 animate-pulse border border-slate-100" />
+                                ))}
+                            </div>
+                        ) : myBounties.length === 0 ? (
+                            <div className="py-20 text-center bg-white border border-dashed border-slate-200">
+                                <div className="w-12 h-12 bg-blue-50 flex items-center justify-center mx-auto mb-4">
+                                    <Target className="w-6 h-6 text-blue-400" />
+                                </div>
+                                <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">No bounties created yet</h3>
+                                <p className="text-xs font-bold text-slate-400 mt-1 mb-4">Create your first bounty to get started.</p>
+                                <Button
+                                    onClick={() => {
+                                        setActiveTab("create");
+                                        setCreateType("bounty");
+                                    }}
+                                    className="bg-blue-500 hover:bg-blue-600 text-white"
+                                >
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Create Bounty
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {myBounties.map((bounty) => (
+                                    <BountyCard
+                                        key={bounty.id}
+                                        bounty={bounty}
+                                        onSubmitToBounty={() => router.push(`/bounties/${bounty.id}`)}
+                                        onSelectWinner={() => router.push(`/bounties/${bounty.id}`)}
+                                        onTriggerSlash={() => router.push(`/bounties/${bounty.id}`)}
+                                        onRefundNoSubmissions={() => router.push(`/bounties/${bounty.id}`)}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </motion.div>
+                ) : activeTab === "my-quests" ? (
+                    <motion.div
+                        key="my-quests"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        {isQuestsLoading ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {Array.from({ length: 3 }).map((_, i) => (
+                                    <div key={i} className="h-64 bg-slate-50 animate-pulse border border-slate-100" />
+                                ))}
+                            </div>
+                        ) : myQuests.length === 0 ? (
+                            <div className="py-20 text-center bg-white border border-dashed border-slate-200">
+                                <div className="w-12 h-12 bg-amber-50 flex items-center justify-center mx-auto mb-4">
+                                    <Zap className="w-6 h-6 text-amber-400" />
+                                </div>
+                                <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">No quests created yet</h3>
+                                <p className="text-xs font-bold text-slate-400 mt-1 mb-4">Create your first quest to get started.</p>
+                                <Button
+                                    onClick={() => {
+                                        setActiveTab("create");
+                                        setCreateType("quest");
+                                    }}
+                                    className="bg-amber-500 hover:bg-amber-600 text-white"
+                                >
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Create Quest
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {myQuests.map((quest) => (
+                                    <QuestCard
+                                        key={quest.id}
+                                        quest={quest}
+                                        entryCount={entryCounts[quest.id] || 0}
+                                        onShowSubmitModal={() => router.push(`/quests/${quest.id}`)}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </motion.div>
                 ) : activeTab === "create" ? (
                     <motion.div
@@ -402,7 +544,7 @@ export default function ProfilePage() {
                             </div>
                         )}
                     </motion.div>
-                ) : (
+                ) : activeTab === "history" ? (
                     <motion.div
                         key="history"
                         initial={{ opacity: 0, y: 10 }}
@@ -500,7 +642,7 @@ export default function ProfilePage() {
                             )}
                         </div>
                     </motion.div>
-                )}
+                ) : null}
             </AnimatePresence>
         </div>
     );
