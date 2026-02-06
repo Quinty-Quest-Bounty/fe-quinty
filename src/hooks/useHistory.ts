@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAccount } from "wagmi";
 import { readContract } from "@wagmi/core";
-import { CONTRACT_ADDRESSES, QUINTY_ABI, AIRDROP_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
+import { CONTRACT_ADDRESSES, QUINTY_ABI, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
 import { wagmiConfig } from "../utils/web3";
 
 export interface Transaction {
@@ -100,9 +100,9 @@ export function useHistory() {
 
             // Fetch Quest transactions
             const questCounter = await readContract(wagmiConfig, {
-                address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-                abi: AIRDROP_ABI,
-                functionName: "airdropCounter",
+                address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+                abi: QUEST_ABI,
+                functionName: "questCounter",
             });
 
             const questPromises = Array.from({ length: Number(questCounter) }, (_, i) => {
@@ -110,9 +110,9 @@ export function useHistory() {
                 return (async () => {
                     try {
                         const quest = await readContract(wagmiConfig, {
-                            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-                            abi: AIRDROP_ABI,
-                            functionName: "getAirdrop",
+                            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+                            abi: QUEST_ABI,
+                            functionName: "getQuest",
                             args: [BigInt(id)],
                         }) as any;
 

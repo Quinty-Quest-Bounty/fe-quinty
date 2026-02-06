@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId, useBalance } from "wagmi";
 import { formatETH, parseETH, formatAddress } from "../../utils/web3";
 import { useHistory } from "../../hooks/useHistory";
-import { CONTRACT_ADDRESSES, QUINTY_ABI, AIRDROP_ABI, BASE_SEPOLIA_CHAIN_ID } from "../../utils/contracts";
+import { CONTRACT_ADDRESSES, QUINTY_ABI, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID } from "../../utils/contracts";
 import { uploadMetadataToIpfs, BountyMetadata } from "../../utils/ipfs";
 import { ensureBaseSepoliaNetwork } from "../../utils/network";
 import ReputationDisplay from "../../components/ReputationDisplay";
@@ -143,9 +143,9 @@ export default function ProfilePage() {
             const totalAmount = perQualifierWei * BigInt(formData.maxQualifiers);
 
             await writeContractAsync({
-                address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-                abi: AIRDROP_ABI,
-                functionName: "createAirdrop",
+                address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+                abi: QUEST_ABI,
+                functionName: "createQuest",
                 args: [
                     formData.title,
                     formData.description,

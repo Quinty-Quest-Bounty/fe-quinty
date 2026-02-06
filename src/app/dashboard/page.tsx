@@ -7,7 +7,7 @@ import Image from "next/image";
 import {
   CONTRACT_ADDRESSES,
   QUINTY_ABI,
-  AIRDROP_ABI,
+  QUEST_ABI,
   BASE_SEPOLIA_CHAIN_ID,
 } from "../../utils/contracts";
 import { readContract } from "@wagmi/core";
@@ -234,9 +234,9 @@ export default function DashboardPage() {
   });
 
   const { data: questCounter } = useReadContract({
-    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]?.AirdropBounty as `0x${string}`,
-    abi: AIRDROP_ABI,
-    functionName: "airdropCounter",
+    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]?.Quest as `0x${string}`,
+    abi: QUEST_ABI,
+    functionName: "questCounter",
   });
 
   // Load bounties
@@ -313,9 +313,9 @@ export default function DashboardPage() {
       for (let i = count; i >= Math.max(1, count - ITEMS_PER_PAGE + 1); i--) {
         try {
           const questData = await readContract(wagmiConfig, {
-            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-            abi: AIRDROP_ABI,
-            functionName: "getAirdrop",
+            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+            abi: QUEST_ABI,
+            functionName: "getQuest",
             args: [BigInt(i)],
           });
           if (questData && Array.isArray(questData)) {
@@ -350,8 +350,8 @@ export default function DashboardPage() {
       for (const q of quests) {
         try {
           const c = await readContract(wagmiConfig, {
-            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-            abi: AIRDROP_ABI,
+            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+            abi: QUEST_ABI,
             functionName: "getEntryCount",
             args: [BigInt(q.id)],
           });
