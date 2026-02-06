@@ -61,6 +61,7 @@ type SortBy = "newest" | "highest_reward" | "ending_soon";
 interface Bounty {
   id: number;
   creator: string;
+  title?: string;
   description: string;
   amount: bigint;
   deadline: bigint;
@@ -257,18 +258,18 @@ export default function DashboardPage() {
           const bountyData = await readContract(wagmiConfig, {
             address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
             abi: QUINTY_ABI,
-            functionName: "getBountyData",
+            functionName: "getBounty",
             args: [BigInt(i)],
           });
 
           if (bountyData && Array.isArray(bountyData)) {
-            const [creator, description, amount, deadline, , , status] = bountyData as any[];
+            const [creator, title, description, amount, openDeadline, judgingDeadline, slashPercent, status] = bountyData as any[];
             let metadataCid;
             if (description && typeof description === "string") {
               const match = description.match(/Metadata: ipfs:\/\/([a-zA-Z0-9]+)/);
               metadataCid = match ? match[1] : undefined;
             }
-            loadedBounties.push({ id: i, creator, description: description || "", amount, deadline, status, metadataCid, type: "bounty" });
+            loadedBounties.push({ id: i, creator, title, description: description || "", amount, deadline: judgingDeadline, status, metadataCid, type: "bounty" });
           }
         } catch (err) {
           console.error(`Error loading bounty ${i}:`, err);

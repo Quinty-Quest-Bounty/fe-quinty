@@ -45,11 +45,11 @@ export function useHistory() {
                         const bountyData = await readContract(wagmiConfig, {
                             address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
                             abi: QUINTY_ABI,
-                            functionName: "getBountyData",
+                            functionName: "getBounty",
                             args: [BigInt(id)],
                         });
 
-                        const [creator, description, amount, deadline, , , status] = bountyData as any;
+                        const [creator, title, description, amount, openDeadline, judgingDeadline, slashPercent, status] = bountyData as any;
 
                         if (creator.toLowerCase() === address.toLowerCase()) {
                             allTransactions.push({
@@ -58,9 +58,9 @@ export function useHistory() {
                                 contractType: "Quinty",
                                 itemId: id,
                                 amount: amount,
-                                timestamp: deadline, // Using deadline as proxy if createdAt not available
-                                status: status === 3 ? "Resolved" : "Active",
-                                description: description.split("\n")[0] || `Bounty #${id}`,
+                                timestamp: openDeadline, // Using openDeadline as timestamp
+                                status: status === 2 ? "Resolved" : status === 3 ? "Slashed" : "Active",
+                                description: title || description.split("\n")[0] || `Bounty #${id}`,
                             });
                         }
 
@@ -86,9 +86,9 @@ export function useHistory() {
                                     contractType: "Quinty",
                                     itemId: id,
                                     amount: subData.deposit,
-                                    timestamp: deadline,
+                                    timestamp: openDeadline,
                                     status: subData.revealed ? "Revealed" : "Submitted",
-                                    description: description.split("\n")[0] || `Bounty #${id}`,
+                                    description: title || description.split("\n")[0] || `Bounty #${id}`,
                                 });
                             }
                         }
