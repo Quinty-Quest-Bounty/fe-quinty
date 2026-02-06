@@ -35,8 +35,9 @@ type CreateType = "bounty" | "quest" | null;
 
 export default function ProfilePage() {
     const router = useRouter();
-    const { address } = useAccount();
+    const { address, isConnecting, isReconnecting } = useAccount();
     const chainId = useChainId();
+    const [mounted, setMounted] = useState(false);
     const { data: balanceData } = useBalance({
         address: address,
     });
@@ -49,6 +50,11 @@ export default function ProfilePage() {
     const [createType, setCreateType] = useState<CreateType>(null);
     const [showCreateOptions, setShowCreateOptions] = useState(false);
     const [copiedAddress, setCopiedAddress] = useState(false);
+
+    // Handle hydration mismatch
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const filteredTransactions = useMemo(() => {
         if (historyFilter === "all") return transactions;
@@ -186,6 +192,19 @@ export default function ProfilePage() {
             setTimeout(() => setCopiedAddress(false), 2000);
         }
     };
+
+    // Show loading state during hydration or wallet connection
+    if (!mounted || isConnecting || isReconnecting) {
+        return (
+            <div className="max-w-3xl mx-auto px-4 pt-32 text-center">
+                <div className="w-16 h-16 bg-slate-50 flex items-center justify-center mx-auto mb-6 animate-pulse">
+                    <User className="w-8 h-8 text-slate-300" />
+                </div>
+                <h2 className="text-xl font-black text-slate-900 mb-2">Loading...</h2>
+                <p className="text-slate-500 text-sm font-medium">Please wait while we check your wallet connection.</p>
+            </div>
+        );
+    }
 
     if (!address) {
         return (
