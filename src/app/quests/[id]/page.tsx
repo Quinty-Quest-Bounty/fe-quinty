@@ -10,7 +10,7 @@ import {
 import { readContract } from "@wagmi/core";
 import {
     CONTRACT_ADDRESSES,
-    AIRDROP_ABI,
+    QUEST_ABI,
     BASE_SEPOLIA_CHAIN_ID,
 } from "../../../utils/contracts";
 import { formatETH, formatTimeLeft, formatAddress, wagmiConfig } from "../../../utils/web3";
@@ -72,6 +72,7 @@ interface Quest {
 interface Entry {
     solver: string;
     ipfsProofCid: string;
+    socialHandle: string;
     timestamp: number;
     status: number;
     feedback: string;
@@ -91,6 +92,7 @@ export default function QuestDetailPage() {
     const [newEntry, setNewEntry] = useState({
         twitterUrl: "",
         ipfsProofCid: "",
+        socialHandle: "",
         description: "",
     });
     const [uploadedProofImage, setUploadedProofImage] = useState<File | null>(null);
@@ -105,9 +107,9 @@ export default function QuestDetailPage() {
         try {
             setIsLoading(true);
             const questData = await readContract(wagmiConfig, {
-                address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-                abi: AIRDROP_ABI,
-                functionName: "getAirdrop",
+                address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+                abi: QUEST_ABI,
+                functionName: "getQuest",
                 args: [BigInt(questId)],
             });
 
@@ -148,8 +150,8 @@ export default function QuestDetailPage() {
 
                 // Load entries
                 const entryCount = await readContract(wagmiConfig, {
-                    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-                    abi: AIRDROP_ABI,
+                    address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+                    abi: QUEST_ABI,
                     functionName: "getEntryCount",
                     args: [BigInt(questId)],
                 });
@@ -157,15 +159,16 @@ export default function QuestDetailPage() {
                 const loadedEntries: Entry[] = [];
                 for (let i = 0; i < Number(entryCount); i++) {
                     const entryData = await readContract(wagmiConfig, {
-                        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-                        abi: AIRDROP_ABI,
+                        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+                        abi: QUEST_ABI,
                         functionName: "getEntry",
                         args: [BigInt(questId), BigInt(i)],
                     });
-                    const [solver, ipfsProofCid, timestamp, status, feedback] = entryData as any;
+                    const [solver, ipfsProofCid, socialHandle, timestamp, status, feedback] = entryData as any;
                     loadedEntries.push({
                         solver,
                         ipfsProofCid,
+                        socialHandle,
                         timestamp: Number(timestamp),
                         status: Number(status),
                         feedback,
@@ -189,7 +192,7 @@ export default function QuestDetailPage() {
     useEffect(() => {
         if (isConfirmed) {
             loadQuest();
-            setNewEntry({ twitterUrl: "", ipfsProofCid: "", description: "" });
+            setNewEntry({ twitterUrl: "", ipfsProofCid: "", socialHandle: "", description: "" });
             setUploadedProofImage(null);
         }
     }, [isConfirmed]);
@@ -236,10 +239,10 @@ export default function QuestDetailPage() {
             }
 
             writeContract({
-                address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-                abi: AIRDROP_ABI,
+                address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+                abi: QUEST_ABI,
                 functionName: "submitEntry",
-                args: [BigInt(questId), proofCid],
+                args: [BigInt(questId), proofCid, newEntry.socialHandle || newEntry.twitterUrl || ""],
             });
         } catch (error) {
             console.error("Error submitting entry:", error);
@@ -552,6 +555,22 @@ export default function QuestDetailPage() {
                                         Provide proof of your social media engagement to qualify for rewards
                                     </p>
                                     <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-black text-slate-900">X/Twitter Handle *</label>
+                                            <Input
+                                                type="text"
+                                                placeholder="@yourhandle"
+                                                value={newEntry.socialHandle}
+                                                onChange={(e) =>
+                                                    setNewEntry({ ...newEntry, socialHandle: e.target.value })
+                                                }
+                                                className="text-sm border-slate-200"
+                                            />
+                                            <p className="text-xs font-medium text-slate-500">
+                                                Your social handle for verification (stored on-chain)
+                                            </p>
+                                        </div>
+
                                         <div className="space-y-2">
                                             <label className="text-sm font-black text-slate-900">X Post URL (Optional)</label>
                                             <Input

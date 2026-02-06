@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useAccount, useWriteContract, useChainId } from "wagmi";
-import { CONTRACT_ADDRESSES, AIRDROP_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
+import { CONTRACT_ADDRESSES, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
 import { parseETH } from "../utils/web3";
 import { ensureBaseSepoliaNetwork } from "../utils/network";
 import QuestCard from "./QuestCard";
@@ -51,9 +51,9 @@ export default function QuestManager() {
       const totalAmount = perQualifierWei * BigInt(formData.maxQualifiers);
 
       const result = await writeContractAsync({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-        abi: AIRDROP_ABI,
-        functionName: "createAirdrop",
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+        abi: QUEST_ABI,
+        functionName: "createQuest",
         args: [
           formData.title,
           formData.description,
