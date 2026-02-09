@@ -3,16 +3,14 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId, useBalance } from "wagmi";
-import { formatETH, parseETH, formatAddress } from "../../utils/web3";
+import { formatETH, parseETH, formatAddress, formatTimeLeft } from "../../utils/web3";
 import { useHistory } from "../../hooks/useHistory";
 import { useBounties } from "../../hooks/useBounties";
 import { useQuests } from "../../hooks/useQuests";
 import { CONTRACT_ADDRESSES, QUINTY_ABI, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID } from "../../utils/contracts";
-import { uploadMetadataToIpfs, BountyMetadata, QuestMetadata } from "../../utils/ipfs";
+import { uploadMetadataToIpfs, BountyMetadata, QuestMetadata, formatIpfsUrl } from "../../utils/ipfs";
 import { ensureBaseSepoliaNetwork } from "../../utils/network";
 import ReputationDisplay from "../../components/ReputationDisplay";
-import BountyCard from "../../components/BountyCard";
-import QuestCard from "../../components/QuestCard";
 import { BountyForm } from "../../components/bounties/BountyForm";
 import { QuestForm } from "../../components/quests/QuestForm";
 import { Button } from "../../components/ui/button";
@@ -41,6 +39,8 @@ import {
     Trophy,
     Send,
     Sparkles,
+    Clock,
+    Users as UsersIcon,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -592,16 +592,55 @@ export default function ProfilePage() {
                                     <p className="text-xs font-bold text-slate-400 mt-1">Create your first bounty to get started.</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                                     {myBounties.map((bounty) => (
-                                        <BountyCard
+                                        <div
                                             key={bounty.id}
-                                            bounty={bounty}
-                                            onSubmitToBounty={() => router.push(`/bounties/${bounty.id}`)}
-                                            onSelectWinner={() => router.push(`/bounties/${bounty.id}`)}
-                                            onTriggerSlash={() => router.push(`/bounties/${bounty.id}`)}
-                                            onRefundNoSubmissions={() => router.push(`/bounties/${bounty.id}`)}
-                                        />
+                                            onClick={() => router.push(`/bounties/${bounty.id}`)}
+                                            className="group cursor-pointer bg-white shadow-sm hover:shadow-xl hover:shadow-stone-200/50 border border-stone-100 hover:border-stone-200 transition-all duration-300 overflow-hidden flex flex-col"
+                                        >
+                                            {/* Type color bar */}
+                                            <div className="h-1 w-full bg-[#0EA885]" />
+                                            
+                                            {/* Placeholder Image */}
+                                            <div className="relative w-full h-36 overflow-hidden">
+                                                <div className="w-full h-full bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
+                                                    <Target className="w-10 h-10 text-[#0EA885]/30" />
+                                                </div>
+                                            </div>
+
+                                            <div className="p-4 flex flex-col flex-1">
+                                                {/* Title */}
+                                                <h3 className="text-[15px] font-semibold text-stone-800 mb-3 line-clamp-2 leading-snug group-hover:text-[#0EA885] transition-colors">
+                                                    {bounty.title}
+                                                </h3>
+
+                                                {/* Status Badge */}
+                                                <div className="flex items-center gap-2 mb-3">
+                                                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 ${
+                                                        bounty.status === 0 ? "bg-emerald-50 text-emerald-600" :
+                                                        bounty.status === 1 ? "bg-amber-50 text-amber-600" :
+                                                        bounty.status === 2 ? "bg-stone-100 text-stone-500" :
+                                                        "bg-red-50 text-red-500"
+                                                    }`}>
+                                                        {bounty.status === 0 ? "Open" : bounty.status === 1 ? "Judging" : bounty.status === 2 ? "Resolved" : "Slashed"}
+                                                    </span>
+                                                    <span className="text-[11px] text-stone-400">{bounty.submissionCount} submissions</span>
+                                                </div>
+
+                                                {/* Footer */}
+                                                <div className="mt-auto pt-3 border-t border-stone-100 flex items-center justify-between">
+                                                    <div className="flex items-center gap-1 text-[11px] text-stone-400">
+                                                        <Clock className="h-3 w-3" />
+                                                        {formatTimeLeft(bounty.judgingDeadline)}
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <span className="text-base font-bold text-stone-800">{formatETH(bounty.amount)}</span>
+                                                        <span className="text-[11px] text-stone-400 ml-1">ETH</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     ))}
                                 </div>
                             )}
@@ -647,15 +686,73 @@ export default function ProfilePage() {
                                     <p className="text-xs font-bold text-slate-400 mt-1">Create your first quest to get started.</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {myQuests.map((quest) => (
-                                        <QuestCard
-                                            key={quest.id}
-                                            quest={quest}
-                                            entryCount={entryCounts[quest.id] || 0}
-                                            onShowSubmitModal={() => router.push(`/quests/${quest.id}`)}
-                                        />
-                                    ))}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                                    {myQuests.map((quest) => {
+                                        const isExpired = Date.now() / 1000 > quest.deadline;
+                                        return (
+                                            <div
+                                                key={quest.id}
+                                                onClick={() => router.push(`/quests/${quest.id}`)}
+                                                className="group cursor-pointer bg-white shadow-sm hover:shadow-xl hover:shadow-stone-200/50 border border-stone-100 hover:border-stone-200 transition-all duration-300 overflow-hidden flex flex-col"
+                                            >
+                                                {/* Type color bar */}
+                                                <div className="h-1 w-full bg-amber-400" />
+                                                
+                                                {/* Placeholder Image */}
+                                                <div className="relative w-full h-36 overflow-hidden">
+                                                    <div className="w-full h-full bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center">
+                                                        <Zap className="w-10 h-10 text-amber-400/30" />
+                                                    </div>
+                                                </div>
+
+                                                <div className="p-4 flex flex-col flex-1">
+                                                    {/* Title */}
+                                                    <h3 className="text-[15px] font-semibold text-stone-800 mb-3 line-clamp-2 leading-snug group-hover:text-amber-500 transition-colors">
+                                                        {quest.title}
+                                                    </h3>
+
+                                                    {/* Status Badge */}
+                                                    <div className="flex items-center gap-2 mb-3">
+                                                        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 ${
+                                                            quest.resolved ? "bg-stone-100 text-stone-500" :
+                                                            quest.cancelled ? "bg-stone-100 text-stone-400" :
+                                                            isExpired ? "bg-red-50 text-red-500" :
+                                                            "bg-amber-50 text-amber-600"
+                                                        }`}>
+                                                            {quest.resolved ? "Completed" : quest.cancelled ? "Cancelled" : isExpired ? "Expired" : "Active"}
+                                                        </span>
+                                                        <span className="text-[11px] text-stone-400">{entryCounts[quest.id] || 0} entries</span>
+                                                    </div>
+
+                                                    {/* Progress */}
+                                                    <div className="mb-3">
+                                                        <div className="flex justify-between text-[10px] text-stone-400 mb-1">
+                                                            <span>Progress</span>
+                                                            <span>{quest.qualifiersCount}/{quest.maxQualifiers}</span>
+                                                        </div>
+                                                        <div className="h-1.5 bg-stone-100 overflow-hidden">
+                                                            <div 
+                                                                className="h-full bg-amber-400 transition-all" 
+                                                                style={{ width: `${Math.min((quest.qualifiersCount / quest.maxQualifiers) * 100, 100)}%` }} 
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Footer */}
+                                                    <div className="mt-auto pt-3 border-t border-stone-100 flex items-center justify-between">
+                                                        <div className="flex items-center gap-1 text-[11px] text-stone-400">
+                                                            <Clock className="h-3 w-3" />
+                                                            {formatTimeLeft(BigInt(quest.deadline))}
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <span className="text-base font-bold text-stone-800">{(Number(quest.perQualifier) / 1e18).toFixed(4)}</span>
+                                                            <span className="text-[11px] text-stone-400 ml-1">ETH/user</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
