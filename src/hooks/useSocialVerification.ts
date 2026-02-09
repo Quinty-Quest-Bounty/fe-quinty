@@ -54,28 +54,31 @@ export function useSocialVerification() {
         console.log('No X account in localStorage');
       }
 
-      // Then try to load from database (if backend is available)
+      // Then try to load from database (source of truth if available)
       try {
         const token = localStorage.getItem('quinty_auth_token');
         const response = await axios.get(`${apiUrl}/auth/me`, {
           withCredentials: true,
-          timeout: 3000, // 3 second timeout
+          timeout: 3000,
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         if (response.data?.twitter_username) {
           const account: XAccount = {
-            username: response.data.twitter_username.startsWith('@') 
-              ? response.data.twitter_username 
+            username: response.data.twitter_username.startsWith('@')
+              ? response.data.twitter_username
               : `@${response.data.twitter_username}`,
             userId: response.data.twitter_id || '',
             verified: true,
           };
           setXAccount(account);
-          // Sync to localStorage
           localStorage.setItem(STORAGE_KEY, JSON.stringify(account));
+        } else {
+          // Backend says no X account — clear local state too
+          setXAccount(null);
+          localStorage.removeItem(STORAGE_KEY);
         }
       } catch (err) {
-        // Backend not available or user not logged in - that's fine
+        // Backend not available or user not logged in - keep localStorage data
         console.log('Backend not available or no X account in DB');
       } finally {
         setIsLoading(false);
@@ -239,23 +242,26 @@ export function useSocialVerification() {
     }
   }, [buildXAuthUrl, isConnecting, saveXAccount]);
 
-  const disconnectX = useCallback(() => {
+  const disconnectX = useCallback(async () => {
     setXAccount(null);
     localStorage.removeItem(STORAGE_KEY);
-    
-    // Try to remove from database too (optional)
-    const token = localStorage.getItem('quinty_auth_token');
-    axios.patch(
-      `${apiUrl}/auth/profile`,
-      { twitter_username: '', twitter_id: '' },
-      {
-        withCredentials: true,
-        timeout: 3000,
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      }
-    ).catch(() => {
-      // Backend not available - that's fine
-    });
+
+    // Remove from database and wait for it to complete
+    try {
+      const token = localStorage.getItem('quinty_auth_token');
+      await axios.patch(
+        `${apiUrl}/auth/profile`,
+        { twitter_username: '', twitter_id: '' },
+        {
+          withCredentials: true,
+          timeout: 5000,
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
+      console.log('X account removed from database');
+    } catch {
+      console.log('Could not remove X account from DB');
+    }
   }, []);
 
   return {

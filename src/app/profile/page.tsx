@@ -85,7 +85,11 @@ export default function ProfilePage() {
     const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
 
     // X account linking
-    const { xAccount, connectX, disconnectX, isConnecting: isConnectingX, isConnected: isXConnected } = useSocialVerification();
+    const { connectX, disconnectX, isConnecting: isConnectingX } = useSocialVerification();
+    const xUsername = profile?.twitter_username
+        ? (profile.twitter_username.startsWith('@') ? profile.twitter_username : `@${profile.twitter_username}`)
+        : '';
+    const isXConnected = !!profile?.twitter_username;
 
     // Handle hydration mismatch
     useEffect(() => {
@@ -398,21 +402,21 @@ export default function ProfilePage() {
                                 </Badge>
                             )}
                         </div>
-                        {isXConnected && xAccount ? (
+                        {isXConnected ? (
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 bg-black flex items-center justify-center">
                                         <XIcon className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
-                                        <span className="text-lg font-black text-slate-900">{xAccount.username}</span>
+                                        <span className="text-lg font-black text-slate-900">{xUsername}</span>
                                         <p className="text-xs text-slate-500">Connected & verified via OAuth</p>
                                     </div>
                                 </div>
                                 <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={disconnectX}
+                                    onClick={async () => { await disconnectX(); await refreshProfile(); }}
                                     className="text-xs border-slate-200"
                                 >
                                     Disconnect

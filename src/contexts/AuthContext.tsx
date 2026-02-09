@@ -111,21 +111,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         twitter_username: twitterUsername || undefined,
       };
 
-      console.log('Profile data prepared:', {
-        id: profileData.id,
-        email: profileData.email,
-        username: profileData.username,
-        hasWallet: !!profileData.wallet_address,
-      });
-
-      // Set profile locally first for immediate UI update
-      setProfile(profileData);
-
       // Sync to backend database
       try {
         console.log('Syncing profile to backend...');
 
-        // First check if backend already has this profile with a custom username
+        // First check if backend already has this profile
         const token = localStorage.getItem('quinty_auth_token');
         let existingProfile: UserProfile | null = null;
         try {
@@ -139,14 +129,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // No existing profile or not authenticated yet — that's fine
         }
 
-        // If backend already has values, don't overwrite with Privy-derived ones
+        // Preserve backend values that shouldn't be overwritten by Privy data
         if (existingProfile?.username) {
           profileData.username = existingProfile.username;
         }
+        // Preserve twitter data managed by our custom OAuth (not Privy)
         if (existingProfile?.twitter_username) {
           profileData.twitter_username = existingProfile.twitter_username;
           profileData.twitter_id = existingProfile.twitter_id;
         }
+
+        // Set profile with merged data for immediate UI update
+        setProfile({ ...profileData });
 
         const response = await axios.post(
           `${apiUrl}/auth/sync-profile`,
@@ -154,21 +148,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           { withCredentials: true }
         );
 
-        console.log('Profile synced to backend successfully:', response.data);
-
         // Store JWT token for subsequent authenticated requests
         if (response.data.access_token) {
           setAuthToken(response.data.access_token);
           localStorage.setItem('quinty_auth_token', response.data.access_token);
         }
 
-        // Update profile with data from backend (source of truth)
+        // Update profile with data from backend (final source of truth)
         if (response.data.profile) {
           setProfile(response.data.profile);
         }
       } catch (error) {
         console.error('Failed to sync profile to backend:', error);
-        // Don't block the UI if backend sync fails - profile still works locally
+        // Backend unavailable — set Privy-only profile so UI still works
+        setProfile(profileData);
         if (axios.isAxiosError(error)) {
           console.error('Backend error details:', {
             status: error.response?.status,
