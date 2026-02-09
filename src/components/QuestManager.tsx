@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from "react";
 import { useAccount, useWriteContract, useChainId } from "wagmi";
-import { CONTRACT_ADDRESSES, AIRDROP_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
+import { CONTRACT_ADDRESSES, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
 import { parseETH } from "../utils/web3";
 import { ensureBaseSepoliaNetwork } from "../utils/network";
+import { uploadMetadataToIpfs, QuestMetadata } from "../utils/ipfs";
 import QuestCard from "./QuestCard";
 import { useQuests } from "../hooks/useQuests";
 import { QuestListSkeleton } from "./quests/QuestSkeleton";
@@ -39,18 +40,37 @@ export default function QuestManager() {
       if (!networkOk) return;
     }
 
+    if (!address) {
+      alert("Please connect your wallet first");
+      return;
+    }
+
     try {
+      console.log("Creating quest with form data:", formData);
       const deadlineTimestamp = Math.floor(new Date(formData.deadline).getTime() / 1000);
       const perQualifierWei = parseETH(formData.perQualifier);
       const totalAmount = perQualifierWei * BigInt(formData.maxQualifiers);
 
-      await writeContractAsync({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-        abi: AIRDROP_ABI,
-        functionName: "createAirdrop",
+      // Create quest metadata with images array (same pattern as bounties)
+      const metadata: QuestMetadata = {
+        title: formData.title,
+        description: formData.description,
+        requirements: formData.requirements,
+        images: formData.imageUrl ? [formData.imageUrl] : [],
+        deadline: deadlineTimestamp,
+        questType: formData.questType || "other",
+      };
+
+      // Upload metadata to Pinata
+      const metadataCid = await uploadMetadataToIpfs(metadata);
+
+      const result = await writeContractAsync({
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+        abi: QUEST_ABI,
+        functionName: "createQuest",
         args: [
           formData.title,
-          formData.description,
+          `${formData.description}\n\nMetadata: ipfs://${metadataCid}`,
           perQualifierWei,
           BigInt(formData.maxQualifiers),
           BigInt(deadlineTimestamp),
@@ -59,9 +79,16 @@ export default function QuestManager() {
         value: totalAmount,
       });
 
-      setActiveTab("browse");
-      refetch();
-    } catch (error) {
+      console.log("Quest created successfully:", result);
+
+      // Wait a bit for the transaction to be indexed
+      setTimeout(() => {
+        refetch();
+        setActiveTab("browse");
+      }, 2000);
+    } catch (error: any) {
+      console.error("Error creating quest:", error);
+      alert(`Error creating quest: ${error.message || error}`);
       console.error(error);
     }
   };
@@ -70,8 +97,8 @@ export default function QuestManager() {
     <div className="space-y-10">
       {/* Unified Header Section */}
       <div className="mb-10 text-center">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Quests</h1>
-        <p className="text-slate-500 mt-1 text-sm font-medium">
+        <h1 className="text-3xl font-black text-slate-900 text-balance">Quests</h1>
+        <p className="text-slate-500 mt-1 text-sm font-medium text-pretty">
           Participate in community tasks and earn rewards directly on-chain.
         </p>
       </div>
@@ -93,7 +120,7 @@ export default function QuestManager() {
                 : "text-slate-500 hover:text-slate-900"
                 }`}
             >
-              <tab.icon className="w-4 h-4 mr-2" />
+              <tab.icon className="size-4 mr-2" />
               {tab.label}
             </Button>
           ))}
@@ -128,21 +155,51 @@ export default function QuestManager() {
 
               {isLoading ? (
                 <QuestListSkeleton />
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {(activeTab === "browse" ? activeQuests : userQuests).map(a => (
-                    <QuestCard
-                      key={a.id}
-                      quest={a}
-                      entryCount={entryCounts[a.id] || 0}
-                    />
-                  ))}
-                </div>
-              )}
+              ) : (() => {
+                const displayQuests = activeTab === "browse" ? activeQuests : userQuests;
+
+                console.log(`${activeTab} tab - Showing ${displayQuests.length} quests`, { address, totalQuests: quests.length });
+
+                if (displayQuests.length === 0) {
+                  return (
+                    <div className="text-center py-16">
+                      <div className="inline-flex items-center justify-center size-16 rounded-full bg-slate-100 mb-4">
+                        <Settings className="size-8 text-slate-400" />
+                      </div>
+                      <h3 className="text-lg font-bold text-slate-900 text-balance mb-2">
+                        {activeTab === "manage" ? "No quests created yet" : "No quests found"}
+                      </h3>
+                      <p className="text-slate-500 text-sm text-pretty mb-6">
+                        {activeTab === "manage"
+                          ? "Create your first quest to get started"
+                          : "Check back later for new quests"}
+                      </p>
+                      {activeTab === "manage" && (
+                        <Button onClick={() => setActiveTab("create")} className="bg-[#0EA885] hover:bg-[#0EA885]/90">
+                          <Plus className="size-4 mr-2" />
+                          Create Quest
+                        </Button>
+                      )}
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {displayQuests.map(a => (
+                      <QuestCard
+                        key={a.id}
+                        quest={a}
+                        entryCount={entryCounts[a.id] || 0}
+                      />
+                    ))}
+                  </div>
+                );
+              })()}
 
               {activeTab === "browse" && showPastQuests && pastQuests.length > 0 && (
                 <div className="pt-12 border-t border-slate-100">
-                  <h3 className="text-sm font-bold text-slate-400 mb-8 text-center uppercase tracking-widest">Past Quests</h3>
+                  <h3 className="text-sm font-bold text-slate-400 mb-8 text-center uppercase">Past Quests</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 opacity-60">
                     {pastQuests.map(a => (
                       <QuestCard

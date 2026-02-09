@@ -28,7 +28,7 @@ export function AnnouncementModal({ isOpen, onClose }: AnnouncementModalProps) {
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute right-3 top-3 sm:right-4 sm:top-4 rounded-full p-1.5 sm:p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 z-10 bg-white/80"
+          className="absolute right-3 top-3 sm:right-4 sm:top-4 p-1.5 sm:p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 z-10 bg-white/80"
           aria-label="Close announcement"
         >
           <X className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -75,7 +75,7 @@ export function AnnouncementModal({ isOpen, onClose }: AnnouncementModalProps) {
             </div>
 
             {/* Development Notice */}
-            <div className="rounded-xl sm:rounded-2xl bg-gradient-to-br from-[#0EA885]/10 to-teal-50 p-4 sm:p-5 md:p-6 border border-[#0EA885]/20">
+            <div className="bg-gradient-to-br from-[#0EA885]/10 to-teal-50 p-4 sm:p-5 md:p-6 border border-[#0EA885]/20">
               <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                 We're in{" "}
                 <span className="font-semibold text-[#0EA885]">full-power building mode</span>{" "}

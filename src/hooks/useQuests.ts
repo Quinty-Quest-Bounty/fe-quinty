@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { useReadContract, useWatchContractEvent } from "wagmi";
 import { readContract } from "@wagmi/core";
-import { CONTRACT_ADDRESSES, AIRDROP_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
+import { CONTRACT_ADDRESSES, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
 import { wagmiConfig } from "../utils/web3";
+import { fetchMetadataFromIpfs, formatIpfsUrl, QuestMetadata } from "../utils/ipfs";
 
 export interface Quest {
     id: number;
@@ -19,11 +20,13 @@ export interface Quest {
     cancelled: boolean;
     requirements: string;
     imageUrl: string;
+    questType?: "development" | "design" | "marketing" | "research" | "other";
 }
 
 export interface Entry {
     solver: string;
     ipfsProofCid: string;
+    socialHandle: string;
     timestamp: number;
     status: number; // 0: Pending, 1: Approved, 2: Rejected
     feedback: string;
@@ -35,9 +38,9 @@ export function useQuests() {
     const [isLoading, setIsLoading] = useState(true);
 
     const { data: questCounter, refetch: refetchCounter } = useReadContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-        abi: AIRDROP_ABI,
-        functionName: "airdropCounter",
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+        abi: QUEST_ABI,
+        functionName: "questCounter",
     });
 
     const loadQuests = useCallback(async () => {
@@ -54,9 +57,9 @@ export function useQuests() {
                 return (async () => {
                     try {
                         const questData = await readContract(wagmiConfig, {
-                            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-                            abi: AIRDROP_ABI,
-                            functionName: "getAirdrop",
+                            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+                            abi: QUEST_ABI,
+                            functionName: "getQuest",
                             args: [BigInt(id)],
                         });
 
@@ -78,11 +81,37 @@ export function useQuests() {
                         ] = questData as any;
 
                         const entryCount = await readContract(wagmiConfig, {
-                            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-                            abi: AIRDROP_ABI,
+                            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+                            abi: QUEST_ABI,
                             functionName: "getEntryCount",
                             args: [BigInt(id)],
                         });
+
+                        // Extract metadata CID from description (same pattern as bounties)
+                        let imageUrl = "";
+                        let questType: "development" | "design" | "marketing" | "research" | "other" | undefined;
+                        const metadataMatch = description.match(/Metadata: ipfs:\/\/([a-zA-Z0-9]+)/);
+                        if (metadataMatch) {
+                            try {
+                                const metadata = await fetchMetadataFromIpfs(metadataMatch[1]) as QuestMetadata;
+                                if (metadata.images && metadata.images.length > 0) {
+                                    // The image is stored as a CID, format it as a full URL
+                                    imageUrl = formatIpfsUrl(metadata.images[0]);
+                                }
+                                // Extract questType from metadata
+                                if (metadata.questType) {
+                                    questType = metadata.questType;
+                                }
+                            } catch (e) {
+                                console.error(`Error fetching quest ${id} metadata:`, e);
+                            }
+                        } else {
+                            // Fallback: check for old Image: ipfs:// format
+                            const oldImageMatch = description.match(/Image: ipfs:\/\/([^\s\n]+)/);
+                            if (oldImageMatch) {
+                                imageUrl = formatIpfsUrl(oldImageMatch[1]);
+                            }
+                        }
 
                         return {
                             quest: {
@@ -99,9 +128,8 @@ export function useQuests() {
                                 resolved,
                                 cancelled,
                                 requirements,
-                                imageUrl: description.includes("ipfs://")
-                                    ? description.match(/ipfs:\/\/[^\s\n]+/)?.[0] || ""
-                                    : "",
+                                imageUrl,
+                                questType,
                             },
                             entryCount: Number(entryCount),
                         };
@@ -113,7 +141,7 @@ export function useQuests() {
             });
 
             const results = await Promise.all(questPromises);
-            const validResults = results.filter((r): r is { quest: Quest; entryCount: number } => r !== null);
+            const validResults = results.filter((r) => r !== null) as { quest: Quest; entryCount: number }[];
 
             setQuests(validResults.map(r => r.quest).reverse());
             const counts: { [id: number]: number } = {};
@@ -133,18 +161,27 @@ export function useQuests() {
     }, [loadQuests]);
 
     useWatchContractEvent({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-        abi: AIRDROP_ABI,
-        eventName: "AirdropCreated",
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+        abi: QUEST_ABI,
+        eventName: "QuestCreated",
         onLogs() {
             refetchCounter();
         },
     });
 
     useWatchContractEvent({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].AirdropBounty as `0x${string}`,
-        abi: AIRDROP_ABI,
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+        abi: QUEST_ABI,
         eventName: "EntrySubmitted",
+        onLogs() {
+            loadQuests();
+        },
+    });
+
+    useWatchContractEvent({
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+        abi: QUEST_ABI,
+        eventName: "EntryVerified",
         onLogs() {
             loadQuests();
         },

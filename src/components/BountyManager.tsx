@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from "react";
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { CONTRACT_ADDRESSES, QUINTY_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
-import { parseETH } from "../utils/web3";
+import React, { useState, useMemo, useEffect } from "react";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
+import { readContract } from "@wagmi/core";
+import { CONTRACT_ADDRESSES, QUINTY_ABI, BASE_SEPOLIA_CHAIN_ID, BountyStatus } from "../utils/contracts";
+import { parseETH, wagmiConfig } from "../utils/web3";
 import { uploadMetadataToIpfs, BountyMetadata } from "../utils/ipfs";
 import BountyCard from "./BountyCard";
 import { useBounties } from "../hooks/useBounties";
@@ -16,7 +17,7 @@ export default function BountyManager() {
   const { address } = useAccount();
   const { bounties, isLoading, refetch } = useBounties();
   const { writeContract, data: hash, isPending } = useWriteContract();
-  const { isLoading: isConfirming } = useWaitForTransactionReceipt({ hash });
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
   const [activeTab, setActiveTab] = useState<"browse" | "create" | "my-bounties">("browse");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -24,73 +25,116 @@ export default function BountyManager() {
 
   const filteredBounties = useMemo(() => {
     return bounties.filter(b => {
-      const isPast = b.status === 3 || BigInt(Math.floor(Date.now() / 1000)) > b.deadline;
-      if (statusFilter === "resolved") return b.status === 3;
-      if (statusFilter === "expired") return BigInt(Math.floor(Date.now() / 1000)) > b.deadline;
-      return !isPast;
+      const now = BigInt(Math.floor(Date.now() / 1000));
+      // Active: OPEN or JUDGING phase
+      const isActive = b.status === BountyStatus.OPEN || b.status === BountyStatus.JUDGING;
+      // Past: RESOLVED or SLASHED
+      const isPast = b.status === BountyStatus.RESOLVED || b.status === BountyStatus.SLASHED;
+      
+      if (statusFilter === "resolved") return b.status === BountyStatus.RESOLVED;
+      if (statusFilter === "slashed") return b.status === BountyStatus.SLASHED;
+      if (statusFilter === "judging") return b.status === BountyStatus.JUDGING || (b.status === BountyStatus.OPEN && now > b.openDeadline);
+      return isActive;
     });
   }, [bounties, statusFilter]);
 
   const pastBounties = useMemo(() => {
-    return bounties.filter(b => b.status === 3 || BigInt(Math.floor(Date.now() / 1000)) > b.deadline);
+    return bounties.filter(b => b.status === BountyStatus.RESOLVED || b.status === BountyStatus.SLASHED);
   }, [bounties]);
 
   const handleCreateBounty = async (formData: any) => {
     try {
+      console.log("Creating bounty with form data:", formData);
+
+      if (!address) {
+        alert("Please connect your wallet first");
+        return;
+      }
+
+      const missingFields = [];
+      if (!formData.title) missingFields.push("Title");
+      if (!formData.description) missingFields.push("Description");
+      if (!formData.amount) missingFields.push("Amount");
+      if (!formData.openDeadline) missingFields.push("Submission Deadline");
+      if (!formData.judgingDeadline) missingFields.push("Judging Deadline");
+
+      if (missingFields.length > 0) {
+        alert(`Please fill in: ${missingFields.join(", ")}`);
+        return;
+      }
+
+      const openDeadlineTs = Math.floor(new Date(formData.openDeadline).getTime() / 1000);
+      const judgingDeadlineTs = Math.floor(new Date(formData.judgingDeadline).getTime() / 1000);
+
       const metadata: BountyMetadata = {
         title: formData.title,
         description: formData.description,
         requirements: formData.requirements.filter((r: string) => r.trim()),
         deliverables: formData.deliverables.filter((d: string) => d.trim()),
         skills: formData.skills.filter((s: string) => s.trim()),
-        images: [],
-        deadline: Math.floor(new Date(formData.deadline).getTime() / 1000),
+        images: formData.images || [],
+        deadline: judgingDeadlineTs, // Use judging deadline as primary deadline for metadata
         bountyType: formData.bountyType,
       };
 
+      console.log("Uploading metadata to IPFS...");
       const metadataCid = await uploadMetadataToIpfs(metadata);
-      const winnerSharesArg = formData.allowMultipleWinners ? formData.winnerShares.map((s: number) => BigInt(s * 100)) : [];
-      const oprecDeadline = formData.hasOprec && formData.oprecDeadline ? Math.floor(new Date(formData.oprecDeadline).getTime() / 1000) : 0;
+      console.log("Metadata CID:", metadataCid);
 
+      console.log("Calling smart contract with new params...");
+      console.log("openDeadline:", openDeadlineTs, "judgingDeadline:", judgingDeadlineTs, "slashPercent:", formData.slashPercent);
+      
       writeContract({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "createBounty",
         args: [
-          `${formData.title}\n\nMetadata: ipfs://${metadataCid}`,
-          BigInt(metadata.deadline),
-          formData.allowMultipleWinners,
-          winnerSharesArg,
-          BigInt(formData.slashPercent * 100),
-          formData.hasOprec,
-          BigInt(oprecDeadline),
+          formData.title,
+          `${formData.description}\n\nMetadata: ipfs://${metadataCid}`,
+          BigInt(openDeadlineTs),
+          BigInt(judgingDeadlineTs),
+          BigInt(formData.slashPercent), // Already in basis points from form
         ],
         value: parseETH(formData.amount),
       });
     } catch (e: any) {
-      console.error(e);
+      console.error("Error creating bounty:", e);
+      alert(`Error creating bounty: ${e.message || e}`);
     }
   };
 
   // Action handlers
-  const submitSolution = async (bountyId: number, ipfsCid: string) => {
-    const bounty = bounties.find(b => b.id === bountyId);
-    if (!bounty) return;
-    writeContract({
-      address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-      abi: QUINTY_ABI,
-      functionName: "submitSolution",
-      args: [BigInt(bountyId), ipfsCid, []],
-      value: bounty.amount / 10n,
-    });
+  const submitToBounty = async (bountyId: number, ipfsCid: string, socialHandle: string) => {
+    try {
+      // Get required deposit amount (1% of bounty)
+      const depositAmount = await readContract(wagmiConfig, {
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+        abi: QUINTY_ABI,
+        functionName: "getRequiredDeposit",
+        args: [BigInt(bountyId)],
+      }) as bigint;
+
+      console.log("Submitting with deposit:", depositAmount.toString());
+
+      writeContract({
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+        abi: QUINTY_ABI,
+        functionName: "submitToBounty",
+        args: [BigInt(bountyId), ipfsCid, socialHandle],
+        value: depositAmount,
+      });
+    } catch (e: any) {
+      console.error("Error submitting to bounty:", e);
+      alert(`Error: ${e.message || e}`);
+    }
   };
 
-  const selectWinners = async (bountyId: number, winners: string[], subIds: number[]) => {
+  const selectWinner = async (bountyId: number, submissionId: number) => {
     writeContract({
       address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
       abi: QUINTY_ABI,
-      functionName: "selectWinners",
-      args: [BigInt(bountyId), winners, subIds.map(id => BigInt(id))],
+      functionName: "selectWinner",
+      args: [BigInt(bountyId), BigInt(submissionId)],
     });
   };
 
@@ -103,31 +147,33 @@ export default function BountyManager() {
     });
   };
 
-  const addReply = async (bountyId: number, subId: number, content: string) => {
+  const refundNoSubmissions = async (bountyId: number) => {
     writeContract({
       address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
       abi: QUINTY_ABI,
-      functionName: "addReply",
-      args: [BigInt(bountyId), BigInt(subId), content],
+      functionName: "refundNoSubmissions",
+      args: [BigInt(bountyId)],
     });
   };
 
-  const revealSolution = async (bountyId: number, subId: number, revealCid: string) => {
-    writeContract({
-      address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-      abi: QUINTY_ABI,
-      functionName: "revealSolution",
-      args: [BigInt(bountyId), BigInt(subId), revealCid],
-    });
-  };
+  // Handle transaction confirmation
+  useEffect(() => {
+    if (isConfirmed) {
+      console.log("Transaction confirmed!");
+      refetch();
+      if (activeTab === "create") {
+        setActiveTab("browse");
+      }
+    }
+  }, [isConfirmed, refetch, activeTab]);
 
   return (
     <div className="space-y-10">
       {/* Unified Header Section */}
       <div className="mb-10 text-center">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Bounties</h1>
-        <p className="text-slate-500 mt-1 text-sm font-medium">
-          Secure, escrow-backed tasks for developers and creators.
+        <h1 className="text-3xl font-black text-slate-900 text-balance">Bounties</h1>
+        <p className="text-slate-500 mt-1 text-sm font-medium text-pretty">
+          Secure, escrow-backed tasks with instant winner payouts.
         </p>
       </div>
 
@@ -148,7 +194,7 @@ export default function BountyManager() {
                 : "text-slate-500 hover:text-slate-900"
                 }`}
             >
-              <tab.icon className="w-4 h-4 mr-2" />
+              <tab.icon className="size-4 mr-2" />
               {tab.label}
             </Button>
           ))}
@@ -185,35 +231,65 @@ export default function BountyManager() {
 
               {isLoading ? (
                 <BountyListSkeleton />
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {(activeTab === "browse" ? filteredBounties : bounties.filter(b => b.creator.toLowerCase() === address?.toLowerCase())).map(b => (
-                    <BountyCard
-                      key={b.id}
-                      bounty={b}
-                      onSubmitSolution={submitSolution}
-                      onSelectWinners={selectWinners}
-                      onTriggerSlash={triggerSlash}
-                      onAddReply={addReply}
-                      onRevealSolution={revealSolution}
-                    />
-                  ))}
-                </div>
-              )}
+              ) : (() => {
+                const displayBounties = activeTab === "browse"
+                  ? filteredBounties
+                  : bounties.filter(b => b.creator.toLowerCase() === address?.toLowerCase());
+
+                console.log(`${activeTab} tab - Showing ${displayBounties.length} bounties`, { address, totalBounties: bounties.length });
+
+                if (displayBounties.length === 0) {
+                  return (
+                    <div className="text-center py-16">
+                      <div className="inline-flex items-center justify-center size-16 rounded-full bg-slate-100 mb-4">
+                        <Target className="size-8 text-slate-400" />
+                      </div>
+                      <h3 className="text-lg font-bold text-slate-900 text-balance mb-2">
+                        {activeTab === "my-bounties" ? "No bounties created yet" : "No bounties found"}
+                      </h3>
+                      <p className="text-slate-500 text-sm text-pretty mb-6">
+                        {activeTab === "my-bounties"
+                          ? "Create your first bounty to get started"
+                          : "Try adjusting your filters"}
+                      </p>
+                      {activeTab === "my-bounties" && (
+                        <Button onClick={() => setActiveTab("create")} className="bg-[#0EA885] hover:bg-[#0EA885]/90">
+                          <Plus className="size-4 mr-2" />
+                          Create Bounty
+                        </Button>
+                      )}
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {displayBounties.map(b => (
+                      <BountyCard
+                        key={b.id}
+                        bounty={b}
+                        onSubmitToBounty={submitToBounty}
+                        onSelectWinner={selectWinner}
+                        onTriggerSlash={triggerSlash}
+                        onRefundNoSubmissions={refundNoSubmissions}
+                      />
+                    ))}
+                  </div>
+                );
+              })()}
 
               {activeTab === "browse" && showPastBounties && pastBounties.length > 0 && (
                 <div className="pt-12 border-t border-slate-100">
-                  <h3 className="text-sm font-bold text-slate-400 mb-8 text-center uppercase tracking-widest">Past Bounties</h3>
+                  <h3 className="text-sm font-bold text-slate-400 mb-8 text-center uppercase">Past Bounties</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 opacity-60">
                     {pastBounties.map(b => (
                       <BountyCard
                         key={b.id}
                         bounty={b}
-                        onSubmitSolution={submitSolution}
-                        onSelectWinners={selectWinners}
+                        onSubmitToBounty={submitToBounty}
+                        onSelectWinner={selectWinner}
                         onTriggerSlash={triggerSlash}
-                        onAddReply={addReply}
-                        onRevealSolution={revealSolution}
+                        onRefundNoSubmissions={refundNoSubmissions}
                       />
                     ))}
                   </div>

@@ -26,8 +26,9 @@ export function BountyFilters({
                     </SelectTrigger>
                     <SelectContent className="rounded-lg">
                         <SelectItem value="all">All Active</SelectItem>
+                        <SelectItem value="judging">Judging</SelectItem>
                         <SelectItem value="resolved">Resolved</SelectItem>
-                        <SelectItem value="expired">Expired</SelectItem>
+                        <SelectItem value="slashed">Slashed</SelectItem>
                     </SelectContent>
                 </Select>
             </div>

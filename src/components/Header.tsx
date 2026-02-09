@@ -11,6 +11,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Menu, X, ChevronRight } from "lucide-react";
 import ZKVerificationModal from "./ZKVerificationModal";
+import { useAuth } from "@/contexts/AuthContext";
+import LoginButton from "./auth/LoginButton";
+import UserMenu from "./auth/UserMenu";
 
 const WalletComponents = dynamic(
   () => import("./WalletComponents"),
@@ -19,16 +22,14 @@ const WalletComponents = dynamic(
 
 const navItems = [
   { name: "Dashboard", link: "/dashboard" },
-  { name: "Quests", link: "/quests" },
-  { name: "Bounties", link: "/bounties" },
-  { name: "Reputation", link: "/reputation" },
-  { name: "History", link: "/history" },
+  { name: "Profile", link: "/profile" },
 ];
 
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const { isConnected } = useAccount();
+  const { profile, loading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [hoveredPath, setHoveredPath] = useState<string | null>(pathname);
@@ -43,62 +44,55 @@ export default function Header() {
 
   return (
     <>
-      <div className="fixed inset-x-0 top-0 z-[100] flex justify-center pt-2 sm:pt-3 pointer-events-none">
+      <div className="fixed inset-x-0 top-0 z-[100] pointer-events-none">
         <motion.header
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6, type: "spring", bounce: 0.3 }}
-          className={cn(
-            "pointer-events-auto mx-4 w-full max-w-5xl rounded-2xl lg:rounded-full border transition-all duration-500",
-            scrolled
-              ? "bg-white border-slate-200 shadow-md"
-              : "bg-white border-slate-100 shadow-sm"
-          )}
+          className="pointer-events-auto w-full bg-gradient-to-r from-[#0EA885] to-[#0c8a6f] text-white"
         >
-          <div className="flex h-14 items-center justify-between px-2 pl-4 pr-2">
+          <div className="max-w-7xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
             {/* Logo */}
             <button
               type="button"
               onClick={() => router.push("/")}
               className="flex items-center gap-2 group mr-4"
             >
-              <div className="relative h-8 w-8 overflow-hidden rounded-full shadow-sm group-hover:scale-105 transition-transform duration-300">
+              <div className="relative h-8 w-8 overflow-hidden shadow-sm group-hover:scale-105 transition-transform duration-300">
                 <Image
                   src="/images/quinty-logo.png"
                   alt="Quinty Logo"
                   fill
-                  className="object-contain brightness-0 dark:brightness-100"
+                  className="object-contain brightness-0 invert"
                   priority
                 />
               </div>
-              <span className="font-bold text-lg tracking-tight text-gray-900 dark:text-white hidden sm:block">
+              <span className="font-bold text-lg tracking-tight text-white hidden sm:block">
                 Quinty
               </span>
             </button>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-1">
+            <nav className="hidden lg:flex items-center gap-6">
               {navItems.map((item) => {
                 const isActive = item.link === pathname;
                 return (
                   <Link
                     key={item.name}
                     href={item.link}
-                    onMouseEnter={() => setHoveredPath(item.link)}
-                    onMouseLeave={() => setHoveredPath(pathname)}
                     className={cn(
-                      "relative px-4 py-2 text-sm font-medium transition-colors duration-200 z-10",
-                      isActive ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                      "relative text-sm font-bold transition-colors duration-200",
+                      isActive ? "text-white" : "text-white/80 hover:text-white"
                     )}
                   >
-                    {item.link === hoveredPath && (
+                    {item.name}
+                    {isActive && (
                       <motion.div
-                        layoutId="navbar-hover"
-                        className="absolute inset-0 bg-black/5 dark:bg-white/10 rounded-full -z-10"
+                        layoutId="navbar-active"
+                        className="absolute -bottom-5 left-0 right-0 h-0.5 bg-white"
                         transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                       />
                     )}
-                    {item.name}
                   </Link>
                 );
               })}
@@ -107,26 +101,35 @@ export default function Header() {
             {/* Desktop Actions */}
             <div className="hidden items-center gap-2 lg:flex">
               {isConnected && (
-                <ZKVerificationModal />
+                <ZKVerificationModal iconOnly={true} />
               )}
+              {/* Auth components */}
+              {!loading && isMounted && (
+                <>
+                  {profile ? (
+                    <UserMenu />
+                  ) : (
+                    <LoginButton />
+                  )}
+                </>
+              )}
+              {/* Keep wallet components for wallet-first users */}
               {isMounted && <WalletComponents />}
             </div>
 
             {/* Mobile Menu Toggle */}
             <div className="flex items-center gap-2 lg:hidden ml-auto">
-              {isConnected && <div className="scale-90"><ZKVerificationModal /></div>}
-              <Button
-                variant="ghost"
-                size="icon"
+              {isConnected && <ZKVerificationModal iconOnly={true} />}
+              <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="rounded-full h-10 w-10 hover:bg-black/5"
+                className="h-10 w-10 flex items-center justify-center hover:bg-white/10 transition-colors text-white"
               >
                 {isMobileMenuOpen ? (
                   <X className="h-5 w-5" />
                 ) : (
                   <Menu className="h-5 w-5" />
                 )}
-              </Button>
+              </button>
             </div>
           </div>
 
@@ -138,7 +141,7 @@ export default function Header() {
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="overflow-hidden lg:hidden border-t border-black/5 dark:border-white/10 mx-4"
+                className="overflow-hidden lg:hidden border-t border-white/20 mx-4"
               >
                 <nav className="flex flex-col gap-1 py-4">
                   {navItems.map((item, idx) => (
@@ -151,15 +154,30 @@ export default function Header() {
                       <Link
                         href={item.link}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="flex items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition-all"
+                        className="flex items-center justify-between px-4 py-3 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-all"
                       >
                         {item.name}
-                        <ChevronRight className="h-4 w-4 opacity-30" />
+                        <ChevronRight className="h-4 w-4 opacity-50" />
                       </Link>
                     </motion.div>
                   ))}
                   {isMounted && (
-                    <div className="mt-3 pt-3 border-t border-black/5 dark:border-white/10 flex flex-col gap-2 px-2">
+                    <div className="mt-3 pt-3 border-t border-white/20 flex flex-col gap-2 px-2">
+                      {/* Auth components for mobile */}
+                      {!loading && (
+                        <>
+                          {profile ? (
+                            <div className="flex items-center gap-2 justify-between px-2">
+                              <span className="text-sm font-medium text-white">
+                                {profile.username || profile.email?.split('@')[0]}
+                              </span>
+                              <UserMenu />
+                            </div>
+                          ) : (
+                            <LoginButton />
+                          )}
+                        </>
+                      )}
                       <WalletComponents />
                     </div>
                   )}

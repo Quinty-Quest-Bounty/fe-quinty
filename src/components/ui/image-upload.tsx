@@ -27,10 +27,16 @@ export function ImageUpload({ onUpload, value, className }: ImageUploadProps) {
 
         try {
             const cid = await uploadToIpfs(file);
+            if (!cid) {
+                throw new Error("Failed to get IPFS CID");
+            }
+            console.log("Image uploaded to IPFS:", cid);
             onUpload(cid);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Upload failed:", error);
+            alert(`Image upload failed: ${error.message || 'Please check your Pinata configuration'}`);
             setPreview(null);
+            onUpload("");
         } finally {
             setIsUploading(false);
         }
@@ -55,7 +61,7 @@ export function ImageUpload({ onUpload, value, className }: ImageUploadProps) {
         <div
             {...getRootProps()}
             className={cn(
-                "relative group cursor-pointer overflow-hidden rounded-xl border-2 border-dashed transition-all duration-300 min-h-[160px] flex flex-col items-center justify-center gap-2",
+                "relative group cursor-pointer overflow-hidden border-2 border-dashed transition-all duration-200 min-h-[160px] flex flex-col items-center justify-center gap-2",
                 isDragActive ? "border-[#0EA885] bg-[#0EA885]/5" : "border-slate-200 bg-slate-50/30 hover:border-slate-300 hover:bg-slate-50",
                 preview ? "border-solid" : "border-dashed",
                 className
@@ -71,7 +77,7 @@ export function ImageUpload({ onUpload, value, className }: ImageUploadProps) {
                     </div>
                     <button
                         onClick={removeImage}
-                        className="absolute top-2 right-2 p-1.5 rounded-full bg-white/90 shadow-sm text-slate-500 hover:text-red-500 transition-colors z-10"
+                        className="absolute top-2 right-2 p-1.5 bg-white/90 text-slate-500 hover:text-red-500 transition-colors z-10"
                     >
                         <X className="w-4 h-4" />
                     </button>
@@ -79,7 +85,7 @@ export function ImageUpload({ onUpload, value, className }: ImageUploadProps) {
             ) : (
                 <div className="flex flex-col items-center gap-2 p-6 text-center">
                     <div className={cn(
-                        "p-3 rounded-full bg-white shadow-sm transition-transform duration-300",
+                        "p-3 bg-white transition-transform duration-200",
                         isDragActive ? "scale-110 text-[#0EA885]" : "text-slate-400 group-hover:scale-110"
                     )}>
                         {isUploading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Upload className="w-6 h-6" />}

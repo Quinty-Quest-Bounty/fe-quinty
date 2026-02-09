@@ -2,8 +2,9 @@ import axios from 'axios';
 import FormData from 'form-data';
 
 // IPFS utilities for handling file uploads and metadata
-export const IPFS_GATEWAY = "https://ipfs.io/ipfs/";
+export const CUSTOM_PINATA_GATEWAY = "https://purple-elderly-silverfish-382.mypinata.cloud/ipfs/";
 export const PINATA_GATEWAY = "https://gateway.pinata.cloud/ipfs/";
+export const IPFS_GATEWAY = "https://ipfs.io/ipfs/";
 
 // Interface for IPFS metadata
 export interface BountyMetadata {
@@ -27,10 +28,19 @@ export interface SubmissionMetadata {
   submittedAt: number;
 }
 
+export interface QuestMetadata {
+  title: string;
+  description: string;
+  requirements: string;
+  images?: string[];
+  deadline: number;
+  questType: "development" | "design" | "marketing" | "research" | "other";
+}
+
 // Helper function to format IPFS URLs
 export const formatIpfsUrl = (
   cid: string,
-  gateway: string = IPFS_GATEWAY
+  gateway: string = CUSTOM_PINATA_GATEWAY
 ): string => {
   if (!cid) return "";
 
@@ -66,6 +76,13 @@ export const uploadToIpfs = async (
   file: File | Blob,
   metadata?: any
 ): Promise<string> => {
+  const jwtToken = process.env.NEXT_PUBLIC_PINATA_JWT;
+
+  if (!jwtToken) {
+    console.error("Pinata JWT token is missing. Please add NEXT_PUBLIC_PINATA_JWT to your .env.local file");
+    throw new Error("Pinata JWT token is not configured");
+  }
+
   const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
 
   const data = new FormData();
@@ -77,21 +94,25 @@ export const uploadToIpfs = async (
   }
 
   const headers = {
-    'Authorization': `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT || ''}`
+    'Authorization': `Bearer ${jwtToken}`
   };
 
   try {
     const res = await axios.post(url, data, { headers });
+    if (!res.data || !res.data.IpfsHash) {
+      throw new Error("Invalid response from Pinata");
+    }
+    console.log("Successfully uploaded to IPFS:", res.data.IpfsHash);
     return res.data.IpfsHash;
-  } catch (error) {
-    console.error("IPFS upload failed:", error);
-    throw new Error("Failed to upload to IPFS");
+  } catch (error: any) {
+    console.error("IPFS upload failed:", error.response?.data || error.message);
+    throw new Error(error.response?.data?.error || "Failed to upload to IPFS");
   }
 };
 
 // Upload JSON metadata to IPFS
 export const uploadMetadataToIpfs = async (
-  metadata: BountyMetadata | SubmissionMetadata
+  metadata: BountyMetadata | SubmissionMetadata | QuestMetadata
 ): Promise<string> => {
   const url = `https://api.pinata.cloud/pinning/pinJSONToIPFS`;
 
@@ -161,14 +182,14 @@ export const IpfsImage: React.FC<IpfsImageProps> = ({
   className,
   fallback,
 }) => {
-  const [imageSrc, setImageSrc] = useState<string>(() => formatIpfsUrl(cid));
+  const [imageSrc, setImageSrc] = useState<string>(() => formatIpfsUrl(cid, CUSTOM_PINATA_GATEWAY));
   const [hasError, setHasError] = useState<boolean>(false);
 
   const handleError = () => {
     if (!hasError) {
       setHasError(true);
-      // Try alternative gateway
-      setImageSrc(formatIpfsUrl(cid, PINATA_GATEWAY));
+      // Try alternative gateway if custom fails
+      setImageSrc(formatIpfsUrl(cid, IPFS_GATEWAY));
     }
   };
 

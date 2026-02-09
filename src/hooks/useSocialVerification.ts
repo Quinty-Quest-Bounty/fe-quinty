@@ -1,10 +1,14 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import axios from "axios";
 
 export interface XAccount {
   username: string;
   userId: string;
   verified: boolean;
 }
+
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const STORAGE_KEY = 'quinty_x_account';
 
 // Generate a random code verifier for PKCE
 function generateCodeVerifier(): string {
@@ -34,6 +38,81 @@ export function useSocialVerification() {
   const [xAccount, setXAccount] = useState<XAccount | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load X account from localStorage first, then try DB
+  useEffect(() => {
+    const loadXAccount = async () => {
+      // First check localStorage (works offline/without backend)
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const account = JSON.parse(stored) as XAccount;
+          setXAccount(account);
+        }
+      } catch (err) {
+        console.log('No X account in localStorage');
+      }
+
+      // Then try to load from database (source of truth if available)
+      try {
+        const token = localStorage.getItem('quinty_auth_token');
+        const response = await axios.get(`${apiUrl}/auth/me`, {
+          withCredentials: true,
+          timeout: 3000,
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (response.data?.twitter_username) {
+          const account: XAccount = {
+            username: response.data.twitter_username.startsWith('@')
+              ? response.data.twitter_username
+              : `@${response.data.twitter_username}`,
+            userId: response.data.twitter_id || '',
+            verified: true,
+          };
+          setXAccount(account);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(account));
+        } else {
+          // Backend says no X account — clear local state too
+          setXAccount(null);
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      } catch (err) {
+        // Backend not available or user not logged in - keep localStorage data
+        console.log('Backend not available or no X account in DB');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadXAccount();
+  }, []);
+
+  // Save X account to localStorage and optionally to database
+  const saveXAccount = useCallback(async (account: XAccount) => {
+    // Always save to localStorage (works without backend)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(account));
+
+    // Try to save to database (optional, may fail if backend is down)
+    try {
+      const token = localStorage.getItem('quinty_auth_token');
+      await axios.patch(
+        `${apiUrl}/auth/profile`,
+        {
+          twitter_username: account.username.replace('@', ''),
+          twitter_id: account.userId,
+        },
+        {
+          withCredentials: true,
+          timeout: 3000,
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
+      console.log('X account saved to database');
+    } catch (err) {
+      // Backend not available - that's fine, we have localStorage
+      console.log('Could not save X account to DB (backend may be offline)');
+    }
+  }, []);
 
   const buildXAuthUrl = useCallback(async (): Promise<string | null> => {
     const clientId = process.env.NEXT_PUBLIC_TWITTER_CLIENT_ID;
@@ -45,10 +124,10 @@ export function useSocialVerification() {
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = await generateCodeChallenge(codeVerifier);
 
-    // Store for validation
-    sessionStorage.setItem('oauth_state_twitter', state);
-    sessionStorage.setItem('oauth_verifier_twitter', codeVerifier);
-    sessionStorage.setItem('oauth_redirect_uri_twitter', redirectUri);
+    // Store for validation (use localStorage for cross-window access in popups)
+    localStorage.setItem('oauth_state_twitter', state);
+    localStorage.setItem('oauth_verifier_twitter', codeVerifier);
+    localStorage.setItem('oauth_redirect_uri_twitter', redirectUri);
 
     const params = new URLSearchParams({
       client_id: clientId,
@@ -101,12 +180,15 @@ export function useSocialVerification() {
             window.removeEventListener('message', handleMessage);
             popup?.close();
 
-            // Received REAL verified data from backend
+            // Received REAL verified data from Twitter
             const account: XAccount = {
-              username: `@${data.username}`, // Add @ prefix
+              username: data.username.startsWith('@') ? data.username : `@${data.username}`,
               userId: data.userId,
               verified: true,
             };
+
+            // Save to localStorage and optionally to database
+            await saveXAccount(account);
 
             setXAccount(account);
             setIsConnecting(false);
@@ -158,10 +240,28 @@ export function useSocialVerification() {
       setIsConnecting(false);
       return null;
     }
-  }, [buildXAuthUrl, isConnecting]);
+  }, [buildXAuthUrl, isConnecting, saveXAccount]);
 
-  const disconnectX = useCallback(() => {
+  const disconnectX = useCallback(async () => {
     setXAccount(null);
+    localStorage.removeItem(STORAGE_KEY);
+
+    // Remove from database and wait for it to complete
+    try {
+      const token = localStorage.getItem('quinty_auth_token');
+      await axios.patch(
+        `${apiUrl}/auth/profile`,
+        { twitter_username: '', twitter_id: '' },
+        {
+          withCredentials: true,
+          timeout: 5000,
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
+      );
+      console.log('X account removed from database');
+    } catch {
+      console.log('Could not remove X account from DB');
+    }
   }, []);
 
   return {
@@ -169,6 +269,7 @@ export function useSocialVerification() {
     connectX,
     disconnectX,
     isConnecting,
+    isLoading,
     error,
     isConnected: !!xAccount,
   };

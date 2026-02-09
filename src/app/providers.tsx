@@ -8,6 +8,7 @@ import { wagmiConfig } from '../utils/web3';
 import { AlertProvider } from '../hooks/useAlert';
 import { AlertDialogProvider } from '../hooks/useAlertDialog';
 import FarcasterProvider from '../components/FarcasterProvider';
+import { AuthProvider } from '../contexts/AuthContext';
 
 const queryClient = new QueryClient();
 
@@ -21,19 +22,27 @@ export default function Providers({ children }: { children: React.ReactNode }) {
      accentColor: '#0EA885',
      logo: '/images/quinty-logo.png',
     },
+    loginMethods: ['email', 'google', 'wallet', 'twitter'],
+    embeddedWallets: {
+     ethereum: {
+      createOnLogin: 'users-without-wallets',
+     },
+    },
     defaultChain: baseSepolia,
     supportedChains: [baseSepolia],
    }}
   >
   <QueryClientProvider client={queryClient}>
    <WagmiProvider config={wagmiConfig}>
-    <FarcasterProvider>
-     <AlertProvider>
-      <AlertDialogProvider>
-       {children}
-      </AlertDialogProvider>
-     </AlertProvider>
-    </FarcasterProvider>
+    <AuthProvider>
+     <FarcasterProvider>
+      <AlertProvider>
+       <AlertDialogProvider>
+        {children}
+       </AlertDialogProvider>
+      </AlertProvider>
+     </FarcasterProvider>
+    </AuthProvider>
    </WagmiProvider>
   </QueryClientProvider>
  </PrivyProvider>
