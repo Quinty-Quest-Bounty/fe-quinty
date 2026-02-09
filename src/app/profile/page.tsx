@@ -79,7 +79,7 @@ export default function ProfilePage() {
     const [copiedAddress, setCopiedAddress] = useState(false);
     
     // Username editing
-    const { profile, updateUsername } = useAuth();
+    const { profile, updateUsername, refreshProfile } = useAuth();
     const [isEditingUsername, setIsEditingUsername] = useState(false);
     const [newUsername, setNewUsername] = useState("");
     const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
@@ -425,7 +425,7 @@ export default function ProfilePage() {
                                 </p>
                                 <Button
                                     size="sm"
-                                    onClick={connectX}
+                                    onClick={async () => { const result = await connectX(); if (result) await refreshProfile(); }}
                                     disabled={isConnectingX}
                                     className="bg-black hover:bg-slate-800 text-white"
                                 >

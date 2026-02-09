@@ -139,9 +139,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // No existing profile or not authenticated yet — that's fine
         }
 
-        // If backend already has a username, don't overwrite it with Privy-derived one
+        // If backend already has values, don't overwrite with Privy-derived ones
         if (existingProfile?.username) {
           profileData.username = existingProfile.username;
+        }
+        if (existingProfile?.twitter_username) {
+          profileData.twitter_username = existingProfile.twitter_username;
+          profileData.twitter_id = existingProfile.twitter_id;
         }
 
         const response = await axios.post(
