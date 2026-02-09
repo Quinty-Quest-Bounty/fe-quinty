@@ -191,6 +191,7 @@ export default function ProfilePage() {
                 requirements: formData.requirements,
                 images: formData.imageUrl ? [formData.imageUrl] : [],
                 deadline: deadlineTimestamp,
+                questType: formData.questType || "other",
             };
 
             // Upload metadata to Pinata

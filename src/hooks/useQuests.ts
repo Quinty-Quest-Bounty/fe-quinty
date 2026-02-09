@@ -20,6 +20,7 @@ export interface Quest {
     cancelled: boolean;
     requirements: string;
     imageUrl: string;
+    questType?: "development" | "design" | "marketing" | "research" | "other";
 }
 
 export interface Entry {
@@ -88,6 +89,7 @@ export function useQuests() {
 
                         // Extract metadata CID from description (same pattern as bounties)
                         let imageUrl = "";
+                        let questType: "development" | "design" | "marketing" | "research" | "other" | undefined;
                         const metadataMatch = description.match(/Metadata: ipfs:\/\/([a-zA-Z0-9]+)/);
                         if (metadataMatch) {
                             try {
@@ -96,6 +98,10 @@ export function useQuests() {
                                     // The image is stored as a CID, format it as a full URL
                                     const imageCid = metadata.images[0];
                                     imageUrl = `${CUSTOM_PINATA_GATEWAY}${imageCid}`;
+                                }
+                                // Extract questType from metadata
+                                if (metadata.questType) {
+                                    questType = metadata.questType;
                                 }
                             } catch (e) {
                                 console.error(`Error fetching quest ${id} metadata:`, e);
@@ -124,6 +130,7 @@ export function useQuests() {
                                 cancelled,
                                 requirements,
                                 imageUrl,
+                                questType,
                             },
                             entryCount: Number(entryCount),
                         };
@@ -135,7 +142,7 @@ export function useQuests() {
             });
 
             const results = await Promise.all(questPromises);
-            const validResults = results.filter((r): r is { quest: Quest; entryCount: number } => r !== null);
+            const validResults = results.filter((r) => r !== null) as { quest: Quest; entryCount: number }[];
 
             setQuests(validResults.map(r => r.quest).reverse());
             const counts: { [id: number]: number } = {};

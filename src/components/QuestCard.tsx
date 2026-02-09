@@ -25,7 +25,18 @@ interface Quest {
   cancelled: boolean;
   requirements: string;
   imageUrl?: string;
+  questType?: "development" | "design" | "marketing" | "research" | "other";
 }
+
+const getCategoryBadgeColor = (category?: string): string => {
+  switch (category) {
+    case "development": return "bg-blue-50 text-blue-600 border-blue-200";
+    case "design": return "bg-purple-50 text-purple-600 border-purple-200";
+    case "marketing": return "bg-orange-50 text-orange-600 border-orange-200";
+    case "research": return "bg-emerald-50 text-emerald-600 border-emerald-200";
+    default: return "bg-slate-50 text-slate-600 border-slate-200";
+  }
+};
 
 interface QuestCardProps {
   quest: Quest;
@@ -74,10 +85,15 @@ export default function QuestCard({ quest, entryCount = 0 }: QuestCardProps) {
             </div>
           )}
 
-          <div className="absolute top-3 right-3">
+          <div className="absolute top-3 right-3 flex items-center gap-1.5">
             <Badge variant={getStatusColor()} className="rounded-full px-2 py-0 text-[10px] font-bold uppercase">
               {getStatusText()}
             </Badge>
+            {quest.questType && (
+              <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${getCategoryBadgeColor(quest.questType)}`}>
+                {quest.questType}
+              </span>
+            )}
           </div>
         </div>
 

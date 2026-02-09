@@ -3,11 +3,21 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Gift, Calendar as CalendarIcon, Users, Coins } from "lucide-react";
+import { Gift, Calendar as CalendarIcon, Users, Coins, Tag, Code, Palette, Megaphone, BookOpen, MoreHorizontal } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { format } from "date-fns";
 import { ImageUpload } from "../ui/image-upload";
+
+type QuestType = "development" | "design" | "marketing" | "research" | "other";
+
+const QUEST_TYPES: { id: QuestType; label: string; icon: React.ReactNode; color: string }[] = [
+    { id: "development", label: "Development", icon: <Code className="w-4 h-4" />, color: "border-blue-500 bg-blue-50 text-blue-700" },
+    { id: "design", label: "Design", icon: <Palette className="w-4 h-4" />, color: "border-purple-500 bg-purple-50 text-purple-700" },
+    { id: "marketing", label: "Marketing", icon: <Megaphone className="w-4 h-4" />, color: "border-orange-500 bg-orange-50 text-orange-700" },
+    { id: "research", label: "Research", icon: <BookOpen className="w-4 h-4" />, color: "border-emerald-500 bg-emerald-50 text-emerald-700" },
+    { id: "other", label: "Other", icon: <MoreHorizontal className="w-4 h-4" />, color: "border-slate-500 bg-slate-50 text-slate-700" },
+];
 
 interface QuestFormProps {
     onSubmit: (data: any) => void;
@@ -23,6 +33,7 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
         deadline: "",
         requirements: "",
         imageUrl: "",
+        questType: "other" as QuestType,
     });
 
     const [deadlineDate, setDeadlineDate] = useState<Date>();
@@ -67,6 +78,30 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
                                     onChange={e => setFormData({ ...formData, title: e.target.value })}
                                     className="border-slate-200 bg-white"
                                 />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <Tag className="w-3 h-3" />
+                                    Category
+                                </label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {QUEST_TYPES.map((type) => (
+                                        <button
+                                            key={type.id}
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, questType: type.id })}
+                                            className={`flex items-center gap-1.5 px-2.5 py-2 text-xs font-bold border-2 transition-all ${
+                                                formData.questType === type.id
+                                                    ? type.color
+                                                    : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
+                                            }`}
+                                        >
+                                            {type.icon}
+                                            <span className="truncate">{type.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
 
                             <div className="space-y-1.5">

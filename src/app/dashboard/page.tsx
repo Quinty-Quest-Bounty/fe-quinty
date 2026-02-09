@@ -42,6 +42,7 @@ import {
 import {
   fetchMetadataFromIpfs,
   BountyMetadata,
+  QuestMetadata,
   formatIpfsUrl,
 } from "../../utils/ipfs";
 import {
@@ -74,12 +75,14 @@ interface Quest {
   id: number;
   creator: string;
   title: string;
+  description: string;
   amount: bigint;
   totalRecipients: bigint;
   deadline: bigint;
   resolved: boolean;
   cancelled: boolean;
   type: "quest";
+  metadataCid?: string;
 }
 
 type UnifiedItem = Bounty | Quest;
@@ -185,6 +188,7 @@ export default function DashboardPage() {
   const [quests, setQuests] = useState<Quest[]>([]);
   const [loading, setLoading] = useState(true);
   const [bountyMetadata, setBountyMetadata] = useState<Map<number, BountyMetadata>>(new Map());
+  const [questMetadata, setQuestMetadata] = useState<Map<number, QuestMetadata>>(new Map());
   const [ethPrice, setEthPrice] = useState<number>(0);
   const [submissionCounts, setSubmissionCounts] = useState<Map<string, number>>(new Map());
 
@@ -285,7 +289,7 @@ export default function DashboardPage() {
     return () => { isMounted = false; };
   }, [bountyCounter]);
 
-  // Load metadata
+  // Load bounty metadata
   useEffect(() => {
     const loadMetadata = async () => {
       const newMeta = new Map<number, BountyMetadata>();
@@ -301,6 +305,23 @@ export default function DashboardPage() {
     };
     if (bounties.length > 0) loadMetadata();
   }, [bounties]);
+
+  // Load quest metadata
+  useEffect(() => {
+    const loadQuestMetadata = async () => {
+      const newMeta = new Map<number, QuestMetadata>();
+      for (const q of quests) {
+        if (q.metadataCid && !questMetadata.has(q.id)) {
+          try {
+            const meta = await fetchMetadataFromIpfs(q.metadataCid);
+            newMeta.set(q.id, meta);
+          } catch { }
+        }
+      }
+      if (newMeta.size > 0) setQuestMetadata(prev => new Map([...prev, ...newMeta]));
+    };
+    if (quests.length > 0) loadQuestMetadata();
+  }, [quests]);
 
   // Load quests
   useEffect(() => {
@@ -320,8 +341,14 @@ export default function DashboardPage() {
             args: [BigInt(i)],
           });
           if (questData && Array.isArray(questData)) {
-            const [creator, title, , totalAmount, , , qualifiersCount, deadline, , resolved, cancelled] = questData as any[];
-            loadedQuests.push({ id: i, creator, title, amount: totalAmount, totalRecipients: qualifiersCount, deadline: BigInt(deadline), resolved, cancelled, type: "quest" });
+            const [creator, title, description, totalAmount, , , qualifiersCount, deadline, , resolved, cancelled] = questData as any[];
+            // Extract metadata CID from description
+            let metadataCid;
+            if (description && typeof description === "string") {
+              const match = description.match(/Metadata: ipfs:\/\/([a-zA-Z0-9]+)/);
+              metadataCid = match ? match[1] : undefined;
+            }
+            loadedQuests.push({ id: i, creator, title, description: description || "", amount: totalAmount, totalRecipients: qualifiersCount, deadline: BigInt(deadline), resolved, cancelled, type: "quest", metadataCid });
           }
         } catch (err) {
           console.error(`Error loading quest ${i}:`, err);
@@ -378,6 +405,10 @@ export default function DashboardPage() {
           const meta = bountyMetadata.get((item as Bounty).id);
           return meta?.bountyType === categoryFilter;
         }
+        if (item.type === "quest") {
+          const meta = questMetadata.get((item as Quest).id);
+          return meta?.questType === categoryFilter;
+        }
         return true;
       });
     }
@@ -423,7 +454,7 @@ export default function DashboardPage() {
     });
 
     return combined;
-  }, [bounties, quests, activeFilter, typeFilter, categoryFilter, bountyMetadata, debouncedSearch, sortBy]);
+  }, [bounties, quests, activeFilter, typeFilter, categoryFilter, bountyMetadata, questMetadata, debouncedSearch, sortBy]);
 
   const displayedItems = useMemo(() => unifiedItems.slice(0, displayCount), [unifiedItems, displayCount]);
 
@@ -504,7 +535,13 @@ export default function DashboardPage() {
       };
     }
     const q = item as Quest;
-    return { title: q.title || `Quest #${q.id}`, image: null, category: "", subCount };
+    const meta = questMetadata.get(q.id);
+    return {
+      title: q.title || `Quest #${q.id}`,
+      image: meta?.images?.[0] ? formatIpfsUrl(meta.images[0]) : null,
+      category: meta?.questType || "",
+      subCount,
+    };
   };
 
   // === FILTER CONFIG ===
@@ -594,26 +631,24 @@ export default function DashboardPage() {
                   </button>
                 ))}
               </div>
-              {(typeFilter === "all" || typeFilter === "bounties") && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="h-8 px-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap ml-2 flex-shrink-0">
-                      <Filter className="w-3 h-3" />
-                      <span className="hidden sm:inline">{categoryFilters.find(f => f.id === categoryFilter)?.label}</span>
-                      <span className="sm:hidden">Category</span>
-                      <ChevronDown className="w-3 h-3" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    {categoryFilters.map(f => (
-                      <DropdownMenuItem key={f.id} onClick={() => setCategoryFilter(f.id)} className="text-xs uppercase tracking-wider cursor-pointer">
-                        <Check className={`w-4 h-4 mr-2 ${categoryFilter === f.id ? "opacity-100" : "opacity-0"}`} />
-                        {f.label}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="h-8 px-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap ml-2 flex-shrink-0">
+                    <Filter className="w-3 h-3" />
+                    <span className="hidden sm:inline">{categoryFilters.find(f => f.id === categoryFilter)?.label}</span>
+                    <span className="sm:hidden">Category</span>
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  {categoryFilters.map(f => (
+                    <DropdownMenuItem key={f.id} onClick={() => setCategoryFilter(f.id)} className="text-xs uppercase tracking-wider cursor-pointer">
+                      <Check className={`w-4 h-4 mr-2 ${categoryFilter === f.id ? "opacity-100" : "opacity-0"}`} />
+                      {f.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Results count */}

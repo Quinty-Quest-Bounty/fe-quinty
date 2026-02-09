@@ -34,6 +34,7 @@ export interface QuestMetadata {
   requirements: string;
   images?: string[];
   deadline: number;
+  questType: "development" | "design" | "marketing" | "research" | "other";
 }
 
 // Helper function to format IPFS URLs
