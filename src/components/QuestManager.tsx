@@ -50,13 +50,19 @@ export default function QuestManager() {
       const perQualifierWei = parseETH(formData.perQualifier);
       const totalAmount = perQualifierWei * BigInt(formData.maxQualifiers);
 
+      // Append image URL to description if provided
+      let description = formData.description;
+      if (formData.imageUrl) {
+        description = `${formData.description}\n\nImage: ${formData.imageUrl}`;
+      }
+
       const result = await writeContractAsync({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
         abi: QUEST_ABI,
         functionName: "createQuest",
         args: [
           formData.title,
-          formData.description,
+          description,
           perQualifierWei,
           BigInt(formData.maxQualifiers),
           BigInt(deadlineTimestamp),
