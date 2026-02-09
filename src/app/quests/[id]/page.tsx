@@ -15,7 +15,7 @@ import {
     BASE_SEPOLIA_CHAIN_ID,
 } from "../../../utils/contracts";
 import { formatETH, formatTimeLeft, formatAddress, wagmiConfig } from "../../../utils/web3";
-import { uploadToIpfs, fetchMetadataFromIpfs, QuestMetadata, CUSTOM_PINATA_GATEWAY } from "../../../utils/ipfs";
+import { uploadToIpfs, fetchMetadataFromIpfs, QuestMetadata, formatIpfsUrl } from "../../../utils/ipfs";
 import { getEthPriceInUSD, convertEthToUSD, formatUSD } from "../../../utils/prices";
 import { useAlert } from "../../../hooks/useAlert";
 import { Button } from "../../../components/ui/button";
@@ -133,7 +133,7 @@ export default function QuestDetailPage() {
                     try {
                         const metadata = await fetchMetadataFromIpfs(metadataMatch[1]) as QuestMetadata;
                         if (metadata.images && metadata.images.length > 0) {
-                            imageUrl = `${CUSTOM_PINATA_GATEWAY}${metadata.images[0]}`;
+                            imageUrl = formatIpfsUrl(metadata.images[0]);
                         }
                     } catch (err) {
                         console.error("Error fetching quest metadata:", err);
