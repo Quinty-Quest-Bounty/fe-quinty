@@ -56,9 +56,11 @@ export function useSocialVerification() {
 
       // Then try to load from database (if backend is available)
       try {
-        const response = await axios.get(`${apiUrl}/auth/me`, { 
+        const token = localStorage.getItem('quinty_auth_token');
+        const response = await axios.get(`${apiUrl}/auth/me`, {
           withCredentials: true,
           timeout: 3000, // 3 second timeout
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         if (response.data?.twitter_username) {
           const account: XAccount = {
@@ -89,15 +91,17 @@ export function useSocialVerification() {
 
     // Try to save to database (optional, may fail if backend is down)
     try {
+      const token = localStorage.getItem('quinty_auth_token');
       await axios.patch(
         `${apiUrl}/auth/profile`,
-        { 
+        {
           twitter_username: account.username.replace('@', ''),
           twitter_id: account.userId,
         },
-        { 
+        {
           withCredentials: true,
           timeout: 3000,
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
         }
       );
       console.log('X account saved to database');
@@ -240,10 +244,15 @@ export function useSocialVerification() {
     localStorage.removeItem(STORAGE_KEY);
     
     // Try to remove from database too (optional)
+    const token = localStorage.getItem('quinty_auth_token');
     axios.patch(
       `${apiUrl}/auth/profile`,
       { twitter_username: null, twitter_id: null },
-      { withCredentials: true, timeout: 3000 }
+      {
+        withCredentials: true,
+        timeout: 3000,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      }
     ).catch(() => {
       // Backend not available - that's fine
     });

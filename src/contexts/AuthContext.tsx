@@ -44,8 +44,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authToken, setAuthToken] = useState<string | null>(null);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+  // Load auth token from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('quinty_auth_token');
+    if (stored) setAuthToken(stored);
+  }, []);
 
   // Sync profile with backend when Privy user changes
   useEffect(() => {
@@ -125,6 +132,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         console.log('Profile synced to backend successfully:', response.data);
 
+        // Store JWT token for subsequent authenticated requests
+        if (response.data.access_token) {
+          setAuthToken(response.data.access_token);
+          localStorage.setItem('quinty_auth_token', response.data.access_token);
+        }
+
         // Update profile with any data from backend
         if (response.data.profile) {
           setProfile(response.data.profile);
@@ -162,6 +175,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     await logout();
     setProfile(null);
+    setAuthToken(null);
+    localStorage.removeItem('quinty_auth_token');
 
     // Clear backend session
     try {
@@ -184,11 +199,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const updateUsername = async (username: string): Promise<boolean> => {
     if (!profile) return false;
 
+    const token = authToken || localStorage.getItem('quinty_auth_token');
     try {
       const response = await axios.patch(
         `${apiUrl}/auth/profile`,
         { username },
-        { withCredentials: true }
+        {
+          withCredentials: true,
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
       );
 
       if (response.data) {
