@@ -29,8 +29,8 @@ function CallbackContent() {
         return;
       }
 
-      // Validate state
-      const storedState = sessionStorage.getItem('oauth_state_twitter');
+      // Validate state (use localStorage for cross-window access in popups)
+      const storedState = localStorage.getItem('oauth_state_twitter');
       if (state !== storedState) {
         setStatus('error');
         setErrorMessage('Invalid state parameter');
@@ -56,9 +56,9 @@ function CallbackContent() {
       }
 
       try {
-        // Get stored PKCE values
-        const codeVerifier = sessionStorage.getItem('oauth_verifier_twitter');
-        const redirectUri = sessionStorage.getItem('oauth_redirect_uri_twitter');
+        // Get stored PKCE values (use localStorage for cross-window access in popups)
+        const codeVerifier = localStorage.getItem('oauth_verifier_twitter');
+        const redirectUri = localStorage.getItem('oauth_redirect_uri_twitter');
 
         if (!codeVerifier || !redirectUri) {
           throw new Error('Missing PKCE values');
@@ -106,9 +106,9 @@ function CallbackContent() {
         const { id: userId, username } = userData.data;
 
         // Clear stored values
-        sessionStorage.removeItem('oauth_state_twitter');
-        sessionStorage.removeItem('oauth_verifier_twitter');
-        sessionStorage.removeItem('oauth_redirect_uri_twitter');
+        localStorage.removeItem('oauth_state_twitter');
+        localStorage.removeItem('oauth_verifier_twitter');
+        localStorage.removeItem('oauth_redirect_uri_twitter');
 
         setStatus('success');
 

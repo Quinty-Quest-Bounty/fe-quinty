@@ -117,10 +117,10 @@ export function useSocialVerification() {
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = await generateCodeChallenge(codeVerifier);
 
-    // Store for validation
-    sessionStorage.setItem('oauth_state_twitter', state);
-    sessionStorage.setItem('oauth_verifier_twitter', codeVerifier);
-    sessionStorage.setItem('oauth_redirect_uri_twitter', redirectUri);
+    // Store for validation (use localStorage for cross-window access in popups)
+    localStorage.setItem('oauth_state_twitter', state);
+    localStorage.setItem('oauth_verifier_twitter', codeVerifier);
+    localStorage.setItem('oauth_redirect_uri_twitter', redirectUri);
 
     const params = new URLSearchParams({
       client_id: clientId,
