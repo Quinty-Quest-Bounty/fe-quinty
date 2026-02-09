@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { Users, Clock, Coins, Eye, Share2, Gift } from "lucide-react";
 import { useShare } from "@/hooks/useShare";
+import { useWalletName } from "@/hooks/useWalletName";
 import { QuestQuickView } from "./quests/QuestQuickView";
 
 interface Quest {
@@ -47,6 +48,7 @@ export default function QuestCard({ quest, entryCount = 0 }: QuestCardProps) {
   const router = useRouter();
   const [quickView, setQuickView] = useState(false);
   const { shareLink } = useShare();
+  const creatorName = useWalletName(quest.creator);
   const progress = Math.min((quest.qualifiersCount / quest.maxQualifiers) * 100, 100);
   const isExpired = Date.now() / 1000 > quest.deadline;
 
@@ -129,11 +131,16 @@ export default function QuestCard({ quest, entryCount = 0 }: QuestCardProps) {
               </div>
               <span className="text-[10px] font-medium text-slate-400">Per User</span>
             </div>
-            <Avatar className="size-7 border border-slate-100">
-              <AvatarFallback className="text-[8px] font-bold bg-slate-100 text-slate-500">
-                {quest.creator.slice(2, 4).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-medium text-slate-400 truncate max-w-[100px]">
+                {creatorName || formatAddress(quest.creator)}
+              </span>
+              <Avatar className="size-7 border border-slate-100">
+                <AvatarFallback className="text-[8px] font-bold bg-slate-100 text-slate-500">
+                  {(creatorName || quest.creator.slice(2, 4)).slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </div>
           </div>
         </CardContent>
       </Card>

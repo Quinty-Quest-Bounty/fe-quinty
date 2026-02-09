@@ -23,6 +23,7 @@ import {
 } from "../../../utils/web3";
 import { fetchMetadataFromIpfs, BountyMetadata, uploadToIpfs } from "../../../utils/ipfs";
 import { getEthPriceInUSD, convertEthToUSD, formatUSD } from "../../../utils/prices";
+import { WalletName } from "../../../components/WalletName";
 import { useAlert } from "../../../hooks/useAlert";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
@@ -491,7 +492,7 @@ export default function BountyDetailPage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-xs text-stone-400">Creator</p>
-                    <p className="text-sm font-mono font-medium text-stone-700">{formatAddress(bounty.creator)}</p>
+                    <p className="text-sm font-medium text-stone-700"><WalletName address={bounty.creator} /></p>
                   </div>
                   {isCreator && <span className="text-[10px] font-medium px-2 py-0.5 bg-[#0EA885]/10 text-[#0EA885]">You</span>}
                 </div>
@@ -617,7 +618,7 @@ export default function BountyDetailPage() {
                     <div className="size-12 bg-amber-100 flex items-center justify-center text-2xl">🏆</div>
                     <div>
                       <p className="text-xs text-amber-600 font-medium uppercase tracking-wider">Winner</p>
-                      <p className="font-mono font-bold text-stone-800">{formatAddress(bounty.selectedWinner)}</p>
+                      <p className="font-bold text-stone-800"><WalletName address={bounty.selectedWinner} /></p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -667,7 +668,7 @@ export default function BountyDetailPage() {
                           )}
                           {isWinner && <span className="text-xs font-semibold bg-[#0EA885] text-white px-2 py-0.5">🏆 Winner</span>}
                           <div>
-                            <p className="text-sm font-mono font-medium text-stone-700">{formatAddress(sub.submitter)}</p>
+                            <p className="text-sm font-medium text-stone-700"><WalletName address={sub.submitter} /></p>
                             <p className="text-xs text-stone-400">@{sub.socialHandle} • {formatETH(sub.deposit)} ETH deposit</p>
                           </div>
                         </div>

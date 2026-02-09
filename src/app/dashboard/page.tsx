@@ -12,6 +12,7 @@ import {
 } from "../../utils/contracts";
 import { readContract } from "@wagmi/core";
 import { wagmiConfig, formatAddress } from "../../utils/web3";
+import { WalletName } from "../../components/WalletName";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import {
@@ -758,7 +759,7 @@ export default function DashboardPage() {
                           {/* Creator */}
                           <div className="flex items-center gap-2 mb-3">
                             <img src={getAvatarUrl(item.creator, 18)} alt="" className="w-[18px] h-[18px] flex-shrink-0" />
-                            <span className="text-[11px] text-stone-400 truncate">{formatAddress(item.creator)}</span>
+                            <WalletName address={item.creator} className="text-[11px] text-stone-400 truncate" />
                           </div>
 
                           {/* Footer: Meta info + Price */}
@@ -1003,7 +1004,7 @@ export default function DashboardPage() {
                                     act.action === "Completed" || act.action === "Resolved" ? "text-stone-500" : "text-amber-600"
                                     }`}>{act.action}</span>
                                   <span className="mx-1.5">&bull;</span>
-                                  {formatAddress(act.creator)}
+                                  <WalletName address={act.creator} />
                                 </p>
                               </div>
                             </div>

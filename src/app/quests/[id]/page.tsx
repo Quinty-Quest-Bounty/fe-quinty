@@ -15,6 +15,7 @@ import {
     BASE_SEPOLIA_CHAIN_ID,
 } from "../../../utils/contracts";
 import { formatETH, formatTimeLeft, formatAddress, wagmiConfig } from "../../../utils/web3";
+import { WalletName } from "../../../components/WalletName";
 import { uploadToIpfs, fetchMetadataFromIpfs, QuestMetadata, formatIpfsUrl } from "../../../utils/ipfs";
 import { getEthPriceInUSD, convertEthToUSD, formatUSD } from "../../../utils/prices";
 import { useAlert } from "../../../hooks/useAlert";
@@ -447,7 +448,7 @@ export default function QuestDetailPage() {
                                     </div>
                                     <div className="flex-1">
                                         <p className="text-xs text-stone-400">Creator</p>
-                                        <p className="text-sm font-mono font-medium text-stone-700">{formatAddress(quest.creator)}</p>
+                                        <p className="text-sm font-medium text-stone-700"><WalletName address={quest.creator} /></p>
                                     </div>
                                     {isCreator && <span className="text-[10px] font-medium px-2 py-0.5 bg-amber-100 text-amber-600">You</span>}
                                 </div>
@@ -584,7 +585,7 @@ export default function QuestDetailPage() {
                                                          <Users className="size-5 text-stone-400" />}
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-mono font-medium text-stone-700">{formatAddress(entry.solver)}</p>
+                                                        <p className="text-sm font-medium text-stone-700"><WalletName address={entry.solver} /></p>
                                                         <div className="flex items-center gap-2 mt-0.5">
                                                             <span className={`text-[10px] font-medium px-1.5 py-0.5 ${
                                                                 entry.status === 1 ? "bg-green-100 text-green-700" :

@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Clock, Users, Trophy, Eye, Share2, Target, AlertTriangle, Gavel } from "lucide-react";
 import { useShare } from "@/hooks/useShare";
+import { useWalletName } from "@/hooks/useWalletName";
 import { BountyQuickView } from "./bounties/BountyQuickView";
 import { Bounty } from "../hooks/useBounties";
 
@@ -87,6 +88,7 @@ export default function BountyCard({ bounty, onTriggerSlash }: BountyCardProps) 
     }
   };
 
+  const creatorName = useWalletName(bounty.creator);
   const isCreator = address?.toLowerCase() === bounty.creator.toLowerCase();
   const canSlash = phase === "SLASH_PENDING" && bounty.submissionCount > 0;
 
@@ -178,11 +180,16 @@ export default function BountyCard({ bounty, onTriggerSlash }: BountyCardProps) 
                 </span>
               )}
             </div>
-            <Avatar className="size-7 border border-slate-100">
-              <AvatarFallback className="text-[8px] font-bold bg-slate-100 text-slate-500">
-                {bounty.creator.slice(2, 4).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-medium text-slate-400 truncate max-w-[100px]">
+                {creatorName || formatAddress(bounty.creator)}
+              </span>
+              <Avatar className="size-7 border border-slate-100">
+                <AvatarFallback className="text-[8px] font-bold bg-slate-100 text-slate-500">
+                  {(creatorName || bounty.creator.slice(2, 4)).slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </div>
           </div>
         </CardContent>
       </Card>
