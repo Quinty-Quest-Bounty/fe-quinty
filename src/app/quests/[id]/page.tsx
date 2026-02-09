@@ -97,6 +97,8 @@ export default function QuestDetailPage() {
     const [isUploadingProof, setIsUploadingProof] = useState(false);
     const [ethPrice, setEthPrice] = useState<number>(0);
     const [showSubmitForm, setShowSubmitForm] = useState(false);
+    const [viewingCid, setViewingCid] = useState<string | null>(null);
+    const [viewingTitle, setViewingTitle] = useState<string>("");
 
     const { writeContract, data: hash, isPending } = useWriteContract();
     const { isLoading: isConfirming, isSuccess: isConfirmed } =
@@ -542,10 +544,16 @@ export default function QuestDetailPage() {
                                                 </div>
                                             </div>
                                             {!(entry.ipfsProofCid.includes("twitter.com") || entry.ipfsProofCid.includes("x.com")) && (
-                                                <Button variant="outline" size="sm" asChild className="border-stone-200 text-stone-600 h-8">
-                                                    <a href={`https://ipfs.io/ipfs/${entry.ipfsProofCid}`} target="_blank" rel="noopener noreferrer">
-                                                        <ExternalLink className="size-3 mr-1" /> View
-                                                    </a>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setViewingCid(entry.ipfsProofCid);
+                                                        setViewingTitle(`Entry by ${formatAddress(entry.solver)}`);
+                                                    }}
+                                                    className="border-stone-200 text-stone-600 h-8"
+                                                >
+                                                    <ExternalLink className="size-3 mr-1" /> View
                                                 </Button>
                                             )}
                                         </div>
@@ -609,6 +617,30 @@ export default function QuestDetailPage() {
                             {isUploadingProof ? "Uploading..." : isPending || isConfirming ? "Submitting..." : "Submit Entry"}
                         </Button>
                     </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* IPFS Viewer */}
+            <Dialog open={!!viewingCid} onOpenChange={() => setViewingCid(null)}>
+                <DialogContent className="max-w-3xl">
+                    <DialogHeader>
+                        <DialogTitle>{viewingTitle}</DialogTitle>
+                    </DialogHeader>
+                    {viewingCid && (
+                        <div className="mt-4">
+                            <img src={`https://purple-elderly-silverfish-382.mypinata.cloud/ipfs/${viewingCid}`} alt="Entry Proof" className="w-full max-h-96 object-contain border border-stone-200" />
+                            <div className="flex gap-2 mt-4">
+                                <Button variant="outline" size="sm" asChild className="flex-1">
+                                    <a href={`https://ipfs.io/ipfs/${viewingCid}`} target="_blank" rel="noopener noreferrer">
+                                        <ExternalLink className="size-3 mr-2" /> Open
+                                    </a>
+                                </Button>
+                                <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(`https://ipfs.io/ipfs/${viewingCid}`); showAlert({ title: "Copied!", description: "Link copied" }); }} className="flex-1">
+                                    <Copy className="size-3 mr-2" /> Copy
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </DialogContent>
             </Dialog>
         </div>
