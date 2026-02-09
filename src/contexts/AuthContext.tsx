@@ -98,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         (privyUser.google as any)?.picture ||
         privyUser.twitter?.profilePictureUrl;
 
-      // Create profile object
+      // Create profile object (without twitter fields - those are managed by X OAuth)
       const profileData: UserProfile = {
         id: privyUser.id,
         email: email || undefined,
@@ -107,8 +107,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         avatar_url: avatarUrl || undefined,
         wallet_address: walletAddress || undefined,
         google_id: googleId || undefined,
-        twitter_id: twitterId || undefined,
-        twitter_username: twitterUsername || undefined,
       };
 
       // Sync to backend database
@@ -133,7 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (existingProfile?.username) {
           profileData.username = existingProfile.username;
         }
-        // Preserve twitter data managed by our custom OAuth (not Privy)
+        // Merge twitter data from backend (managed by our custom OAuth, not Privy)
         if (existingProfile?.twitter_username) {
           profileData.twitter_username = existingProfile.twitter_username;
           profileData.twitter_id = existingProfile.twitter_id;
@@ -142,9 +140,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Set profile with merged data for immediate UI update
         setProfile({ ...profileData });
 
+        // Send to sync-profile WITHOUT twitter fields to avoid overwriting
+        const { twitter_username, twitter_id, ...syncPayload } = profileData;
         const response = await axios.post(
           `${apiUrl}/auth/sync-profile`,
-          profileData,
+          syncPayload,
           { withCredentials: true }
         );
 
