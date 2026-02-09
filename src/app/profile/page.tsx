@@ -62,7 +62,8 @@ export default function ProfilePage() {
     const { writeContractAsync } = useWriteContract();
     const { isLoading: isBountyConfirming, isSuccess: isBountyConfirmed } = useWaitForTransactionReceipt({ hash: bountyHash });
     const [activeTab, setActiveTab] = useState<ProfileTab>("overview");
-    const [historyFilter, setHistoryFilter] = useState<string>("all");
+    const [historyTypeFilter, setHistoryTypeFilter] = useState<"all" | "bounties" | "quests">("all");
+    const [historyActionFilter, setHistoryActionFilter] = useState<"all" | "created" | "submitted" | "wins">("all");
     const [createType, setCreateType] = useState<CreateType>(null);
     const [showCreateOptions, setShowCreateOptions] = useState(false);
     const [copiedAddress, setCopiedAddress] = useState(false);
@@ -93,14 +94,26 @@ export default function ProfilePage() {
     }, [quests, address]);
 
     const filteredTransactions = useMemo(() => {
-        if (historyFilter === "all") return transactions;
-        if (historyFilter === "bounties") return transactions.filter(tx => tx.contractType === "Quinty");
-        if (historyFilter === "quests") return transactions.filter(tx => tx.contractType === "Quest");
-        if (historyFilter === "created") return transactions.filter(tx => tx.type.includes("created"));
-        if (historyFilter === "submitted") return transactions.filter(tx => tx.type.includes("submitted"));
-        if (historyFilter === "wins") return transactions.filter(tx => tx.type.includes("won") || tx.type.includes("approved"));
-        return transactions;
-    }, [transactions, historyFilter]);
+        let filtered = transactions;
+
+        // Apply type filter (Bounties / Quests)
+        if (historyTypeFilter === "bounties") {
+            filtered = filtered.filter(tx => tx.contractType === "Quinty");
+        } else if (historyTypeFilter === "quests") {
+            filtered = filtered.filter(tx => tx.contractType === "Quest");
+        }
+
+        // Apply action filter (Created / Submitted / Wins)
+        if (historyActionFilter === "created") {
+            filtered = filtered.filter(tx => tx.type.includes("created"));
+        } else if (historyActionFilter === "submitted") {
+            filtered = filtered.filter(tx => tx.type.includes("submitted"));
+        } else if (historyActionFilter === "wins") {
+            filtered = filtered.filter(tx => tx.type.includes("won") || tx.type.includes("approved"));
+        }
+
+        return filtered;
+    }, [transactions, historyTypeFilter, historyActionFilter]);
 
     const getIcon = (type: string) => {
         if (type.includes("bounty")) return <Target className="w-4 h-4 text-[#0EA885]" />;
@@ -730,44 +743,54 @@ export default function ProfilePage() {
                         transition={{ duration: 0.2 }}
                     >
                         {/* History Filter Tabs */}
-                        <div className="flex flex-wrap justify-center gap-2 mb-8">
-                            <div className="inline-flex flex-wrap gap-1 p-1 bg-slate-100 border border-slate-200">
-                                {[
-                                    { id: "all", label: "All" },
-                                    { id: "bounties", label: "Bounties" },
-                                    { id: "quests", label: "Quests" },
-                                ].map((tab) => (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => setHistoryFilter(tab.id)}
-                                        className={`px-3 sm:px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
-                                            historyFilter === tab.id
-                                                ? "bg-white text-slate-900 shadow-sm border border-slate-200"
-                                                : "text-slate-500 hover:text-slate-900"
-                                        }`}
-                                    >
-                                        {tab.label}
-                                    </button>
-                                ))}
+                        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
+                            {/* Type Filter */}
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Type:</span>
+                                <div className="inline-flex gap-1 p-1 bg-slate-100 border border-slate-200">
+                                    {[
+                                        { id: "all" as const, label: "All" },
+                                        { id: "bounties" as const, label: "Bounties" },
+                                        { id: "quests" as const, label: "Quests" },
+                                    ].map((tab) => (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => setHistoryTypeFilter(tab.id)}
+                                            className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
+                                                historyTypeFilter === tab.id
+                                                    ? "bg-white text-slate-900 shadow-sm border border-slate-200"
+                                                    : "text-slate-500 hover:text-slate-900"
+                                            }`}
+                                        >
+                                            {tab.label}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                            <div className="inline-flex flex-wrap gap-1 p-1 bg-slate-100 border border-slate-200">
-                                {[
-                                    { id: "created", label: "Created" },
-                                    { id: "submitted", label: "Submitted" },
-                                    { id: "wins", label: "Wins" },
-                                ].map((tab) => (
-                                    <button
-                                        key={tab.id}
-                                        onClick={() => setHistoryFilter(tab.id)}
-                                        className={`px-3 sm:px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
-                                            historyFilter === tab.id
-                                                ? "bg-white text-slate-900 shadow-sm border border-slate-200"
-                                                : "text-slate-500 hover:text-slate-900"
-                                        }`}
-                                    >
-                                        {tab.label}
-                                    </button>
-                                ))}
+
+                            {/* Action Filter */}
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Action:</span>
+                                <div className="inline-flex gap-1 p-1 bg-slate-100 border border-slate-200">
+                                    {[
+                                        { id: "all" as const, label: "All" },
+                                        { id: "created" as const, label: "Created" },
+                                        { id: "submitted" as const, label: "Submitted" },
+                                        { id: "wins" as const, label: "Wins" },
+                                    ].map((tab) => (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => setHistoryActionFilter(tab.id)}
+                                            className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
+                                                historyActionFilter === tab.id
+                                                    ? "bg-white text-slate-900 shadow-sm border border-slate-200"
+                                                    : "text-slate-500 hover:text-slate-900"
+                                            }`}
+                                        >
+                                            {tab.label}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         </div>
 
