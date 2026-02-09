@@ -25,14 +25,14 @@ interface BountyCardProps {
 // Helper to get current phase based on status and deadlines
 function getCurrentPhase(bounty: Bounty): string {
   const now = BigInt(Math.floor(Date.now() / 1000));
-  
+
   if (bounty.status === BountyStatus.RESOLVED) return "RESOLVED";
   if (bounty.status === BountyStatus.SLASHED) return "SLASHED";
-  
+
   // Check actual phase based on time
   if (now <= bounty.openDeadline) return "OPEN";
   if (now <= bounty.judgingDeadline) return "JUDGING";
-  
+
   // Past judging deadline - slash pending
   return "SLASH_PENDING";
 }
@@ -61,10 +61,10 @@ export default function BountyCard({ bounty, onTriggerSlash }: BountyCardProps) 
 
   const phase = getCurrentPhase(bounty);
   const now = BigInt(Math.floor(Date.now() / 1000));
-  
+
   // Determine which deadline to show
   const relevantDeadline = phase === "OPEN" ? bounty.openDeadline : bounty.judgingDeadline;
-  
+
   const getPhaseLabel = () => {
     switch (phase) {
       case "OPEN": return "Open";
@@ -149,14 +149,14 @@ export default function BountyCard({ bounty, onTriggerSlash }: BountyCardProps) 
               {phase === "SLASH_PENDING" && "Slash Available"}
             </div>
           </div>
-          
+
           {/* Deposit requirement indicator */}
           {phase === "OPEN" && (
             <div className="mt-2 text-[10px] text-amber-600 font-medium">
               1% deposit required to submit
             </div>
           )}
-          
+
           {/* Slash percent indicator */}
           {(phase === "JUDGING" || phase === "SLASH_PENDING") && (
             <div className="mt-2 text-[10px] text-slate-500 font-medium">
