@@ -441,7 +441,7 @@ export default function QuestDetailPage() {
                         {/* Hero Image */}
                         {quest.imageUrl && (
                             <div className="bg-white border border-stone-200 overflow-hidden">
-                                <img src={quest.imageUrl} alt={quest.title} className="w-full h-auto max-h-72 object-cover" />
+                                <img src={quest.imageUrl} alt={quest.title} className="w-full h-auto max-h-96 object-contain" />
                             </div>
                         )}
 

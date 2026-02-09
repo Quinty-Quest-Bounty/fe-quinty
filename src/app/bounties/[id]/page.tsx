@@ -511,7 +511,7 @@ export default function BountyDetailPage() {
                 <img
                   src={`https://purple-elderly-silverfish-382.mypinata.cloud/ipfs/${metadata.images[0]}`}
                   alt={metadata.title}
-                  className="w-full h-auto max-h-72 object-cover"
+                  className="w-full h-auto max-h-96 object-contain"
                 />
               </div>
             )}
