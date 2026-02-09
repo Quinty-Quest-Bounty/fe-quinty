@@ -37,7 +37,17 @@ import {
     X as XIcon,
     CheckCircle,
     Link as LinkIcon,
+    Filter,
+    Trophy,
+    Send,
+    Sparkles,
 } from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "../../components/ui/dropdown-menu";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../contexts/AuthContext";
 import { Input } from "../../components/ui/input";
@@ -743,55 +753,74 @@ export default function ProfilePage() {
                         transition={{ duration: 0.2 }}
                     >
                         {/* History Filter Tabs */}
-                        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
+                        <div className="flex justify-center items-center gap-3 mb-8">
                             {/* Type Filter */}
-                            <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Type:</span>
-                                <div className="inline-flex gap-1 p-1 bg-slate-100 border border-slate-200">
-                                    {[
-                                        { id: "all" as const, label: "All" },
-                                        { id: "bounties" as const, label: "Bounties" },
-                                        { id: "quests" as const, label: "Quests" },
-                                    ].map((tab) => (
-                                        <button
-                                            key={tab.id}
-                                            onClick={() => setHistoryTypeFilter(tab.id)}
-                                            className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
-                                                historyTypeFilter === tab.id
-                                                    ? "bg-white text-slate-900 shadow-sm border border-slate-200"
-                                                    : "text-slate-500 hover:text-slate-900"
-                                            }`}
-                                        >
-                                            {tab.label}
-                                        </button>
-                                    ))}
-                                </div>
+                            <div className="inline-flex gap-1 p-1 bg-slate-100 border border-slate-200">
+                                {[
+                                    { id: "all" as const, label: "All" },
+                                    { id: "bounties" as const, label: "Bounties" },
+                                    { id: "quests" as const, label: "Quests" },
+                                ].map((tab) => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setHistoryTypeFilter(tab.id)}
+                                        className={`px-3 sm:px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
+                                            historyTypeFilter === tab.id
+                                                ? "bg-white text-slate-900 shadow-sm border border-slate-200"
+                                                : "text-slate-500 hover:text-slate-900"
+                                        }`}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                ))}
                             </div>
 
-                            {/* Action Filter */}
-                            <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Action:</span>
-                                <div className="inline-flex gap-1 p-1 bg-slate-100 border border-slate-200">
-                                    {[
-                                        { id: "all" as const, label: "All" },
-                                        { id: "created" as const, label: "Created" },
-                                        { id: "submitted" as const, label: "Submitted" },
-                                        { id: "wins" as const, label: "Wins" },
-                                    ].map((tab) => (
-                                        <button
-                                            key={tab.id}
-                                            onClick={() => setHistoryActionFilter(tab.id)}
-                                            className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
-                                                historyActionFilter === tab.id
-                                                    ? "bg-white text-slate-900 shadow-sm border border-slate-200"
-                                                    : "text-slate-500 hover:text-slate-900"
-                                            }`}
-                                        >
-                                            {tab.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
+                            {/* Action Filter Dropdown */}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <button className={`flex items-center gap-2 px-3 py-2 border transition-all ${
+                                        historyActionFilter !== "all" 
+                                            ? "bg-[#0EA885] text-white border-[#0EA885]" 
+                                            : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
+                                    }`}>
+                                        <Filter className="w-4 h-4" />
+                                        <span className="text-xs font-bold uppercase tracking-wider">
+                                            {historyActionFilter === "all" ? "Filter" : historyActionFilter}
+                                        </span>
+                                        <ChevronDown className="w-3 h-3" />
+                                    </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-40">
+                                    <DropdownMenuItem 
+                                        onClick={() => setHistoryActionFilter("all")}
+                                        className={historyActionFilter === "all" ? "bg-slate-100" : ""}
+                                    >
+                                        <Sparkles className="w-4 h-4 mr-2 text-slate-400" />
+                                        <span className="text-xs font-medium">All Actions</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                        onClick={() => setHistoryActionFilter("created")}
+                                        className={historyActionFilter === "created" ? "bg-slate-100" : ""}
+                                    >
+                                        <Plus className="w-4 h-4 mr-2 text-violet-500" />
+                                        <span className="text-xs font-medium">Created</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                        onClick={() => setHistoryActionFilter("submitted")}
+                                        className={historyActionFilter === "submitted" ? "bg-slate-100" : ""}
+                                    >
+                                        <Send className="w-4 h-4 mr-2 text-blue-500" />
+                                        <span className="text-xs font-medium">Submitted</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                        onClick={() => setHistoryActionFilter("wins")}
+                                        className={historyActionFilter === "wins" ? "bg-slate-100" : ""}
+                                    >
+                                        <Trophy className="w-4 h-4 mr-2 text-amber-500" />
+                                        <span className="text-xs font-medium">Wins</span>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
 
                         {/* Transactions List */}
