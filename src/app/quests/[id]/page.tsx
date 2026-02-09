@@ -16,7 +16,6 @@ import {
 import { formatETH, formatTimeLeft, formatAddress, wagmiConfig } from "../../../utils/web3";
 import { uploadToIpfs, fetchMetadataFromIpfs, QuestMetadata, CUSTOM_PINATA_GATEWAY } from "../../../utils/ipfs";
 import { useAlert } from "../../../hooks/useAlert";
-import { useSocialVerification } from "../../../hooks/useSocialVerification";
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -42,16 +41,12 @@ import {
     Send,
     ExternalLink,
     Calendar,
-    Coins,
     FileText,
-    Target,
     Loader2,
     Upload,
     X,
     CheckCircle2,
-    Sparkles,
     Shield,
-    Link as LinkIcon,
 } from "lucide-react";
 
 interface Quest {
@@ -86,9 +81,6 @@ export default function QuestDetailPage() {
     const { address } = useAccount();
     const { showAlert } = useAlert();
     const questId = params.id as string;
-
-    // X account verification
-    const { xAccount, connectX, isConnecting: isConnectingX, isConnected: isXConnected, isLoading: isLoadingX } = useSocialVerification();
 
     const [quest, setQuest] = useState<Quest | null>(null);
     const [entries, setEntries] = useState<Entry[]>([]);
@@ -222,19 +214,18 @@ export default function QuestDetailPage() {
     };
 
     const submitEntry = async () => {
-        // Check if X account is connected
-        if (!isXConnected || !xAccount) {
-            showAlert({
-                title: "X Account Required",
-                description: "Please connect your X account to submit an entry",
-            });
-            return;
-        }
-
         if (!uploadedProofImage && !newEntry.ipfsProofCid.trim()) {
             showAlert({
                 title: "Missing Proof",
                 description: "Please upload a proof image or enter an IPFS CID",
+            });
+            return;
+        }
+
+        if (!newEntry.socialHandle.trim()) {
+            showAlert({
+                title: "Missing Information",
+                description: "Please enter your social handle",
             });
             return;
         }
@@ -264,15 +255,15 @@ export default function QuestDetailPage() {
                 }
             }
 
-            // Use verified X account username from database
-            const verifiedSocialHandle = xAccount.username.replace('@', '');
-            console.log("Using verified social handle:", verifiedSocialHandle);
+            // Use the manually entered social handle
+            const handle = newEntry.socialHandle.replace('@', '');
+            console.log("Using social handle:", handle);
 
             writeContract({
                 address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
                 abi: QUEST_ABI,
                 functionName: "submitEntry",
-                args: [BigInt(questId), proofCid, verifiedSocialHandle],
+                args: [BigInt(questId), proofCid, handle],
             });
         } catch (error) {
             console.error("Error submitting entry:", error);
@@ -585,57 +576,20 @@ export default function QuestDetailPage() {
                                         Provide proof of your social media engagement to qualify for rewards
                                     </p>
                                     <div className="space-y-4">
-                                        {/* X Account Verification Section */}
+                                        {/* Social Handle Input */}
                                         <div className="space-y-2">
-                                            <label className="text-sm font-black text-slate-900">Your X Account *</label>
-                                            {isLoadingX ? (
-                                                <div className="flex items-center gap-2 p-4 border border-slate-200 bg-slate-50">
-                                                    <Loader2 className="size-4 animate-spin text-slate-400" />
-                                                    <span className="text-sm text-slate-500">Loading X account...</span>
-                                                </div>
-                                            ) : isXConnected && xAccount ? (
-                                                <div className="flex items-center justify-between p-4 bg-black border-2 border-black">
-                                                    <div className="flex items-center gap-3">
-                                                        <X className="size-6 text-white" />
-                                                        <div>
-                                                            <p className="font-bold text-white">{xAccount.username}</p>
-                                                            <p className="text-xs text-gray-400">Verified via OAuth</p>
-                                                        </div>
-                                                    </div>
-                                                    <Badge className="bg-[#0EA885] text-white border-0 font-bold text-[10px] uppercase tracking-wider">
-                                                        <CheckCircle2 className="size-3 mr-1" />
-                                                        Verified
-                                                    </Badge>
-                                                </div>
-                                            ) : (
-                                                <div className="p-4 border-2 border-dashed border-slate-300 bg-slate-50">
-                                                    <div className="flex items-center justify-between">
-                                                        <div>
-                                                            <p className="text-sm font-bold text-slate-700">X account required</p>
-                                                            <p className="text-xs text-slate-500">Connect your X account to submit</p>
-                                                        </div>
-                                                        <Button
-                                                            onClick={connectX}
-                                                            disabled={isConnectingX}
-                                                            className="bg-black hover:bg-slate-800 text-white"
-                                                        >
-                                                            {isConnectingX ? (
-                                                                <>
-                                                                    <Loader2 className="size-4 mr-2 animate-spin" />
-                                                                    Connecting...
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <LinkIcon className="size-4 mr-2" />
-                                                                    Connect X
-                                                                </>
-                                                            )}
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            )}
+                                            <label className="text-sm font-black text-slate-900">Your Social Handle *</label>
+                                            <Input
+                                                type="text"
+                                                placeholder="@username"
+                                                value={newEntry.socialHandle}
+                                                onChange={(e) =>
+                                                    setNewEntry({ ...newEntry, socialHandle: e.target.value })
+                                                }
+                                                className="text-sm border-slate-200"
+                                            />
                                             <p className="text-xs font-medium text-slate-500">
-                                                Your verified X handle will be stored on-chain for transparency
+                                                Your social handle will be stored on-chain for transparency
                                             </p>
                                         </div>
 
@@ -726,7 +680,7 @@ export default function QuestDetailPage() {
 
                                         <Button
                                             onClick={submitEntry}
-                                            disabled={(!uploadedProofImage && !newEntry.ipfsProofCid.trim()) || !isXConnected || isPending || isConfirming || isUploadingProof}
+                                            disabled={(!uploadedProofImage && !newEntry.ipfsProofCid.trim()) || !newEntry.socialHandle.trim() || isPending || isConfirming || isUploadingProof}
                                             className="w-full bg-[#0EA885] hover:bg-[#0c8a6f] text-white font-black py-6"
                                         >
                                             {isUploadingProof ? (
