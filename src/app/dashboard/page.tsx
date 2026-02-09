@@ -719,74 +719,73 @@ export default function DashboardPage() {
                       <div
                         key={`${item.type}-${item.id}`}
                         onClick={() => router.push(`/${item.type === "bounty" ? "bounties" : "quests"}/${item.id}`)}
-                        className="group cursor-pointer bg-white  shadow-sm hover:shadow-xl hover:shadow-stone-200/50 border border-stone-100 hover:border-stone-200 transition-all duration-300 overflow-hidden flex flex-col"
+                        className="group cursor-pointer bg-white shadow-sm hover:shadow-xl hover:shadow-stone-200/50 border border-stone-100 hover:border-stone-200 transition-all duration-300 overflow-hidden flex flex-col"
                       >
-                        {/* Image / Gradient Fallback */}
-                        <div className="relative w-full h-44 overflow-hidden">
+                        {/* Image - Clean, no overlays */}
+                        <div className="relative w-full h-40 overflow-hidden">
                           {image ? (
                             <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                           ) : (
                             <div className={`w-full h-full ${getCategoryColor(category)} flex items-center justify-center`}>
                               {item.type === "bounty" ? (
-                                <Target className="w-12 h-12 text-stone-300" />
+                                <Target className="w-10 h-10 text-stone-300" />
                               ) : (
-                                <Zap className="w-12 h-12 text-stone-300" />
+                                <Zap className="w-10 h-10 text-stone-300" />
                               )}
-                            </div>
-                          )}
-                          {/* Gradient overlay for better badge visibility */}
-                          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent" />
-                          
-                          {/* Top badges */}
-                          <div className="absolute top-3 left-3 flex items-center gap-2">
-                            <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider  backdrop-blur-sm ${statusInfo.color}`}>
-                              {statusInfo.label}
-                            </span>
-                          </div>
-                          <div className="absolute top-3 right-3">
-                            <span className={`px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider  backdrop-blur-sm ${
-                              item.type === "bounty" 
-                                ? "bg-white/90 text-stone-700" 
-                                : "bg-amber-400/90 text-amber-900"
-                            }`}>
-                              {item.type === "bounty" ? "Bounty" : "Quest"}
-                            </span>
-                          </div>
-                          
-                          {/* Category badge at bottom of image */}
-                          {category && (
-                            <div className="absolute bottom-3 left-3">
-                              <span className={`px-2.5 py-1 text-[10px] font-semibold capitalize  border backdrop-blur-sm ${getCategoryBadgeColor(category)}`}>
-                                {category}
-                              </span>
                             </div>
                           )}
                         </div>
 
-                        <div className="p-5 flex flex-col flex-1">
-                          {/* Creator */}
-                          <div className="flex items-center gap-2.5 mb-3">
-                            <img src={getAvatarUrl(item.creator, 24)} alt="" className="w-6 h-6  ring-2 ring-stone-100 flex-shrink-0" />
-                            <span className="text-xs font-medium text-stone-400 truncate">{formatAddress(item.creator)}</span>
+                        <div className="p-4 flex flex-col flex-1">
+                          {/* Top row: Type indicator + Status */}
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              {/* Type: small colored bar */}
+                              <div className={`w-1 h-4 ${item.type === "bounty" ? "bg-[#0EA885]" : "bg-amber-400"}`} />
+                              <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-400">
+                                {item.type}
+                              </span>
+                            </div>
+                            {/* Status: simple dot + text */}
+                            <div className="flex items-center gap-1.5">
+                              <div className={`w-1.5 h-1.5 ${
+                                statusInfo.label === "Open" || statusInfo.label === "Live" ? "bg-[#0EA885]" :
+                                statusInfo.label === "Judging" ? "bg-amber-500" :
+                                "bg-stone-300"
+                              }`} />
+                              <span className="text-[11px] font-medium text-stone-400">{statusInfo.label}</span>
+                            </div>
                           </div>
                           
                           {/* Title */}
-                          <h3 className="text-base font-semibold text-stone-800 mb-4 line-clamp-2 leading-snug group-hover:text-[#0EA885] transition-colors">
+                          <h3 className="text-[15px] font-semibold text-stone-800 mb-2 line-clamp-2 leading-snug group-hover:text-[#0EA885] transition-colors">
                             {title}
                           </h3>
+
+                          {/* Creator */}
+                          <div className="flex items-center gap-2 mb-4">
+                            <img src={getAvatarUrl(item.creator, 18)} alt="" className="w-[18px] h-[18px] flex-shrink-0" />
+                            <span className="text-[11px] text-stone-400 truncate">{formatAddress(item.creator)}</span>
+                          </div>
                           
-                          {/* Footer */}
-                          <div className="mt-auto pt-4 border-t border-stone-100 flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <div className="flex items-center gap-1.5 text-xs text-stone-400">
-                                <Clock className="h-3.5 w-3.5" />
-                                <span className="font-medium">{formatDeadline(item.deadline)}</span>
-                              </div>
+                          {/* Footer: Meta info + Price */}
+                          <div className="mt-auto pt-3 border-t border-stone-100 flex items-center justify-between">
+                            <div className="flex items-center gap-3 text-[11px] text-stone-400">
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {formatDeadline(item.deadline)}
+                              </span>
                               {subCount > 0 && (
-                                <div className="flex items-center gap-1.5 text-xs text-stone-400">
-                                  <Users className="h-3.5 w-3.5" />
-                                  <span className="font-medium">{subCount}</span>
-                                </div>
+                                <span className="flex items-center gap-1">
+                                  <Users className="h-3 w-3" />
+                                  {subCount}
+                                </span>
+                              )}
+                              {category && (
+                                <span className="text-stone-300">•</span>
+                              )}
+                              {category && (
+                                <span className="capitalize">{category}</span>
                               )}
                             </div>
                             <div className="text-right">
@@ -805,7 +804,7 @@ export default function DashboardPage() {
                   })}
                 </div>
               ) : (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2">
                   {displayedItems.map(item => {
                     const statusInfo = getStatusInfo(item);
                     const { title, image, category, subCount } = getItemData(item);
@@ -814,39 +813,63 @@ export default function DashboardPage() {
                       <div
                         key={`${item.type}-${item.id}`}
                         onClick={() => router.push(`/${item.type === "bounty" ? "bounties" : "quests"}/${item.id}`)}
-                        className="group cursor-pointer bg-white  shadow-sm hover:shadow-lg hover:shadow-stone-200/50 border border-stone-100 hover:border-stone-200 transition-all duration-200 px-5 py-4 flex items-center gap-5"
+                        className="group cursor-pointer bg-white shadow-sm hover:shadow-md border border-stone-100 hover:border-stone-200 transition-all duration-200 px-4 py-3 flex items-center gap-4"
                       >
-                        <div className="flex-shrink-0 w-16 h-16  overflow-hidden">
+                        {/* Type indicator bar */}
+                        <div className={`w-1 h-12 flex-shrink-0 ${item.type === "bounty" ? "bg-[#0EA885]" : "bg-amber-400"}`} />
+                        
+                        {/* Thumbnail */}
+                        <div className="flex-shrink-0 w-12 h-12 overflow-hidden">
                           {image ? (
                             <img src={image} alt={title} className="w-full h-full object-cover" />
                           ) : (
                             <div className={`w-full h-full ${getCategoryColor(category)} flex items-center justify-center`}>
-                              {item.type === "bounty" ? <Target className="w-6 h-6 text-stone-300" /> : <Zap className="w-6 h-6 text-stone-300" />}
+                              {item.type === "bounty" ? <Target className="w-5 h-5 text-stone-300" /> : <Zap className="w-5 h-5 text-stone-300" />}
                             </div>
                           )}
                         </div>
+                        
+                        {/* Content */}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1.5">
-                            <img src={getAvatarUrl(item.creator, 18)} alt="" className="w-4.5 h-4.5  ring-1 ring-stone-100 flex-shrink-0" />
-                            <span className="text-[11px] font-medium text-stone-400">{formatAddress(item.creator)}</span>
-                          </div>
-                          <h3 className="text-sm font-semibold text-stone-800 mb-2 truncate group-hover:text-[#0EA885] transition-colors">{title}</h3>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider  ${statusInfo.color}`}>{statusInfo.label}</span>
-                            <span className={`px-2 py-0.5 text-[10px] font-medium capitalize  ${
-                              item.type === "bounty" ? "bg-stone-100 text-stone-600" : "bg-amber-100 text-amber-700"
-                            }`}>{item.type}</span>
-                            {category && <span className={`px-2 py-0.5 text-[10px] font-medium capitalize  border ${getCategoryBadgeColor(category)}`}>{category}</span>}
-                            <span className="text-[11px] text-stone-400 flex items-center gap-1"><Clock className="w-3 h-3" />{formatDeadline(item.deadline)}</span>
-                            {subCount > 0 && <span className="text-[11px] text-stone-400 flex items-center gap-1"><Users className="w-3 h-3" />{subCount}</span>}
+                          <h3 className="text-sm font-semibold text-stone-800 truncate group-hover:text-[#0EA885] transition-colors">{title}</h3>
+                          <div className="flex items-center gap-3 mt-1 text-[11px] text-stone-400">
+                            <span className="flex items-center gap-1">
+                              <div className={`w-1.5 h-1.5 ${
+                                statusInfo.label === "Open" || statusInfo.label === "Live" ? "bg-[#0EA885]" :
+                                statusInfo.label === "Judging" ? "bg-amber-500" : "bg-stone-300"
+                              }`} />
+                              {statusInfo.label}
+                            </span>
+                            <span>•</span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {formatDeadline(item.deadline)}
+                            </span>
+                            {subCount > 0 && (
+                              <>
+                                <span>•</span>
+                                <span className="flex items-center gap-1">
+                                  <Users className="w-3 h-3" />
+                                  {subCount}
+                                </span>
+                              </>
+                            )}
+                            {category && (
+                              <>
+                                <span>•</span>
+                                <span className="capitalize">{category}</span>
+                              </>
+                            )}
                           </div>
                         </div>
-                        <div className="flex-shrink-0 text-right pl-4 border-l border-stone-100">
-                          <div className="flex items-center justify-end gap-2 mb-1">
-                            <Image src={ethIcon} alt="ETH" width={22} height={22} className="flex-shrink-0" />
-                            <span className="text-xl font-bold text-stone-800">{(Number(item.amount) / 1e18).toFixed(3)}</span>
+                        
+                        {/* Price */}
+                        <div className="flex-shrink-0 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Image src={ethIcon} alt="ETH" width={18} height={18} className="flex-shrink-0" />
+                            <span className="text-base font-bold text-stone-800">{(Number(item.amount) / 1e18).toFixed(3)}</span>
                           </div>
-                          {ethPrice > 0 && <div className="text-xs font-medium text-stone-400">{formatUSD(convertEthToUSD(Number(item.amount) / 1e18, ethPrice))}</div>}
+                          {ethPrice > 0 && <div className="text-[11px] text-stone-400 mt-0.5">{formatUSD(convertEthToUSD(Number(item.amount) / 1e18, ethPrice))}</div>}
                         </div>
                       </div>
                     );
