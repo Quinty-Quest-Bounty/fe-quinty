@@ -11,14 +11,14 @@ import AirdropBountyABI from "../../contracts/AirdropBounty.json";
 export const BASE_SEPOLIA_CHAIN_ID = 84532;
 
 // Contract addresses on Base Sepolia
-// NOTE: These will be updated after new deployment
+// Updated: 2026-02-09 - Fresh deployment for incuBase milestone
 export const CONTRACT_ADDRESSES = {
   [BASE_SEPOLIA_CHAIN_ID]: {
-    Quinty: "0xdB6511DC9869a10Ed00C3706Ff9332820db87463",
-    QuintyNFT: "0xDe5eB0e3232B40ED445E94f33708dc7E425E84F8",
-    QuintyReputation: "0xE84dA988177707e9e8371894C082049D2C4F5e5e",
-    Quest: "0xFeFAB11BA3Bc2d74B8B4804044f39A12E55BE4ae",
-    AirdropBounty: "0xFeFAB11BA3Bc2d74B8B4804044f39A12E55BE4ae", // Legacy alias
+    Quinty: "0xd1a8Ee7C632E07b4Eeb84d61b48dBb446A40EC85",
+    QuintyNFT: "0x661bFcbb52DA8f62cf9E91fBf55b9c42caEfa828",
+    QuintyReputation: "0xb8a107A32325C94B8fa79DBfe96928ab796eBD0f",
+    Quest: "0x4d93068Ba427A7a7Cf0f3Fb5616B51a402E14a22",
+    AirdropBounty: "0x4d93068Ba427A7a7Cf0f3Fb5616B51a402E14a22", // Legacy alias (points to Quest)
     ZKVerification: "0x045Fb080d926f049db7597c99B56aEccc8977F36",
   },
 };
