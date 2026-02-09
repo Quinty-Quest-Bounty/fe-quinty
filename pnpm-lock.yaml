@@ -125,6 +125,9 @@ importers:
       qr:
         specifier: ^0.5.1
         version: 0.5.2
+      quinty-frontend:
+        specifier: 'link:'
+        version: 'link:'
       react:
         specifier: ^19.2.0
         version: 19.2.0

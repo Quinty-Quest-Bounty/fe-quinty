@@ -28,6 +28,14 @@ export interface SubmissionMetadata {
   submittedAt: number;
 }
 
+export interface QuestMetadata {
+  title: string;
+  description: string;
+  requirements: string;
+  images?: string[];
+  deadline: number;
+}
+
 // Helper function to format IPFS URLs
 export const formatIpfsUrl = (
   cid: string,
@@ -103,7 +111,7 @@ export const uploadToIpfs = async (
 
 // Upload JSON metadata to IPFS
 export const uploadMetadataToIpfs = async (
-  metadata: BountyMetadata | SubmissionMetadata
+  metadata: BountyMetadata | SubmissionMetadata | QuestMetadata
 ): Promise<string> => {
   const url = `https://api.pinata.cloud/pinning/pinJSONToIPFS`;
 

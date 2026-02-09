@@ -8,7 +8,7 @@ import { useHistory } from "../../hooks/useHistory";
 import { useBounties } from "../../hooks/useBounties";
 import { useQuests } from "../../hooks/useQuests";
 import { CONTRACT_ADDRESSES, QUINTY_ABI, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID } from "../../utils/contracts";
-import { uploadMetadataToIpfs, BountyMetadata } from "../../utils/ipfs";
+import { uploadMetadataToIpfs, BountyMetadata, QuestMetadata } from "../../utils/ipfs";
 import { ensureBaseSepoliaNetwork } from "../../utils/network";
 import ReputationDisplay from "../../components/ReputationDisplay";
 import BountyCard from "../../components/BountyCard";
@@ -184,11 +184,17 @@ export default function ProfilePage() {
             const perQualifierWei = parseETH(formData.perQualifier);
             const totalAmount = perQualifierWei * BigInt(formData.maxQualifiers);
 
-            // Append image URL to description if provided
-            let description = formData.description;
-            if (formData.imageUrl) {
-                description = `${formData.description}\n\nImage: ${formData.imageUrl}`;
-            }
+            // Create quest metadata with images array (same pattern as bounties)
+            const metadata: QuestMetadata = {
+                title: formData.title,
+                description: formData.description,
+                requirements: formData.requirements,
+                images: formData.imageUrl ? [formData.imageUrl] : [],
+                deadline: deadlineTimestamp,
+            };
+
+            // Upload metadata to Pinata
+            const metadataCid = await uploadMetadataToIpfs(metadata);
 
             await writeContractAsync({
                 address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
@@ -196,7 +202,7 @@ export default function ProfilePage() {
                 functionName: "createQuest",
                 args: [
                     formData.title,
-                    description,
+                    `${formData.description}\n\nMetadata: ipfs://${metadataCid}`,
                     perQualifierWei,
                     BigInt(formData.maxQualifiers),
                     BigInt(deadlineTimestamp),

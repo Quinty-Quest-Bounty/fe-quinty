@@ -48,6 +48,7 @@
     "next-auth": "^4.24.11",
     "poly-decomp": "^0.3.0",
     "qr": "^0.5.1",
+    "quinty-frontend": "link:",
     "react": "^19.2.0",
     "react-day-picker": "^9.11.1",
     "react-dom": "^19.2.0",

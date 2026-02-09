@@ -3,6 +3,7 @@ import { useAccount, useWriteContract, useChainId } from "wagmi";
 import { CONTRACT_ADDRESSES, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
 import { parseETH } from "../utils/web3";
 import { ensureBaseSepoliaNetwork } from "../utils/network";
+import { uploadMetadataToIpfs, QuestMetadata } from "../utils/ipfs";
 import QuestCard from "./QuestCard";
 import { useQuests } from "../hooks/useQuests";
 import { QuestListSkeleton } from "./quests/QuestSkeleton";
@@ -50,11 +51,17 @@ export default function QuestManager() {
       const perQualifierWei = parseETH(formData.perQualifier);
       const totalAmount = perQualifierWei * BigInt(formData.maxQualifiers);
 
-      // Append image URL to description if provided
-      let description = formData.description;
-      if (formData.imageUrl) {
-        description = `${formData.description}\n\nImage: ${formData.imageUrl}`;
-      }
+      // Create quest metadata with images array (same pattern as bounties)
+      const metadata: QuestMetadata = {
+        title: formData.title,
+        description: formData.description,
+        requirements: formData.requirements,
+        images: formData.imageUrl ? [formData.imageUrl] : [],
+        deadline: deadlineTimestamp,
+      };
+
+      // Upload metadata to Pinata
+      const metadataCid = await uploadMetadataToIpfs(metadata);
 
       const result = await writeContractAsync({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
@@ -62,7 +69,7 @@ export default function QuestManager() {
         functionName: "createQuest",
         args: [
           formData.title,
-          description,
+          `${formData.description}\n\nMetadata: ipfs://${metadataCid}`,
           perQualifierWei,
           BigInt(formData.maxQualifiers),
           BigInt(deadlineTimestamp),

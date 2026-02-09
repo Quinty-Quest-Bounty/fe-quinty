@@ -3,6 +3,7 @@ import { useReadContract, useWatchContractEvent } from "wagmi";
 import { readContract } from "@wagmi/core";
 import { CONTRACT_ADDRESSES, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
 import { wagmiConfig } from "../utils/web3";
+import { fetchMetadataFromIpfs, CUSTOM_PINATA_GATEWAY, QuestMetadata } from "../utils/ipfs";
 
 export interface Quest {
     id: number;
@@ -85,6 +86,28 @@ export function useQuests() {
                             args: [BigInt(id)],
                         });
 
+                        // Extract metadata CID from description (same pattern as bounties)
+                        let imageUrl = "";
+                        const metadataMatch = description.match(/Metadata: ipfs:\/\/([a-zA-Z0-9]+)/);
+                        if (metadataMatch) {
+                            try {
+                                const metadata = await fetchMetadataFromIpfs(metadataMatch[1]) as QuestMetadata;
+                                if (metadata.images && metadata.images.length > 0) {
+                                    // The image is stored as a CID, format it as a full URL
+                                    const imageCid = metadata.images[0];
+                                    imageUrl = `${CUSTOM_PINATA_GATEWAY}${imageCid}`;
+                                }
+                            } catch (e) {
+                                console.error(`Error fetching quest ${id} metadata:`, e);
+                            }
+                        } else {
+                            // Fallback: check for old Image: ipfs:// format
+                            const oldImageMatch = description.match(/Image: ipfs:\/\/([^\s\n]+)/);
+                            if (oldImageMatch) {
+                                imageUrl = `${CUSTOM_PINATA_GATEWAY}${oldImageMatch[1]}`;
+                            }
+                        }
+
                         return {
                             quest: {
                                 id,
@@ -100,9 +123,7 @@ export function useQuests() {
                                 resolved,
                                 cancelled,
                                 requirements,
-                                imageUrl: description.includes("ipfs://")
-                                    ? description.match(/ipfs:\/\/[^\s\n]+/)?.[0] || ""
-                                    : "",
+                                imageUrl,
                             },
                             entryCount: Number(entryCount),
                         };
