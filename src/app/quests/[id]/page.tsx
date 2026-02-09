@@ -47,6 +47,9 @@ import {
     Timer,
     Target,
     Zap,
+    ThumbsUp,
+    ThumbsDown,
+    Gavel,
 } from "lucide-react";
 import ethIcon from "../../../assets/crypto/eth.svg";
 
@@ -187,6 +190,15 @@ export default function QuestDetailPage() {
         navigator.clipboard.writeText(window.location.href);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const verifyEntry = async (entryId: number, status: number, feedback: string = "") => {
+        writeContract({
+            address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
+            abi: QUEST_ABI,
+            functionName: "verifyEntry",
+            args: [BigInt(questId), BigInt(entryId), status, feedback],
+        });
     };
 
     const submitEntry = async () => {
@@ -521,44 +533,108 @@ export default function QuestDetailPage() {
                                 <h2 className="text-lg font-bold text-stone-800 mb-4 flex items-center gap-2">
                                     <Users className="size-5 text-amber-500" />
                                     Entries ({entries.length})
+                                    {isCreator && (
+                                        <span className="ml-auto text-xs font-normal text-stone-400 flex items-center gap-1">
+                                            <Gavel className="size-3" /> You can approve or reject entries
+                                        </span>
+                                    )}
                                 </h2>
                                 <div className="space-y-3">
                                     {entries.map((entry, index) => (
-                                        <div key={index} className="flex items-center justify-between p-4 border border-stone-100 hover:border-stone-200 transition-colors">
-                                            <div className="flex items-center gap-3">
-                                                <div className="size-10 bg-stone-100 flex items-center justify-center">
-                                                    <Users className="size-5 text-stone-400" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm font-mono font-medium text-stone-700">{formatAddress(entry.solver)}</p>
-                                                    <div className="flex items-center gap-2 mt-0.5">
-                                                        <span className={`text-[10px] font-medium px-1.5 py-0.5 ${
-                                                            entry.status === 1 ? "bg-amber-50 text-amber-600" :
-                                                            entry.status === 2 ? "bg-stone-100 text-stone-500" :
-                                                            "bg-stone-50 text-stone-400"
-                                                        }`}>
-                                                            {entry.status === 1 ? "Approved" : entry.status === 2 ? "Rejected" : "Pending"}
-                                                        </span>
-                                                        <span className="text-xs text-stone-400">@{entry.socialHandle}</span>
+                                        <div key={index} className={`p-4 border transition-colors ${
+                                            entry.status === 1 ? "bg-green-50 border-green-200" :
+                                            entry.status === 2 ? "bg-red-50 border-red-200" :
+                                            "border-stone-100 hover:border-stone-200"
+                                        }`}>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`size-10 flex items-center justify-center ${
+                                                        entry.status === 1 ? "bg-green-100" :
+                                                        entry.status === 2 ? "bg-red-100" :
+                                                        "bg-stone-100"
+                                                    }`}>
+                                                        {entry.status === 1 ? <CheckCircle2 className="size-5 text-green-600" /> :
+                                                         entry.status === 2 ? <X className="size-5 text-red-500" /> :
+                                                         <Users className="size-5 text-stone-400" />}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-mono font-medium text-stone-700">{formatAddress(entry.solver)}</p>
+                                                        <div className="flex items-center gap-2 mt-0.5">
+                                                            <span className={`text-[10px] font-medium px-1.5 py-0.5 ${
+                                                                entry.status === 1 ? "bg-green-100 text-green-700" :
+                                                                entry.status === 2 ? "bg-red-100 text-red-600" :
+                                                                "bg-amber-50 text-amber-600"
+                                                            }`}>
+                                                                {entry.status === 1 ? "Approved" : entry.status === 2 ? "Rejected" : "Pending Review"}
+                                                            </span>
+                                                            <span className="text-xs text-stone-400">@{entry.socialHandle}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
+                                                <div className="flex items-center gap-2">
+                                                    {!(entry.ipfsProofCid.includes("twitter.com") || entry.ipfsProofCid.includes("x.com")) && (
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => {
+                                                                setViewingCid(entry.ipfsProofCid);
+                                                                setViewingTitle(`Entry by ${formatAddress(entry.solver)}`);
+                                                            }}
+                                                            className="border-stone-200 text-stone-600 h-8"
+                                                        >
+                                                            <ExternalLink className="size-3 mr-1" /> View
+                                                        </Button>
+                                                    )}
+                                                    {/* Creator can approve/reject pending entries */}
+                                                    {isCreator && entry.status === 0 && !quest.resolved && !quest.cancelled && (
+                                                        <>
+                                                            <Button
+                                                                size="sm"
+                                                                onClick={() => verifyEntry(index, 1)}
+                                                                disabled={isPending || isConfirming}
+                                                                className="bg-green-600 hover:bg-green-700 text-white h-8"
+                                                            >
+                                                                <ThumbsUp className="size-3 mr-1" /> Approve
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={() => verifyEntry(index, 2)}
+                                                                disabled={isPending || isConfirming}
+                                                                className="border-red-200 text-red-600 hover:bg-red-50 h-8"
+                                                            >
+                                                                <ThumbsDown className="size-3 mr-1" /> Reject
+                                                            </Button>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
-                                            {!(entry.ipfsProofCid.includes("twitter.com") || entry.ipfsProofCid.includes("x.com")) && (
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setViewingCid(entry.ipfsProofCid);
-                                                        setViewingTitle(`Entry by ${formatAddress(entry.solver)}`);
-                                                    }}
-                                                    className="border-stone-200 text-stone-600 h-8"
-                                                >
-                                                    <ExternalLink className="size-3 mr-1" /> View
-                                                </Button>
+                                            {/* Show feedback if any */}
+                                            {entry.feedback && (
+                                                <div className="mt-3 pt-3 border-t border-stone-100">
+                                                    <p className="text-xs text-stone-500">
+                                                        <span className="font-medium">Feedback:</span> {entry.feedback}
+                                                    </p>
+                                                </div>
                                             )}
                                         </div>
                                     ))}
                                 </div>
+                                
+                                {/* Creator info box */}
+                                {isCreator && entries.some(e => e.status === 0) && !quest.resolved && !quest.cancelled && (
+                                    <div className="mt-4 p-4 bg-amber-50 border border-amber-200">
+                                        <div className="flex items-start gap-3">
+                                            <Gavel className="size-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                                            <div>
+                                                <p className="text-sm font-semibold text-amber-800">Review Pending Entries</p>
+                                                <p className="text-xs text-amber-600 mt-1">
+                                                    Click "Approve" to reward the participant with {ethAmount.toFixed(4)} ETH, or "Reject" if their submission doesn't meet the requirements.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
