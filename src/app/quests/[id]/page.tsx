@@ -308,6 +308,32 @@ export default function QuestDetailPage() {
                 {/* Type indicator bar */}
                 <div className="h-1.5 w-full bg-amber-400 mb-6" />
 
+                {/* Creator Banner */}
+                {isCreator && (
+                    <div className="mb-6 p-4 bg-gradient-to-r from-violet-500 to-purple-600 text-white">
+                        <div className="flex items-center gap-3">
+                            <div className="size-10 bg-white/20 flex items-center justify-center">
+                                <Shield className="size-5" />
+                            </div>
+                            <div className="flex-1">
+                                <p className="font-bold">You created this quest</p>
+                                <p className="text-sm text-white/80">
+                                    {quest.resolved && "This quest has been completed"}
+                                    {quest.cancelled && "This quest was cancelled"}
+                                    {!quest.resolved && !quest.cancelled && isExpired && "Quest expired - you can still approve pending entries"}
+                                    {!quest.resolved && !quest.cancelled && !isExpired && "You can approve or reject entries anytime. Approved users receive rewards instantly."}
+                                </p>
+                            </div>
+                            {!quest.resolved && !quest.cancelled && !isExpired && (
+                                <div className="text-right">
+                                    <p className="text-xs text-white/60 uppercase tracking-wider">Pending entries</p>
+                                    <p className="font-bold">{entries.filter(e => e.status === 0).length}</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
                 {/* TWO COLUMN LAYOUT */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     

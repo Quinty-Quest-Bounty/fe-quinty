@@ -339,6 +339,39 @@ export default function BountyDetailPage() {
         {/* Type indicator bar */}
         <div className="h-1.5 w-full bg-[#0EA885] mb-6" />
 
+        {/* Creator Banner */}
+        {isCreator && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-violet-500 to-purple-600 text-white">
+            <div className="flex items-center gap-3">
+              <div className="size-10 bg-white/20 flex items-center justify-center">
+                <Shield className="size-5" />
+              </div>
+              <div className="flex-1">
+                <p className="font-bold">You created this bounty</p>
+                <p className="text-sm text-white/80">
+                  {phase === "OPEN" && `Wait until ${new Date(Number(bounty.openDeadline) * 1000).toLocaleString()} to select a winner`}
+                  {phase === "JUDGING" && `Select a winner before ${new Date(Number(bounty.judgingDeadline) * 1000).toLocaleString()}`}
+                  {phase === "RESOLVED" && "Winner has been selected"}
+                  {phase === "SLASHED" && "This bounty was slashed"}
+                  {phase === "SLASH_PENDING" && "Deadline passed! Select a winner now or get slashed"}
+                </p>
+              </div>
+              {phase === "OPEN" && (
+                <div className="text-right">
+                  <p className="text-xs text-white/60 uppercase tracking-wider">Judging starts in</p>
+                  <p className="font-bold">{formatTimeLeft(bounty.openDeadline)}</p>
+                </div>
+              )}
+              {phase === "JUDGING" && (
+                <div className="text-right">
+                  <p className="text-xs text-white/60 uppercase tracking-wider">Time to judge</p>
+                  <p className="font-bold">{formatTimeLeft(bounty.judgingDeadline)}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* TWO COLUMN LAYOUT */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
