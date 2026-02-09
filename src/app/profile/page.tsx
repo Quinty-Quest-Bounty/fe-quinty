@@ -2,13 +2,14 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId, useBalance } from "wagmi";
 import { formatETH, parseETH, formatAddress, formatTimeLeft } from "../../utils/web3";
 import { useHistory } from "../../hooks/useHistory";
 import { useBounties } from "../../hooks/useBounties";
 import { useQuests } from "../../hooks/useQuests";
 import { CONTRACT_ADDRESSES, QUINTY_ABI, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID } from "../../utils/contracts";
-import { uploadMetadataToIpfs, BountyMetadata, QuestMetadata, formatIpfsUrl } from "../../utils/ipfs";
+import { uploadMetadataToIpfs, BountyMetadata, QuestMetadata, formatIpfsUrl, fetchMetadataFromIpfs } from "../../utils/ipfs";
 import { ensureBaseSepoliaNetwork } from "../../utils/network";
 import ReputationDisplay from "../../components/ReputationDisplay";
 import { BountyForm } from "../../components/bounties/BountyForm";
@@ -77,6 +78,7 @@ export default function ProfilePage() {
     const [createType, setCreateType] = useState<CreateType>(null);
     const [showCreateOptions, setShowCreateOptions] = useState(false);
     const [copiedAddress, setCopiedAddress] = useState(false);
+    const [bountyMetadata, setBountyMetadata] = useState<Map<number, BountyMetadata>>(new Map());
     
     // Username editing
     const { profile, updateUsername, refreshProfile } = useAuth();
@@ -106,6 +108,27 @@ export default function ProfilePage() {
         if (!address) return [];
         return quests.filter(q => q.creator.toLowerCase() === address.toLowerCase());
     }, [quests, address]);
+
+    // Load bounty metadata
+    useEffect(() => {
+        const loadMetadata = async () => {
+            const newMeta = new Map<number, BountyMetadata>();
+            for (const b of myBounties) {
+                if (b.metadataCid && !bountyMetadata.has(b.id)) {
+                    try {
+                        const meta = await fetchMetadataFromIpfs(b.metadataCid);
+                        newMeta.set(b.id, meta);
+                    } catch (e) {
+                        console.error(`Error fetching bounty metadata for ${b.id}:`, e);
+                    }
+                }
+            }
+            if (newMeta.size > 0) setBountyMetadata(prev => new Map([...prev, ...newMeta]));
+        };
+        if (myBounties.length > 0) loadMetadata();
+    }, [myBounties]);
+
+
 
     const filteredTransactions = useMemo(() => {
         let filtered = transactions;
@@ -562,7 +585,7 @@ export default function ProfilePage() {
                         <div>
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-blue-500 flex items-center justify-center">
+                                    <div className="w-10 h-10 bg-[#0EA885] flex items-center justify-center">
                                         <Target className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
@@ -591,29 +614,36 @@ export default function ProfilePage() {
                                 </div>
                             ) : myBounties.length === 0 ? (
                                 <div className="py-12 text-center bg-white border border-dashed border-slate-200">
-                                    <div className="w-12 h-12 bg-blue-50 flex items-center justify-center mx-auto mb-4">
-                                        <Target className="w-6 h-6 text-blue-400" />
+                                    <div className="w-12 h-12 bg-[#0EA885]/10 flex items-center justify-center mx-auto mb-4">
+                                        <Target className="w-6 h-6 text-[#0EA885]" />
                                     </div>
                                     <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">No bounties created yet</h3>
                                     <p className="text-xs font-bold text-slate-400 mt-1">Create your first bounty to get started.</p>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                                    {myBounties.map((bounty) => (
-                                        <div
-                                            key={bounty.id}
-                                            onClick={() => router.push(`/bounties/${bounty.id}`)}
-                                            className="group cursor-pointer bg-white shadow-sm hover:shadow-xl hover:shadow-stone-200/50 border border-stone-100 hover:border-stone-200 transition-all duration-300 overflow-hidden flex flex-col"
-                                        >
-                                            {/* Type color bar */}
-                                            <div className="h-1 w-full bg-[#0EA885]" />
-                                            
-                                            {/* Placeholder Image */}
-                                            <div className="relative w-full h-36 overflow-hidden">
-                                                <div className="w-full h-full bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
-                                                    <Target className="w-10 h-10 text-[#0EA885]/30" />
+                                    {myBounties.map((bounty) => {
+                                        const meta = bountyMetadata.get(bounty.id);
+                                        const image = meta?.images?.[0] ? formatIpfsUrl(meta.images[0]) : null;
+                                        return (
+                                            <div
+                                                key={bounty.id}
+                                                onClick={() => router.push(`/bounties/${bounty.id}`)}
+                                                className="group cursor-pointer bg-white shadow-sm hover:shadow-xl hover:shadow-stone-200/50 border border-stone-100 hover:border-stone-200 transition-all duration-300 overflow-hidden flex flex-col"
+                                            >
+                                                {/* Type color bar */}
+                                                <div className="h-1 w-full bg-[#0EA885]" />
+                                                
+                                                {/* Image */}
+                                                <div className="relative w-full h-36 overflow-hidden">
+                                                    {image ? (
+                                                        <img src={image} alt={bounty.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
+                                                            <Target className="w-10 h-10 text-[#0EA885]/30" />
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            </div>
 
                                             <div className="p-4 flex flex-col flex-1">
                                                 {/* Title */}
@@ -647,7 +677,8 @@ export default function ProfilePage() {
                                                 </div>
                                             </div>
                                         </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
@@ -656,7 +687,7 @@ export default function ProfilePage() {
                         <div>
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-amber-500 flex items-center justify-center">
+                                    <div className="w-10 h-10 bg-[#0EA885] flex items-center justify-center">
                                         <Zap className="w-5 h-5 text-white" />
                                     </div>
                                     <div>
@@ -685,8 +716,8 @@ export default function ProfilePage() {
                                 </div>
                             ) : myQuests.length === 0 ? (
                                 <div className="py-12 text-center bg-white border border-dashed border-slate-200">
-                                    <div className="w-12 h-12 bg-amber-50 flex items-center justify-center mx-auto mb-4">
-                                        <Zap className="w-6 h-6 text-amber-400" />
+                                    <div className="w-12 h-12 bg-[#0EA885]/10 flex items-center justify-center mx-auto mb-4">
+                                        <Zap className="w-6 h-6 text-[#0EA885]" />
                                     </div>
                                     <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">No quests created yet</h3>
                                     <p className="text-xs font-bold text-slate-400 mt-1">Create your first quest to get started.</p>
@@ -695,6 +726,7 @@ export default function ProfilePage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                                     {myQuests.map((quest) => {
                                         const isExpired = Date.now() / 1000 > quest.deadline;
+                                        const image = quest.imageUrl || null;
                                         return (
                                             <div
                                                 key={quest.id}
@@ -702,18 +734,22 @@ export default function ProfilePage() {
                                                 className="group cursor-pointer bg-white shadow-sm hover:shadow-xl hover:shadow-stone-200/50 border border-stone-100 hover:border-stone-200 transition-all duration-300 overflow-hidden flex flex-col"
                                             >
                                                 {/* Type color bar */}
-                                                <div className="h-1 w-full bg-amber-400" />
+                                                <div className="h-1 w-full bg-[#0EA885]" />
                                                 
-                                                {/* Placeholder Image */}
+                                                {/* Image */}
                                                 <div className="relative w-full h-36 overflow-hidden">
-                                                    <div className="w-full h-full bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center">
-                                                        <Zap className="w-10 h-10 text-amber-400/30" />
-                                                    </div>
+                                                    {image ? (
+                                                        <img src={image} alt={quest.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center">
+                                                            <Zap className="w-10 h-10 text-[#0EA885]/30" />
+                                                        </div>
+                                                    )}
                                                 </div>
 
                                                 <div className="p-4 flex flex-col flex-1">
                                                     {/* Title */}
-                                                    <h3 className="text-[15px] font-semibold text-stone-800 mb-3 line-clamp-2 leading-snug group-hover:text-amber-500 transition-colors">
+                                                    <h3 className="text-[15px] font-semibold text-stone-800 mb-3 line-clamp-2 leading-snug group-hover:text-[#0EA885] transition-colors">
                                                         {quest.title}
                                                     </h3>
 
@@ -723,7 +759,7 @@ export default function ProfilePage() {
                                                             quest.resolved ? "bg-stone-100 text-stone-500" :
                                                             quest.cancelled ? "bg-stone-100 text-stone-400" :
                                                             isExpired ? "bg-red-50 text-red-500" :
-                                                            "bg-amber-50 text-amber-600"
+                                                            "bg-[#0EA885]/10 text-[#0EA885]"
                                                         }`}>
                                                             {quest.resolved ? "Completed" : quest.cancelled ? "Cancelled" : isExpired ? "Expired" : "Active"}
                                                         </span>
@@ -738,7 +774,7 @@ export default function ProfilePage() {
                                                         </div>
                                                         <div className="h-1.5 bg-stone-100 overflow-hidden">
                                                             <div 
-                                                                className="h-full bg-amber-400 transition-all" 
+                                                                className="h-full bg-[#0EA885] transition-all" 
                                                                 style={{ width: `${Math.min((quest.qualifiersCount / quest.maxQualifiers) * 100, 100)}%` }} 
                                                             />
                                                         </div>
@@ -791,14 +827,14 @@ export default function ProfilePage() {
 
                                 <button
                                     onClick={() => setCreateType("bounty")}
-                                    className="w-full p-6 bg-white border-2 border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition-all text-left group"
+                                    className="w-full p-6 bg-white border-2 border-slate-200 hover:border-[#0EA885] hover:bg-[#0EA885]/5 transition-all text-left group"
                                 >
                                     <div className="flex items-start gap-4">
-                                        <div className="w-12 h-12 bg-blue-500 flex items-center justify-center flex-shrink-0">
+                                        <div className="w-12 h-12 bg-[#0EA885] flex items-center justify-center flex-shrink-0">
                                             <Target className="w-6 h-6 text-white" />
                                         </div>
                                         <div className="flex-1">
-                                            <h4 className="text-sm font-black text-slate-900 mb-1 group-hover:text-blue-600">Create Bounty</h4>
+                                            <h4 className="text-sm font-black text-slate-900 mb-1 group-hover:text-[#0EA885]">Create Bounty</h4>
                                             <p className="text-xs text-slate-600">Post a task with escrow payment for solvers to complete</p>
                                         </div>
                                     </div>
@@ -806,14 +842,14 @@ export default function ProfilePage() {
 
                                 <button
                                     onClick={() => setCreateType("quest")}
-                                    className="w-full p-6 bg-white border-2 border-slate-200 hover:border-amber-500 hover:bg-amber-50/50 transition-all text-left group"
+                                    className="w-full p-6 bg-white border-2 border-slate-200 hover:border-[#0EA885] hover:bg-[#0EA885]/5 transition-all text-left group"
                                 >
                                     <div className="flex items-start gap-4">
-                                        <div className="w-12 h-12 bg-amber-500 flex items-center justify-center flex-shrink-0">
+                                        <div className="w-12 h-12 bg-[#0EA885] flex items-center justify-center flex-shrink-0">
                                             <Zap className="w-6 h-6 text-white" />
                                         </div>
                                         <div className="flex-1">
-                                            <h4 className="text-sm font-black text-slate-900 mb-1 group-hover:text-amber-600">Create Quest</h4>
+                                            <h4 className="text-sm font-black text-slate-900 mb-1 group-hover:text-[#0EA885]">Create Quest</h4>
                                             <p className="text-xs text-slate-600">Launch a campaign with rewards for multiple participants</p>
                                         </div>
                                     </div>
