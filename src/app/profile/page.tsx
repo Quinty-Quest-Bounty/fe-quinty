@@ -96,20 +96,37 @@ export default function ProfilePage() {
         if (historyFilter === "all") return transactions;
         if (historyFilter === "bounties") return transactions.filter(tx => tx.contractType === "Quinty");
         if (historyFilter === "quests") return transactions.filter(tx => tx.contractType === "Quest");
+        if (historyFilter === "created") return transactions.filter(tx => tx.type.includes("created"));
+        if (historyFilter === "submitted") return transactions.filter(tx => tx.type.includes("submitted"));
+        if (historyFilter === "wins") return transactions.filter(tx => tx.type.includes("won") || tx.type.includes("approved"));
         return transactions;
     }, [transactions, historyFilter]);
 
     const getIcon = (type: string) => {
-        if (type.includes("bounty")) return <Target className="w-4 h-4 text-blue-500" />;
+        if (type.includes("bounty")) return <Target className="w-4 h-4 text-[#0EA885]" />;
         if (type.includes("quest")) return <Zap className="w-4 h-4 text-amber-500" />;
         return <HistoryIcon className="w-4 h-4 text-slate-400" />;
     };
 
     const getStatusColor = (type: string) => {
-        if (type.includes("create")) return "bg-emerald-50 text-emerald-600 border-emerald-100";
-        if (type.includes("submit") || type.includes("join")) return "bg-blue-50 text-blue-600 border-blue-100";
-        if (type.includes("win") || type.includes("resolve")) return "bg-purple-50 text-purple-600 border-purple-100";
+        if (type.includes("created")) return "bg-violet-50 text-violet-600 border-violet-100";
+        if (type.includes("submitted")) return "bg-blue-50 text-blue-600 border-blue-100";
+        if (type.includes("won") || type.includes("approved")) return "bg-emerald-50 text-emerald-600 border-emerald-100";
+        if (type.includes("rejected")) return "bg-red-50 text-red-600 border-red-100";
         return "bg-slate-50 text-slate-600 border-slate-100";
+    };
+
+    const getTypeLabel = (type: string) => {
+        switch (type) {
+            case "bounty_created": return "Created Bounty";
+            case "bounty_submitted": return "Submitted to Bounty";
+            case "bounty_won": return "Won Bounty";
+            case "quest_created": return "Created Quest";
+            case "quest_submitted": return "Submitted to Quest";
+            case "quest_approved": return "Quest Approved";
+            case "quest_rejected": return "Quest Rejected";
+            default: return type.replace("_", " ");
+        }
     };
 
     // Bounty creation handler
@@ -713,17 +730,36 @@ export default function ProfilePage() {
                         transition={{ duration: 0.2 }}
                     >
                         {/* History Filter Tabs */}
-                        <div className="flex justify-center mb-8">
-                            <div className="inline-flex gap-1 p-1 bg-slate-100 border border-slate-200">
+                        <div className="flex flex-wrap justify-center gap-2 mb-8">
+                            <div className="inline-flex flex-wrap gap-1 p-1 bg-slate-100 border border-slate-200">
                                 {[
-                                    { id: "all", label: "All Activity" },
+                                    { id: "all", label: "All" },
                                     { id: "bounties", label: "Bounties" },
                                     { id: "quests", label: "Quests" },
                                 ].map((tab) => (
                                     <button
                                         key={tab.id}
                                         onClick={() => setHistoryFilter(tab.id)}
-                                        className={`px-4 sm:px-6 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
+                                        className={`px-3 sm:px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
+                                            historyFilter === tab.id
+                                                ? "bg-white text-slate-900 shadow-sm border border-slate-200"
+                                                : "text-slate-500 hover:text-slate-900"
+                                        }`}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="inline-flex flex-wrap gap-1 p-1 bg-slate-100 border border-slate-200">
+                                {[
+                                    { id: "created", label: "Created" },
+                                    { id: "submitted", label: "Submitted" },
+                                    { id: "wins", label: "Wins" },
+                                ].map((tab) => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setHistoryFilter(tab.id)}
+                                        className={`px-3 sm:px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${
                                             historyFilter === tab.id
                                                 ? "bg-white text-slate-900 shadow-sm border border-slate-200"
                                                 : "text-slate-500 hover:text-slate-900"
@@ -758,10 +794,9 @@ export default function ProfilePage() {
 
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-0.5">
-                                                    <span className="text-xs font-black uppercase tracking-wider text-slate-400">
-                                                        {tx.type.replace("_", " ")}
+                                                    <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 ${getStatusColor(tx.type)}`}>
+                                                        {getTypeLabel(tx.type)}
                                                     </span>
-                                                    <span className="text-[10px] font-bold text-slate-300">•</span>
                                                     <span className="text-[10px] font-bold text-slate-400">
                                                         {new Date(Number(tx.timestamp) * 1000).toLocaleDateString(undefined, {
                                                             month: 'short',
@@ -774,11 +809,15 @@ export default function ProfilePage() {
                                                 <p className="text-sm font-bold text-slate-900 truncate group-hover:text-[#0EA885] transition-colors">
                                                     {tx.description}
                                                 </p>
+                                                <p className="text-xs text-slate-400 mt-0.5">
+                                                    {tx.contractType === "Quinty" ? "Bounty" : "Quest"} #{tx.itemId}
+                                                </p>
                                             </div>
 
                                             <div className="text-right flex flex-col items-end gap-1">
                                                 {tx.amount ? (
-                                                    <div className="text-sm font-black text-slate-900">
+                                                    <div className={`text-sm font-black ${tx.type.includes("won") || tx.type.includes("approved") ? "text-emerald-600" : "text-slate-900"}`}>
+                                                        {tx.type.includes("won") || tx.type.includes("approved") ? "+" : ""}
                                                         {formatETH(tx.amount)} <span className="text-[10px] font-bold text-slate-400">ETH</span>
                                                     </div>
                                                 ) : (
