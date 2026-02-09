@@ -124,6 +124,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Sync to backend database
       try {
         console.log('Syncing profile to backend...');
+
+        // First check if backend already has this profile with a custom username
+        const token = localStorage.getItem('quinty_auth_token');
+        let existingProfile: UserProfile | null = null;
+        try {
+          const meResponse = await axios.get(`${apiUrl}/auth/me`, {
+            withCredentials: true,
+            timeout: 3000,
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          existingProfile = meResponse.data;
+        } catch {
+          // No existing profile or not authenticated yet — that's fine
+        }
+
+        // If backend already has a username, don't overwrite it with Privy-derived one
+        if (existingProfile?.username) {
+          profileData.username = existingProfile.username;
+        }
+
         const response = await axios.post(
           `${apiUrl}/auth/sync-profile`,
           profileData,
@@ -138,7 +158,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem('quinty_auth_token', response.data.access_token);
         }
 
-        // Update profile with any data from backend
+        // Update profile with data from backend (source of truth)
         if (response.data.profile) {
           setProfile(response.data.profile);
         }
@@ -196,17 +216,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Helper to get a valid auth token, refreshing via sync-profile if needed
+  const getAuthToken = async (): Promise<string | null> => {
+    const existing = authToken || localStorage.getItem('quinty_auth_token');
+    if (existing) return existing;
+
+    // No token stored — call sync-profile to get a fresh one
+    if (!privyUser) return null;
+    try {
+      const email = privyUser.email?.address || privyUser.google?.email;
+      const response = await axios.post(
+        `${apiUrl}/auth/sync-profile`,
+        {
+          id: privyUser.id,
+          email: email || undefined,
+          username: profile?.username || 'User',
+        },
+        { withCredentials: true }
+      );
+      if (response.data.access_token) {
+        setAuthToken(response.data.access_token);
+        localStorage.setItem('quinty_auth_token', response.data.access_token);
+        return response.data.access_token;
+      }
+    } catch (e) {
+      console.error('Failed to refresh auth token:', e);
+    }
+    return null;
+  };
+
   const updateUsername = async (username: string): Promise<boolean> => {
     if (!profile) return false;
 
-    const token = authToken || localStorage.getItem('quinty_auth_token');
+    const token = await getAuthToken();
+    if (!token) {
+      console.error('No auth token available for profile update');
+      return false;
+    }
+
     try {
       const response = await axios.patch(
         `${apiUrl}/auth/profile`,
         { username },
         {
           withCredentials: true,
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -217,6 +271,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return false;
     } catch (error) {
       console.error('Failed to update username:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Update error details:', {
+          status: error.response?.status,
+          data: error.response?.data,
+        });
+      }
       return false;
     }
   };

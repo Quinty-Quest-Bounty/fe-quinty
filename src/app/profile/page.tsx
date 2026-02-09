@@ -342,6 +342,8 @@ export default function ProfilePage() {
                                         setIsUpdatingUsername(false);
                                         if (success) {
                                             setIsEditingUsername(false);
+                                        } else {
+                                            alert('Failed to update display name. Please try logging out and back in.');
                                         }
                                     }}
                                     disabled={isUpdatingUsername || !newUsername.trim()}
