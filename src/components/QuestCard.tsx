@@ -67,7 +67,7 @@ export default function QuestCard({ quest, entryCount = 0 }: QuestCardProps) {
   return (
     <>
       <Card
-        className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white hover:border-[#0EA885]/30 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md"
+        className="group relative overflow-hidden border border-stone-200 bg-white hover:border-[#0EA885]/30 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md"
         onClick={() => router.push(`/quests/${quest.id}`)}
       >
         {/* Image Section */}
@@ -85,7 +85,7 @@ export default function QuestCard({ quest, entryCount = 0 }: QuestCardProps) {
           )}
 
           <div className="absolute top-3 right-3 flex items-center gap-1.5">
-            <Badge variant={getStatusColor()} className="rounded-full px-2 py-0 text-[10px] font-bold uppercase">
+            <Badge variant={getStatusColor()} className="px-2 py-0 text-[10px] font-bold uppercase">
               {getStatusText()}
             </Badge>
             {quest.questType && (

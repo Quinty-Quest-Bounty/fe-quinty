@@ -93,7 +93,7 @@ export default function BountyCard({ bounty, onTriggerSlash }: BountyCardProps) 
   return (
     <>
       <Card
-        className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white hover:border-[#0EA885]/30 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md"
+        className="group relative overflow-hidden border border-stone-200 bg-white hover:border-[#0EA885]/30 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-md"
         onClick={() => router.push(`/bounties/${bounty.id}`)}
       >
         {/* Image Section */}
@@ -111,7 +111,7 @@ export default function BountyCard({ bounty, onTriggerSlash }: BountyCardProps) 
           )}
 
           <div className="absolute top-3 right-3 flex gap-1">
-            <Badge variant={getStatusVariant()} className="rounded-full px-2 py-0 text-[10px] font-bold uppercase">
+            <Badge variant={getStatusVariant()} className="px-2 py-0 text-[10px] font-bold uppercase">
               {getPhaseLabel()}
             </Badge>
           </div>
@@ -119,7 +119,7 @@ export default function BountyCard({ bounty, onTriggerSlash }: BountyCardProps) 
           {/* Slash warning indicator */}
           {canSlash && (
             <div className="absolute bottom-3 left-3 right-3">
-              <div className="flex items-center gap-2 bg-red-500/90 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg">
+              <div className="flex items-center gap-2 bg-red-500/90 text-white text-[10px] font-bold px-3 py-1.5">
                 <AlertTriangle className="size-3" />
                 Creator missed deadline - Click to slash
               </div>

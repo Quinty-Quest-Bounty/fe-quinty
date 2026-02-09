@@ -3,7 +3,7 @@ import { useReadContract, useWatchContractEvent } from "wagmi";
 import { readContract } from "@wagmi/core";
 import { CONTRACT_ADDRESSES, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
 import { wagmiConfig } from "../utils/web3";
-import { fetchMetadataFromIpfs, CUSTOM_PINATA_GATEWAY, QuestMetadata } from "../utils/ipfs";
+import { fetchMetadataFromIpfs, formatIpfsUrl, QuestMetadata } from "../utils/ipfs";
 
 export interface Quest {
     id: number;
@@ -96,8 +96,7 @@ export function useQuests() {
                                 const metadata = await fetchMetadataFromIpfs(metadataMatch[1]) as QuestMetadata;
                                 if (metadata.images && metadata.images.length > 0) {
                                     // The image is stored as a CID, format it as a full URL
-                                    const imageCid = metadata.images[0];
-                                    imageUrl = `${CUSTOM_PINATA_GATEWAY}${imageCid}`;
+                                    imageUrl = formatIpfsUrl(metadata.images[0]);
                                 }
                                 // Extract questType from metadata
                                 if (metadata.questType) {
@@ -110,7 +109,7 @@ export function useQuests() {
                             // Fallback: check for old Image: ipfs:// format
                             const oldImageMatch = description.match(/Image: ipfs:\/\/([^\s\n]+)/);
                             if (oldImageMatch) {
-                                imageUrl = `${CUSTOM_PINATA_GATEWAY}${oldImageMatch[1]}`;
+                                imageUrl = formatIpfsUrl(oldImageMatch[1]);
                             }
                         }
 
