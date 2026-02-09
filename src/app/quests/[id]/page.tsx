@@ -14,7 +14,7 @@ import {
     BASE_SEPOLIA_CHAIN_ID,
 } from "../../../utils/contracts";
 import { formatETH, formatTimeLeft, formatAddress, wagmiConfig } from "../../../utils/web3";
-import { IpfsImage, uploadToIpfs } from "../../../utils/ipfs";
+import { uploadToIpfs, fetchMetadataFromIpfs, QuestMetadata, CUSTOM_PINATA_GATEWAY } from "../../../utils/ipfs";
 import { useAlert } from "../../../hooks/useAlert";
 import { useSocialVerification } from "../../../hooks/useSocialVerification";
 import {
@@ -134,6 +134,20 @@ export default function QuestDetailPage() {
                     requirements,
                 ] = questData as any;
 
+                // Extract metadata CID and fetch image from Pinata
+                let imageUrl: string | undefined = undefined;
+                const metadataMatch = description.match(/Metadata: ipfs:\/\/([a-zA-Z0-9]+)/);
+                if (metadataMatch) {
+                    try {
+                        const metadata = await fetchMetadataFromIpfs(metadataMatch[1]) as QuestMetadata;
+                        if (metadata.images && metadata.images.length > 0) {
+                            imageUrl = `${CUSTOM_PINATA_GATEWAY}${metadata.images[0]}`;
+                        }
+                    } catch (err) {
+                        console.error("Error fetching quest metadata:", err);
+                    }
+                }
+
                 setQuest({
                     id: parseInt(questId),
                     creator,
@@ -148,9 +162,7 @@ export default function QuestDetailPage() {
                     resolved,
                     cancelled,
                     requirements,
-                    imageUrl: description.includes("ipfs://")
-                        ? description.match(/ipfs:\/\/[^\s\n]+/)?.[0]
-                        : undefined,
+                    imageUrl,
                 });
 
                 // Load entries
@@ -443,8 +455,8 @@ export default function QuestDetailPage() {
                         {/* Hero Image */}
                         {quest.imageUrl && (
                             <div className="bg-white border border-slate-200 overflow-hidden">
-                                <IpfsImage
-                                    cid={quest.imageUrl.replace("ipfs://", "")}
+                                <img
+                                    src={quest.imageUrl}
                                     alt={quest.title}
                                     className="w-full h-auto max-h-96 object-cover"
                                 />

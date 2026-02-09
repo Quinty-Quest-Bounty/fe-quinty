@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatETH, formatTimeLeft, formatAddress } from "../utils/web3";
-import { IpfsImage } from "../utils/ipfs";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Progress } from "./ui/progress";
@@ -74,8 +73,8 @@ export default function QuestCard({ quest, entryCount = 0 }: QuestCardProps) {
         {/* Image Section */}
         <div className="relative h-40 w-full overflow-hidden bg-slate-50">
           {quest.imageUrl ? (
-            <IpfsImage
-              cid={quest.imageUrl.replace("ipfs://", "")}
+            <img
+              src={quest.imageUrl}
               alt={quest.title}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />

@@ -8,6 +8,7 @@ export interface XAccount {
 }
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const STORAGE_KEY = 'quinty_x_account';
 
 // Generate a random code verifier for PKCE
 function generateCodeVerifier(): string {
@@ -39,23 +40,41 @@ export function useSocialVerification() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load X account from database on mount
+  // Load X account from localStorage first, then try DB
   useEffect(() => {
     const loadXAccount = async () => {
+      // First check localStorage (works offline/without backend)
       try {
-        const response = await axios.get(`${apiUrl}/auth/me`, { withCredentials: true });
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const account = JSON.parse(stored) as XAccount;
+          setXAccount(account);
+        }
+      } catch (err) {
+        console.log('No X account in localStorage');
+      }
+
+      // Then try to load from database (if backend is available)
+      try {
+        const response = await axios.get(`${apiUrl}/auth/me`, { 
+          withCredentials: true,
+          timeout: 3000, // 3 second timeout
+        });
         if (response.data?.twitter_username) {
-          setXAccount({
+          const account: XAccount = {
             username: response.data.twitter_username.startsWith('@') 
               ? response.data.twitter_username 
               : `@${response.data.twitter_username}`,
             userId: response.data.twitter_id || '',
             verified: true,
-          });
+          };
+          setXAccount(account);
+          // Sync to localStorage
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(account));
         }
       } catch (err) {
-        // User not logged in or no X account linked - that's fine
-        console.log('No X account found in DB');
+        // Backend not available or user not logged in - that's fine
+        console.log('Backend not available or no X account in DB');
       } finally {
         setIsLoading(false);
       }
@@ -63,8 +82,12 @@ export function useSocialVerification() {
     loadXAccount();
   }, []);
 
-  // Save X account to database
-  const saveXAccountToDb = useCallback(async (account: XAccount) => {
+  // Save X account to localStorage and optionally to database
+  const saveXAccount = useCallback(async (account: XAccount) => {
+    // Always save to localStorage (works without backend)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(account));
+
+    // Try to save to database (optional, may fail if backend is down)
     try {
       await axios.patch(
         `${apiUrl}/auth/profile`,
@@ -72,12 +95,15 @@ export function useSocialVerification() {
           twitter_username: account.username.replace('@', ''),
           twitter_id: account.userId,
         },
-        { withCredentials: true }
+        { 
+          withCredentials: true,
+          timeout: 3000,
+        }
       );
-      return true;
+      console.log('X account saved to database');
     } catch (err) {
-      console.error('Failed to save X account to DB:', err);
-      return false;
+      // Backend not available - that's fine, we have localStorage
+      console.log('Could not save X account to DB (backend may be offline)');
     }
   }, []);
 
@@ -147,15 +173,15 @@ export function useSocialVerification() {
             window.removeEventListener('message', handleMessage);
             popup?.close();
 
-            // Received REAL verified data from backend
+            // Received REAL verified data from Twitter
             const account: XAccount = {
-              username: `@${data.username}`, // Add @ prefix
+              username: data.username.startsWith('@') ? data.username : `@${data.username}`,
               userId: data.userId,
               verified: true,
             };
 
-            // Save to database
-            await saveXAccountToDb(account);
+            // Save to localStorage and optionally to database
+            await saveXAccount(account);
 
             setXAccount(account);
             setIsConnecting(false);
@@ -207,10 +233,20 @@ export function useSocialVerification() {
       setIsConnecting(false);
       return null;
     }
-  }, [buildXAuthUrl, isConnecting, saveXAccountToDb]);
+  }, [buildXAuthUrl, isConnecting, saveXAccount]);
 
   const disconnectX = useCallback(() => {
     setXAccount(null);
+    localStorage.removeItem(STORAGE_KEY);
+    
+    // Try to remove from database too (optional)
+    axios.patch(
+      `${apiUrl}/auth/profile`,
+      { twitter_username: null, twitter_id: null },
+      { withCredentials: true, timeout: 3000 }
+    ).catch(() => {
+      // Backend not available - that's fine
+    });
   }, []);
 
   return {
