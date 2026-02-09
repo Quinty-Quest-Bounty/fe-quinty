@@ -687,12 +687,24 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Results count */}
+            {/* Legend + Results */}
             {!loading && (
               <div className="flex items-center justify-between mb-5">
-                <p className="text-sm text-stone-500">
-                  <span className="font-semibold text-stone-700">{unifiedItems.length}</span> results
-                  {debouncedSearch && <span className="ml-1">for &ldquo;<span className="text-[#0EA885]">{debouncedSearch}</span>&rdquo;</span>}
+                {/* Color legend */}
+                <div className="flex items-center gap-4 text-[11px] text-stone-400">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 bg-[#0EA885]" />
+                    <span>Bounty</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 bg-amber-400" />
+                    <span>Quest</span>
+                  </div>
+                </div>
+                {/* Results count */}
+                <p className="text-[11px] text-stone-400">
+                  <span className="font-medium text-stone-600">{unifiedItems.length}</span> results
+                  {debouncedSearch && <span className="ml-1">for &ldquo;{debouncedSearch}&rdquo;</span>}
                 </p>
               </div>
             )}
@@ -721,8 +733,11 @@ export default function DashboardPage() {
                         onClick={() => router.push(`/${item.type === "bounty" ? "bounties" : "quests"}/${item.id}`)}
                         className="group cursor-pointer bg-white shadow-sm hover:shadow-xl hover:shadow-stone-200/50 border border-stone-100 hover:border-stone-200 transition-all duration-300 overflow-hidden flex flex-col"
                       >
+                        {/* Type color bar at top */}
+                        <div className={`h-1 w-full ${item.type === "bounty" ? "bg-[#0EA885]" : "bg-amber-400"}`} />
+                        
                         {/* Image - Clean, no overlays */}
-                        <div className="relative w-full h-40 overflow-hidden">
+                        <div className="relative w-full h-36 overflow-hidden">
                           {image ? (
                             <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                           ) : (
@@ -737,40 +752,20 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="p-4 flex flex-col flex-1">
-                          {/* Top row: Type indicator + Status */}
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                              {/* Type: small colored bar */}
-                              <div className={`w-1 h-4 ${item.type === "bounty" ? "bg-[#0EA885]" : "bg-amber-400"}`} />
-                              <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-400">
-                                {item.type}
-                              </span>
-                            </div>
-                            {/* Status: simple dot + text */}
-                            <div className="flex items-center gap-1.5">
-                              <div className={`w-1.5 h-1.5 ${
-                                statusInfo.label === "Open" || statusInfo.label === "Live" ? "bg-[#0EA885]" :
-                                statusInfo.label === "Judging" ? "bg-amber-500" :
-                                "bg-stone-300"
-                              }`} />
-                              <span className="text-[11px] font-medium text-stone-400">{statusInfo.label}</span>
-                            </div>
-                          </div>
-                          
                           {/* Title */}
-                          <h3 className="text-[15px] font-semibold text-stone-800 mb-2 line-clamp-2 leading-snug group-hover:text-[#0EA885] transition-colors">
+                          <h3 className="text-[15px] font-semibold text-stone-800 mb-3 line-clamp-2 leading-snug group-hover:text-[#0EA885] transition-colors">
                             {title}
                           </h3>
 
                           {/* Creator */}
-                          <div className="flex items-center gap-2 mb-4">
+                          <div className="flex items-center gap-2 mb-3">
                             <img src={getAvatarUrl(item.creator, 18)} alt="" className="w-[18px] h-[18px] flex-shrink-0" />
                             <span className="text-[11px] text-stone-400 truncate">{formatAddress(item.creator)}</span>
                           </div>
                           
                           {/* Footer: Meta info + Price */}
                           <div className="mt-auto pt-3 border-t border-stone-100 flex items-center justify-between">
-                            <div className="flex items-center gap-3 text-[11px] text-stone-400">
+                            <div className="flex items-center gap-2 text-[11px] text-stone-400">
                               <span className="flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
                                 {formatDeadline(item.deadline)}
@@ -780,12 +775,6 @@ export default function DashboardPage() {
                                   <Users className="h-3 w-3" />
                                   {subCount}
                                 </span>
-                              )}
-                              {category && (
-                                <span className="text-stone-300">•</span>
-                              )}
-                              {category && (
-                                <span className="capitalize">{category}</span>
                               )}
                             </div>
                             <div className="text-right">
@@ -806,70 +795,57 @@ export default function DashboardPage() {
               ) : (
                 <div className="flex flex-col gap-2">
                   {displayedItems.map(item => {
-                    const statusInfo = getStatusInfo(item);
                     const { title, image, category, subCount } = getItemData(item);
 
                     return (
                       <div
                         key={`${item.type}-${item.id}`}
                         onClick={() => router.push(`/${item.type === "bounty" ? "bounties" : "quests"}/${item.id}`)}
-                        className="group cursor-pointer bg-white shadow-sm hover:shadow-md border border-stone-100 hover:border-stone-200 transition-all duration-200 px-4 py-3 flex items-center gap-4"
+                        className="group cursor-pointer bg-white shadow-sm hover:shadow-md border border-stone-100 hover:border-stone-200 transition-all duration-200 flex items-center overflow-hidden"
                       >
                         {/* Type indicator bar */}
-                        <div className={`w-1 h-12 flex-shrink-0 ${item.type === "bounty" ? "bg-[#0EA885]" : "bg-amber-400"}`} />
+                        <div className={`w-1 self-stretch flex-shrink-0 ${item.type === "bounty" ? "bg-[#0EA885]" : "bg-amber-400"}`} />
                         
-                        {/* Thumbnail */}
-                        <div className="flex-shrink-0 w-12 h-12 overflow-hidden">
-                          {image ? (
-                            <img src={image} alt={title} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className={`w-full h-full ${getCategoryColor(category)} flex items-center justify-center`}>
-                              {item.type === "bounty" ? <Target className="w-5 h-5 text-stone-300" /> : <Zap className="w-5 h-5 text-stone-300" />}
+                        <div className="flex items-center gap-4 px-4 py-3 flex-1">
+                          {/* Thumbnail */}
+                          <div className="flex-shrink-0 w-12 h-12 overflow-hidden">
+                            {image ? (
+                              <img src={image} alt={title} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className={`w-full h-full ${getCategoryColor(category)} flex items-center justify-center`}>
+                                {item.type === "bounty" ? <Target className="w-5 h-5 text-stone-300" /> : <Zap className="w-5 h-5 text-stone-300" />}
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-semibold text-stone-800 truncate group-hover:text-[#0EA885] transition-colors">{title}</h3>
+                            <div className="flex items-center gap-2 mt-1 text-[11px] text-stone-400">
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {formatDeadline(item.deadline)}
+                              </span>
+                              {subCount > 0 && (
+                                <>
+                                  <span>•</span>
+                                  <span className="flex items-center gap-1">
+                                    <Users className="w-3 h-3" />
+                                    {subCount}
+                                  </span>
+                                </>
+                              )}
                             </div>
-                          )}
-                        </div>
-                        
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-semibold text-stone-800 truncate group-hover:text-[#0EA885] transition-colors">{title}</h3>
-                          <div className="flex items-center gap-3 mt-1 text-[11px] text-stone-400">
-                            <span className="flex items-center gap-1">
-                              <div className={`w-1.5 h-1.5 ${
-                                statusInfo.label === "Open" || statusInfo.label === "Live" ? "bg-[#0EA885]" :
-                                statusInfo.label === "Judging" ? "bg-amber-500" : "bg-stone-300"
-                              }`} />
-                              {statusInfo.label}
-                            </span>
-                            <span>•</span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {formatDeadline(item.deadline)}
-                            </span>
-                            {subCount > 0 && (
-                              <>
-                                <span>•</span>
-                                <span className="flex items-center gap-1">
-                                  <Users className="w-3 h-3" />
-                                  {subCount}
-                                </span>
-                              </>
-                            )}
-                            {category && (
-                              <>
-                                <span>•</span>
-                                <span className="capitalize">{category}</span>
-                              </>
-                            )}
                           </div>
-                        </div>
-                        
-                        {/* Price */}
-                        <div className="flex-shrink-0 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <Image src={ethIcon} alt="ETH" width={18} height={18} className="flex-shrink-0" />
-                            <span className="text-base font-bold text-stone-800">{(Number(item.amount) / 1e18).toFixed(3)}</span>
+                          
+                          {/* Price */}
+                          <div className="flex-shrink-0 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <Image src={ethIcon} alt="ETH" width={18} height={18} className="flex-shrink-0" />
+                              <span className="text-base font-bold text-stone-800">{(Number(item.amount) / 1e18).toFixed(3)}</span>
+                            </div>
+                            {ethPrice > 0 && <div className="text-[11px] text-stone-400 mt-0.5">{formatUSD(convertEthToUSD(Number(item.amount) / 1e18, ethPrice))}</div>}
                           </div>
-                          {ethPrice > 0 && <div className="text-[11px] text-stone-400 mt-0.5">{formatUSD(convertEthToUSD(Number(item.amount) / 1e18, ethPrice))}</div>}
                         </div>
                       </div>
                     );
