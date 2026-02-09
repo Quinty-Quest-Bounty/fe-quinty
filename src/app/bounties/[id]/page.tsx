@@ -21,13 +21,14 @@ import {
   formatAddress,
   wagmiConfig,
 } from "../../../utils/web3";
-import { fetchMetadataFromIpfs, BountyMetadata, uploadToIpfs } from "../../../utils/ipfs";
+import { fetchMetadataFromIpfs, BountyMetadata, uploadToIpfs, uploadMetadataToIpfs, SubmissionMetadata, formatIpfsUrl } from "../../../utils/ipfs";
 import { getEthPriceInUSD, convertEthToUSD, formatUSD } from "../../../utils/prices";
 import { WalletName } from "../../../components/WalletName";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useAlert } from "../../../hooks/useAlert";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
+import { Textarea } from "../../../components/ui/textarea";
 import { Alert, AlertDescription } from "../../../components/ui/alert";
 import {
   Dialog,
@@ -50,6 +51,7 @@ import {
   Loader2,
   Upload,
   X,
+  X as XIcon,
   FileText,
   CheckCircle2,
   Package,
@@ -111,8 +113,11 @@ export default function BountyDetailPage() {
   const [metadata, setMetadata] = useState<BountyMetadata | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [socialHandle, setSocialHandle] = useState("");
+  const [submissionText, setSubmissionText] = useState("");
   const [copied, setCopied] = useState(false);
   const [viewingCid, setViewingCid] = useState<string | null>(null);
+  const [viewingMetadata, setViewingMetadata] = useState<any>(null);
+  const [isLoadingViewing, setIsLoadingViewing] = useState(false);
   const [viewingTitle, setViewingTitle] = useState<string>("");
   const [uploadedSolutionImage, setUploadedSolutionImage] = useState<File | null>(null);
   const [isUploadingSolution, setIsUploadingSolution] = useState(false);
@@ -202,6 +207,33 @@ export default function BountyDetailPage() {
   useEffect(() => { if (bountyId) loadBounty(); }, [bountyId, address]);
   useEffect(() => { if (isConfirmed) loadBounty(); }, [isConfirmed]);
 
+  // Load viewing metadata
+  useEffect(() => {
+    const loadViewingMetadata = async () => {
+      if (!viewingCid) {
+        setViewingMetadata(null);
+        return;
+      }
+      
+      try {
+        setIsLoadingViewing(true);
+        const data = await fetchMetadataFromIpfs(viewingCid);
+        // Basic heuristic to check if it's our JSON metadata or just an image CID
+        if (data && (data.description !== undefined || data.screenshots !== undefined)) {
+          setViewingMetadata(data);
+        } else {
+          setViewingMetadata(null);
+        }
+      } catch (e) {
+        console.error("Not a JSON metadata file or failed to fetch:", e);
+        setViewingMetadata(null);
+      } finally {
+        setIsLoadingViewing(false);
+      }
+    };
+    loadViewingMetadata();
+  }, [viewingCid]);
+
   const copyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopied(true);
@@ -220,18 +252,33 @@ export default function BountyDetailPage() {
 
     try {
       setIsUploadingSolution(true);
-      const solutionCid = await uploadToIpfs(uploadedSolutionImage, { bountyId, type: "bounty-solution" });
+      // 1. Upload image
+      const solutionImageCid = await uploadToIpfs(uploadedSolutionImage, { bountyId, type: "bounty-solution" });
+      
+      // 2. Create metadata
+      const submissionMetadata: SubmissionMetadata = {
+        description: submissionText,
+        deliverables: [],
+        attachments: [],
+        screenshots: [solutionImageCid],
+        submittedAt: Math.floor(Date.now() / 1000)
+      };
+
+      // 3. Upload metadata
+      const metadataCid = await uploadMetadataToIpfs(submissionMetadata);
+      
       const handle = xHandle.replace('@', '');
 
       writeContract({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "submitToBounty",
-        args: [BigInt(bountyId), solutionCid, handle],
+        args: [BigInt(bountyId), metadataCid, handle],
         value: requiredDeposit,
       });
 
       setUploadedSolutionImage(null);
+      setSubmissionText("");
       setSocialHandle("");
       setShowSubmitForm(false);
     } catch (error) {
@@ -672,8 +719,22 @@ export default function BountyDetailPage() {
                           )}
                           {isWinner && <span className="text-xs font-semibold bg-[#0EA885] text-white px-2 py-0.5">🏆 Winner</span>}
                           <div>
-                            <p className="text-sm font-medium text-stone-700"><WalletName address={sub.submitter} /></p>
-                            <p className="text-xs text-stone-400">@{sub.socialHandle} • {formatETH(sub.deposit)} ETH deposit</p>
+                            <p className="text-sm font-medium text-stone-700">
+                                Submission by <WalletName address={sub.submitter} />
+                            </p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                                <a 
+                                    href={`https://x.com/${sub.socialHandle}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-xs text-[#0EA885] hover:underline flex items-center gap-1"
+                                >
+                                    <XIcon className="size-3 text-black" />
+                                    @{sub.socialHandle}
+                                </a>
+                                <span className="text-stone-300">•</span>
+                                <p className="text-xs text-stone-400">{formatETH(sub.deposit)} ETH deposit</p>
+                            </div>
                           </div>
                         </div>
                         <Button
@@ -734,6 +795,16 @@ export default function BountyDetailPage() {
                   <Input value={xHandle} readOnly className="h-10 border-stone-200 bg-stone-50 text-stone-500" />
                 </div>
                 <div>
+                  <label className="text-sm font-medium text-stone-700 mb-1.5 block">Description / Notes</label>
+                  <Textarea 
+                    placeholder="Describe your solution..." 
+                    value={submissionText} 
+                    onChange={(e) => setSubmissionText(e.target.value)} 
+                    className="border-stone-200"
+                    rows={4}
+                  />
+                </div>
+                <div>
                   <label className="text-sm font-medium text-stone-700 mb-1.5 block">Solution Image</label>
                   {!uploadedSolutionImage ? (
                     <div className="border-2 border-dashed border-stone-200 hover:border-[#0EA885]/50 bg-stone-50 p-6 text-center cursor-pointer transition-colors">
@@ -767,21 +838,55 @@ export default function BountyDetailPage() {
 
       {/* IPFS Viewer */}
       <Dialog open={!!viewingCid} onOpenChange={() => setViewingCid(null)}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl overflow-y-auto max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>{viewingTitle}</DialogTitle>
           </DialogHeader>
-          {viewingCid && (
-            <div className="mt-4">
-              <img src={`https://purple-elderly-silverfish-382.mypinata.cloud/ipfs/${viewingCid}`} alt="Submission" className="w-full max-h-96 object-contain border border-stone-200" />
-              <div className="flex gap-2 mt-4">
+          {isLoadingViewing ? (
+            <div className="py-12 text-center">
+              <Loader2 className="size-8 animate-spin mx-auto text-[#0EA885]" />
+              <p className="text-sm text-stone-500 mt-2">Fetching details...</p>
+            </div>
+          ) : viewingCid && (
+            <div className="mt-4 space-y-6">
+              {viewingMetadata ? (
+                <>
+                  {viewingMetadata.description && (
+                    <div className="bg-stone-50 p-4 border border-stone-100">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">Description</h4>
+                      <p className="text-sm text-stone-700 whitespace-pre-wrap">{viewingMetadata.description}</p>
+                    </div>
+                  )}
+                  {viewingMetadata.screenshots && viewingMetadata.screenshots.length > 0 && (
+                    <div className="space-y-4">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-stone-400">Attachments</h4>
+                      {viewingMetadata.screenshots.map((imgCid: string, i: number) => (
+                        <img 
+                          key={i}
+                          src={formatIpfsUrl(imgCid)} 
+                          alt={`Attachment ${i + 1}`} 
+                          className="w-full h-auto border border-stone-200" 
+                        />
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <img 
+                  src={formatIpfsUrl(viewingCid)} 
+                  alt="Submission" 
+                  className="w-full h-auto object-contain border border-stone-200" 
+                />
+              )}
+              
+              <div className="flex gap-2 pt-4 border-t border-stone-100">
                 <Button variant="outline" size="sm" asChild className="flex-1">
-                  <a href={`https://ipfs.io/ipfs/${viewingCid}`} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="size-3 mr-2" /> Open
+                  <a href={formatIpfsUrl(viewingCid)} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="size-3 mr-2" /> View Raw IPFS
                   </a>
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(`https://ipfs.io/ipfs/${viewingCid}`); showAlert({ title: "Copied!", description: "Link copied" }); }} className="flex-1">
-                  <Copy className="size-3 mr-2" /> Copy
+                <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(formatIpfsUrl(viewingCid)); showAlert({ title: "Copied!", description: "Link copied" }); }} className="flex-1">
+                  <Copy className="size-3 mr-2" /> Copy Link
                 </Button>
               </div>
             </div>

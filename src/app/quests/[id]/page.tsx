@@ -16,7 +16,7 @@ import {
 } from "../../../utils/contracts";
 import { formatETH, formatTimeLeft, formatAddress, wagmiConfig } from "../../../utils/web3";
 import { WalletName } from "../../../components/WalletName";
-import { uploadToIpfs, fetchMetadataFromIpfs, QuestMetadata, formatIpfsUrl } from "../../../utils/ipfs";
+import { uploadToIpfs, fetchMetadataFromIpfs, QuestMetadata, formatIpfsUrl, uploadMetadataToIpfs, SubmissionMetadata } from "../../../utils/ipfs";
 import { getEthPriceInUSD, convertEthToUSD, formatUSD } from "../../../utils/prices";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useAlert } from "../../../hooks/useAlert";
@@ -43,6 +43,7 @@ import {
     Loader2,
     Upload,
     X,
+    X as XIcon,
     CheckCircle2,
     Shield,
     TrendingUp,
@@ -106,6 +107,8 @@ export default function QuestDetailPage() {
     const [ethPrice, setEthPrice] = useState<number>(0);
     const [showSubmitForm, setShowSubmitForm] = useState(false);
     const [viewingCid, setViewingCid] = useState<string | null>(null);
+    const [viewingMetadata, setViewingMetadata] = useState<any>(null);
+    const [isLoadingViewing, setIsLoadingViewing] = useState(false);
     const [viewingTitle, setViewingTitle] = useState<string>("");
 
     const { writeContract, data: hash, isPending } = useWriteContract();
@@ -183,6 +186,30 @@ export default function QuestDetailPage() {
 
     useEffect(() => { if (questId) loadQuest(); }, [questId]);
     useEffect(() => {
+        const loadViewingMetadata = async () => {
+            if (!viewingCid) {
+                setViewingMetadata(null);
+                return;
+            }
+            
+            try {
+                setIsLoadingViewing(true);
+                const data = await fetchMetadataFromIpfs(viewingCid);
+                if (data && (data.description !== undefined || data.screenshots !== undefined || data.demoUrl !== undefined)) {
+                    setViewingMetadata(data);
+                } else {
+                    setViewingMetadata(null);
+                }
+            } catch (e) {
+                console.error("Not a JSON metadata file or failed to fetch:", e);
+                setViewingMetadata(null);
+            } finally {
+                setIsLoadingViewing(false);
+            }
+        };
+        loadViewingMetadata();
+    }, [viewingCid]);
+    useEffect(() => {
         if (isConfirmed) {
             loadQuest();
             setNewEntry({ twitterUrl: "", ipfsProofCid: "", socialHandle: "", description: "" });
@@ -217,11 +244,14 @@ export default function QuestDetailPage() {
         }
 
         try {
-            let proofCid = newEntry.ipfsProofCid;
+            let finalCid = "";
+            
+            // 1. Upload image if present
+            let imageCid = "";
             if (uploadedProofImage) {
                 setIsUploadingProof(true);
                 try {
-                    proofCid = await uploadToIpfs(uploadedProofImage, { questId, type: "quest-proof" });
+                    imageCid = await uploadToIpfs(uploadedProofImage, { questId, type: "quest-proof" });
                 } catch (uploadError) {
                     showAlert({ title: "Upload Failed", description: "Failed to upload proof to IPFS. Please try again." });
                     setIsUploadingProof(false);
@@ -231,12 +261,25 @@ export default function QuestDetailPage() {
                 }
             }
 
+            // 2. Create metadata JSON
+            const submissionMetadata: SubmissionMetadata = {
+                description: newEntry.description || (newEntry.twitterUrl ? `Proof: ${newEntry.twitterUrl}` : ""),
+                deliverables: [],
+                attachments: [],
+                screenshots: imageCid ? [imageCid] : [],
+                demoUrl: newEntry.twitterUrl,
+                submittedAt: Math.floor(Date.now() / 1000)
+            };
+
+            // 3. Upload metadata
+            finalCid = await uploadMetadataToIpfs(submissionMetadata);
+
             const handle = xHandle.replace('@', '');
             writeContract({
                 address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
                 abi: QUEST_ABI,
                 functionName: "submitEntry",
-                args: [BigInt(questId), proofCid, handle],
+                args: [BigInt(questId), finalCid, handle],
             });
         } catch (error) {
             console.error("Error submitting entry:", error);
@@ -589,7 +632,9 @@ export default function QuestDetailPage() {
                                                          <Users className="size-5 text-stone-400" />}
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-medium text-stone-700"><WalletName address={entry.solver} /></p>
+                                                        <p className="text-sm font-medium text-stone-700">
+                                                            Entry by <WalletName address={entry.solver} />
+                                                        </p>
                                                         <div className="flex items-center gap-2 mt-0.5">
                                                             <span className={`text-[10px] font-medium px-1.5 py-0.5 ${
                                                                 entry.status === 1 ? "bg-green-100 text-green-700" :
@@ -598,7 +643,15 @@ export default function QuestDetailPage() {
                                                             }`}>
                                                                 {entry.status === 1 ? "Approved" : entry.status === 2 ? "Rejected" : "Pending Review"}
                                                             </span>
-                                                            <span className="text-xs text-stone-400">@{entry.socialHandle}</span>
+                                                            <a 
+                                                                href={`https://x.com/${entry.socialHandle}`} 
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer"
+                                                                className="text-xs text-amber-600 hover:underline flex items-center gap-1"
+                                                            >
+                                                                <XIcon className="size-3 text-black" />
+                                                                @{entry.socialHandle}
+                                                            </a>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -741,21 +794,63 @@ export default function QuestDetailPage() {
 
             {/* IPFS Viewer */}
             <Dialog open={!!viewingCid} onOpenChange={() => setViewingCid(null)}>
-                <DialogContent className="max-w-3xl">
+                <DialogContent className="max-w-3xl overflow-y-auto max-h-[90vh]">
                     <DialogHeader>
                         <DialogTitle>{viewingTitle}</DialogTitle>
                     </DialogHeader>
-                    {viewingCid && (
-                        <div className="mt-4">
-                            <img src={`https://purple-elderly-silverfish-382.mypinata.cloud/ipfs/${viewingCid}`} alt="Entry Proof" className="w-full max-h-96 object-contain border border-stone-200" />
-                            <div className="flex gap-2 mt-4">
+                    {isLoadingViewing ? (
+                        <div className="py-12 text-center">
+                            <Loader2 className="size-8 animate-spin mx-auto text-amber-500" />
+                            <p className="text-sm text-stone-500 mt-2">Fetching details...</p>
+                        </div>
+                    ) : viewingCid && (
+                        <div className="mt-4 space-y-6">
+                            {viewingMetadata ? (
+                                <>
+                                    {viewingMetadata.description && (
+                                        <div className="bg-stone-50 p-4 border border-stone-100">
+                                            <h4 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">Description / Proof Details</h4>
+                                            <p className="text-sm text-stone-700 whitespace-pre-wrap">{viewingMetadata.description}</p>
+                                        </div>
+                                    )}
+                                    {viewingMetadata.demoUrl && (
+                                        <div className="px-4">
+                                            <h4 className="text-xs font-bold uppercase tracking-wider text-stone-400 mb-1">X Post URL</h4>
+                                            <a href={viewingMetadata.demoUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-amber-600 hover:underline break-all">
+                                                {viewingMetadata.demoUrl}
+                                            </a>
+                                        </div>
+                                    )}
+                                    {viewingMetadata.screenshots && viewingMetadata.screenshots.length > 0 && (
+                                        <div className="space-y-4">
+                                            <h4 className="text-xs font-bold uppercase tracking-wider text-stone-400 px-4">Proof Screenshots</h4>
+                                            {viewingMetadata.screenshots.map((imgCid: string, i: number) => (
+                                                <img 
+                                                    key={i}
+                                                    src={formatIpfsUrl(imgCid)} 
+                                                    alt={`Proof ${i + 1}`} 
+                                                    className="w-full h-auto border border-stone-200" 
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <img 
+                                    src={formatIpfsUrl(viewingCid)} 
+                                    alt="Entry Proof" 
+                                    className="w-full h-auto object-contain border border-stone-200" 
+                                />
+                            )}
+                            
+                            <div className="flex gap-2 pt-4 border-t border-stone-100">
                                 <Button variant="outline" size="sm" asChild className="flex-1">
-                                    <a href={`https://ipfs.io/ipfs/${viewingCid}`} target="_blank" rel="noopener noreferrer">
-                                        <ExternalLink className="size-3 mr-2" /> Open
+                                    <a href={formatIpfsUrl(viewingCid)} target="_blank" rel="noopener noreferrer">
+                                        <ExternalLink className="size-3 mr-2" /> View Raw IPFS
                                     </a>
                                 </Button>
-                                <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(`https://ipfs.io/ipfs/${viewingCid}`); showAlert({ title: "Copied!", description: "Link copied" }); }} className="flex-1">
-                                    <Copy className="size-3 mr-2" /> Copy
+                                <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(formatIpfsUrl(viewingCid)); showAlert({ title: "Copied!", description: "Link copied" }); }} className="flex-1">
+                                    <Copy className="size-3 mr-2" /> Copy Link
                                 </Button>
                             </div>
                         </div>
