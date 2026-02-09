@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Calendar as CalendarIcon, Target, DollarSign, Plus, Minus, Briefcase, ListChecks } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { ImageUpload } from "../ui/image-upload";
 
@@ -222,7 +222,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                                                 mode="single"
                                                 selected={openDeadlineDate}
                                                 onSelect={setOpenDeadlineDate}
-                                                disabled={(date) => date < new Date()}
+                                                disabled={(date) => date < startOfDay(new Date())}
                                                 initialFocus
                                             />
                                         </PopoverContent>
@@ -252,7 +252,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                                                 mode="single"
                                                 selected={judgingDeadlineDate}
                                                 onSelect={setJudgingDeadlineDate}
-                                                disabled={(date) => date < (openDeadlineDate || new Date())}
+                                                disabled={(date) => date < (openDeadlineDate || startOfDay(new Date()))}
                                                 initialFocus
                                             />
                                         </PopoverContent>

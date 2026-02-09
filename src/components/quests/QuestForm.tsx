@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Gift, Calendar as CalendarIcon, Users, Coins, Tag, Code, Palette, Megaphone, BookOpen, MoreHorizontal } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
-import { format } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import { ImageUpload } from "../ui/image-upload";
 
 type QuestType = "development" | "design" | "marketing" | "research" | "other";
@@ -172,7 +172,7 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
                                             mode="single"
                                             selected={deadlineDate}
                                             onSelect={setDeadlineDate}
-                                            disabled={(date) => date < new Date()}
+                                            disabled={(date) => date < startOfDay(new Date())}
                                             initialFocus
                                         />
                                     </PopoverContent>
