@@ -602,14 +602,13 @@ export default function DashboardPage() {
               <div className="flex items-center gap-3">
                 <div className="flex items-center bg-stone-100/60  p-1 flex-shrink-0">
                   {typeFilters.map(f => (
-                    <button 
-                      key={f.id} 
-                      onClick={() => setTypeFilter(f.id)} 
-                      className={`px-4 py-2 text-xs font-semibold  transition-all duration-200 whitespace-nowrap ${
-                        typeFilter === f.id 
-                          ? "bg-white text-stone-900 shadow-sm" 
-                          : "text-stone-500 hover:text-stone-700"
-                      }`}
+                    <button
+                      key={f.id}
+                      onClick={() => setTypeFilter(f.id)}
+                      className={`px-4 py-2 text-xs font-semibold  transition-all duration-200 whitespace-nowrap ${typeFilter === f.id
+                        ? "bg-white text-stone-900 shadow-sm"
+                        : "text-stone-500 hover:text-stone-700"
+                        }`}
                     >
                       {f.label}
                     </button>
@@ -617,12 +616,12 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex-1 relative min-w-0">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
-                  <Input 
-                    ref={searchRef} 
-                    value={searchQuery} 
-                    onChange={e => setSearchQuery(e.target.value)} 
-                    placeholder="Search bounties & quests..." 
-                    className="pl-11 pr-10 h-11 text-sm bg-stone-50/50 border-stone-100  focus:bg-white focus:border-[#0EA885] focus:ring-[#0EA885]/20 transition-all" 
+                  <Input
+                    ref={searchRef}
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    placeholder="Search bounties & quests..."
+                    className="pl-11 pr-10 h-11 text-sm bg-stone-50/50 border-stone-100  focus:bg-white focus:border-[#0EA885] focus:ring-[#0EA885]/20 transition-all"
                   />
                   {searchQuery && (
                     <button onClick={() => setSearchQuery("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors">
@@ -653,14 +652,13 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 overflow-x-auto pb-1 flex-1">
                   {statusFilters.map(f => (
-                    <button 
-                      key={f.id} 
-                      onClick={() => setActiveFilter(f.id)} 
-                      className={`px-4 py-2 text-xs font-semibold  transition-all duration-200 whitespace-nowrap ${
-                        activeFilter === f.id 
-                          ? "bg-[#0EA885] text-white shadow-sm shadow-[#0EA885]/25" 
-                          : "bg-stone-100/60 text-stone-500 hover:bg-stone-100 hover:text-stone-700"
-                      }`}
+                    <button
+                      key={f.id}
+                      onClick={() => setActiveFilter(f.id)}
+                      className={`px-4 py-2 text-xs font-semibold  transition-all duration-200 whitespace-nowrap ${activeFilter === f.id
+                        ? "bg-[#0EA885] text-white shadow-sm shadow-[#0EA885]/25"
+                        : "bg-stone-100/60 text-stone-500 hover:bg-stone-100 hover:text-stone-700"
+                        }`}
                     >
                       {f.label}
                     </button>
@@ -735,7 +733,7 @@ export default function DashboardPage() {
                       >
                         {/* Type color bar at top */}
                         <div className={`h-1 w-full ${item.type === "bounty" ? "bg-[#0EA885]" : "bg-amber-400"}`} />
-                        
+
                         {/* Image - Clean, no overlays */}
                         <div className="relative w-full h-36 overflow-hidden">
                           {image ? (
@@ -762,7 +760,7 @@ export default function DashboardPage() {
                             <img src={getAvatarUrl(item.creator, 18)} alt="" className="w-[18px] h-[18px] flex-shrink-0" />
                             <span className="text-[11px] text-stone-400 truncate">{formatAddress(item.creator)}</span>
                           </div>
-                          
+
                           {/* Footer: Meta info + Price */}
                           <div className="mt-auto pt-3 border-t border-stone-100 flex items-center justify-between">
                             <div className="flex items-center gap-2 text-[11px] text-stone-400">
@@ -805,7 +803,7 @@ export default function DashboardPage() {
                       >
                         {/* Type indicator bar */}
                         <div className={`w-1 self-stretch flex-shrink-0 ${item.type === "bounty" ? "bg-[#0EA885]" : "bg-amber-400"}`} />
-                        
+
                         <div className="flex items-center gap-4 px-4 py-3 flex-1">
                           {/* Thumbnail */}
                           <div className="flex-shrink-0 w-12 h-12 overflow-hidden">
@@ -817,7 +815,7 @@ export default function DashboardPage() {
                               </div>
                             )}
                           </div>
-                          
+
                           {/* Content */}
                           <div className="flex-1 min-w-0">
                             <h3 className="text-sm font-semibold text-stone-800 truncate group-hover:text-[#0EA885] transition-colors">{title}</h3>
@@ -837,7 +835,7 @@ export default function DashboardPage() {
                               )}
                             </div>
                           </div>
-                          
+
                           {/* Price */}
                           <div className="flex-shrink-0 text-right">
                             <div className="flex items-center justify-end gap-1.5">
@@ -865,9 +863,9 @@ export default function DashboardPage() {
             {/* ===== LOAD MORE ===== */}
             {!loading && displayedItems.length < unifiedItems.length && (
               <div className="text-center mt-10">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setDisplayCount(prev => prev + LOAD_MORE_COUNT)} 
+                <Button
+                  variant="outline"
+                  onClick={() => setDisplayCount(prev => prev + LOAD_MORE_COUNT)}
                   className="px-8 py-3 h-auto text-sm font-semibold  border-stone-200 hover:bg-stone-50 hover:border-stone-300 transition-all"
                 >
                   Load more ({unifiedItems.length - displayedItems.length} remaining)
@@ -915,8 +913,8 @@ export default function DashboardPage() {
                           </div>
                           <span className="text-xs font-semibold text-amber-800">Featured Bounty</span>
                         </div>
-                        <div 
-                          className="p-4 cursor-pointer hover:bg-stone-50/50 transition-colors" 
+                        <div
+                          className="p-4 cursor-pointer hover:bg-stone-50/50 transition-colors"
                           onClick={() => router.push(`/bounties/${featuredBounty.id}`)}
                         >
                           <div className="w-full h-28 mb-4  overflow-hidden">
@@ -958,7 +956,7 @@ export default function DashboardPage() {
                     <div className="divide-y divide-stone-50">
                       <div className="px-4 py-3.5 flex items-center justify-between">
                         <span className="text-sm text-stone-500">Active Bounties</span>
-                        <span className="text-base font-bold text-sky-600 bg-sky-50 px-2.5 py-0.5 ">{stats.activeBounties}</span>
+                        <span className="text-base font-bold text-green-600 bg-green-50 px-2.5 py-0.5 ">{stats.activeBounties}</span>
                       </div>
                       <div className="px-4 py-3.5 flex items-center justify-between">
                         <span className="text-sm text-stone-500">Active Quests</span>
@@ -966,7 +964,7 @@ export default function DashboardPage() {
                       </div>
                       <div className="px-4 py-3.5 flex items-center justify-between">
                         <span className="text-sm text-stone-500">Completed</span>
-                        <span className="text-base font-bold text-[#0EA885] bg-[#0EA885]/10 px-2.5 py-0.5 ">{stats.completed}</span>
+                        <span className="text-base font-bold text-sky-600 bg-sky-5g0 px-2.5 py-0.5 ">{stats.completed}</span>
                       </div>
                       {ethPrice > 0 && (
                         <div className="px-4 py-3.5 flex items-center justify-between bg-gradient-to-r from-violet-50/50 to-purple-50/50">
@@ -1001,10 +999,9 @@ export default function DashboardPage() {
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm text-stone-700 font-medium truncate leading-snug">{act.title}</p>
                                 <p className="text-xs text-stone-400 mt-1">
-                                  <span className={`font-medium ${
-                                    act.action === "Now live" ? "text-[#0EA885]" : 
+                                  <span className={`font-medium ${act.action === "Now live" ? "text-[#0EA885]" :
                                     act.action === "Completed" || act.action === "Resolved" ? "text-stone-500" : "text-amber-600"
-                                  }`}>{act.action}</span>
+                                    }`}>{act.action}</span>
                                   <span className="mx-1.5">&bull;</span>
                                   {formatAddress(act.creator)}
                                 </p>

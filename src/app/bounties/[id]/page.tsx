@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   useAccount,
   useWriteContract,
@@ -21,11 +22,10 @@ import {
   wagmiConfig,
 } from "../../../utils/web3";
 import { fetchMetadataFromIpfs, BountyMetadata, uploadToIpfs } from "../../../utils/ipfs";
+import { getEthPriceInUSD, convertEthToUSD, formatUSD } from "../../../utils/prices";
 import { useAlert } from "../../../hooks/useAlert";
-import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
-import { Textarea } from "../../../components/ui/textarea";
 import { Alert, AlertDescription } from "../../../components/ui/alert";
 import {
   Dialog,
@@ -54,9 +54,12 @@ import {
   AlertTriangle,
   Gavel,
   Zap,
+  TrendingUp,
+  Timer,
+  Layers,
 } from "lucide-react";
+import ethIcon from "../../../assets/crypto/eth.svg";
 
-// New interface matching the updated contract
 interface Submission {
   submitter: string;
   ipfsCid: string;
@@ -83,16 +86,12 @@ interface Bounty {
   metadataCid?: string;
 }
 
-// Phase helper
 function getCurrentPhase(bounty: Bounty): string {
   const now = BigInt(Math.floor(Date.now() / 1000));
-  
   if (bounty.status === BountyStatus.RESOLVED) return "RESOLVED";
   if (bounty.status === BountyStatus.SLASHED) return "SLASHED";
-  
   if (now <= bounty.openDeadline) return "OPEN";
   if (now <= bounty.judgingDeadline) return "JUDGING";
-  
   return "SLASH_PENDING";
 }
 
@@ -115,17 +114,26 @@ export default function BountyDetailPage() {
   const [requiredDeposit, setRequiredDeposit] = useState<bigint>(BigInt(0));
   const [selectedWinnerId, setSelectedWinnerId] = useState<number | null>(null);
   const [hasUserSubmitted, setHasUserSubmitted] = useState(false);
+  const [ethPrice, setEthPrice] = useState<number>(0);
+  const [showSubmitForm, setShowSubmitForm] = useState(false);
 
   const { writeContract, data: hash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({ hash });
 
-  // Load bounty data using new contract interface
+  useEffect(() => {
+    const fetchPrice = async () => {
+      const price = await getEthPriceInUSD();
+      setEthPrice(price);
+    };
+    fetchPrice();
+    const interval = setInterval(fetchPrice, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   const loadBounty = async () => {
     try {
       setIsLoading(true);
-      
-      // Get bounty data using new getBounty function
       const bountyData = await readContract(wagmiConfig, {
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
@@ -134,22 +142,8 @@ export default function BountyDetailPage() {
       }) as any[];
 
       if (bountyData) {
-        const [
-          creator,
-          title,
-          description,
-          amount,
-          openDeadline,
-          judgingDeadline,
-          slashPercent,
-          status,
-          selectedWinner,
-          selectedSubmissionId,
-          submissionCount,
-          totalDeposits,
-        ] = bountyData;
+        const [creator, title, description, amount, openDeadline, judgingDeadline, slashPercent, status, selectedWinner, selectedSubmissionId, submissionCount, totalDeposits] = bountyData;
 
-        // Get all submissions using new getAllSubmissions function
         const submissions = await readContract(wagmiConfig, {
           address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
           abi: QUINTY_ABI,
@@ -157,7 +151,6 @@ export default function BountyDetailPage() {
           args: [BigInt(bountyId)],
         }) as Submission[];
 
-        // Get required deposit amount
         const deposit = await readContract(wagmiConfig, {
           address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
           abi: QUINTY_ABI,
@@ -166,7 +159,6 @@ export default function BountyDetailPage() {
         }) as bigint;
         setRequiredDeposit(deposit);
 
-        // Check if current user has submitted
         if (address) {
           const hasSubmitted = await readContract(wagmiConfig, {
             address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
@@ -181,24 +173,11 @@ export default function BountyDetailPage() {
         const metadataCid = metadataMatch ? metadataMatch[1] : undefined;
 
         setBounty({
-          id: parseInt(bountyId),
-          creator,
-          title,
-          description,
-          amount,
-          openDeadline,
-          judgingDeadline,
-          slashPercent,
-          status: Number(status) as BountyStatus,
-          selectedWinner,
-          selectedSubmissionId,
-          submissionCount: Number(submissionCount),
-          totalDeposits,
-          submissions: submissions as Submission[],
-          metadataCid,
+          id: parseInt(bountyId), creator, title, description, amount, openDeadline, judgingDeadline, slashPercent,
+          status: Number(status) as BountyStatus, selectedWinner, selectedSubmissionId,
+          submissionCount: Number(submissionCount), totalDeposits, submissions: submissions as Submission[], metadataCid,
         });
 
-        // Load metadata
         if (metadataCid) {
           try {
             const meta = await fetchMetadataFromIpfs(metadataCid);
@@ -215,73 +194,29 @@ export default function BountyDetailPage() {
     }
   };
 
-  useEffect(() => {
-    if (bountyId) {
-      loadBounty();
-    }
-  }, [bountyId, address]);
-
-  useEffect(() => {
-    if (isConfirmed) {
-      loadBounty();
-    }
-  }, [isConfirmed]);
+  useEffect(() => { if (bountyId) loadBounty(); }, [bountyId, address]);
+  useEffect(() => { if (isConfirmed) loadBounty(); }, [isConfirmed]);
 
   const copyLink = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(window.location.href);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Submit solution with 1% deposit
   const submitSolution = async () => {
     if (!bounty || !uploadedSolutionImage) {
-      showAlert({
-        title: "Missing Information",
-        description: "Please upload a solution image",
-      });
+      showAlert({ title: "Missing Information", description: "Please upload a solution image" });
       return;
     }
-
     if (!socialHandle.trim()) {
-      showAlert({
-        title: "Missing Information",
-        description: "Please enter your social handle",
-      });
+      showAlert({ title: "Missing Information", description: "Please enter your social handle" });
       return;
     }
 
     try {
-      let solutionCid = "";
-
-      // Upload image to IPFS if a file is selected
-      if (uploadedSolutionImage) {
-        setIsUploadingSolution(true);
-        try {
-          solutionCid = await uploadToIpfs(uploadedSolutionImage, {
-            bountyId: bountyId,
-            type: "bounty-solution",
-          });
-          console.log("Solution uploaded to IPFS:", solutionCid);
-        } catch (uploadError) {
-          console.error("Error uploading solution to IPFS:", uploadError);
-          showAlert({
-            title: "Upload Failed",
-            description: "Failed to upload solution to IPFS. Please try again.",
-          });
-          setIsUploadingSolution(false);
-          return;
-        } finally {
-          setIsUploadingSolution(false);
-        }
-      }
-
-      // Use the manually entered social handle
+      setIsUploadingSolution(true);
+      const solutionCid = await uploadToIpfs(uploadedSolutionImage, { bountyId, type: "bounty-solution" });
       const handle = socialHandle.replace('@', '');
-
-      console.log("Submitting with deposit:", requiredDeposit.toString());
-      console.log("Using social handle:", handle);
 
       writeContract({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
@@ -293,70 +228,49 @@ export default function BountyDetailPage() {
 
       setUploadedSolutionImage(null);
       setSocialHandle("");
+      setShowSubmitForm(false);
     } catch (error) {
       console.error("Error submitting solution:", error);
-      showAlert({
-        title: "Submission Failed",
-        description: error instanceof Error ? error.message : "Failed to submit solution. Please try again.",
-      });
+      showAlert({ title: "Submission Failed", description: "Failed to submit solution. Please try again." });
+    } finally {
+      setIsUploadingSolution(false);
     }
   };
 
-  // Select winner (creator only, during judging phase)
   const selectWinner = async () => {
     if (selectedWinnerId === null) return;
-
-    try {
-      writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-        abi: QUINTY_ABI,
-        functionName: "selectWinner",
-        args: [BigInt(bountyId), BigInt(selectedWinnerId)],
-      });
-    } catch (error) {
-      console.error("Error selecting winner:", error);
-    }
+    writeContract({
+      address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+      abi: QUINTY_ABI,
+      functionName: "selectWinner",
+      args: [BigInt(bountyId), BigInt(selectedWinnerId)],
+    });
   };
 
-  // Trigger slash (anyone can call after judging deadline)
   const triggerSlash = async () => {
-    try {
-      writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-        abi: QUINTY_ABI,
-        functionName: "triggerSlash",
-        args: [BigInt(bountyId)],
-      });
-    } catch (error) {
-      console.error("Error triggering slash:", error);
-    }
+    writeContract({
+      address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+      abi: QUINTY_ABI,
+      functionName: "triggerSlash",
+      args: [BigInt(bountyId)],
+    });
   };
 
-  // Refund if no submissions
   const refundNoSubmissions = async () => {
-    try {
-      writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-        abi: QUINTY_ABI,
-        functionName: "refundNoSubmissions",
-        args: [BigInt(bountyId)],
-      });
-    } catch (error) {
-      console.error("Error refunding:", error);
-    }
-  };
-
-  const openCidViewer = (cid: string, title: string) => {
-    setViewingCid(cid);
-    setViewingTitle(title);
+    writeContract({
+      address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+      abi: QUINTY_ABI,
+      functionName: "refundNoSubmissions",
+      args: [BigInt(bountyId)],
+    });
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-dvh flex items-center justify-center bg-slate-50">
+      <div className="min-h-dvh flex items-center justify-center bg-stone-50">
         <div className="text-center">
-          <Loader2 className="size-12 animate-spin mx-auto text-[#0EA885] mb-4" />
-          <p className="text-sm text-slate-600 text-pretty">Loading bounty...</p>
+          <Loader2 className="size-10 animate-spin mx-auto text-[#0EA885]" />
+          <p className="text-stone-500 mt-4 text-sm">Loading bounty...</p>
         </div>
       </div>
     );
@@ -364,18 +278,11 @@ export default function BountyDetailPage() {
 
   if (!bounty) {
     return (
-      <div className="min-h-dvh flex items-center justify-center bg-slate-50">
+      <div className="min-h-dvh flex items-center justify-center bg-stone-50">
         <div className="text-center">
-          <h2 className="text-2xl font-black mb-3 text-balance">Bounty not found</h2>
-          <p className="text-sm text-slate-600 mb-6 text-pretty">
-            The bounty you're looking for doesn't exist.
-          </p>
-          <Button
-            onClick={() => router.push("/dashboard")}
-            className="bg-slate-900 hover:bg-slate-800"
-          >
-            Back to Dashboard
-          </Button>
+          <h2 className="text-2xl font-bold text-stone-800 mb-3">Bounty not found</h2>
+          <p className="text-sm text-stone-500 mb-6">The bounty you're looking for doesn't exist.</p>
+          <Button onClick={() => router.push("/dashboard")} className="bg-stone-900 hover:bg-stone-800">Back to Dashboard</Button>
         </div>
       </div>
     );
@@ -384,309 +291,305 @@ export default function BountyDetailPage() {
   const isCreator = address?.toLowerCase() === bounty.creator.toLowerCase();
   const phase = getCurrentPhase(bounty);
   const now = BigInt(Math.floor(Date.now() / 1000));
-  
   const canSubmit = phase === "OPEN" && !isCreator && !hasUserSubmitted;
   const canSelectWinner = isCreator && (phase === "JUDGING" || (phase === "OPEN" && now > bounty.openDeadline));
   const canSlash = phase === "SLASH_PENDING" && bounty.submissionCount > 0;
   const canRefund = phase === "SLASH_PENDING" && bounty.submissionCount === 0 && isCreator;
 
-  const getPhaseLabel = () => {
+  const ethAmount = Number(bounty.amount) / 1e18;
+  const usdAmount = ethPrice > 0 ? convertEthToUSD(ethAmount, ethPrice) : 0;
+  const depositEth = Number(requiredDeposit) / 1e18;
+
+  const getPhaseConfig = () => {
     switch (phase) {
-      case "OPEN": return "Open for Submissions";
-      case "JUDGING": return "Judging Phase";
-      case "RESOLVED": return "Completed";
-      case "SLASHED": return "Creator Slashed";
-      case "SLASH_PENDING": return "Slash Pending";
-      default: return "Unknown";
+      case "OPEN": return { label: "Open", color: "bg-emerald-500", textColor: "text-emerald-600", bgColor: "bg-emerald-50" };
+      case "JUDGING": return { label: "Judging", color: "bg-amber-500", textColor: "text-amber-600", bgColor: "bg-amber-50" };
+      case "RESOLVED": return { label: "Completed", color: "bg-stone-400", textColor: "text-stone-500", bgColor: "bg-stone-100" };
+      case "SLASHED": return { label: "Slashed", color: "bg-red-500", textColor: "text-red-600", bgColor: "bg-red-50" };
+      case "SLASH_PENDING": return { label: "Slash Pending", color: "bg-red-500", textColor: "text-red-600", bgColor: "bg-red-50" };
+      default: return { label: "Unknown", color: "bg-stone-400", textColor: "text-stone-500", bgColor: "bg-stone-100" };
     }
   };
 
-  const getStatusColor = () => {
-    switch (phase) {
-      case "OPEN": return "bg-[#0EA885]/10 text-[#0EA885] border-[#0EA885]/20";
-      case "JUDGING": return "bg-amber-50 text-amber-600 border-amber-200";
-      case "RESOLVED": return "bg-slate-100 text-slate-600 border-slate-200";
-      case "SLASHED": return "bg-red-50 text-red-600 border-red-200";
-      case "SLASH_PENDING": return "bg-red-50 text-red-600 border-red-200";
-      default: return "bg-slate-50 text-slate-500 border-slate-200";
-    }
-  };
+  const phaseConfig = getPhaseConfig();
 
   return (
-    <div className="min-h-dvh bg-slate-50 relative">
+    <div className="min-h-dvh bg-stone-50 relative pt-20 pb-16">
       {/* Loading Overlay */}
       {(isPending || isConfirming) && (
-        <div className="fixed inset-0 bg-black/20 z-50 flex items-center justify-center">
-          <div className="bg-white p-8 border border-slate-200 max-w-sm">
-            <div className="flex flex-col items-center gap-4">
-              <Loader2 className="size-12 animate-spin text-[#0EA885]" />
-              <div className="text-center">
-                <p className="font-bold text-lg mb-2 text-balance">
-                  {isPending ? "Waiting for approval..." : "Confirming transaction..."}
-                </p>
-                <p className="text-sm text-slate-600 text-pretty">
-                  Please don't close this page
-                </p>
-              </div>
-            </div>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white p-8 shadow-2xl max-w-sm text-center">
+            <Loader2 className="size-10 animate-spin mx-auto text-[#0EA885]" />
+            <p className="font-semibold text-lg mt-4 text-stone-800">{isPending ? "Waiting for approval..." : "Confirming..."}</p>
+            <p className="text-sm text-stone-500 mt-1">Please don't close this page</p>
           </div>
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 sm:pt-24 pb-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm mb-6 text-slate-600">
-          <button onClick={() => router.push("/")} className="hover:text-[#0EA885]">
-            Home
-          </button>
+        <div className="flex items-center gap-2 text-sm mb-6 text-stone-400">
+          <button onClick={() => router.push("/")} className="hover:text-[#0EA885]">Home</button>
           <ChevronRight className="size-4" />
-          <button onClick={() => router.push("/dashboard")} className="hover:text-[#0EA885]">
-            Dashboard
-          </button>
+          <button onClick={() => router.push("/dashboard")} className="hover:text-[#0EA885]">Dashboard</button>
           <ChevronRight className="size-4" />
-          <span className="font-bold text-slate-900">Bounty #{bountyId}</span>
+          <span className="text-stone-700 font-medium">Bounty #{bountyId}</span>
         </div>
 
-        {/* Main Content Grid */}
+        {/* Type indicator bar */}
+        <div className="h-1.5 w-full bg-[#0EA885] mb-6" />
+
+        {/* TWO COLUMN LAYOUT */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* LEFT SIDEBAR */}
-          <div className="lg:col-span-4 space-y-4 order-2 lg:order-1">
+          
+          {/* LEFT SIDEBAR - Important Info (Sticky) */}
+          <div className="lg:col-span-4 order-2 lg:order-1">
             <div className="lg:sticky lg:top-24 space-y-4">
-              {/* Reward Card */}
-              <div className="bg-white border border-slate-200 p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="size-10 bg-[#0EA885]/10 border border-[#0EA885]/20 flex items-center justify-center">
-                    <Target className="size-5 text-[#0EA885]" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-wider text-slate-600 mb-0.5">Bounty Reward</p>
-                    <p className="text-2xl font-black text-slate-900 tabular-nums">{formatETH(bounty.amount)} ETH</p>
-                  </div>
+              
+              {/* REWARD CARD - The Big Highlight */}
+              <div className="bg-gradient-to-br from-emerald-500 via-[#0EA885] to-teal-600 p-6 text-white shadow-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <Target className="size-5 text-white/80" />
+                  <span className="text-emerald-100 text-xs font-medium uppercase tracking-wider">Bounty Reward</span>
                 </div>
-
-                {/* Action Buttons */}
-                {canSubmit && (
-                  <Button
-                    onClick={() => {
-                      const submitSection = document.getElementById('submit-solution-section');
-                      submitSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }}
-                    className="w-full bg-[#0EA885] hover:bg-[#0c8a6f] text-white font-bold mb-3"
-                  >
-                    <Send className="size-4 mr-2" />
-                    Submit Solution ({formatETH(requiredDeposit)} ETH deposit)
-                  </Button>
+                <div className="flex items-center gap-3 mb-1">
+                  <Image src={ethIcon} alt="ETH" width={32} height={32} className="flex-shrink-0" />
+                  <span className="text-4xl font-bold tabular-nums">{ethAmount.toFixed(4)}</span>
+                  <span className="text-xl text-white/60">ETH</span>
+                </div>
+                {ethPrice > 0 && (
+                  <p className="text-emerald-100 text-sm flex items-center gap-1 mt-2">
+                    <TrendingUp className="size-3" />
+                    ≈ {formatUSD(usdAmount)}
+                  </p>
                 )}
 
-                {canSlash && (
-                  <Button
-                    onClick={triggerSlash}
-                    disabled={isPending || isConfirming}
-                    className="w-full bg-red-600 hover:bg-red-700 text-white font-bold mb-3"
-                  >
-                    <Zap className="size-4 mr-2" />
-                    Trigger Slash ({Number(bounty.slashPercent) / 100}%)
-                  </Button>
-                )}
-
-                {canRefund && (
-                  <Button
-                    onClick={refundNoSubmissions}
-                    disabled={isPending || isConfirming}
-                    className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold mb-3"
-                  >
-                    Claim Refund (No Submissions)
-                  </Button>
-                )}
-
-                <Button
-                  onClick={copyLink}
-                  variant="outline"
-                  size="sm"
-                  className="w-full border-slate-200"
-                >
-                  {copied ? <Check className="size-4 mr-2" /> : <Copy className="size-4 mr-2" />}
-                  {copied ? "Copied!" : "Share"}
-                </Button>
+                {/* CTA */}
+                <div className="mt-5 space-y-2">
+                  {canSubmit && (
+                    <Button onClick={() => setShowSubmitForm(true)} className="w-full bg-white text-[#0EA885] hover:bg-emerald-50 font-semibold h-11 shadow-md">
+                      <Send className="size-4 mr-2" />
+                      Submit Solution
+                    </Button>
+                  )}
+                  {canSlash && (
+                    <Button onClick={triggerSlash} disabled={isPending || isConfirming} className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold h-10">
+                      <Zap className="size-4 mr-2" />
+                      Trigger Slash ({Number(bounty.slashPercent) / 100}%)
+                    </Button>
+                  )}
+                  {canRefund && (
+                    <Button onClick={refundNoSubmissions} disabled={isPending || isConfirming} className="w-full bg-white/20 hover:bg-white/30 text-white font-semibold h-10">
+                      Claim Refund
+                    </Button>
+                  )}
+                </div>
               </div>
 
-              {/* Quick Stats Card */}
-              <div className="bg-white border border-slate-200 p-6">
-                <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 mb-4">Quick Stats</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between py-2 border-b border-slate-200">
-                    <span className="text-xs font-bold text-slate-600">Phase</span>
-                    <Badge className={`text-[10px] font-black uppercase tracking-wider border ${getStatusColor()}`}>
-                      {getPhaseLabel()}
-                    </Badge>
+              {/* STATS - Eye-catching */}
+              <div className="bg-white border border-stone-200 overflow-hidden">
+                <div className="grid grid-cols-2 divide-x divide-stone-100">
+                  <div className="p-4 text-center">
+                    <div className="flex items-center justify-center gap-1.5 mb-1">
+                      <Timer className="size-3.5 text-amber-500" />
+                      <span className="text-[10px] text-stone-400 uppercase tracking-wider">Submit By</span>
+                    </div>
+                    <p className="text-sm font-bold text-stone-800">{formatTimeLeft(bounty.openDeadline)}</p>
                   </div>
-                  <div className="flex items-center justify-between py-2 border-b border-slate-200">
-                    <span className="text-xs font-bold text-slate-600">Submissions Close</span>
-                    <span className="text-xs font-black text-slate-900 tabular-nums">{formatTimeLeft(bounty.openDeadline)}</span>
+                  <div className="p-4 text-center">
+                    <div className="flex items-center justify-center gap-1.5 mb-1">
+                      <Gavel className="size-3.5 text-violet-500" />
+                      <span className="text-[10px] text-stone-400 uppercase tracking-wider">Judge By</span>
+                    </div>
+                    <p className="text-sm font-bold text-stone-800">{formatTimeLeft(bounty.judgingDeadline)}</p>
                   </div>
-                  <div className="flex items-center justify-between py-2 border-b border-slate-200">
-                    <span className="text-xs font-bold text-slate-600">Judging Ends</span>
-                    <span className="text-xs font-black text-slate-900 tabular-nums">{formatTimeLeft(bounty.judgingDeadline)}</span>
+                </div>
+                <div className="grid grid-cols-2 divide-x divide-stone-100 border-t border-stone-100">
+                  <div className="p-4 text-center">
+                    <div className="flex items-center justify-center gap-1.5 mb-1">
+                      <Users className="size-3.5 text-blue-500" />
+                      <span className="text-[10px] text-stone-400 uppercase tracking-wider">Entries</span>
+                    </div>
+                    <p className="text-sm font-bold text-stone-800">{bounty.submissionCount}</p>
                   </div>
-                  <div className="flex items-center justify-between py-2 border-b border-slate-200">
-                    <span className="text-xs font-bold text-slate-600">Submissions</span>
-                    <span className="text-xs font-black text-slate-900 tabular-nums">{bounty.submissionCount}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-2 border-b border-slate-200">
-                    <span className="text-xs font-bold text-slate-600">Required Deposit</span>
-                    <span className="text-xs font-black text-slate-900 tabular-nums">{formatETH(requiredDeposit)} ETH</span>
-                  </div>
-                  <div className="flex items-center justify-between py-2">
-                    <span className="text-xs font-bold text-slate-600">Slash Penalty</span>
-                    <span className="text-xs font-black text-red-600 tabular-nums">{Number(bounty.slashPercent) / 100}%</span>
+                  <div className="p-4 text-center">
+                    <div className="flex items-center justify-center gap-1.5 mb-1">
+                      <Layers className="size-3.5 text-red-500" />
+                      <span className="text-[10px] text-stone-400 uppercase tracking-wider">Slash</span>
+                    </div>
+                    <p className="text-sm font-bold text-red-500">{Number(bounty.slashPercent) / 100}%</p>
                   </div>
                 </div>
               </div>
 
-              {/* Creator Info */}
-              <div className="bg-white border border-slate-200 p-6">
-                <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 mb-3">Creator</h3>
-                <div className="flex items-center gap-3">
-                  <div className="size-10 bg-slate-100 border border-slate-200 flex items-center justify-center">
-                    <Shield className="size-5 text-slate-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-mono font-bold text-slate-900">{formatAddress(bounty.creator)}</p>
-                    {isCreator && (
-                      <Badge variant="outline" className="mt-1 text-[10px] border-slate-200">You</Badge>
+              {/* Status & Deposit */}
+              <div className="bg-white border border-stone-200 p-3">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs text-stone-500">Status</span>
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 ${phaseConfig.bgColor} ${phaseConfig.textColor}`}>
+                    {phaseConfig.label}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-stone-500">Deposit</span>
+                  <div className="text-right">
+                    <span className="text-sm font-semibold text-stone-800">{depositEth.toFixed(4)} ETH</span>
+                    {ethPrice > 0 && (
+                      <span className="text-[10px] text-stone-400 ml-1">({formatUSD(convertEthToUSD(depositEth, ethPrice))})</span>
                     )}
                   </div>
                 </div>
+                {metadata?.skills && metadata.skills.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-stone-100">
+                    <div className="flex flex-wrap gap-1">
+                      {metadata.skills.map((skill, i) => (
+                        <span key={i} className="text-[10px] px-2 py-0.5 bg-stone-100 text-stone-600">{skill}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Skills */}
-              {metadata?.skills && metadata.skills.length > 0 && (
-                <div className="bg-white border border-slate-200 p-6">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 mb-3">Skills Required</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {metadata.skills.map((skill, index) => (
-                      <Badge key={index} variant="outline" className="text-[10px] font-bold border-slate-200">
-                        {skill}
-                      </Badge>
-                    ))}
+              {/* Creator */}
+              <div className="bg-white border border-stone-200 p-4">
+                <div className="flex items-center gap-3">
+                  <div className="size-10 bg-stone-100 flex items-center justify-center">
+                    <Shield className="size-5 text-stone-400" />
                   </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-stone-400">Creator</p>
+                    <p className="text-sm font-mono font-medium text-stone-700">{formatAddress(bounty.creator)}</p>
+                  </div>
+                  {isCreator && <span className="text-[10px] font-medium px-2 py-0.5 bg-[#0EA885]/10 text-[#0EA885]">You</span>}
+                </div>
+              </div>
+
+              {/* Share & User Status */}
+              <div className="space-y-2">
+                <Button onClick={copyLink} variant="outline" className="w-full border-stone-200 text-stone-600 h-10">
+                  {copied ? <Check className="size-4 mr-2 text-green-500" /> : <Copy className="size-4 mr-2" />}
+                  {copied ? "Copied!" : "Share Bounty"}
+                </Button>
+                {hasUserSubmitted && phase === "OPEN" && (
+                  <div className="text-center p-3 bg-emerald-50 border border-emerald-100">
+                    <CheckCircle2 className="size-5 text-[#0EA885] mx-auto mb-1" />
+                    <p className="text-xs text-[#0EA885] font-medium">You've submitted!</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Transaction */}
+              {hash && (
+                <div className="bg-white border border-stone-200 p-4">
+                  <p className="text-xs font-semibold text-stone-700 mb-2">Transaction</p>
+                  <a href={`https://sepolia-explorer.base.org/tx/${hash}`} target="_blank" rel="noopener noreferrer" className="text-[#0EA885] text-xs font-mono break-all hover:underline">
+                    {hash.slice(0, 20)}...
+                  </a>
+                  {isConfirming && <p className="text-xs text-stone-500 mt-2 flex items-center gap-1"><Clock className="size-3 animate-spin" /> Confirming...</p>}
+                  {isConfirmed && <p className="text-xs text-[#0EA885] mt-2 flex items-center gap-1"><Check className="size-4" /> Confirmed!</p>}
                 </div>
               )}
             </div>
           </div>
 
-          {/* RIGHT MAIN CONTENT */}
+          {/* RIGHT CONTENT - Details */}
           <div className="lg:col-span-8 space-y-6 order-1 lg:order-2">
-            {/* Slash Warning Banner */}
+            
+            {/* Slash Warning */}
             {canSlash && (
               <Alert className="border-red-200 bg-red-50">
                 <AlertTriangle className="size-4 text-red-600" />
-                <AlertDescription className="text-red-700 font-medium">
-                  Creator missed the judging deadline! Anyone can trigger the slash to distribute {Number(bounty.slashPercent) / 100}% of the escrow to submitters.
+                <AlertDescription className="text-red-700 text-sm">
+                  Creator missed the judging deadline! Trigger slash to distribute {Number(bounty.slashPercent) / 100}% to submitters.
                 </AlertDescription>
               </Alert>
             )}
 
             {/* Hero Image */}
             {metadata?.images && metadata.images.length > 0 && (
-              <div className="bg-white border border-slate-200 overflow-hidden">
+              <div className="bg-white border border-stone-200 overflow-hidden">
                 <img
                   src={`https://purple-elderly-silverfish-382.mypinata.cloud/ipfs/${metadata.images[0]}`}
                   alt={metadata.title}
-                  className="w-full h-auto max-h-96 object-cover"
+                  className="w-full h-auto max-h-72 object-cover"
                 />
               </div>
             )}
 
             {/* Title Section */}
-            <div className="bg-white border border-slate-200 p-6">
-              <div className="flex items-center gap-2 mb-3">
-                <Badge className={`text-[10px] font-black uppercase tracking-wider border ${getStatusColor()}`}>
-                  {getPhaseLabel()}
-                </Badge>
-                <span className="text-[10px] font-bold text-slate-400 uppercase">Bounty #{bountyId}</span>
+            <div className="bg-white border border-stone-200 p-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-[#0EA885]" />
+                  <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-400">Bounty</span>
+                </div>
+                <span className="text-stone-300">•</span>
+                <span className="text-[11px] text-stone-400">#{bountyId}</span>
               </div>
-              <h1 className="text-3xl sm:text-4xl font-black text-slate-900 mb-2 text-balance">
+              <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 leading-tight">
                 {metadata?.title || bounty.title || bounty.description.split("\n")[0]}
               </h1>
-              <p className="text-sm text-slate-600 text-pretty">
-                Created by <span className="font-mono font-bold">{formatAddress(bounty.creator)}</span>
-              </p>
             </div>
 
-            {/* About */}
-            <div className="bg-white border border-slate-200 p-6">
-              <h2 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
+            {/* About + Requirements + Deliverables (Combined) */}
+            <div className="bg-white border border-stone-200 p-6">
+              <h2 className="text-lg font-bold text-stone-800 mb-4 flex items-center gap-2">
                 <FileText className="size-5 text-[#0EA885]" />
                 About This Bounty
               </h2>
-              <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap text-pretty">
-                {metadata?.description || bounty.description}
-              </div>
+              <p className="text-sm text-stone-600 leading-relaxed whitespace-pre-wrap">
+                {metadata?.description || bounty.description.replace(/\n\nMetadata:.*$/, "")}
+              </p>
+
+              {metadata?.requirements && metadata.requirements.length > 0 && (
+                <div className="mt-6 pt-6 border-t border-stone-100">
+                  <h3 className="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                    <CheckCircle2 className="size-4 text-[#0EA885]" />
+                    Requirements
+                  </h3>
+                  <ul className="space-y-2">
+                    {metadata.requirements.map((req, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-stone-600">
+                        <div className="w-1.5 h-1.5 bg-[#0EA885] mt-2 flex-shrink-0" />
+                        {req}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {metadata?.deliverables && metadata.deliverables.length > 0 && (
+                <div className="mt-6 pt-6 border-t border-stone-100">
+                  <h3 className="text-sm font-semibold text-stone-700 mb-3 flex items-center gap-2">
+                    <Package className="size-4 text-[#0EA885]" />
+                    Deliverables
+                  </h3>
+                  <ul className="space-y-2">
+                    {metadata.deliverables.map((del, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-stone-600">
+                        <div className="w-1.5 h-1.5 bg-[#0EA885] mt-2 flex-shrink-0" />
+                        {del}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
-
-            {/* Requirements */}
-            {metadata?.requirements && metadata.requirements.length > 0 && (
-              <div className="bg-white border border-slate-200 p-6">
-                <h2 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
-                  <CheckCircle2 className="size-5 text-[#0EA885]" />
-                  Requirements
-                </h2>
-                <ul className="space-y-2">
-                  {metadata.requirements.map((req, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <div className="size-5 bg-[#0EA885]/10 flex items-center justify-center shrink-0 mt-0.5">
-                        <div className="size-2 bg-[#0EA885]" />
-                      </div>
-                      <span className="text-sm text-slate-700 text-pretty">{req}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Deliverables */}
-            {metadata?.deliverables && metadata.deliverables.length > 0 && (
-              <div className="bg-white border border-slate-200 p-6">
-                <h2 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
-                  <Package className="size-5 text-[#0EA885]" />
-                  Deliverables
-                </h2>
-                <ul className="space-y-2">
-                  {metadata.deliverables.map((del, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <div className="size-5 bg-[#0EA885]/10 flex items-center justify-center shrink-0 mt-0.5">
-                        <div className="size-2 bg-[#0EA885]" />
-                      </div>
-                      <span className="text-sm text-slate-700 text-pretty">{del}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
 
             {/* Winner Display */}
             {bounty.status === BountyStatus.RESOLVED && bounty.selectedWinner !== "0x0000000000000000000000000000000000000000" && (
-              <div className="bg-white border border-slate-200 p-6">
-                <h2 className="text-lg font-black text-slate-900 mb-4 flex items-center gap-2">
-                  <Trophy className="size-5 text-[#0EA885]" />
-                  Winner
-                </h2>
-                <div className="bg-amber-50 border border-amber-200 p-4">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                      <div className="size-10 bg-[#0EA885]/10 border border-[#0EA885]/20 flex items-center justify-center">
-                        <span className="text-lg">🏆</span>
-                      </div>
-                      <div>
-                        <p className="font-bold text-sm font-mono">{formatAddress(bounty.selectedWinner)}</p>
-                        <p className="text-xs text-slate-600">Submission #{Number(bounty.selectedSubmissionId)}</p>
-                      </div>
+              <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="size-12 bg-amber-100 flex items-center justify-center text-2xl">🏆</div>
+                    <div>
+                      <p className="text-xs text-amber-600 font-medium uppercase tracking-wider">Winner</p>
+                      <p className="font-mono font-bold text-stone-800">{formatAddress(bounty.selectedWinner)}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-black text-[#0EA885] text-lg tabular-nums">{formatETH(bounty.amount)} ETH</p>
-                      <p className="text-xs font-bold text-slate-500">+ deposit refunded</p>
-                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-[#0EA885]">{ethAmount.toFixed(4)} ETH</p>
+                    {ethPrice > 0 && <p className="text-sm text-stone-500">{formatUSD(usdAmount)}</p>}
                   </div>
                 </div>
               </div>
@@ -694,256 +597,70 @@ export default function BountyDetailPage() {
 
             {/* Slashed Display */}
             {bounty.status === BountyStatus.SLASHED && (
-              <div className="bg-white border border-slate-200 p-6">
-                <h2 className="text-lg font-black text-red-600 mb-4 flex items-center gap-2">
-                  <AlertTriangle className="size-5" />
-                  Bounty Slashed
-                </h2>
-                <div className="bg-red-50 border border-red-200 p-4">
-                  <p className="text-sm text-red-700">
-                    The creator missed the judging deadline. {Number(bounty.slashPercent) / 100}% of the escrow 
-                    ({formatETH((bounty.amount * bounty.slashPercent) / BigInt(10000))} ETH) was distributed to submitters.
-                  </p>
+              <div className="bg-red-50 border border-red-200 p-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <AlertTriangle className="size-5 text-red-600" />
+                  <h3 className="font-semibold text-red-700">Bounty Slashed</h3>
                 </div>
+                <p className="text-sm text-red-600">
+                  The creator missed the judging deadline. {Number(bounty.slashPercent) / 100}% was distributed to submitters.
+                </p>
               </div>
-            )}
-
-            {/* Submit Solution */}
-            {canSubmit && (
-              <div id="submit-solution-section" className="bg-white border border-slate-200 p-6">
-                <h2 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
-                  <Send className="size-5 text-[#0EA885]" />
-                  Submit Your Solution
-                </h2>
-
-                <div className="space-y-4">
-                  <Alert className="border-amber-200 bg-amber-50">
-                    <AlertDescription className="text-amber-700 text-sm">
-                      <strong>1% deposit required:</strong> You must pay {formatETH(requiredDeposit)} ETH as a deposit. 
-                      This will be refunded when the winner is selected.
-                    </AlertDescription>
-                  </Alert>
-
-                  {/* Social Handle Input */}
-                  <div>
-                    <label className="text-sm font-black text-slate-900 mb-2 block">Your Social Handle *</label>
-                    <Input
-                      type="text"
-                      placeholder="@username"
-                      value={socialHandle}
-                      onChange={(e) => setSocialHandle(e.target.value)}
-                      className="text-sm border-slate-200"
-                    />
-                    <p className="text-xs text-slate-500 mt-1">Your social handle will be stored on-chain for transparency</p>
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-black text-slate-900 mb-2 block">Upload Solution *</label>
-                    {!uploadedSolutionImage ? (
-                      <div className="border-2 border-dashed border-slate-300 hover:border-slate-400 bg-slate-50 p-8 transition-colors">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              setUploadedSolutionImage(file);
-                            }
-                          }}
-                          className="hidden"
-                          id="solution-image-upload"
-                        />
-                        <label
-                          htmlFor="solution-image-upload"
-                          className="cursor-pointer flex flex-col items-center"
-                        >
-                          <Upload className="size-8 mb-3 text-slate-400" />
-                          <span className="text-sm font-bold text-slate-700 mb-1">
-                            Click to upload solution
-                          </span>
-                          <span className="text-xs font-medium text-slate-500">
-                            JPG, PNG, GIF up to 10MB
-                          </span>
-                        </label>
-                      </div>
-                    ) : (
-                      <div className="relative">
-                        <img
-                          src={URL.createObjectURL(uploadedSolutionImage)}
-                          alt="Solution preview"
-                          className="w-full h-48 object-cover border border-slate-200"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => setUploadedSolutionImage(null)}
-                          className="absolute -top-2 -right-2 size-8"
-                          aria-label="Remove solution image"
-                        >
-                          <X className="size-4" />
-                        </Button>
-                        <p className="text-xs font-bold text-slate-600 mt-2 truncate">
-                          {uploadedSolutionImage.name}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  <Button
-                    onClick={submitSolution}
-                    disabled={
-                      isPending || isConfirming || isUploadingSolution || !uploadedSolutionImage || !socialHandle.trim()
-                    }
-                    className="w-full bg-[#0EA885] hover:bg-[#0c8a6f] text-white font-black py-6"
-                  >
-                    {isUploadingSolution ? (
-                      <>
-                        <Upload className="size-4 mr-2 animate-spin" />
-                        Uploading to IPFS...
-                      </>
-                    ) : isPending || isConfirming ? (
-                      <>
-                        <Clock className="size-4 mr-2 animate-spin" />
-                        Submitting...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="size-4 mr-2" />
-                        Submit Solution (Pay {formatETH(requiredDeposit)} ETH Deposit)
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Already Submitted Notice */}
-            {hasUserSubmitted && phase === "OPEN" && (
-              <Alert className="border-green-200 bg-green-50">
-                <CheckCircle2 className="size-4 text-green-600" />
-                <AlertDescription className="text-green-700">
-                  You have already submitted to this bounty. Wait for the creator to select a winner.
-                </AlertDescription>
-              </Alert>
             )}
 
             {/* Submissions List */}
             {bounty.submissions.length > 0 && (
-              <div className="bg-white border border-slate-200 p-6">
-                <h2 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
+              <div className="bg-white border border-stone-200 p-6">
+                <h2 className="text-lg font-bold text-stone-800 mb-4 flex items-center gap-2">
                   <Users className="size-5 text-[#0EA885]" />
                   Submissions ({bounty.submissions.length})
                 </h2>
-
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {bounty.submissions.map((sub, index) => {
-                    const isWinner = bounty.selectedWinner.toLowerCase() === sub.submitter.toLowerCase() && 
-                                     Number(bounty.selectedSubmissionId) === index;
-
+                    const isWinner = bounty.selectedWinner.toLowerCase() === sub.submitter.toLowerCase() && Number(bounty.selectedSubmissionId) === index;
                     return (
                       <div
                         key={index}
-                        className={`p-4 border ${
-                          isWinner ? "bg-amber-50 border-amber-200" : "border-slate-200"
-                        } ${canSelectWinner ? "cursor-pointer hover:border-[#0EA885]" : ""} ${
-                          selectedWinnerId === index ? "ring-2 ring-[#0EA885]" : ""
-                        }`}
+                        className={`flex items-center justify-between p-4 border transition-all ${
+                          isWinner ? "bg-amber-50 border-amber-200" : "border-stone-100 hover:border-stone-200"
+                        } ${canSelectWinner ? "cursor-pointer" : ""} ${selectedWinnerId === index ? "ring-2 ring-[#0EA885]" : ""}`}
                         onClick={() => canSelectWinner && setSelectedWinnerId(selectedWinnerId === index ? null : index)}
                       >
-                        <div className="flex justify-between items-start">
-                          <div className="flex items-center gap-3 flex-1">
-                            {canSelectWinner && (
-                              <div className={`size-5 rounded-full border-2 flex items-center justify-center ${
-                                selectedWinnerId === index ? "border-[#0EA885] bg-[#0EA885]" : "border-slate-300"
-                              }`}>
-                                {selectedWinnerId === index && <Check className="size-3 text-white" />}
-                              </div>
-                            )}
-
-                            {isWinner && (
-                              <Badge className="text-[10px] font-black bg-[#0EA885] text-white border-0">
-                                🏆 Winner
-                              </Badge>
-                            )}
-
-                            <div>
-                              <p className="text-sm font-bold font-mono">{formatAddress(sub.submitter)}</p>
-                              <p className="text-xs text-slate-500">@{sub.socialHandle}</p>
+                        <div className="flex items-center gap-3">
+                          {canSelectWinner && (
+                            <div className={`size-5 border-2 flex items-center justify-center ${selectedWinnerId === index ? "border-[#0EA885] bg-[#0EA885]" : "border-stone-300"}`}>
+                              {selectedWinnerId === index && <Check className="size-3 text-white" />}
                             </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-slate-500">
-                              Deposit: {formatETH(sub.deposit)} ETH
-                            </span>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openCidViewer(sub.ipfsCid, `Submission by ${formatAddress(sub.submitter)}`);
-                              }}
-                              className="border-slate-200 font-bold"
-                            >
-                              <ExternalLink className="size-3 mr-1" />
-                              View
-                            </Button>
+                          )}
+                          {isWinner && <span className="text-xs font-semibold bg-[#0EA885] text-white px-2 py-0.5">🏆 Winner</span>}
+                          <div>
+                            <p className="text-sm font-mono font-medium text-stone-700">{formatAddress(sub.submitter)}</p>
+                            <p className="text-xs text-stone-400">@{sub.socialHandle} • {formatETH(sub.deposit)} ETH deposit</p>
                           </div>
                         </div>
+                        <Button
+                          variant="outline" size="sm"
+                          onClick={(e) => { e.stopPropagation(); setViewingCid(sub.ipfsCid); setViewingTitle(`Submission by ${formatAddress(sub.submitter)}`); }}
+                          className="border-stone-200 text-stone-600 h-8"
+                        >
+                          <ExternalLink className="size-3 mr-1" /> View
+                        </Button>
                       </div>
                     );
                   })}
                 </div>
-
-                {/* Select Winner Button */}
                 {canSelectWinner && selectedWinnerId !== null && (
-                  <Button
-                    onClick={selectWinner}
-                    disabled={isPending || isConfirming}
-                    className="w-full bg-[#0EA885] hover:bg-[#0c8a6f] text-white font-black mt-6"
-                  >
-                    <Trophy className="size-4 mr-2" />
-                    {isPending || isConfirming ? "Confirming..." : "Select as Winner"}
+                  <Button onClick={selectWinner} disabled={isPending || isConfirming} className="w-full bg-[#0EA885] hover:bg-[#0c8a6f] text-white font-semibold h-11 mt-4">
+                    <Trophy className="size-4 mr-2" /> Select as Winner
                   </Button>
                 )}
-
-                {/* Judging Deadline Warning */}
                 {canSelectWinner && (
-                  <Alert className="mt-4 border-amber-200 bg-amber-50">
+                  <Alert className="mt-4 border-amber-100 bg-amber-50">
                     <Gavel className="size-4 text-amber-600" />
                     <AlertDescription className="text-amber-700 text-sm">
-                      You must select a winner before {new Date(Number(bounty.judgingDeadline) * 1000).toLocaleString()} 
-                      or you will be slashed {Number(bounty.slashPercent) / 100}% of the escrow.
+                      Select a winner before {new Date(Number(bounty.judgingDeadline) * 1000).toLocaleString()} or be slashed.
                     </AlertDescription>
                   </Alert>
-                )}
-              </div>
-            )}
-
-            {/* Transaction Status */}
-            {hash && (
-              <div className="bg-white border border-slate-200 p-4">
-                <p className="text-xs font-black text-slate-900 mb-2">Transaction Hash:</p>
-                <a
-                  href={`https://sepolia-explorer.base.org/tx/${hash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#0EA885] hover:text-[#0c8a6f] font-mono text-xs break-all underline font-bold"
-                >
-                  {hash}
-                </a>
-                {isConfirming && (
-                  <div className="flex items-center gap-2 text-xs text-slate-600 mt-2 font-bold">
-                    <Clock className="size-3 animate-spin" />
-                    Waiting for confirmation...
-                  </div>
-                )}
-                {isConfirmed && (
-                  <div className="flex items-center gap-2 text-xs text-[#0EA885] mt-2 font-bold">
-                    <Check className="size-4" />
-                    Transaction confirmed!
-                  </div>
                 )}
               </div>
             )}
@@ -951,68 +668,74 @@ export default function BountyDetailPage() {
         </div>
       </div>
 
-      {/* IPFS Content Viewer Dialog */}
+      {/* Submit Form Modal */}
+      <Dialog open={showSubmitForm} onOpenChange={setShowSubmitForm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="size-5 text-[#0EA885]" />
+              Submit Solution
+            </DialogTitle>
+            <DialogDescription>
+              Deposit {depositEth.toFixed(4)} ETH • Refunded when winner selected
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <label className="text-sm font-medium text-stone-700 mb-1.5 block">Social Handle</label>
+              <Input placeholder="@username" value={socialHandle} onChange={(e) => setSocialHandle(e.target.value)} className="h-10 border-stone-200" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-stone-700 mb-1.5 block">Solution Image</label>
+              {!uploadedSolutionImage ? (
+                <div className="border-2 border-dashed border-stone-200 hover:border-[#0EA885]/50 bg-stone-50 p-6 text-center cursor-pointer transition-colors">
+                  <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && setUploadedSolutionImage(e.target.files[0])} className="hidden" id="solution-upload" />
+                  <label htmlFor="solution-upload" className="cursor-pointer">
+                    <Upload className="size-6 mx-auto mb-2 text-stone-400" />
+                    <p className="text-sm text-stone-600">Click to upload</p>
+                  </label>
+                </div>
+              ) : (
+                <div className="relative">
+                  <img src={URL.createObjectURL(uploadedSolutionImage)} alt="Preview" className="w-full h-32 object-cover border border-stone-200" />
+                  <Button type="button" variant="destructive" size="icon" onClick={() => setUploadedSolutionImage(null)} className="absolute -top-2 -right-2 size-6">
+                    <X className="size-3" />
+                  </Button>
+                </div>
+              )}
+            </div>
+            <Button
+              onClick={submitSolution}
+              disabled={isPending || isConfirming || isUploadingSolution || !uploadedSolutionImage || !socialHandle.trim()}
+              className="w-full bg-[#0EA885] hover:bg-[#0c8a6f] text-white font-semibold h-11"
+            >
+              {isUploadingSolution ? "Uploading..." : isPending || isConfirming ? "Submitting..." : `Submit (${depositEth.toFixed(4)} ETH)`}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* IPFS Viewer */}
       <Dialog open={!!viewingCid} onOpenChange={() => setViewingCid(null)}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>{viewingTitle}</DialogTitle>
-            <DialogDescription className="text-xs">IPFS CID: {viewingCid}</DialogDescription>
           </DialogHeader>
-          <div className="mt-4">
-            {viewingCid && (
-              <div className="space-y-4">
-                <div className="border border-slate-200 p-4">
-                  <img
-                    src={`https://purple-elderly-silverfish-382.mypinata.cloud/ipfs/${viewingCid}`}
-                    alt="IPFS Content"
-                    className="w-full"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      fetch(`https://ipfs.io/ipfs/${viewingCid}`)
-                        .then(res => res.text())
-                        .then(text => {
-                          const container = target.parentElement;
-                          if (container) {
-                            container.innerHTML = `<pre class="text-xs whitespace-pre-wrap break-all overflow-auto max-h-96">${text}</pre>`;
-                          }
-                        })
-                        .catch(() => {
-                          const container = target.parentElement;
-                          if (container) {
-                            container.innerHTML = '<p class="text-sm text-slate-600">Unable to load content.</p>';
-                          }
-                        });
-                    }}
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" asChild className="flex-1 border-slate-200">
-                    <a href={`https://ipfs.io/ipfs/${viewingCid}`} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="size-3 mr-2" />
-                      Open in New Tab
-                    </a>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      navigator.clipboard.writeText(`https://ipfs.io/ipfs/${viewingCid}`);
-                      showAlert({
-                        title: "Copied!",
-                        description: "IPFS link copied to clipboard"
-                      });
-                    }}
-                    className="flex-1 border-slate-200"
-                  >
-                    <Copy className="size-3 mr-2" />
-                    Copy Link
-                  </Button>
-                </div>
+          {viewingCid && (
+            <div className="mt-4">
+              <img src={`https://purple-elderly-silverfish-382.mypinata.cloud/ipfs/${viewingCid}`} alt="Submission" className="w-full max-h-96 object-contain border border-stone-200" />
+              <div className="flex gap-2 mt-4">
+                <Button variant="outline" size="sm" asChild className="flex-1">
+                  <a href={`https://ipfs.io/ipfs/${viewingCid}`} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="size-3 mr-2" /> Open
+                  </a>
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(`https://ipfs.io/ipfs/${viewingCid}`); showAlert({ title: "Copied!", description: "Link copied" }); }} className="flex-1">
+                  <Copy className="size-3 mr-2" /> Copy
+                </Button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
