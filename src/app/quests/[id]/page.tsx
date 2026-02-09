@@ -18,6 +18,7 @@ import { formatETH, formatTimeLeft, formatAddress, wagmiConfig } from "../../../
 import { WalletName } from "../../../components/WalletName";
 import { uploadToIpfs, fetchMetadataFromIpfs, QuestMetadata, formatIpfsUrl } from "../../../utils/ipfs";
 import { getEthPriceInUSD, convertEthToUSD, formatUSD } from "../../../utils/prices";
+import { useAuth } from "../../../contexts/AuthContext";
 import { useAlert } from "../../../hooks/useAlert";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
@@ -85,7 +86,10 @@ export default function QuestDetailPage() {
     const router = useRouter();
     const { address } = useAccount();
     const { showAlert } = useAlert();
+    const { profile } = useAuth();
     const questId = params.id as string;
+
+    const xHandle = profile?.twitter_username ? `@${profile.twitter_username.replace('@', '')}` : '';
 
     const [quest, setQuest] = useState<Quest | null>(null);
     const [entries, setEntries] = useState<Entry[]>([]);
@@ -207,8 +211,8 @@ export default function QuestDetailPage() {
             showAlert({ title: "Missing Proof", description: "Please upload a proof image or enter an IPFS CID" });
             return;
         }
-        if (!newEntry.socialHandle.trim()) {
-            showAlert({ title: "Missing Information", description: "Please enter your social handle" });
+        if (!xHandle) {
+            showAlert({ title: "X Account Required", description: "Connect your X account on your profile page first." });
             return;
         }
 
@@ -227,7 +231,7 @@ export default function QuestDetailPage() {
                 }
             }
 
-            const handle = newEntry.socialHandle.replace('@', '');
+            const handle = xHandle.replace('@', '');
             writeContract({
                 address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
                 abi: QUEST_ABI,
@@ -681,44 +685,56 @@ export default function QuestDetailPage() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 mt-4">
-                        <div>
-                            <label className="text-sm font-medium text-stone-700 mb-1.5 block">Social Handle *</label>
-                            <Input placeholder="@username" value={newEntry.socialHandle} onChange={(e) => setNewEntry({ ...newEntry, socialHandle: e.target.value })} className="h-10 border-stone-200" />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium text-stone-700 mb-1.5 block">X Post URL (Optional)</label>
-                            <Input placeholder="https://x.com/..." value={newEntry.twitterUrl} onChange={(e) => setNewEntry({ ...newEntry, twitterUrl: e.target.value })} className="h-10 border-stone-200" />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium text-stone-700 mb-1.5 block">Proof Image *</label>
-                            {!uploadedProofImage ? (
-                                <div className="border-2 border-dashed border-stone-200 hover:border-amber-300 bg-stone-50 p-6 text-center cursor-pointer transition-colors">
-                                    <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && setUploadedProofImage(e.target.files[0])} className="hidden" id="proof-upload" />
-                                    <label htmlFor="proof-upload" className="cursor-pointer">
-                                        <Upload className="size-6 mx-auto mb-2 text-stone-400" />
-                                        <p className="text-sm text-stone-600">Click to upload</p>
-                                    </label>
+                        {!xHandle ? (
+                            <div className="bg-amber-50 border border-amber-200 p-4 text-center">
+                                <p className="text-sm font-medium text-amber-800 mb-2">X account required to submit</p>
+                                <p className="text-xs text-amber-600 mb-3">Connect your X account on your profile page first.</p>
+                                <Button onClick={() => router.push('/profile')} variant="outline" size="sm" className="border-amber-300 text-amber-700">
+                                    Go to Profile
+                                </Button>
+                            </div>
+                        ) : (
+                            <>
+                                <div>
+                                    <label className="text-sm font-medium text-stone-700 mb-1.5 block">X Account</label>
+                                    <Input value={xHandle} readOnly className="h-10 border-stone-200 bg-stone-50 text-stone-500" />
                                 </div>
-                            ) : (
-                                <div className="relative">
-                                    <img src={URL.createObjectURL(uploadedProofImage)} alt="Preview" className="w-full h-32 object-cover border border-stone-200" />
-                                    <Button type="button" variant="destructive" size="icon" onClick={() => setUploadedProofImage(null)} className="absolute -top-2 -right-2 size-6">
-                                        <X className="size-3" />
-                                    </Button>
+                                <div>
+                                    <label className="text-sm font-medium text-stone-700 mb-1.5 block">X Post URL (Optional)</label>
+                                    <Input placeholder="https://x.com/..." value={newEntry.twitterUrl} onChange={(e) => setNewEntry({ ...newEntry, twitterUrl: e.target.value })} className="h-10 border-stone-200" />
                                 </div>
-                            )}
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium text-stone-700 mb-1.5 block">Notes (Optional)</label>
-                            <Textarea placeholder="Any additional information..." value={newEntry.description} onChange={(e) => setNewEntry({ ...newEntry, description: e.target.value })} rows={2} className="resize-none border-stone-200" />
-                        </div>
-                        <Button
-                            onClick={submitEntry}
-                            disabled={(!uploadedProofImage && !newEntry.ipfsProofCid.trim()) || !newEntry.socialHandle.trim() || isPending || isConfirming || isUploadingProof}
-                            className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold h-11"
-                        >
-                            {isUploadingProof ? "Uploading..." : isPending || isConfirming ? "Submitting..." : "Submit Entry"}
-                        </Button>
+                                <div>
+                                    <label className="text-sm font-medium text-stone-700 mb-1.5 block">Proof Image *</label>
+                                    {!uploadedProofImage ? (
+                                        <div className="border-2 border-dashed border-stone-200 hover:border-amber-300 bg-stone-50 p-6 text-center cursor-pointer transition-colors">
+                                            <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && setUploadedProofImage(e.target.files[0])} className="hidden" id="proof-upload" />
+                                            <label htmlFor="proof-upload" className="cursor-pointer">
+                                                <Upload className="size-6 mx-auto mb-2 text-stone-400" />
+                                                <p className="text-sm text-stone-600">Click to upload</p>
+                                            </label>
+                                        </div>
+                                    ) : (
+                                        <div className="relative">
+                                            <img src={URL.createObjectURL(uploadedProofImage)} alt="Preview" className="w-full h-32 object-cover border border-stone-200" />
+                                            <Button type="button" variant="destructive" size="icon" onClick={() => setUploadedProofImage(null)} className="absolute -top-2 -right-2 size-6">
+                                                <X className="size-3" />
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <label className="text-sm font-medium text-stone-700 mb-1.5 block">Notes (Optional)</label>
+                                    <Textarea placeholder="Any additional information..." value={newEntry.description} onChange={(e) => setNewEntry({ ...newEntry, description: e.target.value })} rows={2} className="resize-none border-stone-200" />
+                                </div>
+                                <Button
+                                    onClick={submitEntry}
+                                    disabled={(!uploadedProofImage && !newEntry.ipfsProofCid.trim()) || isPending || isConfirming || isUploadingProof}
+                                    className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold h-11"
+                                >
+                                    {isUploadingProof ? "Uploading..." : isPending || isConfirming ? "Submitting..." : "Submit Entry"}
+                                </Button>
+                            </>
+                        )}
                     </div>
                 </DialogContent>
             </Dialog>

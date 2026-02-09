@@ -247,7 +247,7 @@ export function useSocialVerification() {
     const token = localStorage.getItem('quinty_auth_token');
     axios.patch(
       `${apiUrl}/auth/profile`,
-      { twitter_username: null, twitter_id: null },
+      { twitter_username: '', twitter_id: '' },
       {
         withCredentials: true,
         timeout: 3000,

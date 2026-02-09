@@ -24,6 +24,7 @@ import {
 import { fetchMetadataFromIpfs, BountyMetadata, uploadToIpfs } from "../../../utils/ipfs";
 import { getEthPriceInUSD, convertEthToUSD, formatUSD } from "../../../utils/prices";
 import { WalletName } from "../../../components/WalletName";
+import { useAuth } from "../../../contexts/AuthContext";
 import { useAlert } from "../../../hooks/useAlert";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
@@ -101,7 +102,10 @@ export default function BountyDetailPage() {
   const router = useRouter();
   const { address } = useAccount();
   const { showAlert } = useAlert();
+  const { profile } = useAuth();
   const bountyId = params.id as string;
+
+  const xHandle = profile?.twitter_username ? `@${profile.twitter_username.replace('@', '')}` : '';
 
   const [bounty, setBounty] = useState<Bounty | null>(null);
   const [metadata, setMetadata] = useState<BountyMetadata | null>(null);
@@ -209,15 +213,15 @@ export default function BountyDetailPage() {
       showAlert({ title: "Missing Information", description: "Please upload a solution image" });
       return;
     }
-    if (!socialHandle.trim()) {
-      showAlert({ title: "Missing Information", description: "Please enter your social handle" });
+    if (!xHandle) {
+      showAlert({ title: "X Account Required", description: "Connect your X account on your profile page first." });
       return;
     }
 
     try {
       setIsUploadingSolution(true);
       const solutionCid = await uploadToIpfs(uploadedSolutionImage, { bountyId, type: "bounty-solution" });
-      const handle = socialHandle.replace('@', '');
+      const handle = xHandle.replace('@', '');
 
       writeContract({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
@@ -715,36 +719,48 @@ export default function BountyDetailPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            <div>
-              <label className="text-sm font-medium text-stone-700 mb-1.5 block">Social Handle</label>
-              <Input placeholder="@username" value={socialHandle} onChange={(e) => setSocialHandle(e.target.value)} className="h-10 border-stone-200" />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-stone-700 mb-1.5 block">Solution Image</label>
-              {!uploadedSolutionImage ? (
-                <div className="border-2 border-dashed border-stone-200 hover:border-[#0EA885]/50 bg-stone-50 p-6 text-center cursor-pointer transition-colors">
-                  <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && setUploadedSolutionImage(e.target.files[0])} className="hidden" id="solution-upload" />
-                  <label htmlFor="solution-upload" className="cursor-pointer">
-                    <Upload className="size-6 mx-auto mb-2 text-stone-400" />
-                    <p className="text-sm text-stone-600">Click to upload</p>
-                  </label>
+            {!xHandle ? (
+              <div className="bg-amber-50 border border-amber-200 p-4 text-center">
+                <p className="text-sm font-medium text-amber-800 mb-2">X account required to submit</p>
+                <p className="text-xs text-amber-600 mb-3">Connect your X account on your profile page first.</p>
+                <Button onClick={() => router.push('/profile')} variant="outline" size="sm" className="border-amber-300 text-amber-700">
+                  Go to Profile
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div>
+                  <label className="text-sm font-medium text-stone-700 mb-1.5 block">X Account</label>
+                  <Input value={xHandle} readOnly className="h-10 border-stone-200 bg-stone-50 text-stone-500" />
                 </div>
-              ) : (
-                <div className="relative">
-                  <img src={URL.createObjectURL(uploadedSolutionImage)} alt="Preview" className="w-full h-32 object-cover border border-stone-200" />
-                  <Button type="button" variant="destructive" size="icon" onClick={() => setUploadedSolutionImage(null)} className="absolute -top-2 -right-2 size-6">
-                    <X className="size-3" />
-                  </Button>
+                <div>
+                  <label className="text-sm font-medium text-stone-700 mb-1.5 block">Solution Image</label>
+                  {!uploadedSolutionImage ? (
+                    <div className="border-2 border-dashed border-stone-200 hover:border-[#0EA885]/50 bg-stone-50 p-6 text-center cursor-pointer transition-colors">
+                      <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && setUploadedSolutionImage(e.target.files[0])} className="hidden" id="solution-upload" />
+                      <label htmlFor="solution-upload" className="cursor-pointer">
+                        <Upload className="size-6 mx-auto mb-2 text-stone-400" />
+                        <p className="text-sm text-stone-600">Click to upload</p>
+                      </label>
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      <img src={URL.createObjectURL(uploadedSolutionImage)} alt="Preview" className="w-full h-32 object-cover border border-stone-200" />
+                      <Button type="button" variant="destructive" size="icon" onClick={() => setUploadedSolutionImage(null)} className="absolute -top-2 -right-2 size-6">
+                        <X className="size-3" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <Button
-              onClick={submitSolution}
-              disabled={isPending || isConfirming || isUploadingSolution || !uploadedSolutionImage || !socialHandle.trim()}
-              className="w-full bg-[#0EA885] hover:bg-[#0c8a6f] text-white font-semibold h-11"
-            >
-              {isUploadingSolution ? "Uploading..." : isPending || isConfirming ? "Submitting..." : `Submit (${depositEth.toFixed(4)} ETH)`}
-            </Button>
+                <Button
+                  onClick={submitSolution}
+                  disabled={isPending || isConfirming || isUploadingSolution || !uploadedSolutionImage}
+                  className="w-full bg-[#0EA885] hover:bg-[#0c8a6f] text-white font-semibold h-11"
+                >
+                  {isUploadingSolution ? "Uploading..." : isPending || isConfirming ? "Submitting..." : `Submit (${depositEth.toFixed(4)} ETH)`}
+                </Button>
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>
