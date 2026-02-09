@@ -120,54 +120,54 @@ const getAvatarUrl = (address: string, size: number = 40) => {
 
 // === SKELETON COMPONENTS ===
 const SkeletonCard = () => (
-  <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden animate-pulse">
+  <div className="bg-white  shadow-sm border border-stone-100 overflow-hidden animate-pulse">
     <div className="h-40 bg-gradient-to-br from-stone-100 to-stone-50" />
     <div className="p-5 space-y-4">
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-stone-100" />
-        <div className="h-3 w-24 bg-stone-100 rounded-full" />
+        <div className="w-8 h-8  bg-stone-100" />
+        <div className="h-3 w-24 bg-stone-100 " />
       </div>
       <div className="space-y-2">
-        <div className="h-4 w-4/5 bg-stone-100 rounded-full" />
-        <div className="h-3 w-1/2 bg-stone-50 rounded-full" />
+        <div className="h-4 w-4/5 bg-stone-100 " />
+        <div className="h-3 w-1/2 bg-stone-50 " />
       </div>
       <div className="pt-4 border-t border-stone-50 flex justify-between items-center">
-        <div className="h-3 w-16 bg-stone-100 rounded-full" />
-        <div className="h-5 w-24 bg-stone-100 rounded-full" />
+        <div className="h-3 w-16 bg-stone-100 " />
+        <div className="h-5 w-24 bg-stone-100 " />
       </div>
     </div>
   </div>
 );
 
 const SkeletonListItem = () => (
-  <div className="bg-white rounded-xl shadow-sm border border-stone-100 px-5 py-4 flex items-center gap-5 animate-pulse">
-    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-stone-100 to-stone-50 flex-shrink-0" />
+  <div className="bg-white  shadow-sm border border-stone-100 px-5 py-4 flex items-center gap-5 animate-pulse">
+    <div className="w-14 h-14  bg-gradient-to-br from-stone-100 to-stone-50 flex-shrink-0" />
     <div className="flex-1 space-y-2">
-      <div className="h-4 w-1/3 bg-stone-100 rounded-full" />
-      <div className="h-3 w-1/2 bg-stone-50 rounded-full" />
+      <div className="h-4 w-1/3 bg-stone-100 " />
+      <div className="h-3 w-1/2 bg-stone-50 " />
     </div>
-    <div className="h-6 w-24 bg-stone-100 rounded-full" />
+    <div className="h-6 w-24 bg-stone-100 " />
   </div>
 );
 
 const SidebarSkeleton = () => (
   <div className="space-y-5 animate-pulse">
-    <div className="bg-gradient-to-br from-stone-100 to-stone-50 h-28 rounded-2xl" />
-    <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
+    <div className="bg-gradient-to-br from-stone-100 to-stone-50 h-28 " />
+    <div className="bg-white  shadow-sm border border-stone-100 overflow-hidden">
       <div className="h-10 bg-stone-50" />
       <div className="p-5 space-y-4">
-        <div className="h-24 bg-gradient-to-br from-stone-100 to-stone-50 rounded-xl" />
-        <div className="h-4 w-3/4 bg-stone-100 rounded-full" />
-        <div className="h-3 w-1/2 bg-stone-50 rounded-full" />
+        <div className="h-24 bg-gradient-to-br from-stone-100 to-stone-50 " />
+        <div className="h-4 w-3/4 bg-stone-100 " />
+        <div className="h-3 w-1/2 bg-stone-50 " />
       </div>
     </div>
-    <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
+    <div className="bg-white  shadow-sm border border-stone-100 overflow-hidden">
       <div className="h-10 bg-stone-50" />
       <div className="p-4 space-y-3">
         {[1, 2, 3].map(i => (
           <div key={i} className="flex justify-between py-2">
-            <div className="h-3 w-24 bg-stone-100 rounded-full" />
-            <div className="h-3 w-10 bg-stone-100 rounded-full" />
+            <div className="h-3 w-24 bg-stone-100 " />
+            <div className="h-3 w-10 bg-stone-100 " />
           </div>
         ))}
       </div>
@@ -572,7 +572,7 @@ export default function DashboardPage() {
         {/* Mobile stats toggle */}
         <button
           onClick={() => setShowStats(!showStats)}
-          className="lg:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-[#0EA885] to-[#0c9478] text-white rounded-2xl flex items-center justify-center shadow-lg shadow-[#0EA885]/25 hover:shadow-xl hover:shadow-[#0EA885]/30 hover:scale-105 active:scale-95 transition-all duration-300"
+          className="lg:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-[#0EA885] to-[#0c9478] text-white  flex items-center justify-center shadow-lg shadow-[#0EA885]/25 hover:shadow-xl hover:shadow-[#0EA885]/30 hover:scale-105 active:scale-95 transition-all duration-300"
         >
           {showStats ? <X className="w-5 h-5" /> : <BarChart3 className="w-5 h-5" />}
         </button>
@@ -586,26 +586,26 @@ export default function DashboardPage() {
                 <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">Explore</h2>
                 <p className="text-stone-500 mt-1 text-sm">Discover bounties and quests</p>
               </div>
-              <div className="flex items-center bg-white rounded-xl shadow-sm border border-stone-100 p-1">
-                <button onClick={() => setViewMode("card")} className={`h-9 w-9 rounded-lg flex items-center justify-center transition-all duration-200 ${viewMode === "card" ? "bg-stone-900 text-white shadow-sm" : "text-stone-400 hover:text-stone-600 hover:bg-stone-50"}`}>
+              <div className="flex items-center bg-white  shadow-sm border border-stone-100 p-1">
+                <button onClick={() => setViewMode("card")} className={`h-9 w-9  flex items-center justify-center transition-all duration-200 ${viewMode === "card" ? "bg-stone-900 text-white shadow-sm" : "text-stone-400 hover:text-stone-600 hover:bg-stone-50"}`}>
                   <LayoutGrid className="w-4 h-4" />
                 </button>
-                <button onClick={() => setViewMode("list")} className={`h-9 w-9 rounded-lg flex items-center justify-center transition-all duration-200 ${viewMode === "list" ? "bg-stone-900 text-white shadow-sm" : "text-stone-400 hover:text-stone-600 hover:bg-stone-50"}`}>
+                <button onClick={() => setViewMode("list")} className={`h-9 w-9  flex items-center justify-center transition-all duration-200 ${viewMode === "list" ? "bg-stone-900 text-white shadow-sm" : "text-stone-400 hover:text-stone-600 hover:bg-stone-50"}`}>
                   <List className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
             {/* Filters Bar */}
-            <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-4 mb-6 space-y-4">
+            <div className="bg-white  shadow-sm border border-stone-100 p-4 mb-6 space-y-4">
               {/* Row 1: Type tabs + Search + Sort */}
               <div className="flex items-center gap-3">
-                <div className="flex items-center bg-stone-100/60 rounded-xl p-1 flex-shrink-0">
+                <div className="flex items-center bg-stone-100/60  p-1 flex-shrink-0">
                   {typeFilters.map(f => (
                     <button 
                       key={f.id} 
                       onClick={() => setTypeFilter(f.id)} 
-                      className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all duration-200 whitespace-nowrap ${
+                      className={`px-4 py-2 text-xs font-semibold  transition-all duration-200 whitespace-nowrap ${
                         typeFilter === f.id 
                           ? "bg-white text-stone-900 shadow-sm" 
                           : "text-stone-500 hover:text-stone-700"
@@ -622,7 +622,7 @@ export default function DashboardPage() {
                     value={searchQuery} 
                     onChange={e => setSearchQuery(e.target.value)} 
                     placeholder="Search bounties & quests..." 
-                    className="pl-11 pr-10 h-11 text-sm bg-stone-50/50 border-stone-100 rounded-xl focus:bg-white focus:border-[#0EA885] focus:ring-[#0EA885]/20 transition-all" 
+                    className="pl-11 pr-10 h-11 text-sm bg-stone-50/50 border-stone-100  focus:bg-white focus:border-[#0EA885] focus:ring-[#0EA885]/20 transition-all" 
                   />
                   {searchQuery && (
                     <button onClick={() => setSearchQuery("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors">
@@ -632,15 +632,15 @@ export default function DashboardPage() {
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="h-11 px-4 flex items-center gap-2 text-sm font-medium bg-stone-50/50 text-stone-600 border border-stone-100 rounded-xl hover:bg-stone-100/50 hover:border-stone-200 transition-all whitespace-nowrap flex-shrink-0">
+                    <button className="h-11 px-4 flex items-center gap-2 text-sm font-medium bg-stone-50/50 text-stone-600 border border-stone-100  hover:bg-stone-100/50 hover:border-stone-200 transition-all whitespace-nowrap flex-shrink-0">
                       <ArrowUpDown className="w-4 h-4 text-stone-400" />
                       <span className="hidden sm:inline">{sortOptions.find(s => s.id === sortBy)?.label}</span>
                       <ChevronDown className="w-3.5 h-3.5 text-stone-400" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-lg border-stone-100">
+                  <DropdownMenuContent align="end" className="w-48  shadow-lg border-stone-100">
                     {sortOptions.map(opt => (
-                      <DropdownMenuItem key={opt.id} onClick={() => setSortBy(opt.id)} className="text-sm cursor-pointer rounded-lg">
+                      <DropdownMenuItem key={opt.id} onClick={() => setSortBy(opt.id)} className="text-sm cursor-pointer ">
                         <Check className={`w-4 h-4 mr-2 text-[#0EA885] ${sortBy === opt.id ? "opacity-100" : "opacity-0"}`} />
                         {opt.label}
                       </DropdownMenuItem>
@@ -656,7 +656,7 @@ export default function DashboardPage() {
                     <button 
                       key={f.id} 
                       onClick={() => setActiveFilter(f.id)} 
-                      className={`px-4 py-2 text-xs font-semibold rounded-full transition-all duration-200 whitespace-nowrap ${
+                      className={`px-4 py-2 text-xs font-semibold  transition-all duration-200 whitespace-nowrap ${
                         activeFilter === f.id 
                           ? "bg-[#0EA885] text-white shadow-sm shadow-[#0EA885]/25" 
                           : "bg-stone-100/60 text-stone-500 hover:bg-stone-100 hover:text-stone-700"
@@ -668,16 +668,16 @@ export default function DashboardPage() {
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="h-9 px-4 flex items-center gap-2 text-xs font-semibold bg-stone-100/60 text-stone-600 rounded-full hover:bg-stone-100 transition-all whitespace-nowrap ml-3 flex-shrink-0">
+                    <button className="h-9 px-4 flex items-center gap-2 text-xs font-semibold bg-stone-100/60 text-stone-600  hover:bg-stone-100 transition-all whitespace-nowrap ml-3 flex-shrink-0">
                       <Filter className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline">{categoryFilters.find(f => f.id === categoryFilter)?.label}</span>
                       <span className="sm:hidden">Category</span>
                       <ChevronDown className="w-3.5 h-3.5" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-52 rounded-xl shadow-lg border-stone-100">
+                  <DropdownMenuContent align="end" className="w-52  shadow-lg border-stone-100">
                     {categoryFilters.map(f => (
-                      <DropdownMenuItem key={f.id} onClick={() => setCategoryFilter(f.id)} className="text-sm cursor-pointer rounded-lg">
+                      <DropdownMenuItem key={f.id} onClick={() => setCategoryFilter(f.id)} className="text-sm cursor-pointer ">
                         <Check className={`w-4 h-4 mr-2 text-[#0EA885] ${categoryFilter === f.id ? "opacity-100" : "opacity-0"}`} />
                         {f.label}
                       </DropdownMenuItem>
@@ -719,7 +719,7 @@ export default function DashboardPage() {
                       <div
                         key={`${item.type}-${item.id}`}
                         onClick={() => router.push(`/${item.type === "bounty" ? "bounties" : "quests"}/${item.id}`)}
-                        className="group cursor-pointer bg-white rounded-2xl shadow-sm hover:shadow-xl hover:shadow-stone-200/50 border border-stone-100 hover:border-stone-200 transition-all duration-300 overflow-hidden flex flex-col"
+                        className="group cursor-pointer bg-white  shadow-sm hover:shadow-xl hover:shadow-stone-200/50 border border-stone-100 hover:border-stone-200 transition-all duration-300 overflow-hidden flex flex-col"
                       >
                         {/* Image / Gradient Fallback */}
                         <div className="relative w-full h-44 overflow-hidden">
@@ -739,12 +739,12 @@ export default function DashboardPage() {
                           
                           {/* Top badges */}
                           <div className="absolute top-3 left-3 flex items-center gap-2">
-                            <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full backdrop-blur-sm ${statusInfo.color}`}>
+                            <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider  backdrop-blur-sm ${statusInfo.color}`}>
                               {statusInfo.label}
                             </span>
                           </div>
                           <div className="absolute top-3 right-3">
-                            <span className={`px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-full backdrop-blur-sm ${
+                            <span className={`px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider  backdrop-blur-sm ${
                               item.type === "bounty" 
                                 ? "bg-white/90 text-stone-700" 
                                 : "bg-amber-400/90 text-amber-900"
@@ -756,7 +756,7 @@ export default function DashboardPage() {
                           {/* Category badge at bottom of image */}
                           {category && (
                             <div className="absolute bottom-3 left-3">
-                              <span className={`px-2.5 py-1 text-[10px] font-semibold capitalize rounded-full border backdrop-blur-sm ${getCategoryBadgeColor(category)}`}>
+                              <span className={`px-2.5 py-1 text-[10px] font-semibold capitalize  border backdrop-blur-sm ${getCategoryBadgeColor(category)}`}>
                                 {category}
                               </span>
                             </div>
@@ -766,7 +766,7 @@ export default function DashboardPage() {
                         <div className="p-5 flex flex-col flex-1">
                           {/* Creator */}
                           <div className="flex items-center gap-2.5 mb-3">
-                            <img src={getAvatarUrl(item.creator, 24)} alt="" className="w-6 h-6 rounded-full ring-2 ring-stone-100 flex-shrink-0" />
+                            <img src={getAvatarUrl(item.creator, 24)} alt="" className="w-6 h-6  ring-2 ring-stone-100 flex-shrink-0" />
                             <span className="text-xs font-medium text-stone-400 truncate">{formatAddress(item.creator)}</span>
                           </div>
                           
@@ -814,9 +814,9 @@ export default function DashboardPage() {
                       <div
                         key={`${item.type}-${item.id}`}
                         onClick={() => router.push(`/${item.type === "bounty" ? "bounties" : "quests"}/${item.id}`)}
-                        className="group cursor-pointer bg-white rounded-xl shadow-sm hover:shadow-lg hover:shadow-stone-200/50 border border-stone-100 hover:border-stone-200 transition-all duration-200 px-5 py-4 flex items-center gap-5"
+                        className="group cursor-pointer bg-white  shadow-sm hover:shadow-lg hover:shadow-stone-200/50 border border-stone-100 hover:border-stone-200 transition-all duration-200 px-5 py-4 flex items-center gap-5"
                       >
-                        <div className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden">
+                        <div className="flex-shrink-0 w-16 h-16  overflow-hidden">
                           {image ? (
                             <img src={image} alt={title} className="w-full h-full object-cover" />
                           ) : (
@@ -827,16 +827,16 @@ export default function DashboardPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1.5">
-                            <img src={getAvatarUrl(item.creator, 18)} alt="" className="w-4.5 h-4.5 rounded-full ring-1 ring-stone-100 flex-shrink-0" />
+                            <img src={getAvatarUrl(item.creator, 18)} alt="" className="w-4.5 h-4.5  ring-1 ring-stone-100 flex-shrink-0" />
                             <span className="text-[11px] font-medium text-stone-400">{formatAddress(item.creator)}</span>
                           </div>
                           <h3 className="text-sm font-semibold text-stone-800 mb-2 truncate group-hover:text-[#0EA885] transition-colors">{title}</h3>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full ${statusInfo.color}`}>{statusInfo.label}</span>
-                            <span className={`px-2 py-0.5 text-[10px] font-medium capitalize rounded-full ${
+                            <span className={`px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider  ${statusInfo.color}`}>{statusInfo.label}</span>
+                            <span className={`px-2 py-0.5 text-[10px] font-medium capitalize  ${
                               item.type === "bounty" ? "bg-stone-100 text-stone-600" : "bg-amber-100 text-amber-700"
                             }`}>{item.type}</span>
-                            {category && <span className={`px-2 py-0.5 text-[10px] font-medium capitalize rounded-full border ${getCategoryBadgeColor(category)}`}>{category}</span>}
+                            {category && <span className={`px-2 py-0.5 text-[10px] font-medium capitalize  border ${getCategoryBadgeColor(category)}`}>{category}</span>}
                             <span className="text-[11px] text-stone-400 flex items-center gap-1"><Clock className="w-3 h-3" />{formatDeadline(item.deadline)}</span>
                             {subCount > 0 && <span className="text-[11px] text-stone-400 flex items-center gap-1"><Users className="w-3 h-3" />{subCount}</span>}
                           </div>
@@ -854,8 +854,8 @@ export default function DashboardPage() {
                 </div>
               )
             ) : (
-              <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-stone-200">
-                <div className="w-16 h-16 rounded-2xl bg-stone-100 flex items-center justify-center mx-auto mb-5">
+              <div className="text-center py-20 bg-white  border-2 border-dashed border-stone-200">
+                <div className="w-16 h-16  bg-stone-100 flex items-center justify-center mx-auto mb-5">
                   <Search className="h-8 w-8 text-stone-300" />
                 </div>
                 <p className="text-base font-semibold text-stone-600 mb-2">No results found</p>
@@ -869,7 +869,7 @@ export default function DashboardPage() {
                 <Button 
                   variant="outline" 
                   onClick={() => setDisplayCount(prev => prev + LOAD_MORE_COUNT)} 
-                  className="px-8 py-3 h-auto text-sm font-semibold rounded-xl border-stone-200 hover:bg-stone-50 hover:border-stone-300 transition-all"
+                  className="px-8 py-3 h-auto text-sm font-semibold  border-stone-200 hover:bg-stone-50 hover:border-stone-300 transition-all"
                 >
                   Load more ({unifiedItems.length - displayedItems.length} remaining)
                 </Button>
@@ -889,9 +889,9 @@ export default function DashboardPage() {
               {loading ? <SidebarSkeleton /> : (
                 <>
                   {/* Total in Escrow */}
-                  <div className="bg-gradient-to-br from-[#0EA885] via-[#0c9478] to-[#0a7d66] p-5 rounded-2xl text-white shadow-lg shadow-[#0EA885]/20">
+                  <div className="bg-gradient-to-br from-[#0EA885] via-[#0c9478] to-[#0a7d66] p-5  text-white shadow-lg shadow-[#0EA885]/20">
                     <div className="flex items-center gap-2.5 mb-3">
-                      <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                      <div className="w-10 h-10  bg-white/20 flex items-center justify-center">
                         <Image src={ethIcon} alt="ETH" width={24} height={24} className="flex-shrink-0" />
                       </div>
                       <span className="text-xs font-semibold uppercase tracking-wider text-white/80">Total in Escrow</span>
@@ -909,9 +909,9 @@ export default function DashboardPage() {
                     const fImage = meta?.images?.[0] ? formatIpfsUrl(meta.images[0]) : null;
                     const fTitle = meta?.title || `Bounty #${featuredBounty.id}`;
                     return (
-                      <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
+                      <div className="bg-white  shadow-sm border border-stone-100 overflow-hidden">
                         <div className="px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100/50 flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center">
+                          <div className="w-6 h-6  bg-amber-100 flex items-center justify-center">
                             <Star className="w-3.5 h-3.5 text-amber-600" />
                           </div>
                           <span className="text-xs font-semibold text-amber-800">Featured Bounty</span>
@@ -920,7 +920,7 @@ export default function DashboardPage() {
                           className="p-4 cursor-pointer hover:bg-stone-50/50 transition-colors" 
                           onClick={() => router.push(`/bounties/${featuredBounty.id}`)}
                         >
-                          <div className="w-full h-28 mb-4 rounded-xl overflow-hidden">
+                          <div className="w-full h-28 mb-4  overflow-hidden">
                             {fImage ? (
                               <img src={fImage} alt="" className="w-full h-full object-cover" />
                             ) : (
@@ -940,7 +940,7 @@ export default function DashboardPage() {
                               <span className="font-medium">{formatDeadline(featuredBounty.deadline)}</span>
                             </div>
                           </div>
-                          <Button className="w-full bg-stone-900 hover:bg-stone-800 text-white rounded-xl h-10 text-sm font-medium gap-2">
+                          <Button className="w-full bg-stone-900 hover:bg-stone-800 text-white  h-10 text-sm font-medium gap-2">
                             View Bounty <ArrowRight className="w-4 h-4" />
                           </Button>
                         </div>
@@ -949,9 +949,9 @@ export default function DashboardPage() {
                   })()}
 
                   {/* Quick Stats */}
-                  <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
+                  <div className="bg-white  shadow-sm border border-stone-100 overflow-hidden">
                     <div className="px-4 py-3 bg-stone-50/80 border-b border-stone-100 flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-lg bg-stone-200/60 flex items-center justify-center">
+                      <div className="w-6 h-6  bg-stone-200/60 flex items-center justify-center">
                         <BarChart3 className="w-3.5 h-3.5 text-stone-500" />
                       </div>
                       <span className="text-xs font-semibold text-stone-700">Quick Stats</span>
@@ -959,15 +959,15 @@ export default function DashboardPage() {
                     <div className="divide-y divide-stone-50">
                       <div className="px-4 py-3.5 flex items-center justify-between">
                         <span className="text-sm text-stone-500">Active Bounties</span>
-                        <span className="text-base font-bold text-sky-600 bg-sky-50 px-2.5 py-0.5 rounded-lg">{stats.activeBounties}</span>
+                        <span className="text-base font-bold text-sky-600 bg-sky-50 px-2.5 py-0.5 ">{stats.activeBounties}</span>
                       </div>
                       <div className="px-4 py-3.5 flex items-center justify-between">
                         <span className="text-sm text-stone-500">Active Quests</span>
-                        <span className="text-base font-bold text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-lg">{stats.activeQuests}</span>
+                        <span className="text-base font-bold text-amber-600 bg-amber-50 px-2.5 py-0.5 ">{stats.activeQuests}</span>
                       </div>
                       <div className="px-4 py-3.5 flex items-center justify-between">
                         <span className="text-sm text-stone-500">Completed</span>
-                        <span className="text-base font-bold text-[#0EA885] bg-[#0EA885]/10 px-2.5 py-0.5 rounded-lg">{stats.completed}</span>
+                        <span className="text-base font-bold text-[#0EA885] bg-[#0EA885]/10 px-2.5 py-0.5 ">{stats.completed}</span>
                       </div>
                       {ethPrice > 0 && (
                         <div className="px-4 py-3.5 flex items-center justify-between bg-gradient-to-r from-violet-50/50 to-purple-50/50">
@@ -983,9 +983,9 @@ export default function DashboardPage() {
 
                   {/* Recent Activity */}
                   {recentActivity.length > 0 && (
-                    <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
+                    <div className="bg-white  shadow-sm border border-stone-100 overflow-hidden">
                       <div className="px-4 py-3 bg-stone-50/80 border-b border-stone-100 flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-lg bg-stone-200/60 flex items-center justify-center">
+                        <div className="w-6 h-6  bg-stone-200/60 flex items-center justify-center">
                           <Activity className="w-3.5 h-3.5 text-stone-500" />
                         </div>
                         <span className="text-xs font-semibold text-stone-700">Recent Activity</span>
@@ -998,7 +998,7 @@ export default function DashboardPage() {
                               className="px-4 py-3.5 flex items-start gap-3 hover:bg-stone-50/50 cursor-pointer transition-colors"
                               onClick={() => router.push(`/${act.type === "bounty" ? "bounties" : "quests"}/${act.id}`)}
                             >
-                              <img src={getAvatarUrl(act.creator, 32)} alt="" className="w-8 h-8 rounded-full ring-2 ring-stone-100 flex-shrink-0" />
+                              <img src={getAvatarUrl(act.creator, 32)} alt="" className="w-8 h-8  ring-2 ring-stone-100 flex-shrink-0" />
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm text-stone-700 font-medium truncate leading-snug">{act.title}</p>
                                 <p className="text-xs text-stone-400 mt-1">
