@@ -37,13 +37,19 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
     });
 
     const [deadlineDate, setDeadlineDate] = useState<Date>();
+    const [deadlineTime, setDeadlineTime] = useState("23:59");
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!deadlineDate) return;
+
+        const [hours, minutes] = deadlineTime.split(":");
+        const deadlineDateTime = new Date(deadlineDate);
+        deadlineDateTime.setHours(parseInt(hours, 10), parseInt(minutes, 10));
+
         onSubmit({
             ...formData,
-            deadline: deadlineDate.toISOString(),
+            deadline: deadlineDateTime.toISOString(),
         });
     };
 
@@ -160,23 +166,31 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
 
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Deadline</label>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button variant="outline" className="w-full border-slate-200 bg-white justify-start font-normal text-slate-600">
-                                            <CalendarIcon className="mr-2 h-4 w-4 text-slate-400" />
-                                            {deadlineDate ? format(deadlineDate, "PPP") : "Pick a date"}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0 border-slate-200">
-                                        <Calendar
-                                            mode="single"
-                                            selected={deadlineDate}
-                                            onSelect={setDeadlineDate}
-                                            disabled={(date) => date < startOfDay(new Date())}
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
+                                <div className="flex gap-2">
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="outline" className="flex-1 border-slate-200 bg-white justify-start font-normal text-slate-600">
+                                                <CalendarIcon className="mr-2 h-4 w-4 text-slate-400" />
+                                                {deadlineDate ? format(deadlineDate, "PPP") : "Pick a date"}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0 border-slate-200">
+                                            <Calendar
+                                                mode="single"
+                                                selected={deadlineDate}
+                                                onSelect={setDeadlineDate}
+                                                disabled={(date) => date < startOfDay(new Date())}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                    <Input
+                                        type="time"
+                                        value={deadlineTime}
+                                        onChange={e => setDeadlineTime(e.target.value)}
+                                        className="w-28 border-slate-200 bg-white"
+                                    />
+                                </div>
                             </div>
 
                             <div className="p-4 bg-slate-50 border border-slate-200">
