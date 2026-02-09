@@ -3,8 +3,6 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-const TWITTER_CLIENT_ID = process.env.NEXT_PUBLIC_TWITTER_CLIENT_ID;
-
 function CallbackContent() {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
@@ -64,46 +62,19 @@ function CallbackContent() {
           throw new Error('Missing PKCE values');
         }
 
-        if (!TWITTER_CLIENT_ID) {
-          throw new Error('Twitter Client ID not configured');
-        }
-
-        // Exchange code for access token directly with Twitter (PKCE - no secret needed!)
-        const tokenResponse = await fetch('https://api.twitter.com/2/oauth2/token', {
+        // Exchange code via our server-side API route (avoids CORS issues with Twitter API)
+        const verifyResponse = await fetch('/api/x/verify', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: new URLSearchParams({
-            grant_type: 'authorization_code',
-            code,
-            redirect_uri: redirectUri,
-            code_verifier: codeVerifier,
-            client_id: TWITTER_CLIENT_ID,
-          }).toString(),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, codeVerifier, redirectUri }),
         });
 
-        if (!tokenResponse.ok) {
-          const errorData = await tokenResponse.json();
-          throw new Error(errorData.error_description || errorData.error || 'Failed to get access token');
+        if (!verifyResponse.ok) {
+          const errorData = await verifyResponse.json();
+          throw new Error(errorData.error || 'Failed to verify X account');
         }
 
-        const tokenData = await tokenResponse.json();
-        const accessToken = tokenData.access_token;
-
-        // Get user info from Twitter
-        const userResponse = await fetch('https://api.twitter.com/2/users/me', {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-
-        if (!userResponse.ok) {
-          throw new Error('Failed to get user info');
-        }
-
-        const userData = await userResponse.json();
-        const { id: userId, username } = userData.data;
+        const { username, userId } = await verifyResponse.json();
 
         // Clear stored values
         localStorage.removeItem('oauth_state_twitter');
