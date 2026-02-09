@@ -94,17 +94,22 @@ const LOAD_MORE_COUNT = 12;
 
 // === HELPERS ===
 const getCategoryColor = (category?: string): string => {
-  // All categories use very light solid color
-  return "bg-slate-100 dark:bg-slate-200";
+  switch (category) {
+    case "development": return "bg-gradient-to-br from-sky-50 to-blue-50";
+    case "design": return "bg-gradient-to-br from-violet-50 to-purple-50";
+    case "marketing": return "bg-gradient-to-br from-amber-50 to-orange-50";
+    case "research": return "bg-gradient-to-br from-emerald-50 to-teal-50";
+    default: return "bg-gradient-to-br from-stone-50 to-slate-50";
+  }
 };
 
 const getCategoryBadgeColor = (category?: string): string => {
   switch (category) {
-    case "development": return "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20";
-    case "design": return "bg-purple-50 text-purple-600 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20";
-    case "marketing": return "bg-orange-50 text-orange-600 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20";
-    case "research": return "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
-    default: return "bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700";
+    case "development": return "bg-sky-100/80 text-sky-700 border-sky-200/60";
+    case "design": return "bg-violet-100/80 text-violet-700 border-violet-200/60";
+    case "marketing": return "bg-amber-100/80 text-amber-700 border-amber-200/60";
+    case "research": return "bg-emerald-100/80 text-emerald-700 border-emerald-200/60";
+    default: return "bg-stone-100/80 text-stone-600 border-stone-200/60";
   }
 };
 
@@ -115,52 +120,54 @@ const getAvatarUrl = (address: string, size: number = 40) => {
 
 // === SKELETON COMPONENTS ===
 const SkeletonCard = () => (
-  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden animate-pulse">
-    <div className="h-36 bg-slate-200 dark:bg-slate-800" />
-    <div className="p-4 space-y-3">
-      <div className="flex items-center gap-2">
-        <div className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700" />
-        <div className="h-3 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
+  <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden animate-pulse">
+    <div className="h-40 bg-gradient-to-br from-stone-100 to-stone-50" />
+    <div className="p-5 space-y-4">
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 rounded-full bg-stone-100" />
+        <div className="h-3 w-24 bg-stone-100 rounded-full" />
       </div>
-      <div className="h-4 w-3/4 bg-slate-200 dark:bg-slate-700 rounded" />
-      <div className="h-3 w-1/2 bg-slate-200 dark:bg-slate-700 rounded" />
-      <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-between">
-        <div className="h-3 w-16 bg-slate-200 dark:bg-slate-700 rounded" />
-        <div className="h-4 w-20 bg-slate-200 dark:bg-slate-700 rounded" />
+      <div className="space-y-2">
+        <div className="h-4 w-4/5 bg-stone-100 rounded-full" />
+        <div className="h-3 w-1/2 bg-stone-50 rounded-full" />
+      </div>
+      <div className="pt-4 border-t border-stone-50 flex justify-between items-center">
+        <div className="h-3 w-16 bg-stone-100 rounded-full" />
+        <div className="h-5 w-24 bg-stone-100 rounded-full" />
       </div>
     </div>
   </div>
 );
 
 const SkeletonListItem = () => (
-  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center gap-4 animate-pulse">
-    <div className="w-12 h-12 bg-slate-200 dark:bg-slate-700 flex-shrink-0" />
+  <div className="bg-white rounded-xl shadow-sm border border-stone-100 px-5 py-4 flex items-center gap-5 animate-pulse">
+    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-stone-100 to-stone-50 flex-shrink-0" />
     <div className="flex-1 space-y-2">
-      <div className="h-4 w-1/3 bg-slate-200 dark:bg-slate-700 rounded" />
-      <div className="h-3 w-1/2 bg-slate-200 dark:bg-slate-700 rounded" />
+      <div className="h-4 w-1/3 bg-stone-100 rounded-full" />
+      <div className="h-3 w-1/2 bg-stone-50 rounded-full" />
     </div>
-    <div className="h-5 w-20 bg-slate-200 dark:bg-slate-700 rounded" />
+    <div className="h-6 w-24 bg-stone-100 rounded-full" />
   </div>
 );
 
 const SidebarSkeleton = () => (
-  <div className="space-y-4 animate-pulse">
-    <div className="bg-slate-200 dark:bg-slate-800 h-24" />
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-      <div className="h-8 bg-slate-100 dark:bg-slate-800" />
-      <div className="p-4 space-y-3">
-        <div className="h-20 bg-slate-200 dark:bg-slate-700 rounded" />
-        <div className="h-4 w-3/4 bg-slate-200 dark:bg-slate-700 rounded" />
-        <div className="h-3 w-1/2 bg-slate-200 dark:bg-slate-700 rounded" />
+  <div className="space-y-5 animate-pulse">
+    <div className="bg-gradient-to-br from-stone-100 to-stone-50 h-28 rounded-2xl" />
+    <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
+      <div className="h-10 bg-stone-50" />
+      <div className="p-5 space-y-4">
+        <div className="h-24 bg-gradient-to-br from-stone-100 to-stone-50 rounded-xl" />
+        <div className="h-4 w-3/4 bg-stone-100 rounded-full" />
+        <div className="h-3 w-1/2 bg-stone-50 rounded-full" />
       </div>
     </div>
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-      <div className="h-8 bg-slate-100 dark:bg-slate-800" />
-      <div className="p-3 space-y-2">
+    <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
+      <div className="h-10 bg-stone-50" />
+      <div className="p-4 space-y-3">
         {[1, 2, 3].map(i => (
-          <div key={i} className="flex justify-between py-1">
-            <div className="h-3 w-24 bg-slate-200 dark:bg-slate-700 rounded" />
-            <div className="h-3 w-8 bg-slate-200 dark:bg-slate-700 rounded" />
+          <div key={i} className="flex justify-between py-2">
+            <div className="h-3 w-24 bg-stone-100 rounded-full" />
+            <div className="h-3 w-10 bg-stone-100 rounded-full" />
           </div>
         ))}
       </div>
@@ -495,21 +502,21 @@ export default function DashboardPage() {
   const getStatusInfo = (item: UnifiedItem) => {
     const now = BigInt(Math.floor(Date.now() / 1000));
     const isEnded = item.deadline < now;
-    if (isEnded) return { label: "ENDED", color: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700" };
+    if (isEnded) return { label: "Ended", color: "bg-stone-100/80 text-stone-500" };
 
     if (item.type === "bounty") {
       const map = [
-        { label: "OPEN", color: "bg-[#0EA885]/10 text-[#0EA885] border-[#0EA885]/20" },
-        { label: "JUDGING", color: "bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20" },
-        { label: "RESOLVED", color: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700" },
-        { label: "SLASHED", color: "bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20" },
+        { label: "Open", color: "bg-[#0EA885]/15 text-[#0EA885]" },
+        { label: "Judging", color: "bg-amber-100/80 text-amber-700" },
+        { label: "Resolved", color: "bg-stone-100/80 text-stone-600" },
+        { label: "Slashed", color: "bg-rose-100/80 text-rose-600" },
       ];
       return map[(item as Bounty).status] || map[0];
     }
     const q = item as Quest;
-    if (q.resolved) return { label: "COMPLETED", color: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700" };
-    if (q.cancelled) return { label: "ENDED", color: "bg-slate-100 text-slate-400 border-slate-200 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700" };
-    return { label: "LIVE", color: "bg-[#0EA885]/10 text-[#0EA885] border-[#0EA885]/20" };
+    if (q.resolved) return { label: "Completed", color: "bg-stone-100/80 text-stone-600" };
+    if (q.cancelled) return { label: "Cancelled", color: "bg-stone-100/80 text-stone-400" };
+    return { label: "Live", color: "bg-[#0EA885]/15 text-[#0EA885]" };
   };
 
   const formatDeadline = (deadline: bigint | number) => {
@@ -560,109 +567,140 @@ export default function DashboardPage() {
 
   // === RENDER ===
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20 pt-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <div className="min-h-screen bg-gradient-to-b from-stone-50 via-white to-stone-50/50 pb-24 pt-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         {/* Mobile stats toggle */}
         <button
           onClick={() => setShowStats(!showStats)}
-          className="lg:hidden fixed bottom-6 right-6 z-50 w-12 h-12 bg-[#0EA885] text-white flex items-center justify-center shadow-lg hover:bg-[#0c8a6f] transition-colors"
+          className="lg:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-[#0EA885] to-[#0c9478] text-white rounded-2xl flex items-center justify-center shadow-lg shadow-[#0EA885]/25 hover:shadow-xl hover:shadow-[#0EA885]/30 hover:scale-105 active:scale-95 transition-all duration-300"
         >
           {showStats ? <X className="w-5 h-5" /> : <BarChart3 className="w-5 h-5" />}
         </button>
 
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* ===== MAIN CONTENT ===== */}
           <div className="flex-1 min-w-0 order-2 lg:order-1">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">Explore</h2>
-              <div className="flex items-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-                <button onClick={() => setViewMode("card")} className={`h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center transition-colors ${viewMode === "card" ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"}`}>
-                  <LayoutGrid className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            {/* Header */}
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">Explore</h2>
+                <p className="text-stone-500 mt-1 text-sm">Discover bounties and quests</p>
+              </div>
+              <div className="flex items-center bg-white rounded-xl shadow-sm border border-stone-100 p-1">
+                <button onClick={() => setViewMode("card")} className={`h-9 w-9 rounded-lg flex items-center justify-center transition-all duration-200 ${viewMode === "card" ? "bg-stone-900 text-white shadow-sm" : "text-stone-400 hover:text-stone-600 hover:bg-stone-50"}`}>
+                  <LayoutGrid className="w-4 h-4" />
                 </button>
-                <button onClick={() => setViewMode("list")} className={`h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center transition-colors border-l border-slate-200 dark:border-slate-700 ${viewMode === "list" ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900" : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"}`}>
-                  <List className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <button onClick={() => setViewMode("list")} className={`h-9 w-9 rounded-lg flex items-center justify-center transition-all duration-200 ${viewMode === "list" ? "bg-stone-900 text-white shadow-sm" : "text-stone-400 hover:text-stone-600 hover:bg-stone-50"}`}>
+                  <List className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
-            {/* Row 1: Type tabs + Search + Sort */}
-            <div className="flex items-center gap-2 sm:gap-3 mb-3">
-              <div className="flex items-center gap-1 flex-shrink-0">
-                {typeFilters.map(f => (
-                  <button key={f.id} onClick={() => setTypeFilter(f.id)} className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors border whitespace-nowrap ${typeFilter === f.id ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white" : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"}`}>
-                    {f.label}
-                  </button>
-                ))}
-              </div>
-              <div className="flex-1 relative min-w-0">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                <Input ref={searchRef} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search... ( / )" className="pl-9 pr-8 h-9 text-sm" />
-                {searchQuery && (
-                  <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="h-9 px-3 flex items-center gap-2 text-xs font-medium bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap flex-shrink-0">
-                    <ArrowUpDown className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">{sortOptions.find(s => s.id === sortBy)?.label}</span>
-                    <ChevronDown className="w-3 h-3" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-44">
-                  {sortOptions.map(opt => (
-                    <DropdownMenuItem key={opt.id} onClick={() => setSortBy(opt.id)} className="text-xs cursor-pointer">
-                      <Check className={`w-4 h-4 mr-2 ${sortBy === opt.id ? "opacity-100" : "opacity-0"}`} />
-                      {opt.label}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            {/* Row 2: Status pills + Category dropdown */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-1 overflow-x-auto pb-1 flex-1">
-                {statusFilters.map(f => (
-                  <button key={f.id} onClick={() => setActiveFilter(f.id)} className={`px-2.5 sm:px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors border whitespace-nowrap ${activeFilter === f.id ? "bg-[#0EA885] text-white border-[#0EA885]" : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"}`}>
-                    {f.label}
-                  </button>
-                ))}
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="h-8 px-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors whitespace-nowrap ml-2 flex-shrink-0">
-                    <Filter className="w-3 h-3" />
-                    <span className="hidden sm:inline">{categoryFilters.find(f => f.id === categoryFilter)?.label}</span>
-                    <span className="sm:hidden">Category</span>
-                    <ChevronDown className="w-3 h-3" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  {categoryFilters.map(f => (
-                    <DropdownMenuItem key={f.id} onClick={() => setCategoryFilter(f.id)} className="text-xs uppercase tracking-wider cursor-pointer">
-                      <Check className={`w-4 h-4 mr-2 ${categoryFilter === f.id ? "opacity-100" : "opacity-0"}`} />
+            {/* Filters Bar */}
+            <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-4 mb-6 space-y-4">
+              {/* Row 1: Type tabs + Search + Sort */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center bg-stone-100/60 rounded-xl p-1 flex-shrink-0">
+                  {typeFilters.map(f => (
+                    <button 
+                      key={f.id} 
+                      onClick={() => setTypeFilter(f.id)} 
+                      className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all duration-200 whitespace-nowrap ${
+                        typeFilter === f.id 
+                          ? "bg-white text-stone-900 shadow-sm" 
+                          : "text-stone-500 hover:text-stone-700"
+                      }`}
+                    >
                       {f.label}
-                    </DropdownMenuItem>
+                    </button>
                   ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                </div>
+                <div className="flex-1 relative min-w-0">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
+                  <Input 
+                    ref={searchRef} 
+                    value={searchQuery} 
+                    onChange={e => setSearchQuery(e.target.value)} 
+                    placeholder="Search bounties & quests..." 
+                    className="pl-11 pr-10 h-11 text-sm bg-stone-50/50 border-stone-100 rounded-xl focus:bg-white focus:border-[#0EA885] focus:ring-[#0EA885]/20 transition-all" 
+                  />
+                  {searchQuery && (
+                    <button onClick={() => setSearchQuery("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors">
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="h-11 px-4 flex items-center gap-2 text-sm font-medium bg-stone-50/50 text-stone-600 border border-stone-100 rounded-xl hover:bg-stone-100/50 hover:border-stone-200 transition-all whitespace-nowrap flex-shrink-0">
+                      <ArrowUpDown className="w-4 h-4 text-stone-400" />
+                      <span className="hidden sm:inline">{sortOptions.find(s => s.id === sortBy)?.label}</span>
+                      <ChevronDown className="w-3.5 h-3.5 text-stone-400" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-lg border-stone-100">
+                    {sortOptions.map(opt => (
+                      <DropdownMenuItem key={opt.id} onClick={() => setSortBy(opt.id)} className="text-sm cursor-pointer rounded-lg">
+                        <Check className={`w-4 h-4 mr-2 text-[#0EA885] ${sortBy === opt.id ? "opacity-100" : "opacity-0"}`} />
+                        {opt.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {/* Row 2: Status pills + Category dropdown */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 flex-1">
+                  {statusFilters.map(f => (
+                    <button 
+                      key={f.id} 
+                      onClick={() => setActiveFilter(f.id)} 
+                      className={`px-4 py-2 text-xs font-semibold rounded-full transition-all duration-200 whitespace-nowrap ${
+                        activeFilter === f.id 
+                          ? "bg-[#0EA885] text-white shadow-sm shadow-[#0EA885]/25" 
+                          : "bg-stone-100/60 text-stone-500 hover:bg-stone-100 hover:text-stone-700"
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="h-9 px-4 flex items-center gap-2 text-xs font-semibold bg-stone-100/60 text-stone-600 rounded-full hover:bg-stone-100 transition-all whitespace-nowrap ml-3 flex-shrink-0">
+                      <Filter className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">{categoryFilters.find(f => f.id === categoryFilter)?.label}</span>
+                      <span className="sm:hidden">Category</span>
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-52 rounded-xl shadow-lg border-stone-100">
+                    {categoryFilters.map(f => (
+                      <DropdownMenuItem key={f.id} onClick={() => setCategoryFilter(f.id)} className="text-sm cursor-pointer rounded-lg">
+                        <Check className={`w-4 h-4 mr-2 text-[#0EA885] ${categoryFilter === f.id ? "opacity-100" : "opacity-0"}`} />
+                        {f.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
 
             {/* Results count */}
             {!loading && (
-              <div className="text-xs text-slate-500 dark:text-slate-400 mb-4 font-medium">
-                Showing {Math.min(displayCount, unifiedItems.length)} of {unifiedItems.length} items
-                {debouncedSearch && <span className="ml-1">for &quot;{debouncedSearch}&quot;</span>}
+              <div className="flex items-center justify-between mb-5">
+                <p className="text-sm text-stone-500">
+                  <span className="font-semibold text-stone-700">{unifiedItems.length}</span> results
+                  {debouncedSearch && <span className="ml-1">for &ldquo;<span className="text-[#0EA885]">{debouncedSearch}</span>&rdquo;</span>}
+                </p>
               </div>
             )}
 
             {/* ===== CONTENT ===== */}
             {loading ? (
               viewMode === "card" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                   {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
                 </div>
               ) : (
@@ -672,7 +710,7 @@ export default function DashboardPage() {
               )
             ) : displayedItems.length > 0 ? (
               viewMode === "card" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                   {displayedItems.map(item => {
                     const statusInfo = getStatusInfo(item);
                     const { title, image, category, subCount } = getItemData(item);
@@ -681,52 +719,83 @@ export default function DashboardPage() {
                       <div
                         key={`${item.type}-${item.id}`}
                         onClick={() => router.push(`/${item.type === "bounty" ? "bounties" : "quests"}/${item.id}`)}
-                        className="group cursor-pointer bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-[#0EA885] hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
+                        className="group cursor-pointer bg-white rounded-2xl shadow-sm hover:shadow-xl hover:shadow-stone-200/50 border border-stone-100 hover:border-stone-200 transition-all duration-300 overflow-hidden flex flex-col"
                       >
-                        {/* Image / Solid Fallback */}
-                        <div className="relative w-full h-36 overflow-hidden">
+                        {/* Image / Gradient Fallback */}
+                        <div className="relative w-full h-44 overflow-hidden">
                           {image ? (
                             <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                           ) : (
-                            <div className="w-full h-full bg-slate-100 dark:bg-slate-200 flex items-center justify-center">
-                              {item.type === "bounty" ? <Target className="w-10 h-10 text-slate-400 dark:text-slate-500" /> : <Zap className="w-10 h-10 text-slate-400 dark:text-slate-500" />}
+                            <div className={`w-full h-full ${getCategoryColor(category)} flex items-center justify-center`}>
+                              {item.type === "bounty" ? (
+                                <Target className="w-12 h-12 text-stone-300" />
+                              ) : (
+                                <Zap className="w-12 h-12 text-stone-300" />
+                              )}
                             </div>
                           )}
-                          <div className="absolute top-3 left-3 flex items-center gap-1.5">
-                            <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-wider border ${statusInfo.color}`}>{statusInfo.label}</span>
-                            {category && <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${getCategoryBadgeColor(category)}`}>{category}</span>}
-                          </div>
-                          <div className="absolute top-3 right-3">
-                            <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-white/90 dark:bg-black/70 backdrop-blur-sm text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                              {item.type === "bounty" ? "BOUNTY" : "QUEST"}
+                          {/* Gradient overlay for better badge visibility */}
+                          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent" />
+                          
+                          {/* Top badges */}
+                          <div className="absolute top-3 left-3 flex items-center gap-2">
+                            <span className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full backdrop-blur-sm ${statusInfo.color}`}>
+                              {statusInfo.label}
                             </span>
                           </div>
+                          <div className="absolute top-3 right-3">
+                            <span className={`px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider rounded-full backdrop-blur-sm ${
+                              item.type === "bounty" 
+                                ? "bg-white/90 text-stone-700" 
+                                : "bg-amber-400/90 text-amber-900"
+                            }`}>
+                              {item.type === "bounty" ? "Bounty" : "Quest"}
+                            </span>
+                          </div>
+                          
+                          {/* Category badge at bottom of image */}
+                          {category && (
+                            <div className="absolute bottom-3 left-3">
+                              <span className={`px-2.5 py-1 text-[10px] font-semibold capitalize rounded-full border backdrop-blur-sm ${getCategoryBadgeColor(category)}`}>
+                                {category}
+                              </span>
+                            </div>
+                          )}
                         </div>
 
-                        <div className="p-4 flex flex-col flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <img src={getAvatarUrl(item.creator, 20)} alt="" className="w-5 h-5 flex-shrink-0" />
-                            <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate">{formatAddress(item.creator)}</span>
+                        <div className="p-5 flex flex-col flex-1">
+                          {/* Creator */}
+                          <div className="flex items-center gap-2.5 mb-3">
+                            <img src={getAvatarUrl(item.creator, 24)} alt="" className="w-6 h-6 rounded-full ring-2 ring-stone-100 flex-shrink-0" />
+                            <span className="text-xs font-medium text-stone-400 truncate">{formatAddress(item.creator)}</span>
                           </div>
-                          <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-3 line-clamp-2 leading-tight group-hover:text-[#0EA885] transition-colors">{title}</h3>
-                          <div className="mt-auto pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 dark:text-slate-500">
-                                <Clock className="h-3 w-3" />{formatDeadline(item.deadline)}
+                          
+                          {/* Title */}
+                          <h3 className="text-base font-semibold text-stone-800 mb-4 line-clamp-2 leading-snug group-hover:text-[#0EA885] transition-colors">
+                            {title}
+                          </h3>
+                          
+                          {/* Footer */}
+                          <div className="mt-auto pt-4 border-t border-stone-100 flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-1.5 text-xs text-stone-400">
+                                <Clock className="h-3.5 w-3.5" />
+                                <span className="font-medium">{formatDeadline(item.deadline)}</span>
                               </div>
                               {subCount > 0 && (
-                                <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 dark:text-slate-500">
-                                  <Users className="h-3 w-3" />{subCount}
+                                <div className="flex items-center gap-1.5 text-xs text-stone-400">
+                                  <Users className="h-3.5 w-3.5" />
+                                  <span className="font-medium">{subCount}</span>
                                 </div>
                               )}
                             </div>
                             <div className="text-right">
                               <div className="flex items-center justify-end gap-1.5">
-                                <Image src={ethIcon} alt="ETH" width={16} height={16} className="flex-shrink-0" />
-                                <span className="text-sm font-black text-slate-900 dark:text-white">{(Number(item.amount) / 1e18).toFixed(3)}</span>
+                                <Image src={ethIcon} alt="ETH" width={18} height={18} className="flex-shrink-0" />
+                                <span className="text-base font-bold text-stone-800">{(Number(item.amount) / 1e18).toFixed(3)}</span>
                               </div>
                               {ethPrice > 0 && (
-                                <div className="text-[10px] font-medium text-slate-400 dark:text-slate-500">{formatUSD(convertEthToUSD(Number(item.amount) / 1e18, ethPrice))}</div>
+                                <div className="text-[11px] font-medium text-stone-400 mt-0.5">{formatUSD(convertEthToUSD(Number(item.amount) / 1e18, ethPrice))}</div>
                               )}
                             </div>
                           </div>
@@ -745,37 +814,39 @@ export default function DashboardPage() {
                       <div
                         key={`${item.type}-${item.id}`}
                         onClick={() => router.push(`/${item.type === "bounty" ? "bounties" : "quests"}/${item.id}`)}
-                        className="group cursor-pointer bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-[#0EA885] hover:shadow-md transition-all duration-200 px-4 py-3 flex items-center gap-4"
+                        className="group cursor-pointer bg-white rounded-xl shadow-sm hover:shadow-lg hover:shadow-stone-200/50 border border-stone-100 hover:border-stone-200 transition-all duration-200 px-5 py-4 flex items-center gap-5"
                       >
-                        <div className="flex-shrink-0 w-12 h-12 border border-slate-200 dark:border-slate-700 flex items-center justify-center overflow-hidden">
+                        <div className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden">
                           {image ? (
                             <img src={image} alt={title} className="w-full h-full object-cover" />
                           ) : (
-                            <div className="w-full h-full bg-slate-100 dark:bg-slate-200 flex items-center justify-center">
-                              {item.type === "bounty" ? <Target className="w-5 h-5 text-slate-400 dark:text-slate-500" /> : <Zap className="w-5 h-5 text-slate-400 dark:text-slate-500" />}
+                            <div className={`w-full h-full ${getCategoryColor(category)} flex items-center justify-center`}>
+                              {item.type === "bounty" ? <Target className="w-6 h-6 text-stone-300" /> : <Zap className="w-6 h-6 text-stone-300" />}
                             </div>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <img src={getAvatarUrl(item.creator, 16)} alt="" className="w-4 h-4 flex-shrink-0" />
-                            <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">{formatAddress(item.creator)}</span>
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <img src={getAvatarUrl(item.creator, 18)} alt="" className="w-4.5 h-4.5 rounded-full ring-1 ring-stone-100 flex-shrink-0" />
+                            <span className="text-[11px] font-medium text-stone-400">{formatAddress(item.creator)}</span>
                           </div>
-                          <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1.5 truncate group-hover:text-[#0EA885] transition-colors">{title}</h3>
+                          <h3 className="text-sm font-semibold text-stone-800 mb-2 truncate group-hover:text-[#0EA885] transition-colors">{title}</h3>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider border ${statusInfo.color}`}>{statusInfo.label}</span>
-                            <span className="px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">{item.type === "bounty" ? "BOUNTY" : "QUEST"}</span>
-                            {category && <span className={`px-2 py-0.5 text-[9px] font-medium uppercase tracking-wider border ${getCategoryBadgeColor(category)}`}>{category}</span>}
-                            <span className="text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1"><Clock className="w-3 h-3" />{formatDeadline(item.deadline)}</span>
-                            {subCount > 0 && <span className="text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1"><Users className="w-3 h-3" />{subCount}</span>}
+                            <span className={`px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full ${statusInfo.color}`}>{statusInfo.label}</span>
+                            <span className={`px-2 py-0.5 text-[10px] font-medium capitalize rounded-full ${
+                              item.type === "bounty" ? "bg-stone-100 text-stone-600" : "bg-amber-100 text-amber-700"
+                            }`}>{item.type}</span>
+                            {category && <span className={`px-2 py-0.5 text-[10px] font-medium capitalize rounded-full border ${getCategoryBadgeColor(category)}`}>{category}</span>}
+                            <span className="text-[11px] text-stone-400 flex items-center gap-1"><Clock className="w-3 h-3" />{formatDeadline(item.deadline)}</span>
+                            {subCount > 0 && <span className="text-[11px] text-stone-400 flex items-center gap-1"><Users className="w-3 h-3" />{subCount}</span>}
                           </div>
                         </div>
-                        <div className="flex-shrink-0 text-right">
-                          <div className="flex items-center justify-end gap-1.5 mb-0.5">
-                            <Image src={ethIcon} alt="ETH" width={20} height={20} className="flex-shrink-0" />
-                            <span className="text-lg font-black text-slate-900 dark:text-white">{(Number(item.amount) / 1e18).toFixed(3)}</span>
+                        <div className="flex-shrink-0 text-right pl-4 border-l border-stone-100">
+                          <div className="flex items-center justify-end gap-2 mb-1">
+                            <Image src={ethIcon} alt="ETH" width={22} height={22} className="flex-shrink-0" />
+                            <span className="text-xl font-bold text-stone-800">{(Number(item.amount) / 1e18).toFixed(3)}</span>
                           </div>
-                          {ethPrice > 0 && <div className="text-[11px] font-medium text-slate-400 dark:text-slate-500">{formatUSD(convertEthToUSD(Number(item.amount) / 1e18, ethPrice))}</div>}
+                          {ethPrice > 0 && <div className="text-xs font-medium text-stone-400">{formatUSD(convertEthToUSD(Number(item.amount) / 1e18, ethPrice))}</div>}
                         </div>
                       </div>
                     );
@@ -783,21 +854,24 @@ export default function DashboardPage() {
                 </div>
               )
             ) : (
-              <div className="text-center py-20 bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-700">
-                <Search className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-                <p className="text-sm font-bold text-slate-400 dark:text-slate-500 mb-1">No items found</p>
-                <p className="text-xs text-slate-400 dark:text-slate-500">Try adjusting your filters or search query</p>
+              <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-stone-200">
+                <div className="w-16 h-16 rounded-2xl bg-stone-100 flex items-center justify-center mx-auto mb-5">
+                  <Search className="h-8 w-8 text-stone-300" />
+                </div>
+                <p className="text-base font-semibold text-stone-600 mb-2">No results found</p>
+                <p className="text-sm text-stone-400 max-w-sm mx-auto">Try adjusting your filters or search query to find what you&apos;re looking for</p>
               </div>
             )}
 
             {/* ===== LOAD MORE ===== */}
             {!loading && displayedItems.length < unifiedItems.length && (
-              <div className="text-center mt-8 space-y-3">
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                  Showing {displayedItems.length} of {unifiedItems.length} items
-                </p>
-                <Button variant="outline" onClick={() => setDisplayCount(prev => prev + LOAD_MORE_COUNT)} className="px-8 text-xs font-bold uppercase tracking-wider">
-                  Load More
+              <div className="text-center mt-10">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setDisplayCount(prev => prev + LOAD_MORE_COUNT)} 
+                  className="px-8 py-3 h-auto text-sm font-semibold rounded-xl border-stone-200 hover:bg-stone-50 hover:border-stone-300 transition-all"
+                >
+                  Load more ({unifiedItems.length - displayedItems.length} remaining)
                 </Button>
               </div>
             )}
@@ -805,26 +879,28 @@ export default function DashboardPage() {
 
           {/* ===== SIDEBAR ===== */}
           <div
-            className={`${showStats ? "fixed inset-0 z-40 bg-black/50 lg:relative lg:bg-transparent" : "hidden"} lg:block w-full lg:w-72 flex-shrink-0 order-1 lg:order-2`}
+            className={`${showStats ? "fixed inset-0 z-40 bg-black/30 backdrop-blur-sm lg:relative lg:bg-transparent lg:backdrop-blur-none" : "hidden"} lg:block w-full lg:w-80 flex-shrink-0 order-1 lg:order-2`}
             onClick={() => setShowStats(false)}
           >
             <div
-              className={`${showStats ? "fixed right-0 top-0 bottom-0 w-72 overflow-y-auto" : ""} lg:relative lg:sticky lg:top-6 space-y-4 bg-slate-50 dark:bg-slate-950 lg:bg-transparent`}
+              className={`${showStats ? "fixed right-0 top-0 bottom-0 w-80 overflow-y-auto p-4" : ""} lg:relative lg:sticky lg:top-24 space-y-5 bg-gradient-to-b from-stone-50 to-white lg:bg-transparent`}
               onClick={e => e.stopPropagation()}
             >
               {loading ? <SidebarSkeleton /> : (
                 <>
                   {/* Total in Escrow */}
-                  <div className="bg-gradient-to-br from-[#0EA885] to-[#0c8a6f] p-4 text-white">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Image src={ethIcon} alt="ETH" width={28} height={28} className="flex-shrink-0" />
-                      <span className="text-xs font-bold uppercase tracking-wider">Total in Escrow</span>
+                  <div className="bg-gradient-to-br from-[#0EA885] via-[#0c9478] to-[#0a7d66] p-5 rounded-2xl text-white shadow-lg shadow-[#0EA885]/20">
+                    <div className="flex items-center gap-2.5 mb-3">
+                      <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                        <Image src={ethIcon} alt="ETH" width={24} height={24} className="flex-shrink-0" />
+                      </div>
+                      <span className="text-xs font-semibold uppercase tracking-wider text-white/80">Total in Escrow</span>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-black">{stats.totalEth.toFixed(3)}</span>
-                      <span className="text-xs font-medium text-white/60">ETH</span>
+                      <span className="text-3xl font-bold tracking-tight">{stats.totalEth.toFixed(3)}</span>
+                      <span className="text-sm font-medium text-white/60">ETH</span>
                     </div>
-                    {ethPrice > 0 && <div className="text-sm font-medium text-white/70 mt-1">{formatUSD(convertEthToUSD(stats.totalEth, ethPrice))}</div>}
+                    {ethPrice > 0 && <div className="text-sm font-medium text-white/70 mt-2">{formatUSD(convertEthToUSD(stats.totalEth, ethPrice))}</div>}
                   </div>
 
                   {/* Featured Bounty */}
@@ -833,31 +909,39 @@ export default function DashboardPage() {
                     const fImage = meta?.images?.[0] ? formatIpfsUrl(meta.images[0]) : null;
                     const fTitle = meta?.title || `Bounty #${featuredBounty.id}`;
                     return (
-                      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden">
-                        <div className="px-4 py-2 bg-amber-50 dark:bg-amber-500/10 border-b border-amber-100 dark:border-amber-500/20 flex items-center gap-2">
-                          <Star className="w-3.5 h-3.5 text-amber-500" />
-                          <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Featured Bounty</span>
+                      <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
+                        <div className="px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100/50 flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center">
+                            <Star className="w-3.5 h-3.5 text-amber-600" />
+                          </div>
+                          <span className="text-xs font-semibold text-amber-800">Featured Bounty</span>
                         </div>
-                        <div className="p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" onClick={() => router.push(`/bounties/${featuredBounty.id}`)}>
-                          <div className="w-full h-24 mb-3 overflow-hidden">
+                        <div 
+                          className="p-4 cursor-pointer hover:bg-stone-50/50 transition-colors" 
+                          onClick={() => router.push(`/bounties/${featuredBounty.id}`)}
+                        >
+                          <div className="w-full h-28 mb-4 rounded-xl overflow-hidden">
                             {fImage ? (
                               <img src={fImage} alt="" className="w-full h-full object-cover" />
                             ) : (
-                              <div className="w-full h-full bg-slate-100 dark:bg-slate-200 flex items-center justify-center">
-                                <Target className="w-8 h-8 text-slate-400 dark:text-slate-500" />
+                              <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-50 flex items-center justify-center">
+                                <Target className="w-10 h-10 text-stone-300" />
                               </div>
                             )}
                           </div>
-                          <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-2 line-clamp-2">{fTitle}</h4>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1.5">
-                              <Image src={ethIcon} alt="ETH" width={16} height={16} className="flex-shrink-0" />
-                              <span className="text-sm font-black text-slate-900 dark:text-white">{(Number(featuredBounty.amount) / 1e18).toFixed(3)}</span>
+                          <h4 className="text-sm font-semibold text-stone-800 mb-3 line-clamp-2 leading-snug">{fTitle}</h4>
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                              <Image src={ethIcon} alt="ETH" width={18} height={18} className="flex-shrink-0" />
+                              <span className="text-base font-bold text-stone-800">{(Number(featuredBounty.amount) / 1e18).toFixed(3)}</span>
                             </div>
-                            <div className="flex items-center gap-1 text-[10px] font-medium text-slate-400"><Clock className="w-3 h-3" />{formatDeadline(featuredBounty.deadline)}</div>
+                            <div className="flex items-center gap-1.5 text-xs text-stone-400">
+                              <Clock className="w-3.5 h-3.5" />
+                              <span className="font-medium">{formatDeadline(featuredBounty.deadline)}</span>
+                            </div>
                           </div>
-                          <Button variant="outline" size="sm" className="w-full mt-3 text-xs font-bold gap-1">
-                            View Bounty <ArrowRight className="w-3 h-3" />
+                          <Button className="w-full bg-stone-900 hover:bg-stone-800 text-white rounded-xl h-10 text-sm font-medium gap-2">
+                            View Bounty <ArrowRight className="w-4 h-4" />
                           </Button>
                         </div>
                       </div>
@@ -865,53 +949,66 @@ export default function DashboardPage() {
                   })()}
 
                   {/* Quick Stats */}
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800">
-                    <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800 flex items-center gap-2">
-                      <BarChart3 className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-                      <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Stats</span>
-                    </div>
-                    <div className="px-4 py-2.5 flex items-center justify-between">
-                      <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Active Bounties</span>
-                      <span className="text-sm font-black text-blue-600 dark:text-blue-400">{stats.activeBounties}</span>
-                    </div>
-                    <div className="px-4 py-2.5 flex items-center justify-between">
-                      <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Active Quests</span>
-                      <span className="text-sm font-black text-amber-600 dark:text-amber-400">{stats.activeQuests}</span>
-                    </div>
-                    <div className="px-4 py-2.5 flex items-center justify-between">
-                      <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Completed</span>
-                      <span className="text-sm font-black text-[#0EA885]">{stats.completed}</span>
-                    </div>
-                    {ethPrice > 0 && (
-                      <div className="px-4 py-2.5 flex items-center justify-between bg-purple-50/50 dark:bg-purple-500/5">
-                        <span className="text-xs text-slate-600 dark:text-slate-400 font-medium flex items-center gap-1.5">
-                          <Image src={ethIcon} alt="ETH" width={16} height={16} className="flex-shrink-0" />
-                          ETH Price
-                        </span>
-                        <span className="text-sm font-black text-slate-900 dark:text-white">{formatUSD(ethPrice)}</span>
+                  <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
+                    <div className="px-4 py-3 bg-stone-50/80 border-b border-stone-100 flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-lg bg-stone-200/60 flex items-center justify-center">
+                        <BarChart3 className="w-3.5 h-3.5 text-stone-500" />
                       </div>
-                    )}
+                      <span className="text-xs font-semibold text-stone-700">Quick Stats</span>
+                    </div>
+                    <div className="divide-y divide-stone-50">
+                      <div className="px-4 py-3.5 flex items-center justify-between">
+                        <span className="text-sm text-stone-500">Active Bounties</span>
+                        <span className="text-base font-bold text-sky-600 bg-sky-50 px-2.5 py-0.5 rounded-lg">{stats.activeBounties}</span>
+                      </div>
+                      <div className="px-4 py-3.5 flex items-center justify-between">
+                        <span className="text-sm text-stone-500">Active Quests</span>
+                        <span className="text-base font-bold text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-lg">{stats.activeQuests}</span>
+                      </div>
+                      <div className="px-4 py-3.5 flex items-center justify-between">
+                        <span className="text-sm text-stone-500">Completed</span>
+                        <span className="text-base font-bold text-[#0EA885] bg-[#0EA885]/10 px-2.5 py-0.5 rounded-lg">{stats.completed}</span>
+                      </div>
+                      {ethPrice > 0 && (
+                        <div className="px-4 py-3.5 flex items-center justify-between bg-gradient-to-r from-violet-50/50 to-purple-50/50">
+                          <span className="text-sm text-stone-500 flex items-center gap-2">
+                            <Image src={ethIcon} alt="ETH" width={18} height={18} className="flex-shrink-0" />
+                            ETH Price
+                          </span>
+                          <span className="text-base font-bold text-stone-800">{formatUSD(ethPrice)}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Recent Activity */}
                   {recentActivity.length > 0 && (
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                      <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 flex items-center gap-2">
-                        <Activity className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Recent Activity</span>
+                    <div className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
+                      <div className="px-4 py-3 bg-stone-50/80 border-b border-stone-100 flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-lg bg-stone-200/60 flex items-center justify-center">
+                          <Activity className="w-3.5 h-3.5 text-stone-500" />
+                        </div>
+                        <span className="text-xs font-semibold text-stone-700">Recent Activity</span>
                       </div>
-                      <div className="divide-y divide-slate-50 dark:divide-slate-800">
+                      <div className="divide-y divide-stone-50">
                         {recentActivity.map((act, i) => {
                           return (
                             <div
                               key={i}
-                              className="px-4 py-3 flex items-start gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                              className="px-4 py-3.5 flex items-start gap-3 hover:bg-stone-50/50 cursor-pointer transition-colors"
                               onClick={() => router.push(`/${act.type === "bounty" ? "bounties" : "quests"}/${act.id}`)}
                             >
-                              <img src={getAvatarUrl(act.creator, 28)} alt="" className="w-7 h-7 flex-shrink-0 mt-0.5" />
+                              <img src={getAvatarUrl(act.creator, 32)} alt="" className="w-8 h-8 rounded-full ring-2 ring-stone-100 flex-shrink-0" />
                               <div className="flex-1 min-w-0">
-                                <p className="text-xs text-slate-700 dark:text-slate-300 font-medium truncate">{act.title}</p>
-                                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{act.action} &bull; {formatAddress(act.creator)}</p>
+                                <p className="text-sm text-stone-700 font-medium truncate leading-snug">{act.title}</p>
+                                <p className="text-xs text-stone-400 mt-1">
+                                  <span className={`font-medium ${
+                                    act.action === "Now live" ? "text-[#0EA885]" : 
+                                    act.action === "Completed" || act.action === "Resolved" ? "text-stone-500" : "text-amber-600"
+                                  }`}>{act.action}</span>
+                                  <span className="mx-1.5">&bull;</span>
+                                  {formatAddress(act.creator)}
+                                </p>
                               </div>
                             </div>
                           );
