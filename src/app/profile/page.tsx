@@ -515,7 +515,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8 sm:mb-10">
+            <div className="flex justify-center mb-8 sm:mb-10">
                 <div className="inline-flex flex-wrap gap-1 p-1 bg-slate-100 border border-slate-200">
                     <button
                         onClick={() => setActiveTab("overview")}
@@ -551,23 +551,6 @@ export default function ProfilePage() {
                         History
                     </button>
                 </div>
-
-                {/* Create Button - Less Prominent */}
-                <button
-                    onClick={() => {
-                        setActiveTab("create");
-                        setShowCreateOptions(false);
-                        setCreateType(null);
-                    }}
-                    className={`px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider transition-all border ${
-                        activeTab === "create"
-                            ? "bg-slate-700 text-white border-slate-700"
-                            : "bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100"
-                    }`}
-                >
-                    <Plus className="w-3 h-3 inline-block mr-1" />
-                    Create
-                </button>
             </div>
 
             {/* Tab Content */}

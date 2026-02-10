@@ -104,12 +104,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const twitterId = privyUser.twitter?.subject;
       const walletAddress = privyUser.wallet?.address;
 
-      // Get username from various sources
-      const username =
+      // Get username from Privy — only real values, no fallback
+      // We never want to send 'User' as a username to the backend
+      const privyDerivedUsername =
         privyUser.google?.name ||
         privyUser.twitter?.username ||
         email?.split('@')[0] ||
-        'User';
+        null;
 
       const fullName = privyUser.google?.name;
 
@@ -118,10 +119,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         privyUser.twitter?.profilePictureUrl;
 
       // Create profile object (without twitter fields - those are managed by X OAuth)
+      // username is left undefined for now — resolved after checking backend
       const profileData: UserProfile = {
         id: privyUser.id,
         email: email || undefined,
-        username,
+        username: privyDerivedUsername || undefined,
         full_name: fullName || undefined,
         avatar_url: avatarUrl || undefined,
         wallet_address: walletAddress || undefined,
@@ -146,9 +148,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // No existing profile or not authenticated yet — that's fine
         }
 
-        // Preserve backend values that shouldn't be overwritten by Privy data
+        // Backend username always wins over Privy-derived username.
+        // If backend has no username yet, use the Privy-derived one (or omit entirely).
         if (existingProfile?.username) {
           profileData.username = existingProfile.username;
+        }
+        // If no backend username and no real Privy-derived value, omit username from payload
+        // so we never overwrite a custom username with undefined/null
+        if (!profileData.username) {
+          delete profileData.username;
         }
         // Merge twitter data from backend (managed by our custom OAuth, not Privy)
         if (existingProfile?.twitter_username) {
@@ -246,7 +254,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         {
           id: privyUser.id,
           email: email || undefined,
-          username: profile?.username || 'User',
+          ...(profile?.username ? { username: profile.username } : {}),
         },
         { withCredentials: true }
       );
