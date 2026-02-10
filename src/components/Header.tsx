@@ -2,23 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import Image from "next/image";
-import { useAccount } from "wagmi";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import { Menu, X, ChevronRight } from "lucide-react";
-import ZKVerificationModal from "./ZKVerificationModal";
 import { useAuth } from "@/contexts/AuthContext";
 import LoginButton from "./auth/LoginButton";
 import UserMenu from "./auth/UserMenu";
-
-const WalletComponents = dynamic(
-  () => import("./WalletComponents"),
-  { ssr: false }
-);
 
 const navItems = [
   { name: "Dashboard", link: "/dashboard" },
@@ -28,7 +19,6 @@ const navItems = [
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
-  const { isConnected } = useAccount();
   const { profile, loading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -100,10 +90,6 @@ export default function Header() {
 
             {/* Desktop Actions */}
             <div className="hidden items-center gap-2 lg:flex">
-              {isConnected && (
-                <ZKVerificationModal iconOnly={true} />
-              )}
-              {/* Auth components */}
               {!loading && isMounted && (
                 <>
                   {profile ? (
@@ -113,13 +99,10 @@ export default function Header() {
                   )}
                 </>
               )}
-              {/* Keep wallet components for wallet-first users */}
-              {isMounted && <WalletComponents />}
             </div>
 
             {/* Mobile Menu Toggle */}
             <div className="flex items-center gap-2 lg:hidden ml-auto">
-              {isConnected && <ZKVerificationModal iconOnly={true} />}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="h-10 w-10 flex items-center justify-center hover:bg-white/10 transition-colors text-white"
@@ -163,7 +146,6 @@ export default function Header() {
                   ))}
                   {isMounted && (
                     <div className="mt-3 pt-3 border-t border-white/20 flex flex-col gap-2 px-2">
-                      {/* Auth components for mobile */}
                       {!loading && (
                         <>
                           {profile ? (
@@ -178,7 +160,6 @@ export default function Header() {
                           )}
                         </>
                       )}
-                      <WalletComponents />
                     </div>
                   )}
                 </nav>
