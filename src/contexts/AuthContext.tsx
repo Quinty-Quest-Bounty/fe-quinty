@@ -1,7 +1,8 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
+import { useAccount } from 'wagmi';
 import axios from 'axios';
 
 interface UserProfile {
@@ -42,6 +43,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logout,
   } = usePrivy();
 
+  const { address, isConnected } = useAccount();
+  const wasConnectedRef = useRef(false);
+
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [authToken, setAuthToken] = useState<string | null>(null);
@@ -53,6 +57,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const stored = localStorage.getItem('quinty_auth_token');
     if (stored) setAuthToken(stored);
   }, []);
+
+  // When wallet disconnects, sign out of Privy and clear profile
+  useEffect(() => {
+    if (isConnected) {
+      wasConnectedRef.current = true;
+    } else if (wasConnectedRef.current && !isConnected && authenticated) {
+      // Wallet was connected and is now disconnected — sign out
+      wasConnectedRef.current = false;
+      setProfile(null);
+      setAuthToken(null);
+      localStorage.removeItem('quinty_auth_token');
+      localStorage.removeItem('quinty_x_account');
+      logout().catch(() => {});
+    }
+  }, [isConnected, authenticated]);
 
   // Sync profile with backend when Privy user changes
   useEffect(() => {
