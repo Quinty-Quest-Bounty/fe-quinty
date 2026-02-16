@@ -54,7 +54,7 @@ export default function Header() {
                   src="/images/quinty-logo.png"
                   alt="Quinty"
                   fill
-                  className="object-contain"
+                  className="object-contain brightness-0"
                   priority
                 />
               </div>
