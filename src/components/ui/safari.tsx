@@ -12,7 +12,7 @@ export function Safari({ url = "quinty.xyz", src, className, children }: SafariP
   return (
     <div
       className={cn(
-        "relative w-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl",
+        "relative w-full overflow-hidden border border-gray-200 bg-white shadow-2xl",
         className
       )}
     >
@@ -20,14 +20,14 @@ export function Safari({ url = "quinty.xyz", src, className, children }: SafariP
       <div className="flex items-center gap-2 border-b border-gray-200 bg-gray-50 px-4 py-3">
         {/* Traffic Lights */}
         <div className="flex gap-2">
-          <div className="h-3 w-3 rounded-full bg-red-500" />
-          <div className="h-3 w-3 rounded-full bg-yellow-500" />
-          <div className="h-3 w-3 rounded-full bg-green-500" />
+          <div className="h-3 w-3 bg-red-500" />
+          <div className="h-3 w-3 bg-yellow-500" />
+          <div className="h-3 w-3 bg-green-500" />
         </div>
 
         {/* URL Bar */}
         <div className="ml-4 flex-1">
-          <div className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 shadow-sm">
+          <div className="flex items-center gap-2 bg-white px-4 py-2 shadow-sm">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"

@@ -275,7 +275,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                                     max="50"
                                     value={formData.slashPercent}
                                     onChange={e => setFormData({ ...formData, slashPercent: parseInt(e.target.value) })}
-                                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#0EA885]"
+                                    className="w-full h-2 bg-slate-200 appearance-none cursor-pointer accent-[#0EA885]"
                                 />
                                 <div className="flex justify-between text-[10px] text-slate-400">
                                     <span>25%</span>
@@ -322,7 +322,7 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                             </Button>
 
                             {/* Info Box */}
-                            <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                            <div className="p-4 bg-slate-50 border border-slate-200">
                                 <h4 className="text-xs font-bold text-slate-700 mb-2">How it Works</h4>
                                 <ul className="text-[10px] text-slate-500 space-y-1">
                                     <li>1. Create bounty with ETH escrow</li>

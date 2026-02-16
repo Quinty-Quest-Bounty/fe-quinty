@@ -21,10 +21,10 @@ export function BountyFilters({
             <div className="flex items-center gap-2">
                 <Filter className="w-3.5 h-3.5 text-slate-400" />
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-[140px] h-8 text-xs rounded-lg border-slate-200 bg-white">
+                    <SelectTrigger className="w-[140px] h-8 text-xs border-slate-200 bg-white">
                         <SelectValue placeholder="Status" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-lg">
+                    <SelectContent>
                         <SelectItem value="all">All Active</SelectItem>
                         <SelectItem value="judging">Judging</SelectItem>
                         <SelectItem value="resolved">Resolved</SelectItem>

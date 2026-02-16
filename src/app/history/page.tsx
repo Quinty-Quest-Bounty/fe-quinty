@@ -47,7 +47,7 @@ export default function HistoryPage() {
     if (!address) {
         return (
             <div className="max-w-3xl mx-auto px-4 pt-32 text-center">
-                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className="w-16 h-16 bg-slate-50  flex items-center justify-center mx-auto mb-6">
                     <HistoryIcon className="w-8 h-8 text-slate-300" />
                 </div>
                 <h2 className="text-xl font-black text-slate-900 mb-2">Connect Wallet</h2>
@@ -66,7 +66,7 @@ export default function HistoryPage() {
 
             {/* Filter Tabs */}
             <div className="flex justify-center mb-10">
-                <div className="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200">
+                <div className="inline-flex p-1  bg-slate-100 border border-slate-200">
                     {[
                         { id: "all", label: "All Activity" },
                         { id: "bounties", label: "Bounties" },
@@ -77,7 +77,7 @@ export default function HistoryPage() {
                             variant={filter === tab.id ? "default" : "ghost"}
                             size="sm"
                             onClick={() => setFilter(tab.id)}
-                            className={`rounded-lg transition-all px-6 font-bold text-xs ${filter === tab.id
+                            className={` transition-all px-6 font-bold text-xs ${filter === tab.id
                                     ? "bg-white text-slate-900 shadow-sm border border-slate-200"
                                     : "text-slate-500 hover:text-slate-900"
                                 }`}
@@ -92,7 +92,7 @@ export default function HistoryPage() {
             <div className="space-y-3">
                 {isLoading ? (
                     Array.from({ length: 5 }).map((_, i) => (
-                        <div key={i} className="h-20 bg-slate-50 rounded-2xl animate-pulse border border-slate-100" />
+                        <div key={i} className="h-20 bg-slate-50  animate-pulse border border-slate-100" />
                     ))
                 ) : filteredTransactions.length > 0 ? (
                     <AnimatePresence mode="popLayout">
@@ -103,9 +103,9 @@ export default function HistoryPage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: idx * 0.05 }}
                                 onClick={() => router.push(tx.contractType === "Quinty" ? `/bounties/${tx.itemId}` : `/quests/${tx.itemId}`)}
-                                className="group cursor-pointer bg-white border border-slate-100 rounded-2xl p-4 hover:shadow-md hover:border-slate-200 transition-all flex items-center gap-4"
+                                className="group cursor-pointer bg-white border border-slate-100  p-4 hover:shadow-md hover:border-slate-200 transition-all flex items-center gap-4"
                             >
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${getStatusColor(tx.type)}`}>
+                                <div className={`w-10 h-10  flex items-center justify-center border ${getStatusColor(tx.type)}`}>
                                     {getIcon(tx.type)}
                                 </div>
 
@@ -137,7 +137,7 @@ export default function HistoryPage() {
                                     ) : (
                                         <div className="text-xs font-bold text-slate-300">—</div>
                                     )}
-                                    <div className="p-1 rounded-lg bg-slate-50 text-slate-300 group-hover:text-[#0EA885] group-hover:bg-[#0EA885]/5 transition-all">
+                                    <div className="p-1  bg-slate-50 text-slate-300 group-hover:text-[#0EA885] group-hover:bg-[#0EA885]/5 transition-all">
                                         <ChevronRight className="w-4 h-4" />
                                     </div>
                                 </div>
@@ -145,8 +145,8 @@ export default function HistoryPage() {
                         ))}
                     </AnimatePresence>
                 ) : (
-                    <div className="py-20 text-center bg-white rounded-3xl border border-dashed border-slate-200">
-                        <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="py-20 text-center bg-white border border-slate-200">
+                        <div className="w-12 h-12 bg-slate-50  flex items-center justify-center mx-auto mb-4">
                             <Search className="w-6 h-6 text-slate-300" />
                         </div>
                         <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">No activity found</h3>

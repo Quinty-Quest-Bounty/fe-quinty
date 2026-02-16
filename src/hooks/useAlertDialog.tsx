@@ -99,7 +99,7 @@ export function AlertDialogProvider({ children }: { children: React.ReactNode })
         <AlertDialogContent className="sm:max-w-[500px]">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-3 text-xl">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-muted">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-muted">
                 {getIcon()}
               </div>
               {config.title}

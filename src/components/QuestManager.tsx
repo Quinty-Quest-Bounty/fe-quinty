@@ -104,7 +104,7 @@ export default function QuestManager() {
       </div>
 
       <div className="flex justify-center mb-12">
-        <div className="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200">
+        <div className="inline-flex p-1 bg-slate-100 border border-slate-200">
           {[
             { id: "browse", label: "Browse", icon: LayoutGrid },
             { id: "manage", label: "My Quests", icon: Settings },
@@ -115,7 +115,7 @@ export default function QuestManager() {
               variant={activeTab === tab.id ? "default" : "ghost"}
               size="sm"
               onClick={() => setActiveTab(tab.id as any)}
-              className={`rounded-lg transition-all px-6 ${activeTab === tab.id
+              className={`transition-all px-6 ${activeTab === tab.id
                 ? "bg-white text-slate-900 shadow-sm border border-slate-200"
                 : "text-slate-500 hover:text-slate-900"
                 }`}
@@ -163,7 +163,7 @@ export default function QuestManager() {
                 if (displayQuests.length === 0) {
                   return (
                     <div className="text-center py-16">
-                      <div className="inline-flex items-center justify-center size-16 rounded-full bg-slate-100 mb-4">
+                        <div className="inline-flex items-center justify-center size-16 bg-slate-100 mb-4">
                         <Settings className="size-8 text-slate-400" />
                       </div>
                       <h3 className="text-lg font-bold text-slate-900 text-balance mb-2">

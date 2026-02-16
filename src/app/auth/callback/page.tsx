@@ -126,7 +126,7 @@ function CallbackContent() {
         {status === 'loading' && (
           <>
             <div className="mb-4 inline-flex h-12 w-12 items-center justify-center bg-slate-100">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900" />
+              <div className="h-6 w-6 animate-spin border-2 border-slate-300 border-t-slate-900" />
             </div>
             <h1 className="text-xl font-bold mb-2">Authenticating...</h1>
             <p className="text-slate-500 text-sm">Please wait while we verify your X account.</p>
@@ -172,7 +172,7 @@ function LoadingFallback() {
     <div className="flex items-center justify-center min-h-screen bg-slate-50">
       <div className="text-center p-8 bg-white border border-slate-200 max-w-md">
         <div className="mb-4 inline-flex h-12 w-12 items-center justify-center bg-slate-100">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-slate-900" />
+          <div className="h-6 w-6 animate-spin border-2 border-slate-300 border-t-slate-900" />
         </div>
         <h1 className="text-xl font-bold mb-2">Loading...</h1>
         <p className="text-slate-500 text-sm">Please wait...</p>
