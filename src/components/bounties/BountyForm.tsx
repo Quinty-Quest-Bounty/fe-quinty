@@ -3,7 +3,7 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Calendar as CalendarIcon, Target, DollarSign, Plus, Minus, Briefcase, ListChecks } from "lucide-react";
+import { Calendar as CalendarIcon, Target, DollarSign, Plus, Minus, Briefcase, ListChecks, Code2, Palette, Megaphone, FlaskConical, Layers, FileText } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { format, startOfDay } from "date-fns";
@@ -73,7 +73,9 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
         <Card className="max-w-4xl mx-auto border border-slate-200 bg-white overflow-hidden">
             <CardHeader className="border-b border-slate-200 p-6">
                 <div className="flex items-center gap-3">
-                    <Target className="w-5 h-5 text-[#0EA885]" />
+                    <div className="w-8 h-8 bg-[#0EA885]/10 flex items-center justify-center flex-shrink-0">
+                        <Target className="w-4 h-4 text-[#0EA885]" />
+                    </div>
                     <div>
                         <CardTitle className="text-lg font-black text-slate-900">Create New Bounty</CardTitle>
                         <p className="text-slate-400 text-xs">Set up your task with escrow rewards</p>
@@ -113,11 +115,11 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                                         <SelectValue placeholder="Select type" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="development">Development</SelectItem>
-                                        <SelectItem value="design">Design</SelectItem>
-                                        <SelectItem value="content">Content</SelectItem>
-                                        <SelectItem value="marketing">Marketing</SelectItem>
-                                        <SelectItem value="other">Other</SelectItem>
+                                        <SelectItem value="development"><span className="flex items-center gap-2"><Code2 className="w-3.5 h-3.5 text-blue-500" />Development</span></SelectItem>
+                                        <SelectItem value="design"><span className="flex items-center gap-2"><Palette className="w-3.5 h-3.5 text-violet-500" />Design</span></SelectItem>
+                                        <SelectItem value="content"><span className="flex items-center gap-2"><FileText className="w-3.5 h-3.5 text-emerald-500" />Content</span></SelectItem>
+                                        <SelectItem value="marketing"><span className="flex items-center gap-2"><Megaphone className="w-3.5 h-3.5 text-amber-500" />Marketing</span></SelectItem>
+                                        <SelectItem value="other"><span className="flex items-center gap-2"><Layers className="w-3.5 h-3.5 text-zinc-400" />Other</span></SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
