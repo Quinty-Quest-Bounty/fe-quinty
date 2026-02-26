@@ -3,12 +3,14 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Calendar as CalendarIcon, Target, DollarSign, Plus, Minus, Briefcase, ListChecks, Code2, Palette, Megaphone, FlaskConical, Layers, FileText } from "lucide-react";
+import { Calendar as CalendarIcon, Target, DollarSign, Plus, Minus, Briefcase, ListChecks, Code2, Palette, Megaphone, FlaskConical, Layers, FileText, Users, Trophy } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { format, startOfDay } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { ImageUpload } from "../ui/image-upload";
+import { TokenSelector } from "../ui/TokenSelector";
+import { ETH_ADDRESS, calculatePrizeSplit, formatTokenAmount, getTokenInfo } from "../../utils/contracts";
 
 interface BountyFormProps {
     onSubmit: (data: any) => void;
@@ -20,6 +22,8 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
         title: "",
         description: "",
         amount: "",
+        token: ETH_ADDRESS,
+        winnerCount: 1,
         bountyType: "development",
         requirements: [""],
         deliverables: [""],
@@ -66,6 +70,8 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
             openDeadline: openDateTime.toISOString(),
             judgingDeadline: judgingDateTime.toISOString(),
             slashPercent: formData.slashPercent * 100, // Convert to basis points (25% -> 2500)
+            token: formData.token,
+            winnerCount: formData.winnerCount,
         });
     };
 
@@ -195,18 +201,62 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                         {/* Right Column: Reward, Deadline & Skills */}
                         <div className="space-y-6">
                             <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Reward Amount (ETH)</label>
+                                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Payment Token</label>
+                                <TokenSelector
+                                    value={formData.token}
+                                    onChange={(v) => setFormData({ ...formData, token: v })}
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                    Total Reward ({getTokenInfo(formData.token).symbol})
+                                </label>
                                 <div className="relative">
                                     <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                                     <Input
                                         type="number"
-                                        step="0.01"
-                                        placeholder="0.5"
+                                        step={formData.token === ETH_ADDRESS ? "0.01" : "1"}
+                                        placeholder={formData.token === ETH_ADDRESS ? "0.5" : "100"}
                                         value={formData.amount}
                                         onChange={e => setFormData({ ...formData, amount: e.target.value })}
                                         className="pl-10 border-slate-200 bg-white"
                                     />
                                 </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <Trophy className="w-3 h-3" />
+                                    Number of Winners
+                                </label>
+                                <div className="flex items-center gap-3">
+                                    <Input
+                                        type="number"
+                                        min={1}
+                                        max={10}
+                                        value={formData.winnerCount}
+                                        onChange={e => setFormData({ ...formData, winnerCount: Math.min(10, Math.max(1, parseInt(e.target.value) || 1)) })}
+                                        className="w-20 border-slate-200 bg-white"
+                                    />
+                                    <span className="text-xs text-slate-400">1-10 ranked prize tiers</span>
+                                </div>
+                                {formData.winnerCount > 1 && formData.amount && (
+                                    <div className="mt-2 p-3 bg-slate-50 border border-slate-200 text-xs">
+                                        <p className="font-bold text-slate-600 mb-1.5">Prize Breakdown:</p>
+                                        {(() => {
+                                            const token = getTokenInfo(formData.token);
+                                            const totalBigint = BigInt(Math.floor(parseFloat(formData.amount) * 10 ** token.decimals));
+                                            const prizes = calculatePrizeSplit(totalBigint, formData.winnerCount);
+                                            return prizes.map((prize, i) => (
+                                                <div key={i} className="flex justify-between text-slate-500">
+                                                    <span>{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`} {["1st", "2nd", "3rd"][i] || `${i + 1}th`}</span>
+                                                    <span className="font-mono">{formatTokenAmount(prize, formData.token)} {token.symbol}</span>
+                                                </div>
+                                            ));
+                                        })()}
+                                    </div>
+                                )}
                             </div>
 
                             <div className="space-y-1.5">
@@ -327,10 +377,11 @@ export function BountyForm({ onSubmit, isPending }: BountyFormProps) {
                             <div className="p-4 bg-slate-50 border border-slate-200">
                                 <h4 className="text-xs font-bold text-slate-700 mb-2">How it Works</h4>
                                 <ul className="text-[10px] text-slate-500 space-y-1">
-                                    <li>1. Create bounty with ETH escrow</li>
+                                    <li>1. Create bounty with ETH or USDC escrow</li>
                                     <li>2. Performers submit work with 1% deposit</li>
-                                    <li>3. Select winner before judging deadline</li>
+                                    <li>3. Select winner(s) before judging deadline</li>
                                     <li>4. If no winner selected, you get slashed</li>
+                                    <li>5. Winners withdraw funds from their balance</li>
                                 </ul>
                             </div>
                         </div>

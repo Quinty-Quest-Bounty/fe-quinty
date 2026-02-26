@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatETH, formatTimeLeft, formatAddress } from "../utils/web3";
+import { getTokenInfo, formatTokenAmount } from "../utils/contracts";
 import { Users, Clock, ArrowUpRight } from "lucide-react";
 import { useWalletName } from "@/hooks/useWalletName";
 import { QuestQuickView } from "./quests/QuestQuickView";
@@ -10,6 +11,7 @@ interface Quest {
   creator: string;
   title: string;
   description: string;
+  token: string;
   totalAmount: bigint;
   perQualifier: bigint;
   maxQualifiers: number;
@@ -40,6 +42,7 @@ export default function QuestCard({ quest, entryCount = 0 }: QuestCardProps) {
   const router = useRouter();
   const [quickView, setQuickView] = useState(false);
   const creatorName = useWalletName(quest.creator);
+  const tokenInfo = getTokenInfo(quest.token);
   const progress = Math.min((quest.qualifiersCount / quest.maxQualifiers) * 100, 100);
   const isExpired = Date.now() / 1000 > quest.deadline;
   const config = statusConfig(quest, isExpired);
@@ -116,8 +119,8 @@ export default function QuestCard({ quest, entryCount = 0 }: QuestCardProps) {
             {/* Reward */}
             <div>
               <div className="flex items-baseline gap-1">
-                <span className="text-lg font-bold text-zinc-900 tabular-nums tracking-tight">{formatETH(quest.perQualifier)}</span>
-                <span className="text-[10px] font-mono font-semibold text-zinc-400">ETH</span>
+                <span className="text-lg font-bold text-zinc-900 tabular-nums tracking-tight">{formatTokenAmount(quest.perQualifier, quest.token)}</span>
+                <span className="text-[10px] font-mono font-semibold text-zinc-400">{tokenInfo.symbol}</span>
               </div>
               <span className="text-[10px] font-mono text-zinc-300">per qualifier</span>
             </div>

@@ -13,6 +13,9 @@ import {
     CONTRACT_ADDRESSES,
     QUEST_ABI,
     BASE_SEPOLIA_CHAIN_ID,
+    ETH_ADDRESS,
+    getTokenInfo,
+    formatTokenAmount,
 } from "../../../utils/contracts";
 import { formatETH, formatTimeLeft, formatAddress, wagmiConfig } from "../../../utils/web3";
 import { WalletName } from "../../../components/WalletName";
@@ -43,7 +46,6 @@ import {
     Loader2,
     Upload,
     X,
-    X as XIcon,
     CheckCircle2,
     Shield,
     TrendingUp,
@@ -55,12 +57,15 @@ import {
     Gavel,
 } from "lucide-react";
 import ethIcon from "../../../assets/crypto/eth.svg";
+import { VerifierManagement } from "../../../components/quests/VerifierManagement";
+import { getPublicClient } from "@wagmi/core";
 
 interface Quest {
     id: number;
     creator: string;
     title: string;
     description: string;
+    token: string;
     totalAmount: bigint;
     perQualifier: bigint;
     maxQualifiers: number;
@@ -76,7 +81,6 @@ interface Quest {
 interface Entry {
     solver: string;
     ipfsProofCid: string;
-    socialHandle: string;
     timestamp: number;
     status: number;
     feedback: string;
@@ -90,8 +94,6 @@ export default function QuestDetailPage() {
     const { profile } = useAuth();
     const questId = params.id as string;
 
-    const xHandle = profile?.twitter_username ? `@${profile.twitter_username.replace('@', '')}` : '';
-
     const [quest, setQuest] = useState<Quest | null>(null);
     const [entries, setEntries] = useState<Entry[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -99,7 +101,6 @@ export default function QuestDetailPage() {
     const [newEntry, setNewEntry] = useState({
         twitterUrl: "",
         ipfsProofCid: "",
-        socialHandle: "",
         description: "",
     });
     const [uploadedProofImage, setUploadedProofImage] = useState<File | null>(null);
@@ -110,6 +111,7 @@ export default function QuestDetailPage() {
     const [viewingMetadata, setViewingMetadata] = useState<any>(null);
     const [isLoadingViewing, setIsLoadingViewing] = useState(false);
     const [viewingTitle, setViewingTitle] = useState<string>("");
+    const [verifiers, setVerifiers] = useState<string[]>([]);
 
     const { writeContract, data: hash, isPending } = useWriteContract();
     const { isLoading: isConfirming, isSuccess: isConfirmed } =
@@ -136,7 +138,8 @@ export default function QuestDetailPage() {
             });
 
             if (questData) {
-                const [creator, title, description, totalAmount, perQualifier, maxQualifiers, qualifiersCount, deadline, createdAt, resolved, cancelled, requirements] = questData as any;
+                // V2 getQuest: creator, title, description, token, totalAmount, perQualifier, maxQualifiers, qualifiersCount, deadline, createdAt, resolved, cancelled, requirements
+                const [creator, title, description, token, totalAmount, perQualifier, maxQualifiers, qualifiersCount, deadline, createdAt, resolved, cancelled, requirements] = questData as any;
 
                 let imageUrl: string | undefined = undefined;
                 const metadataMatch = description.match(/Metadata: ipfs:\/\/([a-zA-Z0-9]+)/);
@@ -152,7 +155,7 @@ export default function QuestDetailPage() {
                 }
 
                 setQuest({
-                    id: parseInt(questId), creator, title, description, totalAmount, perQualifier,
+                    id: parseInt(questId), creator, title, description, token, totalAmount, perQualifier,
                     maxQualifiers: Number(maxQualifiers), qualifiersCount: Number(qualifiersCount),
                     deadline: Number(deadline), createdAt: Number(createdAt), resolved, cancelled, requirements, imageUrl,
                 });
@@ -172,10 +175,41 @@ export default function QuestDetailPage() {
                         functionName: "getEntry",
                         args: [BigInt(questId), BigInt(i)],
                     });
-                    const [solver, ipfsProofCid, socialHandle, timestamp, status, feedback] = entryData as any;
-                    loadedEntries.push({ solver, ipfsProofCid, socialHandle, timestamp: Number(timestamp), status: Number(status), feedback });
+                    // V2 getEntry: solver, ipfsProofCid, timestamp, status, feedback (no socialHandle)
+                    const [solver, ipfsProofCid, timestamp, status, feedback] = entryData as any;
+                    loadedEntries.push({ solver, ipfsProofCid, timestamp: Number(timestamp), status: Number(status), feedback });
                 }
                 setEntries(loadedEntries);
+
+                // Load verifiers from events
+                try {
+                    const publicClient = getPublicClient(wagmiConfig);
+                    if (publicClient) {
+                        const contractAddr = CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`;
+                        const addedLogs = await publicClient.getLogs({
+                            address: contractAddr,
+                            event: { type: "event", name: "VerifierAdded", inputs: [{ name: "questId", type: "uint256", indexed: true }, { name: "verifier", type: "address", indexed: false }] },
+                            args: { questId: BigInt(questId) },
+                            fromBlock: 0n,
+                        });
+                        const removedLogs = await publicClient.getLogs({
+                            address: contractAddr,
+                            event: { type: "event", name: "VerifierRemoved", inputs: [{ name: "questId", type: "uint256", indexed: true }, { name: "verifier", type: "address", indexed: false }] },
+                            args: { questId: BigInt(questId) },
+                            fromBlock: 0n,
+                        });
+                        const verifierSet = new Set<string>();
+                        for (const log of addedLogs) {
+                            verifierSet.add((log.args as any).verifier.toLowerCase());
+                        }
+                        for (const log of removedLogs) {
+                            verifierSet.delete((log.args as any).verifier.toLowerCase());
+                        }
+                        setVerifiers(Array.from(verifierSet));
+                    }
+                } catch (e) {
+                    console.error("Error loading verifiers:", e);
+                }
             }
         } catch (error) {
             console.error("Error loading quest:", error);
@@ -212,7 +246,7 @@ export default function QuestDetailPage() {
     useEffect(() => {
         if (isConfirmed) {
             loadQuest();
-            setNewEntry({ twitterUrl: "", ipfsProofCid: "", socialHandle: "", description: "" });
+            setNewEntry({ twitterUrl: "", ipfsProofCid: "", description: "" });
             setUploadedProofImage(null);
             setShowSubmitForm(false);
         }
@@ -238,15 +272,10 @@ export default function QuestDetailPage() {
             showAlert({ title: "Missing Proof", description: "Please upload a proof image or enter an IPFS CID" });
             return;
         }
-        if (!xHandle) {
-            showAlert({ title: "X Account Required", description: "Connect your X account on your profile page first." });
-            return;
-        }
 
         try {
             let finalCid = "";
-            
-            // 1. Upload image if present
+
             let imageCid = "";
             if (uploadedProofImage) {
                 setIsUploadingProof(true);
@@ -261,7 +290,6 @@ export default function QuestDetailPage() {
                 }
             }
 
-            // 2. Create metadata JSON
             const submissionMetadata: SubmissionMetadata = {
                 description: newEntry.description || (newEntry.twitterUrl ? `Proof: ${newEntry.twitterUrl}` : ""),
                 deliverables: [],
@@ -271,15 +299,14 @@ export default function QuestDetailPage() {
                 submittedAt: Math.floor(Date.now() / 1000)
             };
 
-            // 3. Upload metadata
             finalCid = await uploadMetadataToIpfs(submissionMetadata);
 
-            const handle = xHandle.replace('@', '');
+            // V2: submitEntry(questId, ipfsCid) - no socialHandle
             writeContract({
                 address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
                 abi: QUEST_ABI,
                 functionName: "submitEntry",
-                args: [BigInt(questId), finalCid, handle],
+                args: [BigInt(questId), finalCid],
             });
         } catch (error) {
             console.error("Error submitting entry:", error);
@@ -316,9 +343,12 @@ export default function QuestDetailPage() {
     const canSubmit = !isExpired && !quest.resolved && !quest.cancelled && !isFull && !userEntry;
     const progress = Math.min((quest.qualifiersCount / quest.maxQualifiers) * 100, 100);
 
-    const ethAmount = Number(quest.perQualifier) / 1e18;
-    const totalEthAmount = Number(quest.totalAmount) / 1e18;
-    const usdAmount = ethPrice > 0 ? convertEthToUSD(ethAmount, ethPrice) : 0;
+    const tokenInfo = getTokenInfo(quest.token);
+    const isETH = quest.token === ETH_ADDRESS;
+    const rewardDisplay = formatTokenAmount(quest.perQualifier, quest.token);
+    const totalDisplay = formatTokenAmount(quest.totalAmount, quest.token);
+    const ethAmount = isETH ? Number(quest.perQualifier) / 1e18 : 0;
+    const usdAmount = isETH && ethPrice > 0 ? convertEthToUSD(ethAmount, ethPrice) : 0;
 
     const getStatusConfig = () => {
         if (quest.cancelled) return { label: "Cancelled", color: "bg-stone-400", textColor: "text-stone-500", bgColor: "bg-stone-100" };
@@ -396,9 +426,9 @@ export default function QuestDetailPage() {
                                     <span className="text-amber-100 text-xs font-medium uppercase tracking-wider">Reward Per User</span>
                                 </div>
                                 <div className="flex items-center gap-3 mb-1">
-                                    <Image src={ethIcon} alt="ETH" width={32} height={32} className="flex-shrink-0" />
-                                    <span className="text-4xl font-bold tabular-nums">{ethAmount.toFixed(4)}</span>
-                                    <span className="text-xl text-white/60">ETH</span>
+                                    <span className="text-2xl flex-shrink-0">{isETH ? "⟠" : "🪙"}</span>
+                                    <span className="text-4xl font-bold tabular-nums">{rewardDisplay}</span>
+                                    <span className="text-xl text-white/60">{tokenInfo.symbol}</span>
                                 </div>
                                 {ethPrice > 0 && (
                                     <p className="text-amber-100 text-sm flex items-center gap-1 mt-2">
@@ -447,7 +477,7 @@ export default function QuestDetailPage() {
                                             <Zap className="size-3.5 text-violet-500" />
                                             <span className="text-[10px] text-stone-400 uppercase tracking-wider">Pool</span>
                                         </div>
-                                        <p className="text-sm font-bold text-stone-800">{totalEthAmount.toFixed(3)} ETH</p>
+                                        <p className="text-sm font-bold text-stone-800">{totalDisplay} {tokenInfo.symbol}</p>
                                     </div>
                                 </div>
                             </div>
@@ -474,11 +504,11 @@ export default function QuestDetailPage() {
                                 <div className="space-y-3 text-sm">
                                     <div className="flex justify-between">
                                         <span className="text-stone-500">Total Budget</span>
-                                        <span className="font-semibold text-stone-800">{totalEthAmount.toFixed(4)} ETH</span>
+                                        <span className="font-semibold text-stone-800">{totalDisplay} {tokenInfo.symbol}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-stone-500">Per Qualifier</span>
-                                        <span className="font-semibold text-stone-800">{ethAmount.toFixed(4)} ETH</span>
+                                        <span className="font-semibold text-stone-800">{rewardDisplay} {tokenInfo.symbol}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-stone-500">Created</span>
@@ -565,7 +595,7 @@ export default function QuestDetailPage() {
                                     </div>
                                     {userEntry.status === 1 && (
                                         <div className="text-right">
-                                            <p className="text-2xl font-bold text-amber-600">{ethAmount.toFixed(4)} ETH</p>
+                                            <p className="text-2xl font-bold text-amber-600">{rewardDisplay} {tokenInfo.symbol}</p>
                                             {ethPrice > 0 && <p className="text-sm text-stone-500">{formatUSD(usdAmount)}</p>}
                                         </div>
                                     )}
@@ -643,15 +673,9 @@ export default function QuestDetailPage() {
                                                             }`}>
                                                                 {entry.status === 1 ? "Approved" : entry.status === 2 ? "Rejected" : "Pending Review"}
                                                             </span>
-                                                            <a 
-                                                                href={`https://x.com/${entry.socialHandle}`} 
-                                                                target="_blank" 
-                                                                rel="noopener noreferrer"
-                                                                className="text-xs text-amber-600 hover:underline flex items-center gap-1"
-                                                            >
-                                                                <XIcon className="size-3 text-black" />
-                                                                @{entry.socialHandle}
-                                                            </a>
+                                                            <span className="text-xs text-stone-400">
+                                                                {new Date(entry.timestamp * 1000).toLocaleDateString()}
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -713,13 +737,21 @@ export default function QuestDetailPage() {
                                             <div>
                                                 <p className="text-sm font-semibold text-amber-800">Review Pending Entries</p>
                                                 <p className="text-xs text-amber-600 mt-1">
-                                                    Click "Approve" to reward the participant with {ethAmount.toFixed(4)} ETH, or "Reject" if their submission doesn't meet the requirements.
+                                                    Click "Approve" to reward the participant with {rewardDisplay} {tokenInfo.symbol}, or "Reject" if their submission doesn't meet the requirements.
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
                                 )}
                             </div>
+                        )}
+                        {/* Verifier Management — only for quest creator */}
+                        {isCreator && !quest.resolved && !quest.cancelled && (
+                            <VerifierManagement
+                                questId={quest.id}
+                                verifiers={verifiers}
+                                onUpdate={loadQuest}
+                            />
                         )}
                     </div>
                 </div>
@@ -738,56 +770,40 @@ export default function QuestDetailPage() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 mt-4">
-                        {!xHandle ? (
-                            <div className="bg-amber-50 border border-amber-200 p-4 text-center">
-                                <p className="text-sm font-medium text-amber-800 mb-2">X account required to submit</p>
-                                <p className="text-xs text-amber-600 mb-3">Connect your X account on your profile page first.</p>
-                                <Button onClick={() => router.push('/profile')} variant="outline" size="sm" className="border-amber-300 text-amber-700">
-                                    Go to Profile
-                                </Button>
-                            </div>
-                        ) : (
-                            <>
-                                <div>
-                                    <label className="text-sm font-medium text-stone-700 mb-1.5 block">X Account</label>
-                                    <Input value={xHandle} readOnly className="h-10 border-stone-200 bg-stone-50 text-stone-500" />
+                        <div>
+                            <label className="text-sm font-medium text-stone-700 mb-1.5 block">Link URL (Optional)</label>
+                            <Input placeholder="https://..." value={newEntry.twitterUrl} onChange={(e) => setNewEntry({ ...newEntry, twitterUrl: e.target.value })} className="h-10 border-stone-200" />
+                        </div>
+                        <div>
+                            <label className="text-sm font-medium text-stone-700 mb-1.5 block">Proof Image *</label>
+                            {!uploadedProofImage ? (
+                                <div className="border-2 border-dashed border-stone-200 hover:border-amber-300 bg-stone-50 p-6 text-center cursor-pointer transition-colors">
+                                    <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && setUploadedProofImage(e.target.files[0])} className="hidden" id="proof-upload" />
+                                    <label htmlFor="proof-upload" className="cursor-pointer">
+                                        <Upload className="size-6 mx-auto mb-2 text-stone-400" />
+                                        <p className="text-sm text-stone-600">Click to upload</p>
+                                    </label>
                                 </div>
-                                <div>
-                                    <label className="text-sm font-medium text-stone-700 mb-1.5 block">X Post URL (Optional)</label>
-                                    <Input placeholder="https://x.com/..." value={newEntry.twitterUrl} onChange={(e) => setNewEntry({ ...newEntry, twitterUrl: e.target.value })} className="h-10 border-stone-200" />
+                            ) : (
+                                <div className="relative">
+                                    <img src={URL.createObjectURL(uploadedProofImage)} alt="Preview" className="w-full h-32 object-cover border border-stone-200" />
+                                    <Button type="button" variant="destructive" size="icon" onClick={() => setUploadedProofImage(null)} className="absolute -top-2 -right-2 size-6">
+                                        <X className="size-3" />
+                                    </Button>
                                 </div>
-                                <div>
-                                    <label className="text-sm font-medium text-stone-700 mb-1.5 block">Proof Image *</label>
-                                    {!uploadedProofImage ? (
-                                        <div className="border-2 border-dashed border-stone-200 hover:border-amber-300 bg-stone-50 p-6 text-center cursor-pointer transition-colors">
-                                            <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && setUploadedProofImage(e.target.files[0])} className="hidden" id="proof-upload" />
-                                            <label htmlFor="proof-upload" className="cursor-pointer">
-                                                <Upload className="size-6 mx-auto mb-2 text-stone-400" />
-                                                <p className="text-sm text-stone-600">Click to upload</p>
-                                            </label>
-                                        </div>
-                                    ) : (
-                                        <div className="relative">
-                                            <img src={URL.createObjectURL(uploadedProofImage)} alt="Preview" className="w-full h-32 object-cover border border-stone-200" />
-                                            <Button type="button" variant="destructive" size="icon" onClick={() => setUploadedProofImage(null)} className="absolute -top-2 -right-2 size-6">
-                                                <X className="size-3" />
-                                            </Button>
-                                        </div>
-                                    )}
-                                </div>
-                                <div>
-                                    <label className="text-sm font-medium text-stone-700 mb-1.5 block">Notes (Optional)</label>
-                                    <Textarea placeholder="Any additional information..." value={newEntry.description} onChange={(e) => setNewEntry({ ...newEntry, description: e.target.value })} rows={2} className="resize-none border-stone-200" />
-                                </div>
-                                <Button
-                                    onClick={submitEntry}
-                                    disabled={(!uploadedProofImage && !newEntry.ipfsProofCid.trim()) || isPending || isConfirming || isUploadingProof}
-                                    className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold h-11"
-                                >
-                                    {isUploadingProof ? "Uploading..." : isPending || isConfirming ? "Submitting..." : "Submit Entry"}
-                                </Button>
-                            </>
-                        )}
+                            )}
+                        </div>
+                        <div>
+                            <label className="text-sm font-medium text-stone-700 mb-1.5 block">Notes (Optional)</label>
+                            <Textarea placeholder="Any additional information..." value={newEntry.description} onChange={(e) => setNewEntry({ ...newEntry, description: e.target.value })} rows={2} className="resize-none border-stone-200" />
+                        </div>
+                        <Button
+                            onClick={submitEntry}
+                            disabled={(!uploadedProofImage && !newEntry.ipfsProofCid.trim()) || isPending || isConfirming || isUploadingProof}
+                            className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold h-11"
+                        >
+                            {isUploadingProof ? "Uploading..." : isPending || isConfirming ? "Submitting..." : "Submit Entry"}
+                        </Button>
                     </div>
                 </DialogContent>
             </Dialog>
