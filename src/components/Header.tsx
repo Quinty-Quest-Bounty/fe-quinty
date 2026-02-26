@@ -8,7 +8,9 @@ import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAccount } from "wagmi";
 import LoginButton from "./auth/LoginButton";
+import { WithdrawalBanner } from "./WithdrawalBanner";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { getInitials } from "@/utils/format";
 import UserMenu from "./auth/UserMenu";
@@ -17,6 +19,7 @@ export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const { profile, loading } = useAuth();
+  const { isConnected } = useAccount();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -106,6 +109,9 @@ export default function Header() {
           </div>
         </div>
       </header>
+
+      {/* Withdrawal Banner */}
+      {isMounted && isConnected && <WithdrawalBanner />}
 
       {/* Mobile menu */}
       <AnimatePresence>

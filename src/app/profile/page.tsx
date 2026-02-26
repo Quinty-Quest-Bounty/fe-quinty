@@ -441,7 +441,7 @@ export default function ProfilePage() {
                                                     <div className="mt-auto pt-3 border-t border-zinc-100 flex items-end justify-between">
                                                         <div>
                                                             <div className="flex items-baseline gap-1">
-                                                                <span className="text-lg font-bold text-zinc-900 tabular-nums tracking-tight">{formatETH(bounty.amount)}</span>
+                                                                <span className="text-lg font-bold text-zinc-900 tabular-nums tracking-tight">{formatETH(bounty.totalAmount)}</span>
                                                                 <span className="text-[10px] font-mono font-semibold text-zinc-400">ETH</span>
                                                             </div>
                                                         </div>

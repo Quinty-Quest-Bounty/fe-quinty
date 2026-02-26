@@ -14,6 +14,10 @@ import {
   QUINTY_ABI,
   BASE_SEPOLIA_CHAIN_ID,
   BountyStatus,
+  ETH_ADDRESS,
+  ERC20_ABI,
+  getTokenInfo,
+  formatTokenAmount,
 } from "../../../utils/contracts";
 import {
   formatETH,
@@ -67,7 +71,6 @@ import ethIcon from "../../../assets/crypto/eth.svg";
 interface Submission {
   submitter: string;
   ipfsCid: string;
-  socialHandle: string;
   deposit: bigint;
   timestamp: bigint;
 }
@@ -77,13 +80,13 @@ interface Bounty {
   creator: string;
   title: string;
   description: string;
-  amount: bigint;
+  token: string;
+  totalAmount: bigint;
+  prizes: bigint[];
   openDeadline: bigint;
   judgingDeadline: bigint;
   slashPercent: bigint;
   status: BountyStatus;
-  selectedWinner: string;
-  selectedSubmissionId: bigint;
   submissionCount: number;
   totalDeposits: bigint;
   submissions: Submission[];
@@ -107,12 +110,9 @@ export default function BountyDetailPage() {
   const { profile } = useAuth();
   const bountyId = params.id as string;
 
-  const xHandle = profile?.twitter_username ? `@${profile.twitter_username.replace('@', '')}` : '';
-
   const [bounty, setBounty] = useState<Bounty | null>(null);
   const [metadata, setMetadata] = useState<BountyMetadata | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [socialHandle, setSocialHandle] = useState("");
   const [submissionText, setSubmissionText] = useState("");
   const [copied, setCopied] = useState(false);
   const [viewingCid, setViewingCid] = useState<string | null>(null);
@@ -122,7 +122,7 @@ export default function BountyDetailPage() {
   const [uploadedSolutionImage, setUploadedSolutionImage] = useState<File | null>(null);
   const [isUploadingSolution, setIsUploadingSolution] = useState(false);
   const [requiredDeposit, setRequiredDeposit] = useState<bigint>(BigInt(0));
-  const [selectedWinnerId, setSelectedWinnerId] = useState<number | null>(null);
+  const [selectedWinnerIds, setSelectedWinnerIds] = useState<number[]>([]);
   const [hasUserSubmitted, setHasUserSubmitted] = useState(false);
   const [ethPrice, setEthPrice] = useState<number>(0);
   const [showSubmitForm, setShowSubmitForm] = useState(false);
@@ -152,7 +152,8 @@ export default function BountyDetailPage() {
       }) as any[];
 
       if (bountyData) {
-        const [creator, title, description, amount, openDeadline, judgingDeadline, slashPercent, status, selectedWinner, selectedSubmissionId, submissionCount, totalDeposits] = bountyData;
+        // V3 getBounty: creator, title, description, token, totalAmount, prizes[], openDeadline, judgingDeadline, slashPercent, status, submissionCount, totalDeposits
+        const [creator, title, description, token, totalAmount, prizes, openDeadline, judgingDeadline, slashPercent, status, submissionCount, totalDeposits] = bountyData;
 
         const submissions = await readContract(wagmiConfig, {
           address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
@@ -183,8 +184,9 @@ export default function BountyDetailPage() {
         const metadataCid = metadataMatch ? metadataMatch[1] : undefined;
 
         setBounty({
-          id: parseInt(bountyId), creator, title, description, amount, openDeadline, judgingDeadline, slashPercent,
-          status: Number(status) as BountyStatus, selectedWinner, selectedSubmissionId,
+          id: parseInt(bountyId), creator, title, description, token, totalAmount, prizes: prizes as bigint[],
+          openDeadline, judgingDeadline, slashPercent,
+          status: Number(status) as BountyStatus,
           submissionCount: Number(submissionCount), totalDeposits, submissions: submissions as Submission[], metadataCid,
         });
 
@@ -245,17 +247,11 @@ export default function BountyDetailPage() {
       showAlert({ title: "Missing Information", description: "Please upload a solution image" });
       return;
     }
-    if (!xHandle) {
-      showAlert({ title: "X Account Required", description: "Connect your X account on your profile page first." });
-      return;
-    }
 
     try {
       setIsUploadingSolution(true);
-      // 1. Upload image
       const solutionImageCid = await uploadToIpfs(uploadedSolutionImage, { bountyId, type: "bounty-solution" });
-      
-      // 2. Create metadata
+
       const submissionMetadata: SubmissionMetadata = {
         description: submissionText,
         deliverables: [],
@@ -264,22 +260,47 @@ export default function BountyDetailPage() {
         submittedAt: Math.floor(Date.now() / 1000)
       };
 
-      // 3. Upload metadata
       const metadataCid = await uploadMetadataToIpfs(submissionMetadata);
-      
-      const handle = xHandle.replace('@', '');
 
-      writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-        abi: QUINTY_ABI,
-        functionName: "submitToBounty",
-        args: [BigInt(bountyId), metadataCid, handle],
-        value: requiredDeposit,
-      });
+      if (bounty.token !== ETH_ADDRESS) {
+        // ERC-20 deposit: approve then submit
+        const contractAddress = CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`;
+        const allowance = await readContract(wagmiConfig, {
+          address: bounty.token as `0x${string}`,
+          abi: ERC20_ABI,
+          functionName: "allowance",
+          args: [address!, contractAddress],
+        }) as bigint;
+
+        if (allowance < requiredDeposit) {
+          const { writeContract: writeContractAction, waitForTransactionReceipt } = await import("wagmi/actions");
+          const approveHash = await writeContractAction(wagmiConfig, {
+            address: bounty.token as `0x${string}`,
+            abi: ERC20_ABI,
+            functionName: "approve",
+            args: [contractAddress, requiredDeposit],
+          });
+          await waitForTransactionReceipt(wagmiConfig, { hash: approveHash });
+        }
+
+        writeContract({
+          address: contractAddress,
+          abi: QUINTY_ABI,
+          functionName: "submitToBounty",
+          args: [BigInt(bountyId), metadataCid],
+        });
+      } else {
+        writeContract({
+          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+          abi: QUINTY_ABI,
+          functionName: "submitToBounty",
+          args: [BigInt(bountyId), metadataCid],
+          value: requiredDeposit,
+        });
+      }
 
       setUploadedSolutionImage(null);
       setSubmissionText("");
-      setSocialHandle("");
       setShowSubmitForm(false);
     } catch (error) {
       console.error("Error submitting solution:", error);
@@ -289,13 +310,13 @@ export default function BountyDetailPage() {
     }
   };
 
-  const selectWinner = async () => {
-    if (selectedWinnerId === null) return;
+  const selectWinners = async (submissionIds: number[]) => {
+    if (submissionIds.length === 0) return;
     writeContract({
       address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
       abi: QUINTY_ABI,
-      functionName: "selectWinner",
-      args: [BigInt(bountyId), BigInt(selectedWinnerId)],
+      functionName: "selectWinners",
+      args: [BigInt(bountyId), submissionIds.map(id => BigInt(id))],
     });
   };
 
@@ -348,9 +369,12 @@ export default function BountyDetailPage() {
   const canSlash = phase === "SLASH_PENDING" && bounty.submissionCount > 0;
   const canRefund = phase === "SLASH_PENDING" && bounty.submissionCount === 0 && isCreator;
 
-  const ethAmount = Number(bounty.amount) / 1e18;
-  const usdAmount = ethPrice > 0 ? convertEthToUSD(ethAmount, ethPrice) : 0;
-  const depositEth = Number(requiredDeposit) / 1e18;
+  const tokenInfo = getTokenInfo(bounty.token);
+  const isETH = bounty.token === ETH_ADDRESS;
+  const displayAmount = formatTokenAmount(bounty.totalAmount, bounty.token);
+  const depositDisplay = formatTokenAmount(requiredDeposit, bounty.token);
+  const ethAmount = isETH ? Number(bounty.totalAmount) / 1e18 : 0;
+  const usdAmount = isETH && ethPrice > 0 ? convertEthToUSD(ethAmount, ethPrice) : 0;
 
   const getPhaseConfig = () => {
     switch (phase) {
@@ -438,15 +462,24 @@ export default function BountyDetailPage() {
                   <span className="text-emerald-100 text-xs font-medium uppercase tracking-wider">Bounty Reward</span>
                 </div>
                 <div className="flex items-center gap-3 mb-1">
-                  <Image src={ethIcon} alt="ETH" width={32} height={32} className="flex-shrink-0" />
-                  <span className="text-4xl font-bold tabular-nums">{ethAmount.toFixed(4)}</span>
-                  <span className="text-xl text-white/60">ETH</span>
+                  <span className="text-2xl flex-shrink-0">{isETH ? "⟠" : "🪙"}</span>
+                  <span className="text-4xl font-bold tabular-nums">{displayAmount}</span>
+                  <span className="text-xl text-white/60">{tokenInfo.symbol}</span>
                 </div>
-                {ethPrice > 0 && (
+                {isETH && ethPrice > 0 && (
                   <p className="text-emerald-100 text-sm flex items-center gap-1 mt-2">
                     <TrendingUp className="size-3" />
                     ≈ {formatUSD(usdAmount)}
                   </p>
+                )}
+                {bounty.prizes.length > 1 && (
+                  <div className="mt-2 space-y-0.5">
+                    {bounty.prizes.map((prize, i) => (
+                      <p key={i} className="text-xs text-emerald-100">
+                        {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i+1}`} {formatTokenAmount(prize, bounty.token)} {tokenInfo.symbol}
+                      </p>
+                    ))}
+                  </div>
                 )}
 
                 {/* CTA */}
@@ -518,10 +551,7 @@ export default function BountyDetailPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-stone-500">Deposit</span>
                   <div className="text-right">
-                    <span className="text-sm font-semibold text-stone-800">{depositEth.toFixed(4)} ETH</span>
-                    {ethPrice > 0 && (
-                      <span className="text-[10px] text-stone-400 ml-1">({formatUSD(convertEthToUSD(depositEth, ethPrice))})</span>
-                    )}
+                    <span className="text-sm font-semibold text-stone-800">{depositDisplay} {tokenInfo.symbol}</span>
                   </div>
                 </div>
                 {metadata?.skills && metadata.skills.length > 0 && (
@@ -661,20 +691,16 @@ export default function BountyDetailPage() {
               )}
             </div>
 
-            {/* Winner Display */}
-            {bounty.status === BountyStatus.RESOLVED && bounty.selectedWinner !== "0x0000000000000000000000000000000000000000" && (
+            {/* Winner Display (V3 - resolved bounty) */}
+            {bounty.status === BountyStatus.RESOLVED && (
               <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="size-12 bg-amber-100 flex items-center justify-center text-2xl">🏆</div>
-                    <div>
-                      <p className="text-xs text-amber-600 font-medium uppercase tracking-wider">Winner</p>
-                      <p className="font-bold text-stone-800"><WalletName address={bounty.selectedWinner} /></p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-[#0EA885]">{ethAmount.toFixed(4)} ETH</p>
-                    {ethPrice > 0 && <p className="text-sm text-stone-500">{formatUSD(usdAmount)}</p>}
+                <div className="flex items-center gap-4 mb-2">
+                  <div className="size-12 bg-amber-100 flex items-center justify-center text-2xl">🏆</div>
+                  <div>
+                    <p className="text-xs text-amber-600 font-medium uppercase tracking-wider">
+                      {bounty.prizes.length > 1 ? "Winners Selected" : "Winner Selected"}
+                    </p>
+                    <p className="text-lg font-bold text-[#0EA885]">{displayAmount} {tokenInfo.symbol} distributed</p>
                   </div>
                 </div>
               </div>
@@ -701,65 +727,55 @@ export default function BountyDetailPage() {
                   Submissions ({bounty.submissions.length})
                 </h2>
                 <div className="space-y-3">
-                  {bounty.submissions.map((sub, index) => {
-                    const isWinner = bounty.selectedWinner.toLowerCase() === sub.submitter.toLowerCase() && Number(bounty.selectedSubmissionId) === index;
-                    return (
-                      <div
-                        key={index}
-                        className={`flex items-center justify-between p-4 border transition-all ${
-                          isWinner ? "bg-amber-50 border-amber-200" : "border-stone-100 hover:border-stone-200"
-                        } ${canSelectWinner ? "cursor-pointer" : ""} ${selectedWinnerId === index ? "ring-2 ring-[#0EA885]" : ""}`}
-                        onClick={() => canSelectWinner && setSelectedWinnerId(selectedWinnerId === index ? null : index)}
-                      >
-                        <div className="flex items-center gap-3">
-                          {canSelectWinner && (
-                            <div className={`size-5 border-2 flex items-center justify-center ${selectedWinnerId === index ? "border-[#0EA885] bg-[#0EA885]" : "border-stone-300"}`}>
-                              {selectedWinnerId === index && <Check className="size-3 text-white" />}
-                            </div>
-                          )}
-                          {isWinner && <span className="text-xs font-semibold bg-[#0EA885] text-white px-2 py-0.5">🏆 Winner</span>}
-                          <div>
-                            <p className="text-sm font-medium text-stone-700">
-                                Submission by <WalletName address={sub.submitter} />
-                            </p>
-                            <div className="flex items-center gap-2 mt-0.5">
-                                <a 
-                                    href={`https://x.com/${sub.socialHandle}`} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="text-xs text-[#0EA885] hover:underline flex items-center gap-1"
-                                >
-                                    <XIcon className="size-3 text-black" />
-                                    @{sub.socialHandle}
-                                </a>
-                                <span className="text-stone-300">•</span>
-                                <p className="text-xs text-stone-400">{formatETH(sub.deposit)} ETH deposit</p>
-                            </div>
-                          </div>
+                  {bounty.submissions.map((sub, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 border border-stone-100 hover:border-stone-200 transition-all"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div>
+                          <p className="text-sm font-medium text-stone-700">
+                              Submission by <WalletName address={sub.submitter} />
+                          </p>
+                          <p className="text-xs text-stone-400 mt-0.5">
+                            {formatTokenAmount(sub.deposit, bounty.token)} {tokenInfo.symbol} deposit
+                          </p>
                         </div>
-                        <Button
-                          variant="outline" size="sm"
-                          onClick={(e) => { e.stopPropagation(); setViewingCid(sub.ipfsCid); setViewingTitle(`Submission by ${formatAddress(sub.submitter)}`); }}
-                          className="border-stone-200 text-stone-600 h-8"
-                        >
-                          <ExternalLink className="size-3 mr-1" /> View
-                        </Button>
                       </div>
-                    );
-                  })}
+                      <Button
+                        variant="outline" size="sm"
+                        onClick={(e) => { e.stopPropagation(); setViewingCid(sub.ipfsCid); setViewingTitle(`Submission by ${formatAddress(sub.submitter)}`); }}
+                        className="border-stone-200 text-stone-600 h-8"
+                      >
+                        <ExternalLink className="size-3 mr-1" /> View
+                      </Button>
+                    </div>
+                  ))}
                 </div>
-                {canSelectWinner && selectedWinnerId !== null && (
-                  <Button onClick={selectWinner} disabled={isPending || isConfirming} className="w-full bg-[#0EA885] hover:bg-[#0c8a6f] text-white font-semibold h-11 mt-4">
-                    <Trophy className="size-4 mr-2" /> Select as Winner
-                  </Button>
-                )}
+                {/* Multi-winner selection via DragToRank */}
                 {canSelectWinner && (
-                  <Alert className="mt-4 border-amber-100 bg-amber-50">
-                    <Gavel className="size-4 text-amber-600" />
-                    <AlertDescription className="text-amber-700 text-sm">
-                      Select a winner before {new Date(Number(bounty.judgingDeadline) * 1000).toLocaleString()} or be slashed.
-                    </AlertDescription>
-                  </Alert>
+                  <>
+                    <div className="mt-4 pt-4 border-t border-stone-100">
+                      {(() => {
+                        const { DragToRank } = require("../../../components/bounties/DragToRank");
+                        return (
+                          <DragToRank
+                            submissions={bounty.submissions}
+                            prizes={bounty.prizes}
+                            token={bounty.token}
+                            onSelectWinners={selectWinners}
+                            disabled={isPending || isConfirming}
+                          />
+                        );
+                      })()}
+                    </div>
+                    <Alert className="mt-4 border-amber-100 bg-amber-50">
+                      <Gavel className="size-4 text-amber-600" />
+                      <AlertDescription className="text-amber-700 text-sm">
+                        Select winner(s) before {new Date(Number(bounty.judgingDeadline) * 1000).toLocaleString()} or be slashed.
+                      </AlertDescription>
+                    </Alert>
+                  </>
                 )}
               </div>
             )}
@@ -776,24 +792,11 @@ export default function BountyDetailPage() {
               Submit Solution
             </DialogTitle>
             <DialogDescription>
-              Deposit {depositEth.toFixed(4)} ETH • Refunded when winner selected
+              Deposit {depositDisplay} {tokenInfo.symbol} • Refunded when winner selected
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            {!xHandle ? (
-              <div className="bg-amber-50 border border-amber-200 p-4 text-center">
-                <p className="text-sm font-medium text-amber-800 mb-2">X account required to submit</p>
-                <p className="text-xs text-amber-600 mb-3">Connect your X account on your profile page first.</p>
-                <Button onClick={() => router.push('/profile')} variant="outline" size="sm" className="border-amber-300 text-amber-700">
-                  Go to Profile
-                </Button>
-              </div>
-            ) : (
               <>
-                <div>
-                  <label className="text-sm font-medium text-stone-700 mb-1.5 block">X Account</label>
-                  <Input value={xHandle} readOnly className="h-10 border-stone-200 bg-stone-50 text-stone-500" />
-                </div>
                 <div>
                   <label className="text-sm font-medium text-stone-700 mb-1.5 block">Description / Notes</label>
                   <Textarea 
@@ -828,10 +831,9 @@ export default function BountyDetailPage() {
                   disabled={isPending || isConfirming || isUploadingSolution || !uploadedSolutionImage}
                   className="w-full bg-[#0EA885] hover:bg-[#0c8a6f] text-white font-semibold h-11"
                 >
-                  {isUploadingSolution ? "Uploading..." : isPending || isConfirming ? "Submitting..." : `Submit (${depositEth.toFixed(4)} ETH)`}
+                  {isUploadingSolution ? "Uploading..." : isPending || isConfirming ? "Submitting..." : `Submit (${depositDisplay} ${tokenInfo.symbol})`}
                 </Button>
               </>
-            )}
           </div>
         </DialogContent>
       </Dialog>

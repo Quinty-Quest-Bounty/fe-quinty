@@ -38,7 +38,7 @@ export function BountyQuickView({ isOpen, onOpenChange, bounty, metadata, onView
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <div className="absolute bottom-6 left-8 right-8">
             <h2 className="text-2xl font-bold text-white mb-1">{metadata?.title || bounty.title || "Bounty Details"}</h2>
-            <p className="text-white/80 text-sm">Bounty #{bounty.id} • {formatETH(bounty.amount)} ETH</p>
+            <p className="text-white/80 text-sm">Bounty #{bounty.id} • {formatETH(bounty.totalAmount)} ETH</p>
           </div>
         </div>
 
@@ -46,7 +46,7 @@ export function BountyQuickView({ isOpen, onOpenChange, bounty, metadata, onView
           <div className="grid grid-cols-4 gap-4">
             <div className="p-4 bg-slate-50 border border-slate-100">
               <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Reward</p>
-              <p className="text-lg font-black text-[#0EA885]">{formatETH(bounty.amount)} ETH</p>
+              <p className="text-lg font-black text-[#0EA885]">{formatETH(bounty.totalAmount)} ETH</p>
             </div>
             <div className="p-4 bg-slate-50 border border-slate-100">
               <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Submissions</p>

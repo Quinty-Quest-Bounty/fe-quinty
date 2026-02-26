@@ -10,6 +10,7 @@ export interface Quest {
     creator: string;
     title: string;
     description: string;
+    token: string;           // address(0) for ETH, token address for ERC-20
     totalAmount: bigint;
     perQualifier: bigint;
     maxQualifiers: number;
@@ -26,7 +27,6 @@ export interface Quest {
 export interface Entry {
     solver: string;
     ipfsProofCid: string;
-    socialHandle: string;
     timestamp: number;
     status: number; // 0: Pending, 1: Approved, 2: Rejected
     feedback: string;
@@ -65,10 +65,12 @@ export function useQuests() {
 
                         if (!questData) return null;
 
+                        // V2 getQuest returns: creator, title, description, token, totalAmount, perQualifier, maxQualifiers, qualifiersCount, deadline, createdAt, resolved, cancelled, requirements
                         const [
                             creator,
                             title,
                             description,
+                            token,
                             totalAmount,
                             perQualifier,
                             maxQualifiers,
@@ -87,7 +89,6 @@ export function useQuests() {
                             args: [BigInt(id)],
                         });
 
-                        // Extract metadata CID from description (same pattern as bounties)
                         let imageUrl = "";
                         let questType: "development" | "design" | "marketing" | "research" | "other" | undefined;
                         const metadataMatch = description.match(/Metadata: ipfs:\/\/([a-zA-Z0-9]+)/);
@@ -95,10 +96,8 @@ export function useQuests() {
                             try {
                                 const metadata = await fetchMetadataFromIpfs(metadataMatch[1]) as QuestMetadata;
                                 if (metadata.images && metadata.images.length > 0) {
-                                    // The image is stored as a CID, format it as a full URL
                                     imageUrl = formatIpfsUrl(metadata.images[0]);
                                 }
-                                // Extract questType from metadata
                                 if (metadata.questType) {
                                     questType = metadata.questType;
                                 }
@@ -106,7 +105,6 @@ export function useQuests() {
                                 console.error(`Error fetching quest ${id} metadata:`, e);
                             }
                         } else {
-                            // Fallback: check for old Image: ipfs:// format
                             const oldImageMatch = description.match(/Image: ipfs:\/\/([^\s\n]+)/);
                             if (oldImageMatch) {
                                 imageUrl = formatIpfsUrl(oldImageMatch[1]);
@@ -119,6 +117,7 @@ export function useQuests() {
                                 creator,
                                 title,
                                 description,
+                                token,
                                 totalAmount,
                                 perQualifier,
                                 maxQualifiers: Number(maxQualifiers),
