@@ -54,7 +54,7 @@ export default function LinkWalletPage() {
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="max-w-md w-full">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center bg-green-100">
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
             <CardTitle>Wallet Already Linked!</CardTitle>
@@ -87,7 +87,7 @@ export default function LinkWalletPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="max-w-md w-full">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center bg-slate-100">
             <Wallet className="h-8 w-8 text-slate-600" />
           </div>
           <CardTitle>Link Your Wallet</CardTitle>
@@ -97,13 +97,13 @@ export default function LinkWalletPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* User info */}
-          <div className="rounded-lg bg-slate-50 p-4">
+          <div className="bg-slate-50 p-4">
             <p className="text-sm text-slate-600 mb-1">Signed in as:</p>
             <p className="font-medium text-slate-900">{profile.username || profile.email}</p>
           </div>
 
           {/* Info box */}
-          <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+          <div className="border border-blue-200 bg-blue-50 p-4">
             <p className="text-sm text-blue-700">
               Privy will help you create or connect a wallet. Your wallet will be automatically linked to your account.
             </p>

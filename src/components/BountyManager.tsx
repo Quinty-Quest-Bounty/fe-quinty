@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
 import { readContract } from "@wagmi/core";
-import { CONTRACT_ADDRESSES, QUINTY_ABI, BASE_SEPOLIA_CHAIN_ID, BountyStatus } from "../utils/contracts";
+import { CONTRACT_ADDRESSES, QUINTY_ABI, BASE_SEPOLIA_CHAIN_ID, BountyStatus, ETH_ADDRESS, ERC20_ABI, calculatePrizeSplit, parseTokenAmount, getTokenInfo } from "../utils/contracts";
 import { parseETH, wagmiConfig } from "../utils/web3";
 import { uploadMetadataToIpfs, BountyMetadata } from "../utils/ipfs";
 import BountyCard from "./BountyCard";
@@ -26,11 +26,9 @@ export default function BountyManager() {
   const filteredBounties = useMemo(() => {
     return bounties.filter(b => {
       const now = BigInt(Math.floor(Date.now() / 1000));
-      // Active: OPEN or JUDGING phase
       const isActive = b.status === BountyStatus.OPEN || b.status === BountyStatus.JUDGING;
-      // Past: RESOLVED or SLASHED
       const isPast = b.status === BountyStatus.RESOLVED || b.status === BountyStatus.SLASHED;
-      
+
       if (statusFilter === "resolved") return b.status === BountyStatus.RESOLVED;
       if (statusFilter === "slashed") return b.status === BountyStatus.SLASHED;
       if (statusFilter === "judging") return b.status === BountyStatus.JUDGING || (b.status === BountyStatus.OPEN && now > b.openDeadline);
@@ -44,8 +42,6 @@ export default function BountyManager() {
 
   const handleCreateBounty = async (formData: any) => {
     try {
-      console.log("Creating bounty with form data:", formData);
-
       if (!address) {
         alert("Please connect your wallet first");
         return;
@@ -73,30 +69,75 @@ export default function BountyManager() {
         deliverables: formData.deliverables.filter((d: string) => d.trim()),
         skills: formData.skills.filter((s: string) => s.trim()),
         images: formData.images || [],
-        deadline: judgingDeadlineTs, // Use judging deadline as primary deadline for metadata
+        deadline: judgingDeadlineTs,
         bountyType: formData.bountyType,
       };
 
-      console.log("Uploading metadata to IPFS...");
       const metadataCid = await uploadMetadataToIpfs(metadata);
-      console.log("Metadata CID:", metadataCid);
 
-      console.log("Calling smart contract with new params...");
-      console.log("openDeadline:", openDeadlineTs, "judgingDeadline:", judgingDeadlineTs, "slashPercent:", formData.slashPercent);
-      
-      writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-        abi: QUINTY_ABI,
-        functionName: "createBounty",
-        args: [
-          formData.title,
-          `${formData.description}\n\nMetadata: ipfs://${metadataCid}`,
-          BigInt(openDeadlineTs),
-          BigInt(judgingDeadlineTs),
-          BigInt(formData.slashPercent), // Already in basis points from form
-        ],
-        value: parseETH(formData.amount),
-      });
+      const token = formData.token || ETH_ADDRESS;
+      const tokenInfo = getTokenInfo(token);
+      const totalAmount = parseTokenAmount(formData.amount, token);
+      const winnerCount = formData.winnerCount || 1;
+      const prizes = calculatePrizeSplit(totalAmount, winnerCount);
+
+      if (token !== ETH_ADDRESS) {
+        // ERC-20: check allowance and approve if needed
+        const contractAddress = CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`;
+        const allowance = await readContract(wagmiConfig, {
+          address: token as `0x${string}`,
+          abi: ERC20_ABI,
+          functionName: "allowance",
+          args: [address, contractAddress],
+        }) as bigint;
+
+        if (allowance < totalAmount) {
+          // Need approval first
+          const { writeContractAsync } = await import("wagmi/actions").then(m => ({ writeContractAsync: m.writeContract }));
+          const approveHash = await writeContractAsync(wagmiConfig, {
+            address: token as `0x${string}`,
+            abi: ERC20_ABI,
+            functionName: "approve",
+            args: [contractAddress, totalAmount],
+          });
+          // Wait for approval
+          const { waitForTransactionReceipt } = await import("wagmi/actions");
+          await waitForTransactionReceipt(wagmiConfig, { hash: approveHash });
+        }
+
+        // Create bounty without value
+        writeContract({
+          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+          abi: QUINTY_ABI,
+          functionName: "createBounty",
+          args: [
+            formData.title,
+            `${formData.description}\n\nMetadata: ipfs://${metadataCid}`,
+            BigInt(openDeadlineTs),
+            BigInt(judgingDeadlineTs),
+            BigInt(formData.slashPercent),
+            prizes,
+            token as `0x${string}`,
+          ],
+        });
+      } else {
+        // ETH bounty
+        writeContract({
+          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+          abi: QUINTY_ABI,
+          functionName: "createBounty",
+          args: [
+            formData.title,
+            `${formData.description}\n\nMetadata: ipfs://${metadataCid}`,
+            BigInt(openDeadlineTs),
+            BigInt(judgingDeadlineTs),
+            BigInt(formData.slashPercent),
+            prizes,
+            ETH_ADDRESS as `0x${string}`,
+          ],
+          value: totalAmount,
+        });
+      }
     } catch (e: any) {
       console.error("Error creating bounty:", e);
       alert(`Error creating bounty: ${e.message || e}`);
@@ -104,9 +145,9 @@ export default function BountyManager() {
   };
 
   // Action handlers
-  const submitToBounty = async (bountyId: number, ipfsCid: string, socialHandle: string) => {
+  const submitToBounty = async (bountyId: number, ipfsCid: string) => {
     try {
-      // Get required deposit amount (1% of bounty)
+      const bounty = bounties.find(b => b.id === bountyId);
       const depositAmount = await readContract(wagmiConfig, {
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
@@ -114,27 +155,56 @@ export default function BountyManager() {
         args: [BigInt(bountyId)],
       }) as bigint;
 
-      console.log("Submitting with deposit:", depositAmount.toString());
+      if (bounty && bounty.token !== ETH_ADDRESS) {
+        // ERC-20 deposit: approve then submit
+        const contractAddress = CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`;
+        const allowance = await readContract(wagmiConfig, {
+          address: bounty.token as `0x${string}`,
+          abi: ERC20_ABI,
+          functionName: "allowance",
+          args: [address!, contractAddress],
+        }) as bigint;
 
-      writeContract({
-        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-        abi: QUINTY_ABI,
-        functionName: "submitToBounty",
-        args: [BigInt(bountyId), ipfsCid, socialHandle],
-        value: depositAmount,
-      });
+        if (allowance < depositAmount) {
+          const { writeContract: writeContractAction } = await import("wagmi/actions");
+          const approveHash = await writeContractAction(wagmiConfig, {
+            address: bounty.token as `0x${string}`,
+            abi: ERC20_ABI,
+            functionName: "approve",
+            args: [contractAddress, depositAmount],
+          });
+          const { waitForTransactionReceipt } = await import("wagmi/actions");
+          await waitForTransactionReceipt(wagmiConfig, { hash: approveHash });
+        }
+
+        writeContract({
+          address: contractAddress,
+          abi: QUINTY_ABI,
+          functionName: "submitToBounty",
+          args: [BigInt(bountyId), ipfsCid],
+        });
+      } else {
+        // ETH deposit
+        writeContract({
+          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+          abi: QUINTY_ABI,
+          functionName: "submitToBounty",
+          args: [BigInt(bountyId), ipfsCid],
+          value: depositAmount,
+        });
+      }
     } catch (e: any) {
       console.error("Error submitting to bounty:", e);
       alert(`Error: ${e.message || e}`);
     }
   };
 
-  const selectWinner = async (bountyId: number, submissionId: number) => {
+  const selectWinners = async (bountyId: number, submissionIds: number[]) => {
     writeContract({
       address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
       abi: QUINTY_ABI,
-      functionName: "selectWinner",
-      args: [BigInt(bountyId), BigInt(submissionId)],
+      functionName: "selectWinners",
+      args: [BigInt(bountyId), submissionIds.map(id => BigInt(id))],
     });
   };
 
@@ -156,10 +226,8 @@ export default function BountyManager() {
     });
   };
 
-  // Handle transaction confirmation
   useEffect(() => {
     if (isConfirmed) {
-      console.log("Transaction confirmed!");
       refetch();
       if (activeTab === "create") {
         setActiveTab("browse");
@@ -169,7 +237,6 @@ export default function BountyManager() {
 
   return (
     <div className="space-y-10">
-      {/* Unified Header Section */}
       <div className="mb-10 text-center">
         <h1 className="text-3xl font-black text-slate-900 text-balance">Bounties</h1>
         <p className="text-slate-500 mt-1 text-sm font-medium text-pretty">
@@ -178,7 +245,7 @@ export default function BountyManager() {
       </div>
 
       <div className="flex justify-center mb-12">
-        <div className="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200">
+        <div className="inline-flex p-1 bg-slate-100 border border-slate-200">
           {[
             { id: "browse", label: "Browse", icon: LayoutGrid },
             { id: "my-bounties", label: "My Bounties", icon: Users },
@@ -189,7 +256,7 @@ export default function BountyManager() {
               variant={activeTab === tab.id ? "default" : "ghost"}
               size="sm"
               onClick={() => setActiveTab(tab.id as any)}
-              className={`rounded-lg transition-all px-6 ${activeTab === tab.id
+              className={`transition-all px-6 ${activeTab === tab.id
                 ? "bg-white text-slate-900 shadow-sm border border-slate-200"
                 : "text-slate-500 hover:text-slate-900"
                 }`}
@@ -201,7 +268,6 @@ export default function BountyManager() {
         </div>
       </div>
 
-      {/* Content Area */}
       <div className="min-h-[400px]">
         <AnimatePresence mode="wait">
           {activeTab === "create" ? (
@@ -236,12 +302,10 @@ export default function BountyManager() {
                   ? filteredBounties
                   : bounties.filter(b => b.creator.toLowerCase() === address?.toLowerCase());
 
-                console.log(`${activeTab} tab - Showing ${displayBounties.length} bounties`, { address, totalBounties: bounties.length });
-
                 if (displayBounties.length === 0) {
                   return (
                     <div className="text-center py-16">
-                      <div className="inline-flex items-center justify-center size-16 rounded-full bg-slate-100 mb-4">
+                      <div className="inline-flex items-center justify-center size-16 bg-slate-100 mb-4">
                         <Target className="size-8 text-slate-400" />
                       </div>
                       <h3 className="text-lg font-bold text-slate-900 text-balance mb-2">
@@ -269,7 +333,7 @@ export default function BountyManager() {
                         key={b.id}
                         bounty={b}
                         onSubmitToBounty={submitToBounty}
-                        onSelectWinner={selectWinner}
+                        onSelectWinner={(bountyId, subId) => selectWinners(bountyId, [subId])}
                         onTriggerSlash={triggerSlash}
                         onRefundNoSubmissions={refundNoSubmissions}
                       />
@@ -287,7 +351,7 @@ export default function BountyManager() {
                         key={b.id}
                         bounty={b}
                         onSubmitToBounty={submitToBounty}
-                        onSelectWinner={selectWinner}
+                        onSelectWinner={(bountyId, subId) => selectWinners(bountyId, [subId])}
                         onTriggerSlash={triggerSlash}
                         onRefundNoSubmissions={refundNoSubmissions}
                       />

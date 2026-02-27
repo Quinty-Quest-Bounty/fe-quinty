@@ -18,7 +18,7 @@ export function QuestQuickView({ isOpen, onOpenChange, quest, onViewFull }: Ques
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2rem] border border-white/60 bg-white/95 backdrop-blur-2xl shadow-2xl p-0">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border border-white/60 bg-white/95 backdrop-blur-2xl shadow-2xl p-0">
                 <div className="relative h-64 w-full bg-slate-100">
                     {quest.imageUrl ? (
                         <IpfsImage
@@ -40,15 +40,15 @@ export function QuestQuickView({ isOpen, onOpenChange, quest, onViewFull }: Ques
 
                 <div className="p-8 space-y-8">
                     <div className="grid grid-cols-3 gap-4">
-                        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                        <div className="p-4 bg-slate-50 border border-slate-100">
                             <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Reward</p>
                             <p className="text-lg font-black text-purple-600">{formatETH(quest.perQualifier)} ETH</p>
                         </div>
-                        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                        <div className="p-4 bg-slate-50 border border-slate-100">
                             <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Participants</p>
                             <p className="text-lg font-black text-slate-700">{quest.qualifiersCount}/{quest.maxQualifiers}</p>
                         </div>
-                        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                        <div className="p-4 bg-slate-50 border border-slate-100">
                             <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Time Left</p>
                             <p className="text-sm font-bold text-slate-700">{formatTimeLeft(BigInt(quest.deadline))}</p>
                         </div>
@@ -81,10 +81,10 @@ export function QuestQuickView({ isOpen, onOpenChange, quest, onViewFull }: Ques
                     </div>
 
                     <div className="flex gap-4 pt-4">
-                        <Button variant="outline" className="flex-1 h-12 rounded-xl" onClick={() => onOpenChange(false)}>
+                        <Button variant="outline" className="flex-1 h-12" onClick={() => onOpenChange(false)}>
                             Close
                         </Button>
-                        <Button className="flex-1 h-12 rounded-xl bg-purple-600 hover:bg-purple-700 text-white" onClick={onViewFull}>
+                        <Button className="flex-1 h-12 bg-purple-600 hover:bg-purple-700 text-white" onClick={onViewFull}>
                             View Full Details
                         </Button>
                     </div>

@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { User, Wallet, LogOut, Settings } from 'lucide-react';
+import { User, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { formatAddress, getInitials } from '../../utils/format';
 
@@ -34,7 +34,7 @@ export default function UserMenu() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="relative h-10 w-10 rounded-full border border-white/60 bg-white/70 backdrop-blur-sm hover:bg-white/90 transition-all duration-300"
+          className="relative h-10 w-10 border border-white/60 bg-white/70 backdrop-blur-sm hover:bg-white/90 transition-all duration-300"
         >
           <Avatar className="h-10 w-10">
             <AvatarImage src={profile.avatar_url} alt={displayName} />
@@ -68,21 +68,9 @@ export default function UserMenu() {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem onClick={() => router.push('/reputation')}>
+        <DropdownMenuItem onClick={() => router.push('/profile')}>
           <User className="mr-2 h-4 w-4" />
-          <span>Reputation</span>
-        </DropdownMenuItem>
-
-        {!profile.wallet_address && (
-          <DropdownMenuItem onClick={() => router.push('/link-wallet')}>
-            <Wallet className="mr-2 h-4 w-4" />
-            <span>Link Wallet</span>
-          </DropdownMenuItem>
-        )}
-
-        <DropdownMenuItem onClick={() => router.push('/dashboard')}>
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Dashboard</span>
+          <span>Profile</span>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />

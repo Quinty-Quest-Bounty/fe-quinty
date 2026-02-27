@@ -51,7 +51,7 @@ export function CalendarWithPresets({
   ];
 
   return (
-    <div className={cn("rounded-xl border border-border bg-card shadow-sm", className)}>
+    <div className={cn("border border-border bg-card shadow-sm", className)}>
       <div className="flex max-sm:flex-col">
         <div className="relative border-border py-4 max-sm:order-1 max-sm:border-t sm:w-36">
           <div className="h-full border-border sm:border-e">

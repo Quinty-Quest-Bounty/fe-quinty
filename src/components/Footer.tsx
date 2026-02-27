@@ -55,8 +55,8 @@ export function Footer() {
 
         {/* Bottom: Operational & Info */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-400">
-           <div className="flex items-center gap-2 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
-             <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></div>
+           <div className="flex items-center gap-2 bg-gray-50 px-3 py-1 border border-gray-100">
+              <div className="h-1.5 w-1.5 bg-green-500 animate-pulse"></div>
              <span className="font-medium text-gray-500">Operational on Base Sepolia</span>
            </div>
            

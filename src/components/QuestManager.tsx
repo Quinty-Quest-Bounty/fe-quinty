@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from "react";
 import { useAccount, useWriteContract, useChainId } from "wagmi";
-import { CONTRACT_ADDRESSES, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
-import { parseETH } from "../utils/web3";
+import { CONTRACT_ADDRESSES, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID, ETH_ADDRESS, ERC20_ABI, parseTokenAmount, getTokenInfo } from "../utils/contracts";
+import { parseETH, wagmiConfig } from "../utils/web3";
+import { readContract } from "@wagmi/core";
 import { ensureBaseSepoliaNetwork } from "../utils/network";
 import { uploadMetadataToIpfs, QuestMetadata } from "../utils/ipfs";
 import QuestCard from "./QuestCard";
@@ -48,7 +49,10 @@ export default function QuestManager() {
     try {
       console.log("Creating quest with form data:", formData);
       const deadlineTimestamp = Math.floor(new Date(formData.deadline).getTime() / 1000);
-      const perQualifierWei = parseETH(formData.perQualifier);
+      const token = formData.token || ETH_ADDRESS;
+      const perQualifierWei = token === ETH_ADDRESS
+        ? parseETH(formData.perQualifier)
+        : parseTokenAmount(formData.perQualifier, token);
       const totalAmount = perQualifierWei * BigInt(formData.maxQualifiers);
 
       // Create quest metadata with images array (same pattern as bounties)
@@ -64,6 +68,28 @@ export default function QuestManager() {
       // Upload metadata to Pinata
       const metadataCid = await uploadMetadataToIpfs(metadata);
 
+      if (token !== ETH_ADDRESS) {
+        // ERC-20: approve then create
+        const contractAddress = CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`;
+        const allowance = await readContract(wagmiConfig, {
+          address: token as `0x${string}`,
+          abi: ERC20_ABI,
+          functionName: "allowance",
+          args: [address, contractAddress],
+        }) as bigint;
+
+        if (allowance < totalAmount) {
+          const approveHash = await writeContractAsync({
+            address: token as `0x${string}`,
+            abi: ERC20_ABI,
+            functionName: "approve",
+            args: [contractAddress, totalAmount],
+          });
+          const { waitForTransactionReceipt } = await import("wagmi/actions");
+          await waitForTransactionReceipt(wagmiConfig, { hash: approveHash });
+        }
+      }
+
       const result = await writeContractAsync({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
         abi: QUEST_ABI,
@@ -75,8 +101,9 @@ export default function QuestManager() {
           BigInt(formData.maxQualifiers),
           BigInt(deadlineTimestamp),
           formData.requirements,
+          token as `0x${string}`,
         ],
-        value: totalAmount,
+        value: token === ETH_ADDRESS ? totalAmount : 0n,
       });
 
       console.log("Quest created successfully:", result);
@@ -104,7 +131,7 @@ export default function QuestManager() {
       </div>
 
       <div className="flex justify-center mb-12">
-        <div className="inline-flex p-1 rounded-xl bg-slate-100 border border-slate-200">
+        <div className="inline-flex p-1 bg-slate-100 border border-slate-200">
           {[
             { id: "browse", label: "Browse", icon: LayoutGrid },
             { id: "manage", label: "My Quests", icon: Settings },
@@ -115,7 +142,7 @@ export default function QuestManager() {
               variant={activeTab === tab.id ? "default" : "ghost"}
               size="sm"
               onClick={() => setActiveTab(tab.id as any)}
-              className={`rounded-lg transition-all px-6 ${activeTab === tab.id
+              className={`transition-all px-6 ${activeTab === tab.id
                 ? "bg-white text-slate-900 shadow-sm border border-slate-200"
                 : "text-slate-500 hover:text-slate-900"
                 }`}
@@ -163,7 +190,7 @@ export default function QuestManager() {
                 if (displayQuests.length === 0) {
                   return (
                     <div className="text-center py-16">
-                      <div className="inline-flex items-center justify-center size-16 rounded-full bg-slate-100 mb-4">
+                        <div className="inline-flex items-center justify-center size-16 bg-slate-100 mb-4">
                         <Settings className="size-8 text-slate-400" />
                       </div>
                       <h3 className="text-lg font-bold text-slate-900 text-balance mb-2">

@@ -22,7 +22,7 @@ export function BountyQuickView({ isOpen, onOpenChange, bounty, metadata, onView
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-[2rem] border border-white/60 bg-white/95 backdrop-blur-2xl shadow-2xl p-0">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border border-white/60 bg-white/95 backdrop-blur-2xl shadow-2xl p-0">
         <div className="relative h-64 w-full bg-slate-100">
           {metadata?.images && metadata.images.length > 0 ? (
             <img
@@ -38,25 +38,25 @@ export function BountyQuickView({ isOpen, onOpenChange, bounty, metadata, onView
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <div className="absolute bottom-6 left-8 right-8">
             <h2 className="text-2xl font-bold text-white mb-1">{metadata?.title || bounty.title || "Bounty Details"}</h2>
-            <p className="text-white/80 text-sm">Bounty #{bounty.id} • {formatETH(bounty.amount)} ETH</p>
+            <p className="text-white/80 text-sm">Bounty #{bounty.id} • {formatETH(bounty.totalAmount)} ETH</p>
           </div>
         </div>
 
         <div className="p-8 space-y-8">
           <div className="grid grid-cols-4 gap-4">
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+            <div className="p-4 bg-slate-50 border border-slate-100">
               <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Reward</p>
-              <p className="text-lg font-black text-[#0EA885]">{formatETH(bounty.amount)} ETH</p>
+              <p className="text-lg font-black text-[#0EA885]">{formatETH(bounty.totalAmount)} ETH</p>
             </div>
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+            <div className="p-4 bg-slate-50 border border-slate-100">
               <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Submissions</p>
               <p className="text-lg font-black text-slate-700">{bounty.submissionCount}</p>
             </div>
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+            <div className="p-4 bg-slate-50 border border-slate-100">
               <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">{deadlineLabel}</p>
               <p className="text-sm font-bold text-slate-700">{formatTimeLeft(relevantDeadline)}</p>
             </div>
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+            <div className="p-4 bg-slate-50 border border-slate-100">
               <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">Slash %</p>
               <p className="text-lg font-black text-red-500">{Number(bounty.slashPercent) / 100}%</p>
             </div>
@@ -76,7 +76,7 @@ export function BountyQuickView({ isOpen, onOpenChange, bounty, metadata, onView
                 <ul className="grid grid-cols-1 gap-2">
                   {metadata.requirements.map((req, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#0EA885] mt-1.5 shrink-0" />
+                      <div className="w-1.5 h-1.5 bg-[#0EA885] mt-1.5 shrink-0" />
                       {req}
                     </li>
                   ))}
@@ -84,7 +84,7 @@ export function BountyQuickView({ isOpen, onOpenChange, bounty, metadata, onView
               </div>
             )}
             
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+            <div className="p-3 bg-amber-50 border border-amber-200">
               <p className="text-xs text-amber-700 font-medium">
                 1% deposit required to submit. Refunded when winner is selected.
               </p>
@@ -92,10 +92,10 @@ export function BountyQuickView({ isOpen, onOpenChange, bounty, metadata, onView
           </div>
 
           <div className="flex gap-4 pt-4">
-            <Button variant="outline" className="flex-1 h-12 rounded-xl" onClick={() => onOpenChange(false)}>
+            <Button variant="outline" className="flex-1 h-12" onClick={() => onOpenChange(false)}>
               Close
             </Button>
-            <Button className="flex-1 h-12 rounded-xl bg-[#0EA885] hover:bg-[#0EA885]/90" onClick={onViewFull}>
+            <Button className="flex-1 h-12 bg-[#0EA885] hover:bg-[#0EA885]/90" onClick={onViewFull}>
               View Full Details
             </Button>
           </div>

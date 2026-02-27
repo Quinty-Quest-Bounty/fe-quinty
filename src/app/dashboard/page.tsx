@@ -23,7 +23,6 @@ import {
 } from "../../components/ui/dropdown-menu";
 import {
   Target,
-  Zap,
   Clock,
   Filter,
   ChevronDown,
@@ -39,6 +38,13 @@ import {
   ArrowRight,
   Star,
   Activity,
+  Code2,
+  Palette,
+  Megaphone,
+  FlaskConical,
+  Layers,
+  Trophy,
+  Zap,
 } from "lucide-react";
 import {
   fetchMetadataFromIpfs,
@@ -94,83 +100,51 @@ const DISPLAY_PER_PAGE = 12;
 const LOAD_MORE_COUNT = 12;
 
 // === HELPERS ===
-const getCategoryColor = (category?: string): string => {
-  switch (category) {
-    case "development": return "bg-gradient-to-br from-sky-50 to-blue-50";
-    case "design": return "bg-gradient-to-br from-violet-50 to-purple-50";
-    case "marketing": return "bg-gradient-to-br from-amber-50 to-orange-50";
-    case "research": return "bg-gradient-to-br from-emerald-50 to-teal-50";
-    default: return "bg-gradient-to-br from-stone-50 to-slate-50";
-  }
-};
-
-const getCategoryBadgeColor = (category?: string): string => {
-  switch (category) {
-    case "development": return "bg-sky-100/80 text-sky-700 border-sky-200/60";
-    case "design": return "bg-violet-100/80 text-violet-700 border-violet-200/60";
-    case "marketing": return "bg-amber-100/80 text-amber-700 border-amber-200/60";
-    case "research": return "bg-emerald-100/80 text-emerald-700 border-emerald-200/60";
-    default: return "bg-stone-100/80 text-stone-600 border-stone-200/60";
-  }
-};
-
 const getAvatarUrl = (address: string, size: number = 40) => {
-  // Use DiceBear API with identicon style - creates geometric block patterns
   return `https://api.dicebear.com/7.x/identicon/svg?seed=${address}&size=${size}`;
 };
 
 // === SKELETON COMPONENTS ===
 const SkeletonCard = () => (
-  <div className="bg-white  shadow-sm border border-stone-100 overflow-hidden animate-pulse">
-    <div className="h-40 bg-gradient-to-br from-stone-100 to-stone-50" />
+  <div className="bg-white border border-zinc-200 overflow-hidden animate-pulse">
+    <div className="h-40 bg-zinc-100" />
     <div className="p-5 space-y-4">
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8  bg-stone-100" />
-        <div className="h-3 w-24 bg-stone-100 " />
+        <div className="w-8 h-8 bg-zinc-100" />
+        <div className="h-3 w-24 bg-zinc-100" />
       </div>
       <div className="space-y-2">
-        <div className="h-4 w-4/5 bg-stone-100 " />
-        <div className="h-3 w-1/2 bg-stone-50 " />
+        <div className="h-4 w-4/5 bg-zinc-100" />
+        <div className="h-3 w-1/2 bg-zinc-50" />
       </div>
-      <div className="pt-4 border-t border-stone-50 flex justify-between items-center">
-        <div className="h-3 w-16 bg-stone-100 " />
-        <div className="h-5 w-24 bg-stone-100 " />
+      <div className="pt-4 border-t border-zinc-100 flex justify-between items-center">
+        <div className="h-3 w-16 bg-zinc-100" />
+        <div className="h-5 w-24 bg-zinc-100" />
       </div>
     </div>
   </div>
 );
 
 const SkeletonListItem = () => (
-  <div className="bg-white  shadow-sm border border-stone-100 px-5 py-4 flex items-center gap-5 animate-pulse">
-    <div className="w-14 h-14  bg-gradient-to-br from-stone-100 to-stone-50 flex-shrink-0" />
+  <div className="bg-white border border-zinc-200 px-5 py-4 flex items-center gap-5 animate-pulse">
+    <div className="w-14 h-14 bg-zinc-100 flex-shrink-0" />
     <div className="flex-1 space-y-2">
-      <div className="h-4 w-1/3 bg-stone-100 " />
-      <div className="h-3 w-1/2 bg-stone-50 " />
+      <div className="h-4 w-1/3 bg-zinc-100" />
+      <div className="h-3 w-1/2 bg-zinc-50" />
     </div>
-    <div className="h-6 w-24 bg-stone-100 " />
+    <div className="h-6 w-24 bg-zinc-100" />
   </div>
 );
 
 const SidebarSkeleton = () => (
   <div className="space-y-5 animate-pulse">
-    <div className="bg-gradient-to-br from-stone-100 to-stone-50 h-28 " />
-    <div className="bg-white  shadow-sm border border-stone-100 overflow-hidden">
-      <div className="h-10 bg-stone-50" />
+    <div className="bg-zinc-100 h-28" />
+    <div className="bg-white border border-zinc-200 overflow-hidden">
+      <div className="h-10 bg-zinc-50" />
       <div className="p-5 space-y-4">
-        <div className="h-24 bg-gradient-to-br from-stone-100 to-stone-50 " />
-        <div className="h-4 w-3/4 bg-stone-100 " />
-        <div className="h-3 w-1/2 bg-stone-50 " />
-      </div>
-    </div>
-    <div className="bg-white  shadow-sm border border-stone-100 overflow-hidden">
-      <div className="h-10 bg-stone-50" />
-      <div className="p-4 space-y-3">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="flex justify-between py-2">
-            <div className="h-3 w-24 bg-stone-100 " />
-            <div className="h-3 w-10 bg-stone-100 " />
-          </div>
-        ))}
+        <div className="h-24 bg-zinc-100" />
+        <div className="h-4 w-3/4 bg-zinc-100" />
+        <div className="h-3 w-1/2 bg-zinc-50" />
       </div>
     </div>
   </div>
@@ -204,18 +178,15 @@ export default function DashboardPage() {
 
   // === EFFECTS ===
 
-  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchQuery), 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Reset display count on filter/sort/search change
   useEffect(() => {
     setDisplayCount(DISPLAY_PER_PAGE);
   }, [activeFilter, typeFilter, categoryFilter, debouncedSearch, sortBy]);
 
-  // Keyboard shortcut: / or Ctrl+K to focus search
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const tag = document.activeElement?.tagName || "";
@@ -228,7 +199,6 @@ export default function DashboardPage() {
     return () => document.removeEventListener("keydown", handler);
   }, []);
 
-  // Fetch ETH price
   useEffect(() => {
     const fetchPrice = async () => {
       const price = await getEthPriceInUSD();
@@ -239,7 +209,6 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Read counters
   const { data: bountyCounter } = useReadContract({
     address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]?.Quinty as `0x${string}`,
     abi: QUINTY_ABI,
@@ -252,28 +221,19 @@ export default function DashboardPage() {
     functionName: "questCounter",
   });
 
-  // Load bounties
   useEffect(() => {
     let isMounted = true;
     const loadBounties = async () => {
       if (bountyCounter === undefined || !CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]) return;
-
       const count = Number(bountyCounter);
-      if (count === 0) {
-        if (isMounted) setLoading(false);
-        return;
-      }
-
+      if (count === 0) { if (isMounted) setLoading(false); return; }
       const loadedBounties: Bounty[] = [];
       for (let i = count; i >= Math.max(1, count - ITEMS_PER_PAGE + 1); i--) {
         try {
           const bountyData = await readContract(wagmiConfig, {
             address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-            abi: QUINTY_ABI,
-            functionName: "getBounty",
-            args: [BigInt(i)],
+            abi: QUINTY_ABI, functionName: "getBounty", args: [BigInt(i)],
           });
-
           if (bountyData && Array.isArray(bountyData)) {
             const [creator, title, description, amount, openDeadline, judgingDeadline, slashPercent, status] = bountyData as any[];
             let metadataCid;
@@ -283,30 +243,20 @@ export default function DashboardPage() {
             }
             loadedBounties.push({ id: i, creator, title, description: description || "", amount, deadline: judgingDeadline, status, metadataCid, type: "bounty" });
           }
-        } catch (err) {
-          console.error(`Error loading bounty ${i}:`, err);
-        }
+        } catch (err) { console.error(`Error loading bounty ${i}:`, err); }
       }
-
-      if (isMounted) {
-        setBounties(loadedBounties);
-        setLoading(false);
-      }
+      if (isMounted) { setBounties(loadedBounties); setLoading(false); }
     };
     loadBounties();
     return () => { isMounted = false; };
   }, [bountyCounter]);
 
-  // Load bounty metadata
   useEffect(() => {
     const loadMetadata = async () => {
       const newMeta = new Map<number, BountyMetadata>();
       for (const b of bounties) {
         if (b.metadataCid && !bountyMetadata.has(b.id)) {
-          try {
-            const meta = await fetchMetadataFromIpfs(b.metadataCid);
-            newMeta.set(b.id, meta);
-          } catch { }
+          try { const meta = await fetchMetadataFromIpfs(b.metadataCid); newMeta.set(b.id, meta); } catch { }
         }
       }
       if (newMeta.size > 0) setBountyMetadata(prev => new Map([...prev, ...newMeta]));
@@ -314,16 +264,12 @@ export default function DashboardPage() {
     if (bounties.length > 0) loadMetadata();
   }, [bounties]);
 
-  // Load quest metadata
   useEffect(() => {
     const loadQuestMetadata = async () => {
       const newMeta = new Map<number, QuestMetadata>();
       for (const q of quests) {
         if (q.metadataCid && !questMetadata.has(q.id)) {
-          try {
-            const meta = await fetchMetadataFromIpfs(q.metadataCid);
-            newMeta.set(q.id, meta);
-          } catch { }
+          try { const meta = await fetchMetadataFromIpfs(q.metadataCid); newMeta.set(q.id, meta); } catch { }
         }
       }
       if (newMeta.size > 0) setQuestMetadata(prev => new Map([...prev, ...newMeta]));
@@ -331,26 +277,21 @@ export default function DashboardPage() {
     if (quests.length > 0) loadQuestMetadata();
   }, [quests]);
 
-  // Load quests
   useEffect(() => {
     let isMounted = true;
     const loadQuests = async () => {
       if (questCounter === undefined || !CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID]) return;
       const count = Number(questCounter);
       if (count === 0) return;
-
       const loadedQuests: Quest[] = [];
       for (let i = count; i >= Math.max(1, count - ITEMS_PER_PAGE + 1); i--) {
         try {
           const questData = await readContract(wagmiConfig, {
             address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
-            abi: QUEST_ABI,
-            functionName: "getQuest",
-            args: [BigInt(i)],
+            abi: QUEST_ABI, functionName: "getQuest", args: [BigInt(i)],
           });
           if (questData && Array.isArray(questData)) {
             const [creator, title, description, totalAmount, , , qualifiersCount, deadline, , resolved, cancelled] = questData as any[];
-            // Extract metadata CID from description
             let metadataCid;
             if (description && typeof description === "string") {
               const match = description.match(/Metadata: ipfs:\/\/([a-zA-Z0-9]+)/);
@@ -358,9 +299,7 @@ export default function DashboardPage() {
             }
             loadedQuests.push({ id: i, creator, title, description: description || "", amount: totalAmount, totalRecipients: qualifiersCount, deadline: BigInt(deadline), resolved, cancelled, type: "quest", metadataCid });
           }
-        } catch (err) {
-          console.error(`Error loading quest ${i}:`, err);
-        }
+        } catch (err) { console.error(`Error loading quest ${i}:`, err); }
       }
       if (isMounted) setQuests(loadedQuests);
     };
@@ -368,7 +307,6 @@ export default function DashboardPage() {
     return () => { isMounted = false; };
   }, [questCounter]);
 
-  // Fetch submission counts
   useEffect(() => {
     const fetchCounts = async () => {
       const counts = new Map<string, number>();
@@ -376,9 +314,7 @@ export default function DashboardPage() {
         try {
           const c = await readContract(wagmiConfig, {
             address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
-            abi: QUINTY_ABI,
-            functionName: "getSubmissionCount",
-            args: [BigInt(b.id)],
+            abi: QUINTY_ABI, functionName: "getSubmissionCount", args: [BigInt(b.id)],
           });
           counts.set(`bounty-${b.id}`, Number(c));
         } catch { }
@@ -387,9 +323,7 @@ export default function DashboardPage() {
         try {
           const c = await readContract(wagmiConfig, {
             address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
-            abi: QUEST_ABI,
-            functionName: "getEntryCount",
-            args: [BigInt(q.id)],
+            abi: QUEST_ABI, functionName: "getEntryCount", args: [BigInt(q.id)],
           });
           counts.set(`quest-${q.id}`, Number(c));
         } catch { }
@@ -403,20 +337,13 @@ export default function DashboardPage() {
 
   const unifiedItems: UnifiedItem[] = useMemo(() => {
     let combined = [...bounties, ...quests];
-
     if (typeFilter === "bounties") combined = combined.filter(i => i.type === "bounty");
     else if (typeFilter === "quests") combined = combined.filter(i => i.type === "quest");
 
     if (categoryFilter !== "all") {
       combined = combined.filter(item => {
-        if (item.type === "bounty") {
-          const meta = bountyMetadata.get((item as Bounty).id);
-          return meta?.bountyType === categoryFilter;
-        }
-        if (item.type === "quest") {
-          const meta = questMetadata.get((item as Quest).id);
-          return meta?.questType === categoryFilter;
-        }
+        if (item.type === "bounty") { const meta = bountyMetadata.get((item as Bounty).id); return meta?.bountyType === categoryFilter; }
+        if (item.type === "quest") { const meta = questMetadata.get((item as Quest).id); return meta?.questType === categoryFilter; }
         return true;
       });
     }
@@ -427,11 +354,10 @@ export default function DashboardPage() {
       if (item.type === "bounty") {
         const b = item as Bounty;
         if (activeFilter === "all") return true;
-        // Live = OPEN (0) or JUDGING (1)
         if (activeFilter === "live") return (b.status === 0 || b.status === 1);
-        if (activeFilter === "in-review") return b.status === 1; // JUDGING
-        if (activeFilter === "completed") return b.status === 2; // RESOLVED
-        if (activeFilter === "ended") return b.status === 2 || b.status === 3; // RESOLVED or SLASHED
+        if (activeFilter === "in-review") return b.status === 1;
+        if (activeFilter === "completed") return b.status === 2;
+        if (activeFilter === "ended") return b.status === 2 || b.status === 3;
       } else {
         const q = item as Quest;
         if (activeFilter === "all") return true;
@@ -446,8 +372,7 @@ export default function DashboardPage() {
       const q = debouncedSearch.toLowerCase();
       combined = combined.filter(item => {
         if (item.type === "bounty") {
-          const b = item as Bounty;
-          const meta = bountyMetadata.get(b.id);
+          const b = item as Bounty; const meta = bountyMetadata.get(b.id);
           return (meta?.title || "").toLowerCase().includes(q) || b.description.toLowerCase().includes(q) || b.creator.toLowerCase().includes(q);
         }
         const quest = item as Quest;
@@ -460,7 +385,6 @@ export default function DashboardPage() {
       if (sortBy === "ending_soon") return Number(a.deadline) - Number(b.deadline);
       return b.id - a.id;
     });
-
     return combined;
   }, [bounties, quests, activeFilter, typeFilter, categoryFilter, bountyMetadata, questMetadata, debouncedSearch, sortBy]);
 
@@ -489,10 +413,8 @@ export default function DashboardPage() {
   const stats = useMemo(() => {
     const now = BigInt(Math.floor(Date.now() / 1000));
     return {
-      // Active = OPEN (0) or JUDGING (1) phase
       activeBounties: bounties.filter(b => (b.status === 0 || b.status === 1)).length,
       activeQuests: quests.filter(q => !q.resolved && !q.cancelled && q.deadline >= now).length,
-      // Completed = RESOLVED (2) for bounties
       completed: bounties.filter(b => b.status === 2).length + quests.filter(q => q.resolved).length,
       totalEth: [...bounties, ...quests].reduce((sum, item) => sum + Number(item.amount) / 1e18, 0),
     };
@@ -503,21 +425,20 @@ export default function DashboardPage() {
   const getStatusInfo = (item: UnifiedItem) => {
     const now = BigInt(Math.floor(Date.now() / 1000));
     const isEnded = item.deadline < now;
-    if (isEnded) return { label: "Ended", color: "bg-stone-100/80 text-stone-500" };
-
+    if (isEnded) return { label: "Ended", color: "bg-zinc-100 text-zinc-500 border-zinc-200" };
     if (item.type === "bounty") {
       const map = [
-        { label: "Open", color: "bg-[#0EA885]/15 text-[#0EA885]" },
-        { label: "Judging", color: "bg-amber-100/80 text-amber-700" },
-        { label: "Resolved", color: "bg-stone-100/80 text-stone-600" },
-        { label: "Slashed", color: "bg-rose-100/80 text-rose-600" },
+        { label: "Open", color: "bg-[#E6FAF5] text-[#0EA885] border-[#0EA885]/20" },
+        { label: "Judging", color: "bg-amber-50 text-amber-600 border-amber-200/60" },
+        { label: "Resolved", color: "bg-zinc-100 text-zinc-600 border-zinc-200" },
+        { label: "Slashed", color: "bg-rose-50 text-rose-600 border-rose-200/60" },
       ];
       return map[(item as Bounty).status] || map[0];
     }
     const q = item as Quest;
-    if (q.resolved) return { label: "Completed", color: "bg-stone-100/80 text-stone-600" };
-    if (q.cancelled) return { label: "Cancelled", color: "bg-stone-100/80 text-stone-400" };
-    return { label: "Live", color: "bg-[#0EA885]/15 text-[#0EA885]" };
+    if (q.resolved) return { label: "Completed", color: "bg-zinc-100 text-zinc-600 border-zinc-200" };
+    if (q.cancelled) return { label: "Cancelled", color: "bg-zinc-100 text-zinc-400 border-zinc-200" };
+    return { label: "Live", color: "bg-[#E6FAF5] text-[#0EA885] border-[#0EA885]/20" };
   };
 
   const formatDeadline = (deadline: bigint | number) => {
@@ -533,23 +454,11 @@ export default function DashboardPage() {
   const getItemData = (item: UnifiedItem) => {
     const subCount = submissionCounts.get(`${item.type}-${item.id}`) || 0;
     if (item.type === "bounty") {
-      const b = item as Bounty;
-      const meta = bountyMetadata.get(b.id);
-      return {
-        title: meta?.title || b.description.split("\n")[0] || "Untitled Bounty",
-        image: meta?.images?.[0] ? formatIpfsUrl(meta.images[0]) : null,
-        category: meta?.bountyType || "",
-        subCount,
-      };
+      const b = item as Bounty; const meta = bountyMetadata.get(b.id);
+      return { title: meta?.title || b.description.split("\n")[0] || "Untitled Bounty", image: meta?.images?.[0] ? formatIpfsUrl(meta.images[0]) : null, category: meta?.bountyType || "", subCount };
     }
-    const q = item as Quest;
-    const meta = questMetadata.get(q.id);
-    return {
-      title: q.title || `Quest #${q.id}`,
-      image: meta?.images?.[0] ? formatIpfsUrl(meta.images[0]) : null,
-      category: meta?.questType || "",
-      subCount,
-    };
+    const q = item as Quest; const meta = questMetadata.get(q.id);
+    return { title: q.title || `Quest #${q.id}`, image: meta?.images?.[0] ? formatIpfsUrl(meta.images[0]) : null, category: meta?.questType || "", subCount };
   };
 
   // === FILTER CONFIG ===
@@ -559,8 +468,13 @@ export default function DashboardPage() {
   const typeFilters: { id: TypeFilter; label: string }[] = [
     { id: "all", label: "All" }, { id: "bounties", label: "Bounties" }, { id: "quests", label: "Quests" },
   ];
-  const categoryFilters: { id: CategoryFilter; label: string }[] = [
-    { id: "all", label: "All Categories" }, { id: "development", label: "Development" }, { id: "design", label: "Design" }, { id: "marketing", label: "Marketing" }, { id: "research", label: "Research" }, { id: "other", label: "Other" },
+  const categoryFilters: { id: CategoryFilter; label: string; icon: React.ElementType; iconColor: string }[] = [
+    { id: "all", label: "All Categories", icon: Layers, iconColor: "text-zinc-400" },
+    { id: "development", label: "Development", icon: Code2, iconColor: "text-blue-500" },
+    { id: "design", label: "Design", icon: Palette, iconColor: "text-violet-500" },
+    { id: "marketing", label: "Marketing", icon: Megaphone, iconColor: "text-amber-500" },
+    { id: "research", label: "Research", icon: FlaskConical, iconColor: "text-emerald-500" },
+    { id: "other", label: "Other", icon: Star, iconColor: "text-rose-400" },
   ];
   const sortOptions: { id: SortBy; label: string }[] = [
     { id: "newest", label: "Newest" }, { id: "highest_reward", label: "Highest Reward" }, { id: "ending_soon", label: "Ending Soon" },
@@ -568,12 +482,12 @@ export default function DashboardPage() {
 
   // === RENDER ===
   return (
-    <div className="min-h-screen bg-gradient-to-b from-stone-50 via-white to-stone-50/50 pb-24 pt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <div className="min-h-screen bg-white pb-24 pt-20 relative">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 relative">
         {/* Mobile stats toggle */}
         <button
           onClick={() => setShowStats(!showStats)}
-          className="lg:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-[#0EA885] to-[#0c9478] text-white  flex items-center justify-center shadow-lg shadow-[#0EA885]/25 hover:shadow-xl hover:shadow-[#0EA885]/30 hover:scale-105 active:scale-95 transition-all duration-300"
+          className="lg:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#0EA885] text-white flex items-center justify-center shadow-lg hover:bg-[#0c9478] active:bg-[#0a8266] transition-colors duration-200"
         >
           {showStats ? <X className="w-5 h-5" /> : <BarChart3 className="w-5 h-5" />}
         </button>
@@ -581,34 +495,34 @@ export default function DashboardPage() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* ===== MAIN CONTENT ===== */}
           <div className="flex-1 min-w-0 order-2 lg:order-1">
-            {/* Header */}
-            <div className="flex items-end justify-between mb-8">
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">Explore</h2>
-                <p className="text-stone-500 mt-1 text-sm">Discover bounties and quests</p>
+            {/* Section header */}
+            <div className="border-b border-zinc-200 pb-3 mb-8 flex items-end justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-1.5 h-7 bg-[#0EA885]" />
+                <h2 className="text-2xl sm:text-3xl font-semibold text-zinc-900 tracking-tight">Explore</h2>
               </div>
-              <div className="flex items-center bg-white  shadow-sm border border-stone-100 p-1">
-                <button onClick={() => setViewMode("card")} className={`h-9 w-9  flex items-center justify-center transition-all duration-200 ${viewMode === "card" ? "bg-stone-900 text-white shadow-sm" : "text-stone-400 hover:text-stone-600 hover:bg-stone-50"}`}>
+              <div className="flex items-center bg-zinc-50 border border-zinc-200 p-1">
+                <button onClick={() => setViewMode("card")} className={`h-9 w-9 flex items-center justify-center transition-all duration-200 ${viewMode === "card" ? "bg-[#0EA885] text-white shadow-sm" : "text-zinc-400 hover:text-[#0EA885] hover:bg-zinc-100"}`}>
                   <LayoutGrid className="w-4 h-4" />
                 </button>
-                <button onClick={() => setViewMode("list")} className={`h-9 w-9  flex items-center justify-center transition-all duration-200 ${viewMode === "list" ? "bg-stone-900 text-white shadow-sm" : "text-stone-400 hover:text-stone-600 hover:bg-stone-50"}`}>
+                <button onClick={() => setViewMode("list")} className={`h-9 w-9 flex items-center justify-center transition-all duration-200 ${viewMode === "list" ? "bg-[#0EA885] text-white shadow-sm" : "text-zinc-400 hover:text-[#0EA885] hover:bg-zinc-100"}`}>
                   <List className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
             {/* Filters Bar */}
-            <div className="bg-white  shadow-sm border border-stone-100 p-4 mb-6 space-y-4">
+            <div className="bg-white border border-zinc-200 p-4 mb-6 space-y-4">
               {/* Row 1: Type tabs + Search + Sort */}
               <div className="flex items-center gap-3">
-                <div className="flex items-center bg-stone-100/60  p-1 flex-shrink-0">
+                <div className="flex items-center bg-zinc-50 p-1 flex-shrink-0">
                   {typeFilters.map(f => (
                     <button
                       key={f.id}
                       onClick={() => setTypeFilter(f.id)}
-                      className={`px-4 py-2 text-xs font-semibold  transition-all duration-200 whitespace-nowrap ${typeFilter === f.id
-                        ? "bg-white text-stone-900 shadow-sm"
-                        : "text-stone-500 hover:text-stone-700"
+                      className={`px-4 py-2 text-xs font-semibold transition-all duration-200 whitespace-nowrap ${typeFilter === f.id
+                        ? "bg-white text-zinc-900 shadow-sm"
+                        : "text-zinc-500 hover:text-zinc-700"
                         }`}
                     >
                       {f.label}
@@ -616,31 +530,31 @@ export default function DashboardPage() {
                   ))}
                 </div>
                 <div className="flex-1 relative min-w-0">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-300 pointer-events-none" />
                   <Input
                     ref={searchRef}
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     placeholder="Search bounties & quests..."
-                    className="pl-11 pr-10 h-11 text-sm bg-stone-50/50 border-stone-100  focus:bg-white focus:border-[#0EA885] focus:ring-[#0EA885]/20 transition-all"
+                    className="pl-11 pr-10 h-11 text-sm bg-white border-zinc-200 focus:bg-white focus:border-[#0EA885] focus:ring-[#0EA885]/20 transition-all"
                   />
                   {searchQuery && (
-                    <button onClick={() => setSearchQuery("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors">
+                    <button onClick={() => setSearchQuery("")} className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors">
                       <X className="w-4 h-4" />
                     </button>
                   )}
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="h-11 px-4 flex items-center gap-2 text-sm font-medium bg-stone-50/50 text-stone-600 border border-stone-100  hover:bg-stone-100/50 hover:border-stone-200 transition-all whitespace-nowrap flex-shrink-0">
-                      <ArrowUpDown className="w-4 h-4 text-stone-400" />
+                    <button className="h-11 px-4 flex items-center gap-2 text-sm font-medium bg-white text-zinc-600 border border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-800 transition-all whitespace-nowrap flex-shrink-0">
+                      <ArrowUpDown className="w-4 h-4 text-zinc-400" />
                       <span className="hidden sm:inline">{sortOptions.find(s => s.id === sortBy)?.label}</span>
-                      <ChevronDown className="w-3.5 h-3.5 text-stone-400" />
+                      <ChevronDown className="w-3.5 h-3.5 text-zinc-400" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48  shadow-lg border-stone-100">
+                  <DropdownMenuContent align="end" className="w-48 border-zinc-200">
                     {sortOptions.map(opt => (
-                      <DropdownMenuItem key={opt.id} onClick={() => setSortBy(opt.id)} className="text-sm cursor-pointer ">
+                      <DropdownMenuItem key={opt.id} onClick={() => setSortBy(opt.id)} className="text-sm cursor-pointer">
                         <Check className={`w-4 h-4 mr-2 text-[#0EA885] ${sortBy === opt.id ? "opacity-100" : "opacity-0"}`} />
                         {opt.label}
                       </DropdownMenuItem>
@@ -656,9 +570,9 @@ export default function DashboardPage() {
                     <button
                       key={f.id}
                       onClick={() => setActiveFilter(f.id)}
-                      className={`px-4 py-2 text-xs font-semibold  transition-all duration-200 whitespace-nowrap ${activeFilter === f.id
-                        ? "bg-[#0EA885] text-white shadow-sm shadow-[#0EA885]/25"
-                        : "bg-stone-100/60 text-stone-500 hover:bg-stone-100 hover:text-stone-700"
+                      className={`px-4 py-2 text-xs font-semibold transition-all duration-200 whitespace-nowrap ${activeFilter === f.id
+                        ? "bg-[#0EA885] text-white"
+                        : "bg-zinc-50 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700"
                         }`}
                     >
                       {f.label}
@@ -667,20 +581,28 @@ export default function DashboardPage() {
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="h-9 px-4 flex items-center gap-2 text-xs font-semibold bg-stone-100/60 text-stone-600  hover:bg-stone-100 transition-all whitespace-nowrap ml-3 flex-shrink-0">
-                      <Filter className="w-3.5 h-3.5" />
+                    <button className="h-9 px-4 flex items-center gap-2 text-xs font-semibold bg-zinc-50 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800 transition-all whitespace-nowrap ml-3 flex-shrink-0">
+                      {(() => { const active = categoryFilters.find(f => f.id === categoryFilter); const Icon = active?.icon || Filter; return <Icon className={`w-3.5 h-3.5 ${active?.iconColor || "text-zinc-400"}`} />; })()}
                       <span className="hidden sm:inline">{categoryFilters.find(f => f.id === categoryFilter)?.label}</span>
                       <span className="sm:hidden">Category</span>
                       <ChevronDown className="w-3.5 h-3.5" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-52  shadow-lg border-stone-100">
-                    {categoryFilters.map(f => (
-                      <DropdownMenuItem key={f.id} onClick={() => setCategoryFilter(f.id)} className="text-sm cursor-pointer ">
-                        <Check className={`w-4 h-4 mr-2 text-[#0EA885] ${categoryFilter === f.id ? "opacity-100" : "opacity-0"}`} />
-                        {f.label}
-                      </DropdownMenuItem>
-                    ))}
+                  <DropdownMenuContent align="end" className="w-52 border-zinc-200">
+                    {categoryFilters.map(f => {
+                      const Icon = f.icon;
+                      return (
+                        <DropdownMenuItem key={f.id} onClick={() => setCategoryFilter(f.id)} className="text-sm cursor-pointer">
+                          <div className="flex items-center gap-2 flex-1">
+                            <div className={`w-5 h-5 flex items-center justify-center flex-shrink-0 ${categoryFilter === f.id ? "opacity-100" : "opacity-60"}`}>
+                              <Icon className={`w-3.5 h-3.5 ${f.iconColor}`} />
+                            </div>
+                            <span>{f.label}</span>
+                          </div>
+                          <Check className={`w-4 h-4 ml-2 text-[#0EA885] flex-shrink-0 ${categoryFilter === f.id ? "opacity-100" : "opacity-0"}`} />
+                        </DropdownMenuItem>
+                      );
+                    })}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -689,8 +611,7 @@ export default function DashboardPage() {
             {/* Legend + Results */}
             {!loading && (
               <div className="flex items-center justify-between mb-5">
-                {/* Color legend */}
-                <div className="flex items-center gap-4 text-[11px] text-stone-400">
+                <div className="flex items-center gap-4 text-[11px] font-mono text-zinc-400">
                   <div className="flex items-center gap-1.5">
                     <div className="w-3 h-3 bg-[#0EA885]" />
                     <span>Bounty</span>
@@ -700,9 +621,8 @@ export default function DashboardPage() {
                     <span>Quest</span>
                   </div>
                 </div>
-                {/* Results count */}
-                <p className="text-[11px] text-stone-400">
-                  <span className="font-medium text-stone-600">{unifiedItems.length}</span> results
+                <p className="text-[11px] font-mono text-zinc-400">
+                  <span className="font-medium text-[#0EA885]">{unifiedItems.length}</span> results
                   {debouncedSearch && <span className="ml-1">for &ldquo;{debouncedSearch}&rdquo;</span>}
                 </p>
               </div>
@@ -721,7 +641,7 @@ export default function DashboardPage() {
               )
             ) : displayedItems.length > 0 ? (
               viewMode === "card" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                   {displayedItems.map(item => {
                     const statusInfo = getStatusInfo(item);
                     const { title, image, category, subCount } = getItemData(item);
@@ -730,60 +650,62 @@ export default function DashboardPage() {
                       <div
                         key={`${item.type}-${item.id}`}
                         onClick={() => router.push(`/${item.type === "bounty" ? "bounties" : "quests"}/${item.id}`)}
-                        className="group cursor-pointer bg-white shadow-sm hover:shadow-xl hover:shadow-stone-200/50 border border-stone-100 hover:border-stone-200 transition-all duration-300 overflow-hidden flex flex-col"
+                        className="group cursor-pointer bg-white hover:shadow-md hover:shadow-[#0EA885]/5 border border-zinc-200 hover:border-[#0EA885]/30 transition-all duration-200 overflow-hidden flex flex-col"
                       >
-                        {/* Type color bar at top */}
-                        <div className={`h-1 w-full ${item.type === "bounty" ? "bg-[#0EA885]" : "bg-amber-400"}`} />
-
-                        {/* Image - Clean, no overlays */}
-                        <div className="relative w-full h-36 overflow-hidden">
-                          {image ? (
-                            <img src={image} alt={title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                          ) : (
-                            <div className={`w-full h-full ${getCategoryColor(category)} flex items-center justify-center`}>
-                              {item.type === "bounty" ? (
-                                <Target className="w-10 h-10 text-stone-300" />
-                              ) : (
-                                <Zap className="w-10 h-10 text-stone-300" />
-                              )}
-                            </div>
-                          )}
-                        </div>
+                        {/* Image — clean, nothing overlaid */}
+                        {image ? (
+                          <div className="h-44 w-full overflow-hidden">
+                            <img src={image} alt={title} className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className={`h-20 w-full ${item.type === "bounty" ? "bg-gradient-to-r from-[#0EA885]/5 to-transparent" : "bg-gradient-to-r from-amber-400/5 to-transparent"}`} />
+                        )}
 
                         <div className="p-4 flex flex-col flex-1">
+                          {/* Status + type */}
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className={`text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 ${
+                              statusInfo.label === "Open" || statusInfo.label === "Live" ? "bg-[#0EA885]/10 text-[#0EA885]" :
+                              statusInfo.label === "Judging" ? "bg-amber-500/10 text-amber-600" :
+                              "bg-zinc-100 text-zinc-500"
+                            }`}>{statusInfo.label}</span>
+                            <span className="text-[10px] font-mono text-zinc-300">#{item.id}</span>
+                          </div>
+
                           {/* Title */}
-                          <h3 className="text-[15px] font-semibold text-stone-800 mb-3 line-clamp-2 leading-snug group-hover:text-[#0EA885] transition-colors">
+                          <h3 className="text-[15px] font-semibold text-zinc-900 leading-snug line-clamp-2 mb-2 group-hover:text-[#0EA885] transition-colors">
                             {title}
                           </h3>
 
                           {/* Creator */}
-                          <div className="flex items-center gap-2 mb-3">
-                            <img src={getAvatarUrl(item.creator, 18)} alt="" className="w-[18px] h-[18px] flex-shrink-0" />
-                            <WalletName address={item.creator} className="text-[11px] text-stone-400 truncate" />
+                          <div className="flex items-center gap-1.5 mb-3">
+                            <img src={getAvatarUrl(item.creator, 16)} alt="" className="w-4 h-4 flex-shrink-0" />
+                            <WalletName address={item.creator} className="text-[11px] text-zinc-400 truncate font-mono" />
                           </div>
 
-                          {/* Footer: Meta info + Price */}
-                          <div className="mt-auto pt-3 border-t border-stone-100 flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-[11px] text-stone-400">
-                              <span className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                {formatDeadline(item.deadline)}
-                              </span>
-                              {subCount > 0 && (
-                                <span className="flex items-center gap-1">
-                                  <Users className="h-3 w-3" />
-                                  {subCount}
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-right">
-                              <div className="flex items-center justify-end gap-1.5">
-                                <Image src={ethIcon} alt="ETH" width={18} height={18} className="flex-shrink-0" />
-                                <span className="text-base font-bold text-stone-800">{(Number(item.amount) / 1e18).toFixed(3)}</span>
+                          {/* Data strip */}
+                          <div className="mt-auto pt-3 border-t border-zinc-100 flex items-end justify-between">
+                            <div>
+                              <div className="flex items-baseline gap-1">
+                                <span className="text-lg font-bold text-zinc-900 tabular-nums tracking-tight">{(Number(item.amount) / 1e18).toFixed(3)}</span>
+                                <span className="text-[10px] font-mono font-semibold text-zinc-400">ETH</span>
                               </div>
                               {ethPrice > 0 && (
-                                <div className="text-[11px] font-medium text-stone-400 mt-0.5">{formatUSD(convertEthToUSD(Number(item.amount) / 1e18, ethPrice))}</div>
+                                <span className="text-[10px] font-mono text-zinc-300 tabular-nums">{formatUSD(convertEthToUSD(Number(item.amount) / 1e18, ethPrice))}</span>
                               )}
+                            </div>
+                            <div className="flex items-center gap-3">
+                              {subCount > 0 && (
+                                <div className="flex items-center gap-1 text-[10px] font-mono text-zinc-400">
+                                  <Users className="w-3 h-3" />
+                                  <span className="tabular-nums">{subCount}</span>
+                                </div>
+                              )}
+                              <div className="flex items-center gap-1 text-[10px] font-mono text-zinc-400">
+                                <Clock className="w-3 h-3" />
+                                <span>{formatDeadline(item.deadline)}</span>
+                              </div>
+                              <ArrowRight className="w-3.5 h-3.5 text-zinc-300 group-hover:text-[#0EA885] transition-colors" />
                             </div>
                           </div>
                         </div>
@@ -792,42 +714,46 @@ export default function DashboardPage() {
                   })}
                 </div>
               ) : (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5">
                   {displayedItems.map(item => {
-                    const { title, image, category, subCount } = getItemData(item);
+                    const statusInfo = getStatusInfo(item);
+                    const { title, image, subCount } = getItemData(item);
 
                     return (
                       <div
                         key={`${item.type}-${item.id}`}
                         onClick={() => router.push(`/${item.type === "bounty" ? "bounties" : "quests"}/${item.id}`)}
-                        className="group cursor-pointer bg-white shadow-sm hover:shadow-md border border-stone-100 hover:border-stone-200 transition-all duration-200 flex items-center overflow-hidden"
+                        className="group cursor-pointer bg-white hover:shadow-sm hover:shadow-[#0EA885]/5 border border-zinc-200 hover:border-[#0EA885]/30 transition-all duration-200 flex items-center overflow-hidden"
                       >
-                        {/* Type indicator bar */}
-                        <div className={`w-1 self-stretch flex-shrink-0 ${item.type === "bounty" ? "bg-[#0EA885]" : "bg-amber-400"}`} />
+                        {/* Type indicator */}
+                        <div className={`w-[3px] self-stretch flex-shrink-0 ${item.type === "bounty" ? "bg-[#0EA885]" : "bg-amber-400"}`} />
 
-                        <div className="flex items-center gap-4 px-4 py-3 flex-1">
+                        <div className="flex items-center gap-4 px-4 py-3 flex-1 min-w-0">
                           {/* Thumbnail */}
-                          <div className="flex-shrink-0 w-12 h-12 overflow-hidden">
-                            {image ? (
-                              <img src={image} alt={title} className="w-full h-full object-cover" />
-                            ) : (
-                              <div className={`w-full h-full ${getCategoryColor(category)} flex items-center justify-center`}>
-                                {item.type === "bounty" ? <Target className="w-5 h-5 text-stone-300" /> : <Zap className="w-5 h-5 text-stone-300" />}
-                              </div>
-                            )}
-                          </div>
+                          {image ? (
+                            <div className="w-20 h-20 flex-shrink-0 overflow-hidden bg-zinc-100">
+                              <img src={image} alt="" className="w-full h-full object-cover" />
+                            </div>
+                          ) : (
+                            <div className={`w-20 h-20 flex-shrink-0 ${item.type === "bounty" ? "bg-[#0EA885]/5" : "bg-amber-400/5"}`} />
+                          )}
 
-                          {/* Content */}
+                          {/* Status dot + title */}
                           <div className="flex-1 min-w-0">
-                            <h3 className="text-sm font-semibold text-stone-800 truncate group-hover:text-[#0EA885] transition-colors">{title}</h3>
-                            <div className="flex items-center gap-2 mt-1 text-[11px] text-stone-400">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-mono text-zinc-300 tabular-nums flex-shrink-0">#{item.id}</span>
+                              <h3 className="text-sm font-semibold text-zinc-800 truncate group-hover:text-[#0EA885] transition-colors">{title}</h3>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1 text-[10px] font-mono text-zinc-400">
+                              <span className={`font-bold uppercase tracking-wider ${statusInfo.color.includes("[#0EA885]") ? "text-[#0EA885]" : statusInfo.color.includes("amber") ? "text-amber-500" : "text-zinc-400"}`}>{statusInfo.label}</span>
+                              <span className="text-zinc-200">|</span>
                               <span className="flex items-center gap-1">
                                 <Clock className="w-3 h-3" />
                                 {formatDeadline(item.deadline)}
                               </span>
                               {subCount > 0 && (
                                 <>
-                                  <span>•</span>
+                                  <span className="text-zinc-200">|</span>
                                   <span className="flex items-center gap-1">
                                     <Users className="w-3 h-3" />
                                     {subCount}
@@ -837,14 +763,16 @@ export default function DashboardPage() {
                             </div>
                           </div>
 
-                          {/* Price */}
+                          {/* Reward */}
                           <div className="flex-shrink-0 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <Image src={ethIcon} alt="ETH" width={18} height={18} className="flex-shrink-0" />
-                              <span className="text-base font-bold text-stone-800">{(Number(item.amount) / 1e18).toFixed(3)}</span>
+                            <div className="flex items-baseline justify-end gap-1">
+                              <span className="text-base font-bold text-zinc-900 tabular-nums">{(Number(item.amount) / 1e18).toFixed(3)}</span>
+                              <span className="text-[10px] font-mono font-semibold text-zinc-400">ETH</span>
                             </div>
-                            {ethPrice > 0 && <div className="text-[11px] text-stone-400 mt-0.5">{formatUSD(convertEthToUSD(Number(item.amount) / 1e18, ethPrice))}</div>}
+                            {ethPrice > 0 && <div className="text-[10px] font-mono text-zinc-300 mt-0.5 tabular-nums">{formatUSD(convertEthToUSD(Number(item.amount) / 1e18, ethPrice))}</div>}
                           </div>
+
+                          <ArrowRight className="w-3.5 h-3.5 text-zinc-300 group-hover:text-[#0EA885] transition-colors flex-shrink-0" />
                         </div>
                       </div>
                     );
@@ -852,12 +780,12 @@ export default function DashboardPage() {
                 </div>
               )
             ) : (
-              <div className="text-center py-20 bg-white  border-2 border-dashed border-stone-200">
-                <div className="w-16 h-16  bg-stone-100 flex items-center justify-center mx-auto mb-5">
-                  <Search className="h-8 w-8 text-stone-300" />
+              <div className="text-center py-20 bg-white border border-zinc-200">
+                <div className="w-16 h-16 bg-zinc-50 flex items-center justify-center mx-auto mb-5">
+                  <Search className="h-8 w-8 text-zinc-300" />
                 </div>
-                <p className="text-base font-semibold text-stone-600 mb-2">No results found</p>
-                <p className="text-sm text-stone-400 max-w-sm mx-auto">Try adjusting your filters or search query to find what you&apos;re looking for</p>
+                <p className="text-base font-semibold text-zinc-600 mb-2">No results found</p>
+                <p className="text-sm text-zinc-400 max-w-sm mx-auto">Try adjusting your filters or search query to find what you&apos;re looking for</p>
               </div>
             )}
 
@@ -867,7 +795,7 @@ export default function DashboardPage() {
                 <Button
                   variant="outline"
                   onClick={() => setDisplayCount(prev => prev + LOAD_MORE_COUNT)}
-                  className="px-8 py-3 h-auto text-sm font-semibold  border-stone-200 hover:bg-stone-50 hover:border-stone-300 transition-all"
+                  className="px-8 py-3 h-auto text-sm font-semibold border-zinc-200 hover:bg-[#0EA885]/5 hover:border-[#0EA885]/30 hover:text-[#0EA885] transition-all"
                 >
                   Load more ({unifiedItems.length - displayedItems.length} remaining)
                 </Button>
@@ -881,24 +809,24 @@ export default function DashboardPage() {
             onClick={() => setShowStats(false)}
           >
             <div
-              className={`${showStats ? "fixed right-0 top-0 bottom-0 w-80 overflow-y-auto p-4" : ""} lg:relative lg:sticky lg:top-24 space-y-5 bg-gradient-to-b from-stone-50 to-white lg:bg-transparent`}
+              className={`${showStats ? "fixed right-0 top-0 bottom-0 w-80 overflow-y-auto p-4" : ""} lg:relative lg:sticky lg:top-24 space-y-5 bg-white lg:bg-transparent`}
               onClick={e => e.stopPropagation()}
             >
               {loading ? <SidebarSkeleton /> : (
                 <>
                   {/* Total in Escrow */}
-                  <div className="bg-gradient-to-br from-[#0EA885] via-[#0c9478] to-[#0a7d66] p-5  text-white shadow-lg shadow-[#0EA885]/20">
+                  <div className="bg-white p-5 border border-zinc-200 border-l-2 border-l-[#0EA885]">
                     <div className="flex items-center gap-2.5 mb-3">
-                      <div className="w-10 h-10  bg-white/20 flex items-center justify-center">
+                      <div className="w-10 h-10 bg-[#0EA885]/5 flex items-center justify-center">
                         <Image src={ethIcon} alt="ETH" width={24} height={24} className="flex-shrink-0" />
                       </div>
-                      <span className="text-xs font-semibold uppercase tracking-wider text-white/80">Total in Escrow</span>
+                      <span className="text-xs font-mono font-semibold uppercase tracking-wider text-[#0EA885]">Total in Escrow</span>
                     </div>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-3xl font-bold tracking-tight">{stats.totalEth.toFixed(3)}</span>
-                      <span className="text-sm font-medium text-white/60">ETH</span>
+                      <span className="text-3xl font-bold tracking-tight text-zinc-900 tabular-nums">{stats.totalEth.toFixed(3)}</span>
+                      <span className="text-sm font-mono font-medium text-zinc-400">ETH</span>
                     </div>
-                    {ethPrice > 0 && <div className="text-sm font-medium text-white/70 mt-2">{formatUSD(convertEthToUSD(stats.totalEth, ethPrice))}</div>}
+                    {ethPrice > 0 && <div className="text-sm font-mono font-medium text-zinc-400 mt-2">{formatUSD(convertEthToUSD(stats.totalEth, ethPrice))}</div>}
                   </div>
 
                   {/* Featured Bounty */}
@@ -907,38 +835,38 @@ export default function DashboardPage() {
                     const fImage = meta?.images?.[0] ? formatIpfsUrl(meta.images[0]) : null;
                     const fTitle = meta?.title || `Bounty #${featuredBounty.id}`;
                     return (
-                      <div className="bg-white  shadow-sm border border-stone-100 overflow-hidden">
-                        <div className="px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100/50 flex items-center gap-2">
-                          <div className="w-6 h-6  bg-amber-100 flex items-center justify-center">
+                      <div className="bg-white border border-zinc-200 overflow-hidden">
+                        <div className="px-4 py-3 bg-zinc-50 border-b border-zinc-200 flex items-center gap-2">
+                          <div className="w-6 h-6 bg-amber-100 flex items-center justify-center">
                             <Star className="w-3.5 h-3.5 text-amber-600" />
                           </div>
-                          <span className="text-xs font-semibold text-amber-800">Featured Bounty</span>
+                          <span className="text-xs font-mono font-semibold text-zinc-600">Featured Bounty</span>
                         </div>
                         <div
-                          className="p-4 cursor-pointer hover:bg-stone-50/50 transition-colors"
+                          className="p-4 cursor-pointer hover:bg-[#0EA885]/5 transition-colors"
                           onClick={() => router.push(`/bounties/${featuredBounty.id}`)}
                         >
-                          <div className="w-full h-28 mb-4  overflow-hidden">
+                          <div className="w-full h-28 mb-4 overflow-hidden">
                             {fImage ? (
                               <img src={fImage} alt="" className="w-full h-full object-cover" />
                             ) : (
-                              <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-50 flex items-center justify-center">
-                                <Target className="w-10 h-10 text-stone-300" />
+                              <div className="w-full h-full bg-zinc-50 flex items-center justify-center">
+                                <Target className="w-10 h-10 text-zinc-200" />
                               </div>
                             )}
                           </div>
-                          <h4 className="text-sm font-semibold text-stone-800 mb-3 line-clamp-2 leading-snug">{fTitle}</h4>
+                          <h4 className="text-sm font-semibold text-zinc-800 mb-3 line-clamp-2 leading-snug">{fTitle}</h4>
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                               <Image src={ethIcon} alt="ETH" width={18} height={18} className="flex-shrink-0" />
-                              <span className="text-base font-bold text-stone-800">{(Number(featuredBounty.amount) / 1e18).toFixed(3)}</span>
+                              <span className="text-base font-bold text-zinc-800">{(Number(featuredBounty.amount) / 1e18).toFixed(3)}</span>
                             </div>
-                            <div className="flex items-center gap-1.5 text-xs text-stone-400">
+                            <div className="flex items-center gap-1.5 text-xs font-mono text-zinc-400">
                               <Clock className="w-3.5 h-3.5" />
                               <span className="font-medium">{formatDeadline(featuredBounty.deadline)}</span>
                             </div>
                           </div>
-                          <Button className="w-full bg-stone-900 hover:bg-stone-800 text-white  h-10 text-sm font-medium gap-2">
+                          <Button className="w-full bg-[#0EA885] hover:bg-[#0c9478] text-white h-10 text-sm font-medium gap-2">
                             View Bounty <ArrowRight className="w-4 h-4" />
                           </Button>
                         </div>
@@ -947,33 +875,50 @@ export default function DashboardPage() {
                   })()}
 
                   {/* Quick Stats */}
-                  <div className="bg-white  shadow-sm border border-stone-100 overflow-hidden">
-                    <div className="px-4 py-3 bg-stone-50/80 border-b border-stone-100 flex items-center gap-2">
-                      <div className="w-6 h-6  bg-stone-200/60 flex items-center justify-center">
-                        <BarChart3 className="w-3.5 h-3.5 text-stone-500" />
+                  <div className="bg-white border border-zinc-200 overflow-hidden">
+                    <div className="px-4 py-3 bg-zinc-50 border-b border-zinc-200 flex items-center gap-2">
+                      <div className="w-6 h-6 bg-zinc-100 flex items-center justify-center">
+                        <BarChart3 className="w-3.5 h-3.5 text-zinc-500" />
                       </div>
-                      <span className="text-xs font-semibold text-stone-700">Quick Stats</span>
+                      <span className="text-xs font-mono font-semibold text-zinc-600">Quick Stats</span>
                     </div>
-                    <div className="divide-y divide-stone-50">
+                    <div className="divide-y divide-zinc-100">
                       <div className="px-4 py-3.5 flex items-center justify-between">
-                        <span className="text-sm text-stone-500">Active Bounties</span>
-                        <span className="text-base font-bold text-green-600 bg-green-50 px-2.5 py-0.5 ">{stats.activeBounties}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 bg-[#0EA885]/10 flex items-center justify-center">
+                            <Target className="w-3 h-3 text-[#0EA885]" />
+                          </div>
+                          <span className="text-sm text-zinc-500">Active Bounties</span>
+                        </div>
+                        <span className="text-base font-bold text-[#0EA885] font-mono tabular-nums">{stats.activeBounties}</span>
                       </div>
                       <div className="px-4 py-3.5 flex items-center justify-between">
-                        <span className="text-sm text-stone-500">Active Quests</span>
-                        <span className="text-base font-bold text-amber-600 bg-amber-50 px-2.5 py-0.5 ">{stats.activeQuests}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 bg-amber-50 flex items-center justify-center">
+                            <Zap className="w-3 h-3 text-amber-500" />
+                          </div>
+                          <span className="text-sm text-zinc-500">Active Quests</span>
+                        </div>
+                        <span className="text-base font-bold text-amber-600 font-mono tabular-nums">{stats.activeQuests}</span>
                       </div>
                       <div className="px-4 py-3.5 flex items-center justify-between">
-                        <span className="text-sm text-stone-500">Completed</span>
-                        <span className="text-base font-bold text-sky-600 bg-sky-5g0 px-2.5 py-0.5 ">{stats.completed}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 bg-zinc-100 flex items-center justify-center">
+                            <Trophy className="w-3 h-3 text-zinc-500" />
+                          </div>
+                          <span className="text-sm text-zinc-500">Completed</span>
+                        </div>
+                        <span className="text-base font-bold text-zinc-600 font-mono tabular-nums">{stats.completed}</span>
                       </div>
                       {ethPrice > 0 && (
-                        <div className="px-4 py-3.5 flex items-center justify-between bg-gradient-to-r from-violet-50/50 to-purple-50/50">
-                          <span className="text-sm text-stone-500 flex items-center gap-2">
-                            <Image src={ethIcon} alt="ETH" width={18} height={18} className="flex-shrink-0" />
-                            ETH Price
-                          </span>
-                          <span className="text-base font-bold text-stone-800">{formatUSD(ethPrice)}</span>
+                        <div className="px-4 py-3.5 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-5 h-5 bg-blue-50 flex items-center justify-center">
+                              <Image src={ethIcon} alt="ETH" width={12} height={12} className="flex-shrink-0" />
+                            </div>
+                            <span className="text-sm text-zinc-500">ETH Price</span>
+                          </div>
+                          <span className="text-base font-bold text-zinc-800 font-mono">{formatUSD(ethPrice)}</span>
                         </div>
                       )}
                     </div>
@@ -981,29 +926,32 @@ export default function DashboardPage() {
 
                   {/* Recent Activity */}
                   {recentActivity.length > 0 && (
-                    <div className="bg-white  shadow-sm border border-stone-100 overflow-hidden">
-                      <div className="px-4 py-3 bg-stone-50/80 border-b border-stone-100 flex items-center gap-2">
-                        <div className="w-6 h-6  bg-stone-200/60 flex items-center justify-center">
-                          <Activity className="w-3.5 h-3.5 text-stone-500" />
+                    <div className="bg-white border border-zinc-200 overflow-hidden">
+                      <div className="px-4 py-3 bg-zinc-50 border-b border-zinc-200 flex items-center gap-2">
+                        <div className="w-6 h-6 bg-zinc-100 flex items-center justify-center">
+                          <Activity className="w-3.5 h-3.5 text-zinc-500" />
                         </div>
-                        <span className="text-xs font-semibold text-stone-700">Recent Activity</span>
+                        <span className="text-xs font-mono font-semibold text-zinc-600">Recent Activity</span>
                       </div>
-                      <div className="divide-y divide-stone-50">
+                      <div className="divide-y divide-zinc-100">
                         {recentActivity.map((act, i) => {
                           return (
                             <div
                               key={i}
-                              className="px-4 py-3.5 flex items-start gap-3 hover:bg-stone-50/50 cursor-pointer transition-colors"
+                              className="group relative px-4 py-3.5 flex items-start gap-3 cursor-pointer transition-colors"
                               onClick={() => router.push(`/${act.type === "bounty" ? "bounties" : "quests"}/${act.id}`)}
                             >
-                              <img src={getAvatarUrl(act.creator, 32)} alt="" className="w-8 h-8  ring-2 ring-stone-100 flex-shrink-0" />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm text-stone-700 font-medium truncate leading-snug">{act.title}</p>
-                                <p className="text-xs text-stone-400 mt-1">
+                              {/* Full-bleed hover */}
+                              <div className="absolute inset-0 bg-[#0EA885]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                              <img src={getAvatarUrl(act.creator, 32)} alt="" className="relative w-8 h-8 ring-2 ring-zinc-100 flex-shrink-0" />
+                              <div className="relative flex-1 min-w-0">
+                                <p className="text-sm text-zinc-700 font-medium truncate leading-snug">{act.title}</p>
+                                <p className="text-xs text-zinc-400 mt-1 font-mono">
                                   <span className={`font-medium ${act.action === "Now live" ? "text-[#0EA885]" :
-                                    act.action === "Completed" || act.action === "Resolved" ? "text-stone-500" : "text-amber-600"
+                                    act.action === "Completed" || act.action === "Resolved" ? "text-zinc-500" : "text-amber-600"
                                     }`}>{act.action}</span>
-                                  <span className="mx-1.5">&bull;</span>
+                                  <span className="mx-1.5 text-zinc-300">|</span>
                                   <WalletName address={act.creator} />
                                 </p>
                               </div>

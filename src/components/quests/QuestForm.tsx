@@ -8,6 +8,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { format, startOfDay } from "date-fns";
 import { ImageUpload } from "../ui/image-upload";
+import { TokenSelector } from "../ui/TokenSelector";
+import { ETH_ADDRESS, getTokenInfo } from "../../utils/contracts";
 
 type QuestType = "development" | "design" | "marketing" | "research" | "other";
 
@@ -34,6 +36,7 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
         requirements: "",
         imageUrl: "",
         questType: "other" as QuestType,
+        token: ETH_ADDRESS,
     });
 
     const [deadlineDate, setDeadlineDate] = useState<Date>();
@@ -50,6 +53,7 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
         onSubmit({
             ...formData,
             deadline: deadlineDateTime.toISOString(),
+            token: formData.token,
         });
     };
 
@@ -57,7 +61,9 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
         <Card className="max-w-3xl mx-auto border border-slate-200 bg-white overflow-hidden">
             <CardHeader className="border-b border-slate-200 p-6">
                 <div className="flex items-center gap-3">
-                    <Gift className="w-5 h-5 text-[#0EA885]" />
+                    <div className="w-8 h-8 bg-amber-50 flex items-center justify-center flex-shrink-0">
+                        <Gift className="w-4 h-4 text-amber-500" />
+                    </div>
                     <div>
                         <CardTitle className="text-lg font-black text-slate-900">Create New Quest</CardTitle>
                         <p className="text-slate-400 text-xs">Launch a reward campaign for your community</p>
@@ -134,9 +140,19 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
                         </div>
 
                         <div className="space-y-4">
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Payment Token</label>
+                                <TokenSelector
+                                    value={formData.token}
+                                    onChange={(v) => setFormData({ ...formData, token: v })}
+                                />
+                            </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Reward / User</label>
+                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                        Reward / User ({getTokenInfo(formData.token).symbol})
+                                    </label>
                                     <div className="relative">
                                         <Coins className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                                         <Input
@@ -197,7 +213,7 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
                                 <div className="flex items-center justify-between mb-1">
                                     <span className="text-xs font-bold text-slate-700">Total Escrow</span>
                                     <span className="text-base font-black text-[#0EA885]">
-                                        {(parseFloat(formData.perQualifier) || 0) * (formData.maxQualifiers || 0)} ETH
+                                        {(parseFloat(formData.perQualifier) || 0) * (formData.maxQualifiers || 0)} {getTokenInfo(formData.token).symbol}
                                     </span>
                                 </div>
                                 <p className="text-[10px] text-slate-400 leading-relaxed">This amount will be locked in the contract until distribution.</p>
