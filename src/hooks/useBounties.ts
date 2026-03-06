@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useReadContract, useWatchContractEvent } from "wagmi";
 import { readContract } from "@wagmi/core";
-import { CONTRACT_ADDRESSES, QUINTY_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
+import { CONTRACT_ADDRESSES, QUINTY_ABI, BASE_SEPOLIA_CHAIN_ID, ETH_ADDRESS } from "../utils/contracts";
 import { wagmiConfig } from "../utils/web3";
 
 export interface Submission {
@@ -16,14 +16,13 @@ export interface Bounty {
     creator: string;
     title: string;
     description: string;
-    token: string;           // always ETH in V2
-    totalAmount: bigint;
+    token: string;           // address(0) for ETH, token address for ERC-20
+    totalAmount: bigint;     // total prize pool
+    prizes: bigint[];        // ranked prize tiers
     openDeadline: bigint;
     judgingDeadline: bigint;
-    slashPercent: bigint;
+    slashPercent: bigint;    // 2500-5000 (25%-50% in basis points)
     status: number;          // 0: OPEN, 1: JUDGING, 2: RESOLVED, 3: SLASHED
-    selectedWinner: string;
-    selectedSubmissionId: number;
     submissionCount: number;
     totalDeposits: bigint;
     submissions: Submission[];
@@ -72,20 +71,19 @@ export function useBounties() {
                         const description = bountyData[2];
                         const metadataMatch = description.match(/Metadata: ipfs:\/\/([a-zA-Z0-9]+)/);
 
-                        // V2 getBounty returns: creator, title, description, amount, openDeadline, judgingDeadline, slashPercent, status, selectedWinner, selectedSubmissionId, submissionCount, totalDeposits
+                        // V3 getBounty returns: creator, title, description, token, totalAmount, prizes[], openDeadline, judgingDeadline, slashPercent, status, submissionCount, totalDeposits
                         return {
                             id,
                             creator: bountyData[0],
                             title: bountyData[1],
                             description: description,
-                            token: "0x0000000000000000000000000000000000000000",
-                            totalAmount: bountyData[3],
-                            openDeadline: bountyData[4],
-                            judgingDeadline: bountyData[5],
-                            slashPercent: bountyData[6],
-                            status: Number(bountyData[7]),
-                            selectedWinner: bountyData[8],
-                            selectedSubmissionId: Number(bountyData[9]),
+                            token: bountyData[3],
+                            totalAmount: bountyData[4],
+                            prizes: bountyData[5] as bigint[],
+                            openDeadline: bountyData[6],
+                            judgingDeadline: bountyData[7],
+                            slashPercent: bountyData[8],
+                            status: Number(bountyData[9]),
                             submissionCount: Number(bountyData[10]),
                             totalDeposits: bountyData[11],
                             submissions: submissions as Submission[],
@@ -133,7 +131,7 @@ export function useBounties() {
     useWatchContractEvent({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
-        eventName: "WinnerSelected",
+        eventName: "WinnersSelected",
         onLogs() {
             loadBounties();
         },

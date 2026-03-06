@@ -13,6 +13,9 @@ import {
     CONTRACT_ADDRESSES,
     QUEST_ABI,
     BASE_SEPOLIA_CHAIN_ID,
+    ETH_ADDRESS,
+    getTokenInfo,
+    formatTokenAmount,
 } from "../../../utils/contracts";
 import { formatETH, formatTimeLeft, formatAddress, wagmiConfig } from "../../../utils/web3";
 import { WalletName } from "../../../components/WalletName";
@@ -298,12 +301,12 @@ export default function QuestDetailPage() {
 
             finalCid = await uploadMetadataToIpfs(submissionMetadata);
 
-            // V2: submitEntry(questId, ipfsProofCid, socialHandle)
+            // V2: submitEntry(questId, ipfsCid) - no socialHandle
             writeContract({
                 address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
                 abi: QUEST_ABI,
                 functionName: "submitEntry",
-                args: [BigInt(questId), finalCid, ""],
+                args: [BigInt(questId), finalCid],
             });
         } catch (error) {
             console.error("Error submitting entry:", error);
@@ -340,10 +343,12 @@ export default function QuestDetailPage() {
     const canSubmit = !isExpired && !quest.resolved && !quest.cancelled && !isFull && !userEntry;
     const progress = Math.min((quest.qualifiersCount / quest.maxQualifiers) * 100, 100);
 
-    const rewardDisplay = formatETH(quest.perQualifier);
-    const totalDisplay = formatETH(quest.totalAmount);
-    const ethAmount = Number(quest.perQualifier) / 1e18;
-    const usdAmount = ethPrice > 0 ? convertEthToUSD(ethAmount, ethPrice) : 0;
+    const tokenInfo = getTokenInfo(quest.token);
+    const isETH = quest.token === ETH_ADDRESS;
+    const rewardDisplay = formatTokenAmount(quest.perQualifier, quest.token);
+    const totalDisplay = formatTokenAmount(quest.totalAmount, quest.token);
+    const ethAmount = isETH ? Number(quest.perQualifier) / 1e18 : 0;
+    const usdAmount = isETH && ethPrice > 0 ? convertEthToUSD(ethAmount, ethPrice) : 0;
 
     const getStatusConfig = () => {
         if (quest.cancelled) return { label: "Cancelled", color: "bg-stone-400", textColor: "text-stone-500", bgColor: "bg-stone-100" };
@@ -421,9 +426,9 @@ export default function QuestDetailPage() {
                                     <span className="text-amber-100 text-xs font-medium uppercase tracking-wider">Reward Per User</span>
                                 </div>
                                 <div className="flex items-center gap-3 mb-1">
-                                    <span className="text-2xl flex-shrink-0">{"⟠"}</span>
+                                    <span className="text-2xl flex-shrink-0">{isETH ? "⟠" : "🪙"}</span>
                                     <span className="text-4xl font-bold tabular-nums">{rewardDisplay}</span>
-                                    <span className="text-xl text-white/60">{"ETH"}</span>
+                                    <span className="text-xl text-white/60">{tokenInfo.symbol}</span>
                                 </div>
                                 {ethPrice > 0 && (
                                     <p className="text-amber-100 text-sm flex items-center gap-1 mt-2">
@@ -472,7 +477,7 @@ export default function QuestDetailPage() {
                                             <Zap className="size-3.5 text-violet-500" />
                                             <span className="text-[10px] text-stone-400 uppercase tracking-wider">Pool</span>
                                         </div>
-                                        <p className="text-sm font-bold text-stone-800">{totalDisplay} {"ETH"}</p>
+                                        <p className="text-sm font-bold text-stone-800">{totalDisplay} {tokenInfo.symbol}</p>
                                     </div>
                                 </div>
                             </div>
@@ -499,11 +504,11 @@ export default function QuestDetailPage() {
                                 <div className="space-y-3 text-sm">
                                     <div className="flex justify-between">
                                         <span className="text-stone-500">Total Budget</span>
-                                        <span className="font-semibold text-stone-800">{totalDisplay} {"ETH"}</span>
+                                        <span className="font-semibold text-stone-800">{totalDisplay} {tokenInfo.symbol}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-stone-500">Per Qualifier</span>
-                                        <span className="font-semibold text-stone-800">{rewardDisplay} {"ETH"}</span>
+                                        <span className="font-semibold text-stone-800">{rewardDisplay} {tokenInfo.symbol}</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-stone-500">Created</span>
@@ -590,7 +595,7 @@ export default function QuestDetailPage() {
                                     </div>
                                     {userEntry.status === 1 && (
                                         <div className="text-right">
-                                            <p className="text-2xl font-bold text-amber-600">{rewardDisplay} {"ETH"}</p>
+                                            <p className="text-2xl font-bold text-amber-600">{rewardDisplay} {tokenInfo.symbol}</p>
                                             {ethPrice > 0 && <p className="text-sm text-stone-500">{formatUSD(usdAmount)}</p>}
                                         </div>
                                     )}
@@ -732,7 +737,7 @@ export default function QuestDetailPage() {
                                             <div>
                                                 <p className="text-sm font-semibold text-amber-800">Review Pending Entries</p>
                                                 <p className="text-xs text-amber-600 mt-1">
-                                                    Click "Approve" to reward the participant with {rewardDisplay} {"ETH"}, or "Reject" if their submission doesn't meet the requirements.
+                                                    Click "Approve" to reward the participant with {rewardDisplay} {tokenInfo.symbol}, or "Reject" if their submission doesn't meet the requirements.
                                                 </p>
                                             </div>
                                         </div>

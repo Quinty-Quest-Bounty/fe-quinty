@@ -65,11 +65,12 @@ export function useQuests() {
 
                         if (!questData) return null;
 
-                        // V2 getQuest returns: creator, title, description, totalAmount, perQualifier, maxQualifiers, qualifiersCount, deadline, createdAt, resolved, cancelled, requirements
+                        // V2 getQuest returns: creator, title, description, token, totalAmount, perQualifier, maxQualifiers, qualifiersCount, deadline, createdAt, resolved, cancelled, requirements
                         const [
                             creator,
                             title,
                             description,
+                            token,
                             totalAmount,
                             perQualifier,
                             maxQualifiers,
@@ -116,7 +117,7 @@ export function useQuests() {
                                 creator,
                                 title,
                                 description,
-                                token: "0x0000000000000000000000000000000000000000",
+                                token,
                                 totalAmount,
                                 perQualifier,
                                 maxQualifiers: Number(maxQualifiers),
