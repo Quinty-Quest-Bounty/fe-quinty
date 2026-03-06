@@ -4,7 +4,7 @@ import { useAccount } from "wagmi";
 import { formatETH, formatTimeLeft, formatAddress } from "../utils/web3";
 import { fetchMetadataFromIpfs, BountyMetadata } from "../utils/ipfs";
 import { getEthPriceInUSD, convertEthToUSD, formatUSD } from "../utils/prices";
-import { BountyStatus, getTokenInfo, formatTokenAmount } from "../utils/contracts";
+import { BountyStatus } from "../utils/contracts";
 import { Clock, Users, AlertTriangle, Gavel, ArrowUpRight } from "lucide-react";
 import { useWalletName } from "@/hooks/useWalletName";
 import { BountyQuickView } from "./bounties/BountyQuickView";
@@ -60,7 +60,6 @@ export default function BountyCard({ bounty, onTriggerSlash }: BountyCardProps) 
   const config = phaseConfig[phase] || phaseConfig.OPEN;
   const creatorName = useWalletName(bounty.creator);
   const canSlash = phase === "SLASH_PENDING" && bounty.submissionCount > 0;
-  const tokenInfo = getTokenInfo(bounty.token);
   const title = metadata?.title || bounty.title || bounty.description.split("\n")[0];
   const imageUrl = metadata?.images?.[0]
     ? `https://purple-elderly-silverfish-382.mypinata.cloud/ipfs/${metadata.images[0]}`
@@ -137,10 +136,10 @@ export default function BountyCard({ bounty, onTriggerSlash }: BountyCardProps) 
             {/* Reward */}
             <div>
               <div className="flex items-baseline gap-1">
-                <span className="text-lg font-bold text-zinc-900 tabular-nums tracking-tight">{formatTokenAmount(bounty.totalAmount, bounty.token)}</span>
-                <span className="text-[10px] font-mono font-semibold text-zinc-400">{tokenInfo.symbol}</span>
+                <span className="text-lg font-bold text-zinc-900 tabular-nums tracking-tight">{formatETH(bounty.totalAmount)}</span>
+                <span className="text-[10px] font-mono font-semibold text-zinc-400">{"ETH"}</span>
               </div>
-              {ethPrice > 0 && tokenInfo.symbol === "ETH" && (
+              {ethPrice > 0 && (
                 <span className="text-[10px] font-mono text-zinc-300 tabular-nums">
                   {formatUSD(convertEthToUSD(Number(bounty.totalAmount) / 1e18, ethPrice))}
                 </span>

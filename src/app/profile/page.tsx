@@ -5,11 +5,10 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useChainId, useBalance } from "wagmi";
 import { formatETH, parseETH, formatAddress, formatTimeLeft, wagmiConfig } from "../../utils/web3";
-import { readContract } from "@wagmi/core";
 import { useHistory } from "../../hooks/useHistory";
 import { useBounties } from "../../hooks/useBounties";
 import { useQuests } from "../../hooks/useQuests";
-import { CONTRACT_ADDRESSES, QUINTY_ABI, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID, ETH_ADDRESS, ERC20_ABI, calculatePrizeSplit, parseTokenAmount, getTokenInfo } from "../../utils/contracts";
+import { CONTRACT_ADDRESSES, QUINTY_ABI, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID } from "../../utils/contracts";
 import { uploadMetadataToIpfs, BountyMetadata, QuestMetadata, formatIpfsUrl, fetchMetadataFromIpfs } from "../../utils/ipfs";
 import { ensureBaseSepoliaNetwork } from "../../utils/network";
 import ReputationDisplay from "../../components/ReputationDisplay";
@@ -172,36 +171,12 @@ export default function ProfilePage() {
                 images: formData.images || [], deadline: judgingDeadlineTs, bountyType: formData.bountyType,
             };
             const metadataCid = await uploadMetadataToIpfs(metadata);
-            const token = formData.token || ETH_ADDRESS;
-            const totalAmount = parseTokenAmount(formData.amount, token);
-            const winnerCount = formData.winnerCount || 1;
-            const prizes = calculatePrizeSplit(totalAmount, winnerCount);
-
-            if (token !== ETH_ADDRESS) {
-                const contractAddress = CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`;
-                const allowance = await readContract(wagmiConfig, {
-                    address: token as `0x${string}`,
-                    abi: ERC20_ABI,
-                    functionName: "allowance",
-                    args: [address, contractAddress],
-                }) as bigint;
-                if (allowance < totalAmount) {
-                    const approveHash = await writeContractAsync({
-                        address: token as `0x${string}`,
-                        abi: ERC20_ABI,
-                        functionName: "approve",
-                        args: [contractAddress, totalAmount],
-                    });
-                    const { waitForTransactionReceipt } = await import("wagmi/actions");
-                    await waitForTransactionReceipt(wagmiConfig, { hash: approveHash });
-                }
-            }
 
             writeContract({
                 address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
                 abi: QUINTY_ABI, functionName: "createBounty",
-                args: [formData.title, `${formData.description}\n\nMetadata: ipfs://${metadataCid}`, BigInt(openDeadlineTs), BigInt(judgingDeadlineTs), BigInt(formData.slashPercent), prizes, token as `0x${string}`],
-                value: token === ETH_ADDRESS ? totalAmount : 0n,
+                args: [formData.title, `${formData.description}\n\nMetadata: ipfs://${metadataCid}`, BigInt(openDeadlineTs), BigInt(judgingDeadlineTs), BigInt(formData.slashPercent)],
+                value: parseETH(formData.amount),
             });
         } catch (e: any) { console.error("Error creating bounty:", e); alert(`Error creating bounty: ${e.message || e}`); }
     };
@@ -211,10 +186,7 @@ export default function ProfilePage() {
         if (!address) { alert("Please connect your wallet first"); return; }
         try {
             const deadlineTimestamp = Math.floor(new Date(formData.deadline).getTime() / 1000);
-            const token = formData.token || ETH_ADDRESS;
-            const perQualifierWei = token === ETH_ADDRESS
-                ? parseETH(formData.perQualifier)
-                : parseTokenAmount(formData.perQualifier, token);
+            const perQualifierWei = parseETH(formData.perQualifier);
             const totalAmount = perQualifierWei * BigInt(formData.maxQualifiers);
             const metadata: QuestMetadata = {
                 title: formData.title, description: formData.description,
@@ -223,31 +195,11 @@ export default function ProfilePage() {
             };
             const metadataCid = await uploadMetadataToIpfs(metadata);
 
-            if (token !== ETH_ADDRESS) {
-                const contractAddress = CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`;
-                const allowance = await readContract(wagmiConfig, {
-                    address: token as `0x${string}`,
-                    abi: ERC20_ABI,
-                    functionName: "allowance",
-                    args: [address, contractAddress],
-                }) as bigint;
-                if (allowance < totalAmount) {
-                    const approveHash = await writeContractAsync({
-                        address: token as `0x${string}`,
-                        abi: ERC20_ABI,
-                        functionName: "approve",
-                        args: [contractAddress, totalAmount],
-                    });
-                    const { waitForTransactionReceipt } = await import("wagmi/actions");
-                    await waitForTransactionReceipt(wagmiConfig, { hash: approveHash });
-                }
-            }
-
             await writeContractAsync({
                 address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
                 abi: QUEST_ABI, functionName: "createQuest",
-                args: [formData.title, `${formData.description}\n\nMetadata: ipfs://${metadataCid}`, perQualifierWei, BigInt(formData.maxQualifiers), BigInt(deadlineTimestamp), formData.requirements, token as `0x${string}`],
-                value: token === ETH_ADDRESS ? totalAmount : 0n,
+                args: [formData.title, `${formData.description}\n\nMetadata: ipfs://${metadataCid}`, perQualifierWei, BigInt(formData.maxQualifiers), BigInt(deadlineTimestamp), formData.requirements],
+                value: totalAmount,
             });
             setTimeout(() => { setCreateType(null); setShowCreateOptions(false); setActiveTab("reputation"); }, 2000);
         } catch (error: any) { console.error("Error creating quest:", error); alert(`Error creating quest: ${error.message || error}`); }

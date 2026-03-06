@@ -291,7 +291,7 @@ export default function DashboardPage() {
             abi: QUEST_ABI, functionName: "getQuest", args: [BigInt(i)],
           });
           if (questData && Array.isArray(questData)) {
-            const [creator, title, description, , totalAmount, , , qualifiersCount, deadline, , resolved, cancelled] = questData as any[];
+            const [creator, title, description, totalAmount, , , qualifiersCount, deadline, , resolved, cancelled] = questData as any[];
             let metadataCid;
             if (description && typeof description === "string") {
               const match = description.match(/Metadata: ipfs:\/\/([a-zA-Z0-9]+)/);

@@ -1,8 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useAccount, useWriteContract, useChainId } from "wagmi";
-import { CONTRACT_ADDRESSES, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID, ETH_ADDRESS, ERC20_ABI, parseTokenAmount, getTokenInfo } from "../utils/contracts";
-import { parseETH, wagmiConfig } from "../utils/web3";
-import { readContract } from "@wagmi/core";
+import { CONTRACT_ADDRESSES, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID } from "../utils/contracts";
+import { parseETH } from "../utils/web3";
 import { ensureBaseSepoliaNetwork } from "../utils/network";
 import { uploadMetadataToIpfs, QuestMetadata } from "../utils/ipfs";
 import QuestCard from "./QuestCard";
@@ -49,10 +48,7 @@ export default function QuestManager() {
     try {
       console.log("Creating quest with form data:", formData);
       const deadlineTimestamp = Math.floor(new Date(formData.deadline).getTime() / 1000);
-      const token = formData.token || ETH_ADDRESS;
-      const perQualifierWei = token === ETH_ADDRESS
-        ? parseETH(formData.perQualifier)
-        : parseTokenAmount(formData.perQualifier, token);
+      const perQualifierWei = parseETH(formData.perQualifier);
       const totalAmount = perQualifierWei * BigInt(formData.maxQualifiers);
 
       // Create quest metadata with images array (same pattern as bounties)
@@ -68,28 +64,7 @@ export default function QuestManager() {
       // Upload metadata to Pinata
       const metadataCid = await uploadMetadataToIpfs(metadata);
 
-      if (token !== ETH_ADDRESS) {
-        // ERC-20: approve then create
-        const contractAddress = CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`;
-        const allowance = await readContract(wagmiConfig, {
-          address: token as `0x${string}`,
-          abi: ERC20_ABI,
-          functionName: "allowance",
-          args: [address, contractAddress],
-        }) as bigint;
-
-        if (allowance < totalAmount) {
-          const approveHash = await writeContractAsync({
-            address: token as `0x${string}`,
-            abi: ERC20_ABI,
-            functionName: "approve",
-            args: [contractAddress, totalAmount],
-          });
-          const { waitForTransactionReceipt } = await import("wagmi/actions");
-          await waitForTransactionReceipt(wagmiConfig, { hash: approveHash });
-        }
-      }
-
+      // V2 createQuest: 6 params (title, description, perQualifier, maxQualifiers, deadline, requirements) + msg.value
       const result = await writeContractAsync({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quest as `0x${string}`,
         abi: QUEST_ABI,
@@ -101,9 +76,8 @@ export default function QuestManager() {
           BigInt(formData.maxQualifiers),
           BigInt(deadlineTimestamp),
           formData.requirements,
-          token as `0x${string}`,
         ],
-        value: token === ETH_ADDRESS ? totalAmount : 0n,
+        value: totalAmount,
       });
 
       console.log("Quest created successfully:", result);

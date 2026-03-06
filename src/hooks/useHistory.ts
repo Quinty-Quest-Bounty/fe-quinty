@@ -140,7 +140,7 @@ export function useHistory() {
                             args: [BigInt(id)],
                         }) as any;
 
-                        const [creator, title, , , totalReward, perQualifier, , , deadline, createdAt] = quest;
+                        const [creator, title, , totalReward, perQualifier, , , deadline, createdAt] = quest;
 
                         if (creator.toLowerCase() === address.toLowerCase()) {
                             allTransactions.push({

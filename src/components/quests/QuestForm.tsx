@@ -8,8 +8,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { format, startOfDay } from "date-fns";
 import { ImageUpload } from "../ui/image-upload";
-import { TokenSelector } from "../ui/TokenSelector";
-import { ETH_ADDRESS, getTokenInfo } from "../../utils/contracts";
 
 type QuestType = "development" | "design" | "marketing" | "research" | "other";
 
@@ -36,7 +34,6 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
         requirements: "",
         imageUrl: "",
         questType: "other" as QuestType,
-        token: ETH_ADDRESS,
     });
 
     const [deadlineDate, setDeadlineDate] = useState<Date>();
@@ -53,7 +50,6 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
         onSubmit({
             ...formData,
             deadline: deadlineDateTime.toISOString(),
-            token: formData.token,
         });
     };
 
@@ -140,18 +136,10 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
                         </div>
 
                         <div className="space-y-4">
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Payment Token</label>
-                                <TokenSelector
-                                    value={formData.token}
-                                    onChange={(v) => setFormData({ ...formData, token: v })}
-                                />
-                            </div>
-
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                        Reward / User ({getTokenInfo(formData.token).symbol})
+                                        Reward / User (ETH)
                                     </label>
                                     <div className="relative">
                                         <Coins className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
@@ -213,7 +201,7 @@ export function QuestForm({ onSubmit, isPending }: QuestFormProps) {
                                 <div className="flex items-center justify-between mb-1">
                                     <span className="text-xs font-bold text-slate-700">Total Escrow</span>
                                     <span className="text-base font-black text-[#0EA885]">
-                                        {(parseFloat(formData.perQualifier) || 0) * (formData.maxQualifiers || 0)} {getTokenInfo(formData.token).symbol}
+                                        {(parseFloat(formData.perQualifier) || 0) * (formData.maxQualifiers || 0)} ETH
                                     </span>
                                 </div>
                                 <p className="text-[10px] text-slate-400 leading-relaxed">This amount will be locked in the contract until distribution.</p>

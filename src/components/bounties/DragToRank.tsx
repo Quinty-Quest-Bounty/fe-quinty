@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { formatTokenAmount } from "../../utils/contracts";
+import { formatETH } from "../../utils/web3";
 import { WalletName } from "../WalletName";
 import { Button } from "../ui/button";
 import { Trophy, X, GripVertical } from "lucide-react";
@@ -16,7 +16,6 @@ interface Submission {
 interface DragToRankProps {
     submissions: Submission[];
     prizes: bigint[];
-    token: string;
     onSelectWinners: (submissionIds: number[]) => void;
     disabled?: boolean;
 }
@@ -35,7 +34,7 @@ const RANK_COLORS = [
     "border-stone-200 bg-stone-50",
 ];
 
-export function DragToRank({ submissions, prizes, token, onSelectWinners, disabled }: DragToRankProps) {
+export function DragToRank({ submissions, prizes, onSelectWinners, disabled }: DragToRankProps) {
     // ranked[slotIndex] = submissionIndex or null
     const [ranked, setRanked] = useState<(number | null)[]>(
         Array(prizes.length).fill(null)
@@ -112,7 +111,7 @@ export function DragToRank({ submissions, prizes, token, onSelectWinners, disabl
                     >
                         <div className="flex-shrink-0 w-12 text-center">
                             <span className="text-xs font-bold text-stone-500">{RANK_LABELS[slotIndex]}</span>
-                            <p className="text-[10px] text-stone-400">{formatTokenAmount(prize, token)}</p>
+                            <p className="text-[10px] text-stone-400">{formatETH(prize)} ETH</p>
                         </div>
 
                         {ranked[slotIndex] !== null ? (
