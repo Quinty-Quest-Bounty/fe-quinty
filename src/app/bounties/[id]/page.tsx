@@ -207,7 +207,14 @@ export default function BountyDetailPage() {
   };
 
   useEffect(() => { if (bountyId) loadBounty(); }, [bountyId, address]);
-  useEffect(() => { if (isConfirmed) loadBounty(); }, [isConfirmed]);
+  useEffect(() => {
+    if (isConfirmed) {
+      setUploadedSolutionImage(null);
+      setSubmissionText("");
+      setShowSubmitForm(false);
+      loadBounty();
+    }
+  }, [isConfirmed]);
 
   // Load viewing metadata
   useEffect(() => {
@@ -299,9 +306,6 @@ export default function BountyDetailPage() {
         });
       }
 
-      setUploadedSolutionImage(null);
-      setSubmissionText("");
-      setShowSubmitForm(false);
     } catch (error) {
       console.error("Error submitting solution:", error);
       showAlert({ title: "Submission Failed", description: "Failed to submit solution. Please try again." });

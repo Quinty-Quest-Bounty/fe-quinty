@@ -376,28 +376,28 @@ export default function ProfilePage() {
                         )}
                     </div>
 
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-3">
-                                <Wallet className="w-4 h-4 text-[#0EA885]" />
-                                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-500">Wallet Address</span>
-                            </div>
+                    <div>
+                        <div className="flex items-center gap-2 mb-3">
+                            <Wallet className="w-4 h-4 text-[#0EA885]" />
+                            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-500">Wallet Address</span>
+                        </div>
+                        <div className="flex items-start justify-between gap-4">
                             <div className="flex items-center gap-2">
                                 <span className="font-mono text-sm font-semibold text-zinc-900">{formatAddress(address || "")}</span>
                                 <button onClick={copyAddress} className="p-1.5 hover:bg-[#0EA885]/5 transition-colors border border-zinc-200 hover:border-[#0EA885]/30" title="Copy address">
                                     {copiedAddress ? <Check className="w-3.5 h-3.5 text-[#0EA885]" /> : <Copy className="w-3.5 h-3.5 text-zinc-400" />}
                                 </button>
                             </div>
-                        </div>
-                        <div className="text-right">
-                            <div className="flex items-center justify-end gap-2 mb-3">
-                                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-500">Balance</span>
+                            <div className="text-right">
+                                <div className="flex items-center justify-end gap-1 mb-1">
+                                    <span className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-500">Balance</span>
+                                </div>
+                                <div className="flex items-baseline gap-1 justify-end">
+                                    <span className="text-2xl font-semibold text-zinc-900 tabular-nums font-heading">{balanceData ? formatETH(balanceData.value) : "0.00"}</span>
+                                    <span className="text-xs font-mono font-semibold text-zinc-400">ETH</span>
+                                </div>
+                                <div className="text-xs font-mono text-zinc-400 mt-1">{balanceData?.symbol || "ETH"} · Base Sepolia</div>
                             </div>
-                            <div className="flex items-baseline gap-1 justify-end">
-                                <span className="text-2xl font-semibold text-zinc-900 tabular-nums font-heading">{balanceData ? formatETH(balanceData.value) : "0.00"}</span>
-                                <span className="text-xs font-mono font-semibold text-zinc-400">ETH</span>
-                            </div>
-                            <div className="text-xs font-mono text-zinc-400 mt-1">{balanceData?.symbol || "ETH"} · Base Sepolia</div>
                         </div>
                     </div>
                 </div>
