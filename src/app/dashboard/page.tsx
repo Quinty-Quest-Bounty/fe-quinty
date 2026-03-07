@@ -237,13 +237,13 @@ export default function DashboardPage() {
             abi: QUINTY_ABI, functionName: "getBounty", args: [BigInt(i)],
           });
           if (bountyData && Array.isArray(bountyData)) {
-            const [creator, title, description, amount, openDeadline, judgingDeadline, slashPercent, status] = bountyData as any[];
+            const [creator, title, description, , totalAmount, , openDeadline, judgingDeadline, slashPercent, status] = bountyData as any[];
             let metadataCid;
             if (description && typeof description === "string") {
               const match = description.match(/Metadata: ipfs:\/\/([a-zA-Z0-9]+)/);
               metadataCid = match ? match[1] : undefined;
             }
-            loadedBounties.push({ id: i, creator, title, description: description || "", amount, deadline: judgingDeadline, status, metadataCid, type: "bounty" });
+            loadedBounties.push({ id: i, creator, title, description: description || "", amount: totalAmount, deadline: judgingDeadline, status, metadataCid, type: "bounty" });
           }
         } catch (err) { console.error(`Error loading bounty ${i}:`, err); }
       }
@@ -448,12 +448,15 @@ export default function DashboardPage() {
 
   const formatDeadline = (deadline: bigint | number) => {
     try {
-      const diff = new Date(Number(deadline) * 1000).getTime() - Date.now();
+      if (deadline === undefined || deadline === null) return "—";
+      const num = Number(deadline);
+      if (isNaN(num) || num === 0) return "—";
+      const diff = new Date(num * 1000).getTime() - Date.now();
       if (diff < 0) return "Ended";
       const days = Math.floor(diff / 86400000);
       const hours = Math.floor((diff % 86400000) / 3600000);
       return days > 0 ? `${days}d left` : `${hours}h left`;
-    } catch { return "N/A"; }
+    } catch { return "—"; }
   };
 
   const getItemData = (item: UnifiedItem) => {
