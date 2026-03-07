@@ -9,6 +9,7 @@ import {
   useWaitForTransactionReceipt,
 } from "wagmi";
 import { readContract } from "@wagmi/core";
+import { ensureBaseSepoliaNetwork } from "../../../utils/network";
 import {
   CONTRACT_ADDRESSES,
   QUINTY_ABI,
@@ -127,7 +128,7 @@ export default function BountyDetailPage() {
   const [ethPrice, setEthPrice] = useState<number>(0);
   const [showSubmitForm, setShowSubmitForm] = useState(false);
 
-  const { writeContract, data: hash, isPending } = useWriteContract();
+  const { writeContractAsync, data: hash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({ hash });
 
@@ -257,6 +258,7 @@ export default function BountyDetailPage() {
 
     try {
       setIsUploadingSolution(true);
+      await ensureBaseSepoliaNetwork();
       const solutionImageCid = await uploadToIpfs(uploadedSolutionImage, { bountyId, type: "bounty-solution" });
 
       const submissionMetadata: SubmissionMetadata = {
@@ -290,14 +292,14 @@ export default function BountyDetailPage() {
           await waitForTransactionReceipt(wagmiConfig, { hash: approveHash });
         }
 
-        writeContract({
+        await writeContractAsync({
           address: contractAddress,
           abi: QUINTY_ABI,
           functionName: "submitToBounty",
           args: [BigInt(bountyId), metadataCid],
         });
       } else {
-        writeContract({
+        await writeContractAsync({
           address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
           abi: QUINTY_ABI,
           functionName: "submitToBounty",
@@ -316,7 +318,7 @@ export default function BountyDetailPage() {
 
   const selectWinners = async (submissionIds: number[]) => {
     if (submissionIds.length === 0) return;
-    writeContract({
+    await writeContractAsync({
       address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
       abi: QUINTY_ABI,
       functionName: "selectWinners",
@@ -325,7 +327,7 @@ export default function BountyDetailPage() {
   };
 
   const triggerSlash = async () => {
-    writeContract({
+    await writeContractAsync({
       address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
       abi: QUINTY_ABI,
       functionName: "triggerSlash",
@@ -334,7 +336,7 @@ export default function BountyDetailPage() {
   };
 
   const refundNoSubmissions = async () => {
-    writeContract({
+    await writeContractAsync({
       address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
       abi: QUINTY_ABI,
       functionName: "refundNoSubmissions",

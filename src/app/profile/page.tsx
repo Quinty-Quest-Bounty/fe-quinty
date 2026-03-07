@@ -79,7 +79,7 @@ export default function ProfilePage() {
     const [copiedAddress, setCopiedAddress] = useState(false);
     const [bountyMetadata, setBountyMetadata] = useState<Map<number, BountyMetadata>>(new Map());
     
-    const { profile, updateUsername, refreshProfile } = useAuth();
+    const { profile, loading: authLoading, updateUsername, refreshProfile } = useAuth();
     const [isEditingUsername, setIsEditingUsername] = useState(false);
     const [newUsername, setNewUsername] = useState("");
     const [isUpdatingUsername, setIsUpdatingUsername] = useState(false);
@@ -259,7 +259,7 @@ export default function ProfilePage() {
         if (address) { navigator.clipboard.writeText(address); setCopiedAddress(true); setTimeout(() => setCopiedAddress(false), 2000); }
     };
 
-    if (!mounted || isConnecting || isReconnecting) {
+    if (!mounted || isConnecting || isReconnecting || authLoading) {
         return (
             <div className="max-w-3xl mx-auto px-4 pt-32 text-center">
                 <div className="w-16 h-16 bg-zinc-50 flex items-center justify-center mx-auto mb-6 animate-pulse">
@@ -294,7 +294,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Wallet Info Card */}
-            <div className="max-w-3xl mx-auto mb-8">
+            <div className="mb-8">
                 <div className="bg-white border border-zinc-200 border-l-2 border-l-[#0EA885] p-6">
                     {/* Username Section */}
                     <div className="mb-6 pb-6 border-b border-zinc-100">
