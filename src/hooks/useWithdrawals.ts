@@ -10,6 +10,7 @@ import {
     USDC_BASE_SEPOLIA,
 } from "../utils/contracts";
 import { wagmiConfig } from "../utils/web3";
+import { ensureBaseSepoliaNetwork } from "../utils/network";
 
 export interface PendingBalance {
     token: string;
@@ -22,7 +23,7 @@ export function useWithdrawals() {
     const { address } = useAccount();
     const [pendingBalances, setPendingBalances] = useState<PendingBalance[]>([]);
     const [isLoading, setIsLoading] = useState(false);
-    const { writeContract, data: hash, isPending: isWithdrawing } = useWriteContract();
+    const { writeContractAsync, data: hash, isPending: isWithdrawing } = useWriteContract();
     const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
     const loadBalances = useCallback(async () => {
@@ -97,23 +98,25 @@ export function useWithdrawals() {
     }, [isConfirmed, loadBalances]);
 
     const withdrawETH = useCallback(async (contract: "Quinty" | "Quest") => {
+        await ensureBaseSepoliaNetwork();
         const abi = contract === "Quinty" ? QUINTY_ABI : QUEST_ABI;
-        writeContract({
+        await writeContractAsync({
             address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID][contract] as `0x${string}`,
             abi,
             functionName: "withdrawETH",
         });
-    }, [writeContract]);
+    }, [writeContractAsync]);
 
     const withdrawToken = useCallback(async (contract: "Quinty" | "Quest", tokenAddress: string) => {
+        await ensureBaseSepoliaNetwork();
         const abi = contract === "Quinty" ? QUINTY_ABI : QUEST_ABI;
-        writeContract({
+        await writeContractAsync({
             address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID][contract] as `0x${string}`,
             abi,
             functionName: "withdrawToken",
             args: [tokenAddress as `0x${string}`],
         });
-    }, [writeContract]);
+    }, [writeContractAsync]);
 
     // Convenience: withdraw all of a given token from both contracts
     const withdrawAll = useCallback(async (tokenAddress: string) => {
@@ -127,12 +130,12 @@ export function useWithdrawals() {
                     args: [ETH_ADDRESS as `0x${string}`, address!],
                 }) as bigint;
                 if (quintyBal > 0n) {
-                    withdrawETH("Quinty");
+                    await withdrawETH("Quinty");
                     return;
                 }
             } catch {}
             // Then Quest
-            withdrawETH("Quest");
+            await withdrawETH("Quest");
         } else {
             try {
                 const quintyBal = await readContract(wagmiConfig, {
@@ -142,11 +145,11 @@ export function useWithdrawals() {
                     args: [tokenAddress as `0x${string}`, address!],
                 }) as bigint;
                 if (quintyBal > 0n) {
-                    withdrawToken("Quinty", tokenAddress);
+                    await withdrawToken("Quinty", tokenAddress);
                     return;
                 }
             } catch {}
-            withdrawToken("Quest", tokenAddress);
+            await withdrawToken("Quest", tokenAddress);
         }
     }, [address, withdrawETH, withdrawToken]);
 
