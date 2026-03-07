@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isConnected, authenticated]);
 
-  // Sync profile with backend when Privy user changes
+  // Sync profile with backend when Privy user or wallet address changes
   useEffect(() => {
     if (!ready) {
       setLoading(true);
@@ -82,11 +82,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (authenticated && privyUser) {
       syncProfile();
+    } else if (isConnected && address && !profile) {
+      // Wallet connected but Privy state hasn't propagated yet — retry sync shortly
+      const timer = setTimeout(() => {
+        if (authenticated && privyUser) {
+          syncProfile();
+        }
+      }, 500);
+      return () => clearTimeout(timer);
     } else {
       setProfile(null);
       setLoading(false);
     }
-  }, [ready, authenticated, privyUser]);
+  }, [ready, authenticated, privyUser, address]);
 
   const syncProfile = async () => {
     try {
