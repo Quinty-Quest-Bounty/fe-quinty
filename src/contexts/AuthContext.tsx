@@ -81,20 +81,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (authenticated && privyUser) {
+      setLoading(true);
       syncProfile();
-    } else if (isConnected && address && !profile) {
-      // Wallet connected but Privy state hasn't propagated yet — retry sync shortly
-      const timer = setTimeout(() => {
-        if (authenticated && privyUser) {
-          syncProfile();
-        }
-      }, 500);
-      return () => clearTimeout(timer);
     } else {
       setProfile(null);
       setLoading(false);
     }
-  }, [ready, authenticated, privyUser, address]);
+  }, [ready, authenticated, privyUser]);
 
   const syncProfile = async () => {
     try {

@@ -23,10 +23,11 @@ export const formatAddress = (address: string): string => {
 };
 
 export const formatTimeLeft = (deadline: bigint): string => {
+  if (deadline === undefined || deadline === null) return "—";
   const now = Math.floor(Date.now() / 1000);
   const timeLeft = Number(deadline) - now;
 
-  if (timeLeft <= 0) return "Expired";
+  if (isNaN(timeLeft) || timeLeft <= 0) return "Expired";
 
   const days = Math.floor(timeLeft / 86400);
   const hours = Math.floor((timeLeft % 86400) / 3600);

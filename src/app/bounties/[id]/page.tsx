@@ -120,6 +120,7 @@ export default function BountyDetailPage() {
   const [viewingMetadata, setViewingMetadata] = useState<any>(null);
   const [isLoadingViewing, setIsLoadingViewing] = useState(false);
   const [viewingTitle, setViewingTitle] = useState<string>("");
+  const [viewingSubmitter, setViewingSubmitter] = useState<string>("");
   const [uploadedSolutionImage, setUploadedSolutionImage] = useState<File | null>(null);
   const [isUploadingSolution, setIsUploadingSolution] = useState(false);
   const [requiredDeposit, setRequiredDeposit] = useState<bigint>(BigInt(0));
@@ -750,7 +751,7 @@ export default function BountyDetailPage() {
                       </div>
                       <Button
                         variant="outline" size="sm"
-                        onClick={(e) => { e.stopPropagation(); setViewingCid(sub.ipfsCid); setViewingTitle(`Submission by ${formatAddress(sub.submitter)}`); }}
+                        onClick={(e) => { e.stopPropagation(); setViewingCid(sub.ipfsCid); setViewingSubmitter(sub.submitter); }}
                         className="border-stone-200 text-stone-600 h-8"
                       >
                         <ExternalLink className="size-3 mr-1" /> View
@@ -848,7 +849,7 @@ export default function BountyDetailPage() {
       <Dialog open={!!viewingCid} onOpenChange={() => setViewingCid(null)}>
         <DialogContent className="max-w-3xl overflow-y-auto max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle>{viewingTitle}</DialogTitle>
+            <DialogTitle>{viewingSubmitter ? <>Submission by <WalletName address={viewingSubmitter} /></> : viewingTitle}</DialogTitle>
           </DialogHeader>
           {isLoadingViewing ? (
             <div className="py-12 text-center">
