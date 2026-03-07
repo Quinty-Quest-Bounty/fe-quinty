@@ -55,6 +55,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { Input } from "../../components/ui/input";
 import { useSocialVerification } from "../../hooks/useSocialVerification";
 import { Badge } from "../../components/ui/badge";
+import { useWithdrawals } from "../../hooks/useWithdrawals";
+import { formatTokenAmount } from "../../utils/contracts";
 
 type ProfileTab = "overview" | "reputation" | "history" | "create";
 type CreateType = "bounty" | "quest" | null;
@@ -68,6 +70,7 @@ export default function ProfilePage() {
     const { transactions, isLoading } = useHistory();
     const { bounties, isLoading: isBountiesLoading } = useBounties();
     const { quests, entryCounts, isLoading: isQuestsLoading } = useQuests();
+    const { pendingBalances, hasPendingBalance, isWithdrawing, isConfirming: isWithdrawConfirming, withdrawAll } = useWithdrawals();
     const { writeContract, data: bountyHash, isPending: isBountyPending } = useWriteContract();
     const { writeContractAsync } = useWriteContract();
     const { isLoading: isBountyConfirming, isSuccess: isBountyConfirmed } = useWaitForTransactionReceipt({ hash: bountyHash });
@@ -402,6 +405,36 @@ export default function ProfilePage() {
                     </div>
                 </div>
             </div>
+
+            {/* Pending Withdrawals */}
+            {hasPendingBalance && (
+                <div className="mb-8 border border-emerald-200 bg-emerald-50/50 p-4 sm:p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Wallet className="w-4 h-4 text-emerald-600" />
+                        <span className="text-xs font-mono font-semibold uppercase tracking-wider text-emerald-700">Pending Withdrawals</span>
+                    </div>
+                    <div className="space-y-2">
+                        {pendingBalances.map((bal) => (
+                            <div key={bal.token} className="flex items-center justify-between">
+                                <span className="text-sm font-semibold text-emerald-900">
+                                    {formatTokenAmount(bal.amount, bal.token)} {bal.symbol}
+                                </span>
+                                <Button
+                                    size="sm"
+                                    onClick={() => withdrawAll(bal.token)}
+                                    disabled={isWithdrawing || isWithdrawConfirming}
+                                    className="h-8 px-4 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                                >
+                                    {isWithdrawing || isWithdrawConfirming ? (
+                                        <Loader2 className="size-3 animate-spin mr-1.5" />
+                                    ) : null}
+                                    Withdraw {bal.symbol}
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Tab Navigation */}
             <div className="flex justify-center mb-8 sm:mb-10 relative">

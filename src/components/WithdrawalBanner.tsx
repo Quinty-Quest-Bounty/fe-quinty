@@ -1,18 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useWithdrawals } from "../hooks/useWithdrawals";
 import { formatTokenAmount } from "../utils/contracts";
 import { Button } from "./ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 
 export function WithdrawalBanner() {
     const { pendingBalances, hasPendingBalance, isWithdrawing, isConfirming, withdrawAll } = useWithdrawals();
+    const [dismissed, setDismissed] = useState(false);
 
-    if (!hasPendingBalance) return null;
+    if (!hasPendingBalance || dismissed) return null;
 
     return (
-        <div className="bg-emerald-50 border-b border-emerald-200">
+        <div className="pointer-events-auto bg-emerald-50 border-b border-emerald-200">
             <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm">
                     <span className="text-emerald-600 font-medium">Pending withdrawals:</span>
@@ -39,6 +40,13 @@ export function WithdrawalBanner() {
                             Withdraw {bal.symbol}
                         </Button>
                     ))}
+                    <button
+                        onClick={() => setDismissed(true)}
+                        className="ml-1 p-1 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-100 transition-colors"
+                        title="Dismiss"
+                    >
+                        <X className="size-4" />
+                    </button>
                 </div>
             </div>
         </div>
