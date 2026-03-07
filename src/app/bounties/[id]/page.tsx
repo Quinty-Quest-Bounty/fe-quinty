@@ -262,6 +262,22 @@ export default function BountyDetailPage() {
     try {
       setIsUploadingSolution(true);
       await ensureBaseSepoliaNetwork();
+
+      // Re-check if user already submitted (prevents stale state)
+      if (address) {
+        const alreadySubmitted = await readContract(wagmiConfig, {
+          address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+          abi: QUINTY_ABI,
+          functionName: "hasUserSubmitted",
+          args: [BigInt(bountyId), address],
+        }) as boolean;
+        if (alreadySubmitted) {
+          setHasUserSubmitted(true);
+          showAlert({ title: "Already Submitted", description: "You have already submitted a solution to this bounty." });
+          return;
+        }
+      }
+
       const solutionImageCid = await uploadToIpfs(uploadedSolutionImage, { bountyId, type: "bounty-solution" });
 
       const submissionMetadata: SubmissionMetadata = {
@@ -311,9 +327,17 @@ export default function BountyDetailPage() {
         });
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting solution:", error);
-      showAlert({ title: "Submission Failed", description: "Failed to submit solution. Please try again." });
+      const msg = error?.message || "";
+      if (msg.includes("User rejected") || msg.includes("user rejected")) {
+        showAlert({ title: "Transaction Cancelled", description: "You cancelled the transaction in your wallet." });
+      } else if (msg.includes("Already submitted") || msg.includes("already submitted")) {
+        setHasUserSubmitted(true);
+        showAlert({ title: "Already Submitted", description: "You have already submitted a solution to this bounty." });
+      } else {
+        showAlert({ title: "Submission Failed", description: "Transaction failed. The bounty may be closed or you may have already submitted." });
+      }
     } finally {
       setIsUploadingSolution(false);
     }
