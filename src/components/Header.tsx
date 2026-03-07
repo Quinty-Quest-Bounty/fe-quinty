@@ -9,6 +9,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAccount } from "wagmi";
+import { useAdmin } from "@/hooks/useAdmin";
 import LoginButton from "./auth/LoginButton";
 import { WithdrawalBanner } from "./WithdrawalBanner";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -20,6 +21,7 @@ export default function Header() {
   const pathname = usePathname();
   const { profile, loading } = useAuth();
   const { isConnected } = useAccount();
+  const { isAdmin } = useAdmin();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -66,8 +68,8 @@ export default function Header() {
               </span>
             </button>
 
-            {/* Nav — just Dashboard */}
-            <nav className="hidden lg:flex items-center">
+            {/* Nav */}
+            <nav className="hidden lg:flex items-center gap-6">
               <Link
                 href="/dashboard"
                 className={cn(
@@ -79,6 +81,19 @@ export default function Header() {
               >
                 Dashboard
               </Link>
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className={cn(
+                    "text-[13px] font-medium transition-colors duration-150",
+                    pathname === "/admin"
+                      ? "text-zinc-900"
+                      : "text-zinc-400 hover:text-zinc-600"
+                  )}
+                >
+                  Admin
+                </Link>
+              )}
             </nav>
           </div>
 
@@ -153,6 +168,18 @@ export default function Header() {
                 >
                   Profile
                 </Link>
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={cn(
+                      "px-3 py-2.5 text-sm font-medium transition-colors",
+                      pathname === "/admin" ? "text-zinc-900" : "text-zinc-500 hover:text-zinc-900"
+                    )}
+                  >
+                    Admin
+                  </Link>
+                )}
                 {isMounted && !loading && !profile && (
                   <div className="mt-2 pt-2 border-t border-zinc-100 px-3">
                     <LoginButton />

@@ -58,6 +58,7 @@ import {
   formatUSD,
 } from "../../utils/prices";
 import ethIcon from "../../assets/crypto/eth.svg";
+import { useHiddenItems } from "../../hooks/useHiddenItems";
 
 // === TYPES ===
 type FilterType = "all" | "live" | "in-review" | "completed" | "ended";
@@ -175,6 +176,7 @@ export default function DashboardPage() {
   const [submissionCounts, setSubmissionCounts] = useState<Map<string, number>>(new Map());
 
   const searchRef = useRef<HTMLInputElement>(null);
+  const { hiddenBountyIds, hiddenQuestIds } = useHiddenItems();
 
   // === EFFECTS ===
 
@@ -336,7 +338,10 @@ export default function DashboardPage() {
   // === COMPUTED ===
 
   const unifiedItems: UnifiedItem[] = useMemo(() => {
-    let combined = [...bounties, ...quests];
+    let combined: UnifiedItem[] = [
+      ...bounties.filter(b => !hiddenBountyIds.has(b.id)),
+      ...quests.filter(q => !hiddenQuestIds.has(q.id)),
+    ];
     if (typeFilter === "bounties") combined = combined.filter(i => i.type === "bounty");
     else if (typeFilter === "quests") combined = combined.filter(i => i.type === "quest");
 
@@ -386,7 +391,7 @@ export default function DashboardPage() {
       return b.id - a.id;
     });
     return combined;
-  }, [bounties, quests, activeFilter, typeFilter, categoryFilter, bountyMetadata, questMetadata, debouncedSearch, sortBy]);
+  }, [bounties, quests, activeFilter, typeFilter, categoryFilter, bountyMetadata, questMetadata, debouncedSearch, sortBy, hiddenBountyIds, hiddenQuestIds]);
 
   const displayedItems = useMemo(() => unifiedItems.slice(0, displayCount), [unifiedItems, displayCount]);
 

@@ -57,6 +57,7 @@ import {
     Gavel,
 } from "lucide-react";
 import ethIcon from "../../../assets/crypto/eth.svg";
+import { useHiddenItems } from "../../../hooks/useHiddenItems";
 import { VerifierManagement } from "../../../components/quests/VerifierManagement";
 import { getPublicClient } from "@wagmi/core";
 
@@ -92,6 +93,7 @@ export default function QuestDetailPage() {
     const { address } = useAccount();
     const { showAlert } = useAlert();
     const { profile } = useAuth();
+    const { isHidden } = useHiddenItems();
     const questId = params.id as string;
 
     const [quest, setQuest] = useState<Quest | null>(null);
@@ -324,13 +326,13 @@ export default function QuestDetailPage() {
         );
     }
 
-    if (!quest) {
+    if (isHidden("quest", parseInt(questId, 10)) || !quest) {
         return (
             <div className="min-h-dvh flex items-center justify-center bg-stone-50">
                 <div className="text-center">
                     <h2 className="text-2xl font-bold mb-3">Quest not found</h2>
                     <p className="text-stone-500 mb-6 text-sm">The quest you're looking for doesn't exist.</p>
-                    <Button onClick={() => router.push("/quests")}>Back to Quests</Button>
+                    <Button onClick={() => router.push("/dashboard")}>Back to Dashboard</Button>
                 </div>
             </div>
         );
