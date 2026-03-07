@@ -68,6 +68,7 @@ import {
   Layers,
 } from "lucide-react";
 import ethIcon from "../../../assets/crypto/eth.svg";
+import { useHiddenItems } from "../../../hooks/useHiddenItems";
 
 interface Submission {
   submitter: string;
@@ -109,6 +110,7 @@ export default function BountyDetailPage() {
   const { address } = useAccount();
   const { showAlert } = useAlert();
   const { profile } = useAuth();
+  const { isHidden } = useHiddenItems();
   const bountyId = params.id as string;
 
   const [bounty, setBounty] = useState<Bounty | null>(null);
@@ -356,7 +358,7 @@ export default function BountyDetailPage() {
     );
   }
 
-  if (!bounty) {
+  if (isHidden("bounty", parseInt(bountyId, 10)) || !bounty) {
     return (
       <div className="min-h-dvh flex items-center justify-center bg-stone-50">
         <div className="text-center">
