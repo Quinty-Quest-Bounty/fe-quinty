@@ -157,17 +157,18 @@ export default function AdminPage() {
     const key = `${item.type}-${item.id}`;
     setActionLoading(key);
     try {
+      const token = localStorage.getItem('quinty_auth_token');
+      if (!token) throw new Error("Not authenticated");
       if (item.hidden) {
         const res = await fetch(`${apiUrl}/moderation/unhide/${item.type}/${item.id}`, {
           method: "DELETE",
-          credentials: "include",
+          headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Failed to unhide");
       } else {
         const res = await fetch(`${apiUrl}/moderation/hide`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({
             type: item.type,
             onChainId: item.id,
