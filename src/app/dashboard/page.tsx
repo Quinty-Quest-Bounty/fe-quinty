@@ -397,33 +397,35 @@ export default function DashboardPage() {
 
   const featuredBounty = useMemo(() => {
     const now = BigInt(Math.floor(Date.now() / 1000));
-    const live = bounties.filter(b => b.status === 1 && b.deadline >= now);
+    const live = bounties.filter(b => !hiddenBountyIds.has(b.id) && b.status === 1 && b.deadline >= now);
     if (live.length === 0) return null;
     return live.sort((a, b) => Number(b.amount) - Number(a.amount))[0];
-  }, [bounties]);
+  }, [bounties, hiddenBountyIds]);
 
   const recentActivity = useMemo(() => {
     const items: { type: "bounty" | "quest"; id: number; title: string; action: string; creator: string }[] = [];
-    bounties.slice(0, 3).forEach(b => {
+    bounties.filter(b => !hiddenBountyIds.has(b.id)).slice(0, 3).forEach(b => {
       const meta = bountyMetadata.get(b.id);
       const action = b.status === 3 ? "Resolved" : b.status === 2 ? "In review" : "Now live";
       items.push({ type: "bounty", id: b.id, title: meta?.title || `Bounty #${b.id}`, action, creator: b.creator });
     });
-    quests.slice(0, 2).forEach(q => {
+    quests.filter(q => !hiddenQuestIds.has(q.id)).slice(0, 2).forEach(q => {
       items.push({ type: "quest", id: q.id, title: q.title || `Quest #${q.id}`, action: q.resolved ? "Completed" : "Now live", creator: q.creator });
     });
     return items.slice(0, 5);
-  }, [bounties, quests, bountyMetadata]);
+  }, [bounties, quests, bountyMetadata, hiddenBountyIds, hiddenQuestIds]);
 
   const stats = useMemo(() => {
     const now = BigInt(Math.floor(Date.now() / 1000));
+    const visibleBounties = bounties.filter(b => !hiddenBountyIds.has(b.id));
+    const visibleQuests = quests.filter(q => !hiddenQuestIds.has(q.id));
     return {
-      activeBounties: bounties.filter(b => (b.status === 0 || b.status === 1)).length,
-      activeQuests: quests.filter(q => !q.resolved && !q.cancelled && q.deadline >= now).length,
-      completed: bounties.filter(b => b.status === 2).length + quests.filter(q => q.resolved).length,
-      totalEth: [...bounties, ...quests].reduce((sum, item) => sum + Number(item.amount) / 1e18, 0),
+      activeBounties: visibleBounties.filter(b => (b.status === 0 || b.status === 1)).length,
+      activeQuests: visibleQuests.filter(q => !q.resolved && !q.cancelled && q.deadline >= now).length,
+      completed: visibleBounties.filter(b => b.status === 2).length + visibleQuests.filter(q => q.resolved).length,
+      totalEth: [...visibleBounties, ...visibleQuests].reduce((sum, item) => sum + Number(item.amount) / 1e18, 0),
     };
-  }, [bounties, quests]);
+  }, [bounties, quests, hiddenBountyIds, hiddenQuestIds]);
 
   // === HELPERS ===
 
