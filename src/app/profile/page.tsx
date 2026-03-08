@@ -9,6 +9,7 @@ import { readContract } from "@wagmi/core";
 import { useHistory } from "../../hooks/useHistory";
 import { useBounties } from "../../hooks/useBounties";
 import { useQuests } from "../../hooks/useQuests";
+import { useHiddenItems } from "../../hooks/useHiddenItems";
 import { CONTRACT_ADDRESSES, QUINTY_ABI, QUEST_ABI, BASE_SEPOLIA_CHAIN_ID, ETH_ADDRESS, ERC20_ABI, calculatePrizeSplit, parseTokenAmount, getTokenInfo } from "../../utils/contracts";
 import { uploadMetadataToIpfs, BountyMetadata, QuestMetadata, formatIpfsUrl, fetchMetadataFromIpfs } from "../../utils/ipfs";
 import { ensureBaseSepoliaNetwork } from "../../utils/network";
@@ -70,6 +71,7 @@ export default function ProfilePage() {
     const { transactions, isLoading } = useHistory();
     const { bounties, isLoading: isBountiesLoading } = useBounties();
     const { quests, entryCounts, isLoading: isQuestsLoading } = useQuests();
+    const { hiddenBountyIds, hiddenQuestIds } = useHiddenItems();
     const { pendingBalances, hasPendingBalance, isWithdrawing, isConfirming: isWithdrawConfirming, withdrawAll } = useWithdrawals();
     const { writeContract, data: bountyHash, isPending: isBountyPending } = useWriteContract();
     const { writeContractAsync } = useWriteContract();
@@ -97,13 +99,13 @@ export default function ProfilePage() {
 
     const myBounties = useMemo(() => {
         if (!address) return [];
-        return bounties.filter(b => b.creator.toLowerCase() === address.toLowerCase());
-    }, [bounties, address]);
+        return bounties.filter(b => !hiddenBountyIds.has(b.id) && b.creator.toLowerCase() === address.toLowerCase());
+    }, [bounties, address, hiddenBountyIds]);
 
     const myQuests = useMemo(() => {
         if (!address) return [];
-        return quests.filter(q => q.creator.toLowerCase() === address.toLowerCase());
-    }, [quests, address]);
+        return quests.filter(q => !hiddenQuestIds.has(q.id) && q.creator.toLowerCase() === address.toLowerCase());
+    }, [quests, address, hiddenQuestIds]);
 
     useEffect(() => {
         const loadMetadata = async () => {
