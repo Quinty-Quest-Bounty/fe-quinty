@@ -6,10 +6,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Bell, Bot, FileText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAccount } from "wagmi";
 import { useAdmin } from "@/hooks/useAdmin";
+import { useNotifications } from "@/hooks/useNotifications";
 import LoginButton from "./auth/LoginButton";
 import { WithdrawalBanner } from "./WithdrawalBanner";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -22,7 +23,9 @@ export default function Header() {
   const { profile, loading } = useAuth();
   const { isConnected } = useAccount();
   const { isAdmin } = useAdmin();
+  const { unreadCount } = useNotifications();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -81,6 +84,19 @@ export default function Header() {
               >
                 Dashboard
               </Link>
+              {profile && (
+                <Link
+                  href="/agent/drafts"
+                  className={cn(
+                    "text-[13px] font-medium transition-colors duration-150",
+                    pathname?.startsWith("/agent")
+                      ? "text-zinc-900"
+                      : "text-zinc-400 hover:text-zinc-600"
+                  )}
+                >
+                  Agents
+                </Link>
+              )}
               {isAdmin && (
                 <Link
                   href="/admin"
@@ -102,7 +118,21 @@ export default function Header() {
             {!loading && isMounted && (
               <>
                 {profile ? (
-                  <UserMenu />
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => router.push("/agent/drafts")}
+                      className="relative h-9 w-9 flex items-center justify-center text-zinc-400 hover:text-zinc-700 transition-colors"
+                      title="Notifications"
+                    >
+                      <Bell className="h-[18px] w-[18px]" />
+                      {unreadCount > 0 && (
+                        <span className="absolute top-1 right-1 h-4 min-w-[16px] flex items-center justify-center rounded-full bg-[#0EA885] text-white text-[10px] font-bold px-1">
+                          {unreadCount > 9 ? "9+" : unreadCount}
+                        </span>
+                      )}
+                    </button>
+                    <UserMenu />
+                  </div>
                 ) : (
                   <LoginButton />
                 )}
@@ -168,6 +198,30 @@ export default function Header() {
                 >
                   Profile
                 </Link>
+                {profile && (
+                  <>
+                    <Link
+                      href="/agent/drafts"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={cn(
+                        "px-3 py-2.5 text-sm font-medium transition-colors",
+                        pathname?.startsWith("/agent/drafts") ? "text-zinc-900" : "text-zinc-500 hover:text-zinc-900"
+                      )}
+                    >
+                      Agent Drafts
+                    </Link>
+                    <Link
+                      href="/agent/setup"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={cn(
+                        "px-3 py-2.5 text-sm font-medium transition-colors",
+                        pathname === "/agent/setup" ? "text-zinc-900" : "text-zinc-500 hover:text-zinc-900"
+                      )}
+                    >
+                      Register Agent
+                    </Link>
+                  </>
+                )}
                 {isAdmin && (
                   <Link
                     href="/admin"
