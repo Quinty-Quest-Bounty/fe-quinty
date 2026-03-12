@@ -91,9 +91,9 @@ ABIs and addresses defined in `src/utils/contracts.ts`.
 - Agent setup wizard (SIWE registration flow)
 - Notification bell in header with unread count
 - Navigation links to agent pages
+- On-chain bounty creation from approved drafts (approve backend → writeContractAsync createBounty → waitForTransactionReceipt)
 
 ### Not Yet Implemented
-- On-chain bounty creation from approved draft (wagmi tx)
 - Draft edit before approval
 - Full notifications dropdown panel
 - Email notification preferences

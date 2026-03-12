@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useDrafts, Draft } from "../../../hooks/useDrafts";
 import { Button } from "../../../components/ui/button";
@@ -16,8 +17,17 @@ import {
   ChevronUp,
   Bot,
   AlertCircle,
+  ExternalLink,
 } from "lucide-react";
 import { formatAddress } from "../../../utils/web3";
+import {
+  CONTRACT_ADDRESSES,
+  QUINTY_ABI,
+  BASE_SEPOLIA_CHAIN_ID,
+  ETH_ADDRESS,
+  parseTokenAmount,
+  calculatePrizeSplit,
+} from "../../../utils/contracts";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -200,10 +210,13 @@ function DraftCard({
 
 export default function AgentDraftsPage() {
   const router = useRouter();
+  const { address } = useAccount();
   const { profile, authenticated, loading: authLoading } = useAuth();
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
-  const { drafts, loading, error, approveDraft, rejectDraft } = useDrafts(statusFilter);
+  const { drafts, loading, error, approveDraft, rejectDraft, refetch } = useDrafts(statusFilter);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [txStatus, setTxStatus] = useState<{ draftId: string; hash?: string; step: string } | null>(null);
+  const { writeContractAsync } = useWriteContract();
 
   if (authLoading) {
     return (
@@ -224,13 +237,71 @@ export default function AgentDraftsPage() {
   }
 
   const handleApprove = async (draftId: string) => {
+    const draft = drafts.find((d) => d.id === draftId);
+    if (!draft || !address) return;
+
     try {
       setActionLoading(draftId);
+
+      // Step 1: Approve draft in backend
+      setTxStatus({ draftId, step: "Approving draft..." });
       await approveDraft(draftId);
+
+      // Step 2: Create bounty on-chain
+      setTxStatus({ draftId, step: "Creating bounty on-chain..." });
+
+      // Calculate total amount and prizes from draft prize tiers
+      const token = ETH_ADDRESS; // Default to ETH for now
+      let totalAmount = 0n;
+      const prizes: bigint[] = [];
+
+      for (const tier of draft.prize_tiers) {
+        const amount = parseTokenAmount(tier.amount, tier.token === "ETH" ? ETH_ADDRESS : tier.token);
+        prizes.push(amount);
+        totalAmount += amount;
+      }
+
+      // Default deadlines: 7 days open, 14 days judging
+      const now = Math.floor(Date.now() / 1000);
+      const openDeadlineTs = draft.open_deadline
+        ? Math.floor(new Date(draft.open_deadline).getTime() / 1000)
+        : now + 7 * 86400;
+      const judgingDeadlineTs = draft.judging_deadline
+        ? Math.floor(new Date(draft.judging_deadline).getTime() / 1000)
+        : now + 14 * 86400;
+
+      const hash = await writeContractAsync({
+        address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
+        abi: QUINTY_ABI,
+        functionName: "createBounty",
+        args: [
+          draft.title,
+          draft.description,
+          BigInt(openDeadlineTs),
+          BigInt(judgingDeadlineTs),
+          BigInt(2500), // 25% slash percent default
+          prizes,
+          ETH_ADDRESS as `0x${string}`,
+        ],
+        value: totalAmount,
+      });
+
+      setTxStatus({ draftId, hash, step: "Waiting for confirmation..." });
+
+      // Wait for tx confirmation
+      const { waitForTransactionReceipt } = await import("wagmi/actions");
+      const { wagmiConfig } = await import("../../../utils/web3");
+      await waitForTransactionReceipt(wagmiConfig, { hash });
+
+      setTxStatus(null);
+      await refetch();
+      alert("Bounty created on-chain successfully!");
     } catch (err: any) {
-      alert(err.response?.data?.error || "Failed to approve draft");
+      console.error("Approve & fund error:", err);
+      alert(err.response?.data?.error || err.shortMessage || err.message || "Failed to approve and fund");
     } finally {
       setActionLoading(null);
+      setTxStatus(null);
     }
   };
 
