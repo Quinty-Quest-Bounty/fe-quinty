@@ -45,6 +45,7 @@ import {
   Layers,
   Trophy,
   Zap,
+  Bot,
 } from "lucide-react";
 import {
   fetchMetadataFromIpfs,
@@ -403,11 +404,11 @@ export default function DashboardPage() {
   }, [bounties, hiddenBountyIds]);
 
   const recentActivity = useMemo(() => {
-    const items: { type: "bounty" | "quest"; id: number; title: string; action: string; creator: string }[] = [];
+    const items: { type: "bounty" | "quest"; id: number; title: string; action: string; creator: string; agentName?: string }[] = [];
     bounties.filter(b => !hiddenBountyIds.has(b.id)).slice(0, 3).forEach(b => {
       const meta = bountyMetadata.get(b.id);
       const action = b.status === 3 ? "Resolved" : b.status === 2 ? "In review" : "Now live";
-      items.push({ type: "bounty", id: b.id, title: meta?.title || `Bounty #${b.id}`, action, creator: b.creator });
+      items.push({ type: "bounty", id: b.id, title: meta?.title || `Bounty #${b.id}`, action, creator: b.creator, agentName: meta?.agentName });
     });
     quests.filter(q => !hiddenQuestIds.has(q.id)).slice(0, 2).forEach(q => {
       items.push({ type: "quest", id: q.id, title: q.title || `Quest #${q.id}`, action: q.resolved ? "Completed" : "Now live", creator: q.creator });
@@ -954,7 +955,13 @@ export default function DashboardPage() {
                               {/* Full-bleed hover */}
                               <div className="absolute inset-0 bg-[#0EA885]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                              <img src={getAvatarUrl(act.creator, 32)} alt="" className="relative w-8 h-8 ring-2 ring-zinc-100 flex-shrink-0" />
+                              {act.agentName ? (
+                                <div className="relative w-8 h-8 ring-2 ring-blue-100 flex-shrink-0 bg-blue-50 flex items-center justify-center" title={`AI Agent: ${act.agentName}`}>
+                                  <Bot className="w-4 h-4 text-blue-500" />
+                                </div>
+                              ) : (
+                                <img src={getAvatarUrl(act.creator, 32)} alt="" className="relative w-8 h-8 ring-2 ring-zinc-100 flex-shrink-0" />
+                              )}
                               <div className="relative flex-1 min-w-0">
                                 <p className="text-sm text-zinc-700 font-medium truncate leading-snug">{act.title}</p>
                                 <p className="text-xs text-zinc-400 mt-1 font-mono">

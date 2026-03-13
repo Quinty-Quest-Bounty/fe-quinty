@@ -5,7 +5,7 @@ import { formatETH, formatTimeLeft, formatAddress } from "../utils/web3";
 import { fetchMetadataFromIpfs, BountyMetadata } from "../utils/ipfs";
 import { getEthPriceInUSD, convertEthToUSD, formatUSD } from "../utils/prices";
 import { BountyStatus, getTokenInfo, formatTokenAmount } from "../utils/contracts";
-import { Clock, Users, AlertTriangle, Gavel, ArrowUpRight } from "lucide-react";
+import { Clock, Users, AlertTriangle, Gavel, ArrowUpRight, Bot } from "lucide-react";
 import { useWalletName } from "@/hooks/useWalletName";
 import { BountyQuickView } from "./bounties/BountyQuickView";
 import { Bounty } from "../hooks/useBounties";
@@ -115,11 +115,17 @@ export default function BountyCard({ bounty, onTriggerSlash }: BountyCardProps) 
                 {title}
               </h3>
               <div className="flex items-center gap-1.5 mt-2">
-                <div className="w-4 h-4 bg-zinc-100 flex items-center justify-center flex-shrink-0">
-                  <span className="text-[7px] font-bold text-zinc-400">
-                    {(creatorName || bounty.creator.slice(2, 4)).slice(0, 2).toUpperCase()}
-                  </span>
-                </div>
+                {metadata?.agentName ? (
+                  <div className="w-4 h-4 bg-blue-50 flex items-center justify-center flex-shrink-0" title={`Created by AI: ${metadata.agentName}`}>
+                    <Bot className="w-2.5 h-2.5 text-blue-500" />
+                  </div>
+                ) : (
+                  <div className="w-4 h-4 bg-zinc-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-[7px] font-bold text-zinc-400">
+                      {(creatorName || bounty.creator.slice(2, 4)).slice(0, 2).toUpperCase()}
+                    </span>
+                  </div>
+                )}
                 <span className="text-[11px] font-mono text-zinc-400 truncate">
                   {creatorName || formatAddress(bounty.creator)}
                 </span>

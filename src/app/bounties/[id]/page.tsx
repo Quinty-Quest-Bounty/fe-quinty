@@ -66,6 +66,7 @@ import {
   TrendingUp,
   Timer,
   Layers,
+  Bot,
 } from "lucide-react";
 import ethIcon from "../../../assets/crypto/eth.svg";
 import { Markdown } from "../../../components/ui/markdown";
@@ -609,6 +610,12 @@ export default function BountyDetailPage() {
                     <p className="text-xs text-stone-400">Creator</p>
                     <p className="text-sm font-medium text-stone-700"><WalletName address={bounty.creator} /></p>
                   </div>
+                  {metadata?.agentName && (
+                    <span className="text-[10px] font-medium px-2 py-0.5 bg-blue-50 text-blue-600 flex items-center gap-1" title={`Created by ${metadata.agentName}`}>
+                      <Bot className="w-3 h-3" />
+                      AI Agent
+                    </span>
+                  )}
                   {isCreator && <span className="text-[10px] font-medium px-2 py-0.5 bg-[#0EA885]/10 text-[#0EA885]">You</span>}
                 </div>
               </div>
