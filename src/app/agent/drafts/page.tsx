@@ -28,6 +28,7 @@ import {
   parseTokenAmount,
   calculatePrizeSplit,
 } from "../../../utils/contracts";
+import { uploadMetadataToIpfs, BountyMetadata } from "../../../utils/ipfs";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -90,6 +91,30 @@ function DraftCard({
 
       {expanded && (
         <div className="mt-4 space-y-3">
+          {draft.cover_image_cid && (
+            <div>
+              <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Cover Image</h4>
+              <img
+                src={`https://gateway.pinata.cloud/ipfs/${draft.cover_image_cid}`}
+                alt="Cover"
+                className="mt-1 w-full max-w-sm rounded-lg object-cover h-40"
+              />
+            </div>
+          )}
+
+          <div className="flex items-center gap-3">
+            {draft.bounty_type && (
+              <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium capitalize">
+                {draft.bounty_type}
+              </span>
+            )}
+            {draft.slash_percent && draft.slash_percent !== 2500 && (
+              <span className="text-xs text-gray-500">
+                Slash: {draft.slash_percent / 100}%
+              </span>
+            )}
+          </div>
+
           <div>
             <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Description</h4>
             <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{draft.description}</p>
@@ -99,6 +124,33 @@ function DraftCard({
             <div>
               <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Requirements</h4>
               <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{draft.requirements}</p>
+            </div>
+          )}
+
+          {draft.deliverables && draft.deliverables.length > 0 && (
+            <div>
+              <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Deliverables</h4>
+              <ul className="mt-1 space-y-1">
+                {draft.deliverables.map((d, i) => (
+                  <li key={i} className="text-sm text-gray-700 flex items-center gap-1.5">
+                    <span className="w-1 h-1 rounded-full bg-gray-400" />
+                    {d}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {draft.skills && draft.skills.length > 0 && (
+            <div>
+              <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Required Skills</h4>
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                {draft.skills.map((s, i) => (
+                  <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
+                    {s}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
 
@@ -247,7 +299,32 @@ export default function AgentDraftsPage() {
       setTxStatus({ draftId, step: "Approving draft..." });
       await approveDraft(draftId);
 
-      // Step 2: Create bounty on-chain
+      // Step 2: Upload IPFS metadata (same as human bounty creation flow)
+      setTxStatus({ draftId, step: "Uploading metadata to IPFS..." });
+
+      // Default deadlines: 7 days open, 14 days judging
+      const now = Math.floor(Date.now() / 1000);
+      const openDeadlineTs = draft.open_deadline
+        ? Math.floor(new Date(draft.open_deadline).getTime() / 1000)
+        : now + 7 * 86400;
+      const judgingDeadlineTs = draft.judging_deadline
+        ? Math.floor(new Date(draft.judging_deadline).getTime() / 1000)
+        : now + 14 * 86400;
+
+      const metadata: BountyMetadata = {
+        title: draft.title,
+        description: draft.description,
+        requirements: draft.requirements ? [draft.requirements] : [],
+        deliverables: draft.deliverables || [],
+        skills: draft.skills || [],
+        images: draft.cover_image_cid ? [draft.cover_image_cid] : [],
+        deadline: judgingDeadlineTs,
+        bountyType: (draft.bounty_type as BountyMetadata["bountyType"]) || "development",
+      };
+
+      const metadataCid = await uploadMetadataToIpfs(metadata);
+
+      // Step 3: Create bounty on-chain
       setTxStatus({ draftId, step: "Creating bounty on-chain..." });
 
       // Calculate total amount and prizes from draft prize tiers
@@ -261,25 +338,16 @@ export default function AgentDraftsPage() {
         totalAmount += amount;
       }
 
-      // Default deadlines: 7 days open, 14 days judging
-      const now = Math.floor(Date.now() / 1000);
-      const openDeadlineTs = draft.open_deadline
-        ? Math.floor(new Date(draft.open_deadline).getTime() / 1000)
-        : now + 7 * 86400;
-      const judgingDeadlineTs = draft.judging_deadline
-        ? Math.floor(new Date(draft.judging_deadline).getTime() / 1000)
-        : now + 14 * 86400;
-
       const hash = await writeContractAsync({
         address: CONTRACT_ADDRESSES[BASE_SEPOLIA_CHAIN_ID].Quinty as `0x${string}`,
         abi: QUINTY_ABI,
         functionName: "createBounty",
         args: [
           draft.title,
-          draft.description,
+          `${draft.description}\n\nMetadata: ipfs://${metadataCid}`,
           BigInt(openDeadlineTs),
           BigInt(judgingDeadlineTs),
-          BigInt(2500), // 25% slash percent default
+          BigInt(draft.slash_percent || 2500),
           prizes,
           ETH_ADDRESS as `0x${string}`,
         ],

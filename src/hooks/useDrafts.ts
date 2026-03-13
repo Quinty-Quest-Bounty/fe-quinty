@@ -14,6 +14,11 @@ export interface Draft {
   open_deadline: string | null;
   judging_deadline: string | null;
   status: "pending" | "approved" | "rejected" | "cancelled" | "expired";
+  cover_image_cid: string | null;
+  bounty_type: string;
+  deliverables: string[];
+  skills: string[];
+  slash_percent: number;
   rejection_reason: string | null;
   created_at: string;
   updated_at: string;
