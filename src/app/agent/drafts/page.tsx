@@ -392,7 +392,8 @@ export default function AgentDraftsPage() {
   ];
 
   return (
-    <main className="max-w-3xl mx-auto px-4 py-8">
+    <main className="min-h-screen bg-white pt-20 pb-24">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <FileText className="w-6 h-6 text-[#0EA885]" />
@@ -449,6 +450,7 @@ export default function AgentDraftsPage() {
           ))}
         </div>
       )}
+      </div>
     </main>
   );
 }
