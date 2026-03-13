@@ -31,11 +31,12 @@ src/
 │   └── page.tsx            # Landing/home page
 ├── components/
 │   ├── ui/                 # shadcn/ui components (Radix-based)
+│   │   └── markdown.tsx    # Shared Markdown renderer (react-markdown + remark-gfm)
 │   ├── auth/               # LoginButton, UserMenu
 │   ├── bounties/           # Bounty-specific components
 │   ├── quests/             # Quest-specific components
 │   ├── Header.tsx          # Main header with nav, notifications bell
-│   ├── BountyCard.tsx      # Bounty card component
+│   ├── BountyCard.tsx      # Bounty card with robot badge for agent-created bounties
 │   └── QuestCard.tsx       # Quest card component
 ├── contexts/
 │   └── AuthContext.tsx     # Privy auth + profile sync + JWT cookies
@@ -62,6 +63,8 @@ src/
 - **Brand color**: `#0EA885` (teal green).
 - **Styling**: Tailwind CSS, fonts: Space Grotesk + Plus Jakarta Sans.
 - **Animations**: `framer-motion` for page transitions and mobile menu.
+- **Markdown**: `react-markdown` v10 + `remark-gfm` for rendering markdown content. `@tailwindcss/typography` for `prose` classes. Shared component at `components/ui/markdown.tsx`.
+- **Robot badge**: Agent-created bounties show a Bot icon (lucide-react) on BountyCard, bounty detail, and dashboard Recent Activity. Detected via `agentName` field in IPFS metadata.
 
 ## Smart Contracts (Base Sepolia)
 
@@ -75,7 +78,7 @@ ABIs and addresses defined in `src/utils/contracts.ts`.
 ## Agent Pages
 
 - `/agent/setup` — Multi-step wizard: enter agent info → connect wallet → sign SIWE → get API key
-- `/agent/drafts` — List bounty drafts from agents, approve/reject (JWT auth)
+- `/agent/drafts` — List bounty drafts from agents. Features: edit all fields (title, description, requirements, bountyType, deliverables, skills, prize tiers, slash percent), upload/change cover image, markdown preview (raw in edit mode, rendered in view mode), approve & fund (requires cover image), reject with reason
 
 ## Environment Variables
 
@@ -84,18 +87,20 @@ ABIs and addresses defined in `src/utils/contracts.ts`.
 | `NEXT_PUBLIC_API_URL` | Backend API URL (default: `http://localhost:3001`) |
 | `NEXT_PUBLIC_PRIVY_APP_ID` | Privy application ID |
 
-## Current Branch: `feat/agent-ux-polish`
-
-### Completed
+## Completed Features
 - Agent drafts page (list, approve, reject with reason)
 - Agent setup wizard (SIWE registration flow)
 - Notification dropdown in header with unread count, titles, timestamps, mark-as-read
 - Navigation links to agent pages
 - On-chain bounty creation from approved drafts with IPFS metadata upload (cover image, deliverables, skills, bountyType)
 - Expanded draft card showing cover image, bounty type, deliverables, skills
+- Markdown rendering on bounty detail page and agent drafts (react-markdown + remark-gfm + @tailwindcss/typography)
+- Draft editing — human owner can edit all fields of pending drafts before approving
+- Image upload/edit on agent drafts with cover image required before approve & fund
+- Robot badge (Bot icon) on BountyCard, bounty detail, and dashboard for agent-created bounties
+- Approve flow fix: on-chain tx happens before DB status update (prevents orphaned "approved" status)
 
 ### Not Yet Implemented
-- Draft edit before approval
 - Email notification preferences
 
 ## Multi-Repo Context
