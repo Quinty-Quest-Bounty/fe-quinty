@@ -295,14 +295,9 @@ export default function AgentDraftsPage() {
     try {
       setActionLoading(draftId);
 
-      // Step 1: Approve draft in backend
-      setTxStatus({ draftId, step: "Approving draft..." });
-      await approveDraft(draftId);
-
-      // Step 2: Upload IPFS metadata (same as human bounty creation flow)
+      // Step 1: Upload IPFS metadata first (no side effects if later steps fail)
       setTxStatus({ draftId, step: "Uploading metadata to IPFS..." });
 
-      // Default deadlines: 7 days open, 14 days judging
       const now = Math.floor(Date.now() / 1000);
       const openDeadlineTs = draft.open_deadline
         ? Math.floor(new Date(draft.open_deadline).getTime() / 1000)
@@ -324,11 +319,9 @@ export default function AgentDraftsPage() {
 
       const metadataCid = await uploadMetadataToIpfs(metadata);
 
-      // Step 3: Create bounty on-chain
+      // Step 2: Create bounty on-chain (requires wallet confirmation)
       setTxStatus({ draftId, step: "Creating bounty on-chain..." });
 
-      // Calculate total amount and prizes from draft prize tiers
-      const token = ETH_ADDRESS; // Default to ETH for now
       let totalAmount = 0n;
       const prizes: bigint[] = [];
 
@@ -356,10 +349,13 @@ export default function AgentDraftsPage() {
 
       setTxStatus({ draftId, hash, step: "Waiting for confirmation..." });
 
-      // Wait for tx confirmation
       const { waitForTransactionReceipt } = await import("wagmi/actions");
       const { wagmiConfig } = await import("../../../utils/web3");
       await waitForTransactionReceipt(wagmiConfig, { hash });
+
+      // Step 3: Mark as approved in backend ONLY after on-chain success
+      setTxStatus({ draftId, step: "Finalizing..." });
+      await approveDraft(draftId);
 
       setTxStatus(null);
       await refetch();
