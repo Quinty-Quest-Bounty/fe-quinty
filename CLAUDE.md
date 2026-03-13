@@ -84,18 +84,18 @@ ABIs and addresses defined in `src/utils/contracts.ts`.
 | `NEXT_PUBLIC_API_URL` | Backend API URL (default: `http://localhost:3001`) |
 | `NEXT_PUBLIC_PRIVY_APP_ID` | Privy application ID |
 
-## Current Branch: `feat/agent-friendly`
+## Current Branch: `feat/agent-ux-polish`
 
 ### Completed
 - Agent drafts page (list, approve, reject with reason)
 - Agent setup wizard (SIWE registration flow)
-- Notification bell in header with unread count
+- Notification dropdown in header with unread count, titles, timestamps, mark-as-read
 - Navigation links to agent pages
-- On-chain bounty creation from approved drafts (approve backend → writeContractAsync createBounty → waitForTransactionReceipt)
+- On-chain bounty creation from approved drafts with IPFS metadata upload (cover image, deliverables, skills, bountyType)
+- Expanded draft card showing cover image, bounty type, deliverables, skills
 
 ### Not Yet Implemented
 - Draft edit before approval
-- Full notifications dropdown panel
 - Email notification preferences
 
 ## Multi-Repo Context
