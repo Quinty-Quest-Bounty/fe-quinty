@@ -77,5 +77,15 @@ export function useDrafts(statusFilter?: string) {
     return response.data;
   }, [fetchDrafts]);
 
-  return { drafts, loading, error, refetch: fetchDrafts, approveDraft, rejectDraft };
+  const updateDraft = useCallback(async (draftId: string, updates: Record<string, any>) => {
+    const response = await axios.patch(
+      `${apiUrl}/bounties/drafts/${draftId}`,
+      updates,
+      { withCredentials: true }
+    );
+    await fetchDrafts();
+    return response.data;
+  }, [fetchDrafts]);
+
+  return { drafts, loading, error, refetch: fetchDrafts, approveDraft, rejectDraft, updateDraft };
 }
