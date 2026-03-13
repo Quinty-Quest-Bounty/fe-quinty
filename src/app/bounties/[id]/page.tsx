@@ -68,6 +68,7 @@ import {
   Layers,
 } from "lucide-react";
 import ethIcon from "../../../assets/crypto/eth.svg";
+import { Markdown } from "../../../components/ui/markdown";
 import { useHiddenItems } from "../../../hooks/useHiddenItems";
 
 interface Submission {
@@ -685,9 +686,9 @@ export default function BountyDetailPage() {
                 <FileText className="size-5 text-[#0EA885]" />
                 About This Bounty
               </h2>
-              <p className="text-sm text-stone-600 leading-relaxed whitespace-pre-wrap">
+              <Markdown>
                 {metadata?.description || bounty.description.replace(/\n\nMetadata:.*$/, "")}
-              </p>
+              </Markdown>
 
               {metadata?.requirements && metadata.requirements.length > 0 && (
                 <div className="mt-6 pt-6 border-t border-stone-100">

@@ -16,6 +16,7 @@ export interface BountyMetadata {
   images?: string[];
   deadline: number;
   bountyType: "development" | "design" | "marketing" | "research" | "other";
+  agentName?: string;
 }
 
 export interface SubmissionMetadata {

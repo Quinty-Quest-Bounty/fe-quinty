@@ -18,6 +18,10 @@ import {
   Bot,
   AlertCircle,
   ExternalLink,
+  Pencil,
+  Plus,
+  Trash2,
+  Save,
 } from "lucide-react";
 import { formatAddress } from "../../../utils/web3";
 import {
@@ -28,7 +32,9 @@ import {
   parseTokenAmount,
   calculatePrizeSplit,
 } from "../../../utils/contracts";
-import { uploadMetadataToIpfs, BountyMetadata } from "../../../utils/ipfs";
+import { uploadMetadataToIpfs, BountyMetadata, CUSTOM_PINATA_GATEWAY } from "../../../utils/ipfs";
+import { Markdown } from "../../../components/ui/markdown";
+import { ImageUpload } from "../../../components/ui/image-upload";
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -117,13 +123,13 @@ function DraftCard({
 
           <div>
             <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Description</h4>
-            <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{draft.description}</p>
+            <Markdown className="mt-1">{draft.description}</Markdown>
           </div>
 
           {draft.requirements && (
             <div>
               <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Requirements</h4>
-              <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{draft.requirements}</p>
+              <Markdown className="mt-1">{draft.requirements}</Markdown>
             </div>
           )}
 
