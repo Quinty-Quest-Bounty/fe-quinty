@@ -24,3 +24,15 @@
 # Hardhat coverage reports
 /coverage
 .vercel
+*.tsbuildinfo
+
+# Test results
+/test-results
+
+# Pencil files
+*.pen
+
+# Plans and brainstorms
+docs/brainstorms/
+docs/plans/
+scripts/
